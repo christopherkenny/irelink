@@ -1,0 +1,8 @@
+^irelink\.Rproj$
+^\.Rproj\.user$
+^LICENSE\.md$
+^\.positai$
+^\.claude$
+^README\.Rmd$
+^inst/notes/.*\.md$
+^inst/refs/.*\.md$
