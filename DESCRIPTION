@@ -1,13 +1,48 @@
 Package: irelink
-Title: What the Package Does (One Line, Title Case)
+Title: Fast Probabilistic Record Linkage
 Version: 0.0.0.9000
 Authors@R: c(
     person(given = "Christopher T.",
            family = "Kenny",
            role = c("aut", "cre"),
            email = "ctkenny@proton.me",
-           comment = c(ORCID = "0000-0002-9386-6860")))
-Description: What the package does (one paragraph).
+           comment = c(ORCID = "0000-0002-9386-6860")),
+    person(given = "Robin",
+           family = "Linacre",
+           role = "cph",
+           comment = "Lead author of splink, the Python package this is derived from"),
+    person(given = "Sam",
+           family = "Lindsay",
+           role = "cph",
+           comment = "Author of splink"),
+    person(given = "Theodore",
+           family = "Manassis",
+           role = "cph",
+           comment = "Author of splink"),
+    person(given = "Tom",
+           family = "Hepworth",
+           role = "cph",
+           comment = "Author of splink"),
+    person(given = "Andy",
+           family = "Bond",
+           role = "cph",
+           comment = "Author of splink"),
+    person(given = "Ross",
+           family = "Kennedy",
+           role = "cph",
+           comment = "Author of splink"),
+    person("Ministry of Justice",
+           role = "cph",
+           comment = "Copyright holder of splink"))
+Description: Performs fast, scalable probabilistic record linkage and
+    deduplication using the Fellegi-Sunter model. Records lacking a shared
+    unique identifier are compared across configurable dimensions using
+    exact, fuzzy, and distance-based comparisons, with model parameters
+    estimated via unsupervised Expectation-Maximisation. Multiple SQL
+    backends are supported through 'DBI', enabling execution from
+    laptop-scale ('DuckDB') through to distributed engines. This package
+    is a translation of the Python 'splink' library by Linacre et al.
+    into idiomatic R.
 License: MIT + file LICENSE
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)

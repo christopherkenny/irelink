@@ -18,7 +18,19 @@ knitr::opts_chunk$set(
 <!-- badges: start -->
 <!-- badges: end -->
 
-The goal of `irelink` is to ...
+`irelink` brings fast, scalable probabilistic record linkage to R. It
+implements the Fellegi-Sunter model to identify and link duplicate or related
+records across datasets that lack a shared unique identifier. Model parameters
+are estimated via unsupervised Expectation-Maximisation, so no labelled training
+data is required. A rich library of comparison functions — from exact matching
+through Jaro-Winkler, Levenshtein, date differences, and geographic distance —
+lets you tailor the linkage model to your data. Multiple SQL backends are
+supported through DBI, so the same code runs on DuckDB (laptop-scale), SQLite,
+PostgreSQL, or Spark.
+
+`irelink` is a translation of the Python
+[splink](https://github.com/moj-analytical-services/splink) library into
+idiomatic R.
 
 ## Installation
 
@@ -36,19 +48,3 @@ This is a basic example which shows you how to solve a common problem:
 library(irelink)
 ## basic example code
 ```
-
-What is special about using `README.Rmd` instead of just `README.md`? You can include R chunks like so:
-
-```{r cars}
-summary(cars)
-```
-
-You'll still need to render `README.Rmd` regularly, to keep `README.md` up-to-date. `devtools::build_readme()` is handy for this.
-
-You can also embed plots, for example:
-
-```{r pressure, echo = FALSE}
-plot(pressure)
-```
-
-In that case, don't forget to commit and push the resulting figure files, so they display on GitHub and CRAN.
