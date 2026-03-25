@@ -166,3 +166,35 @@ Consider this when designing the sprints to make sure we can proceed with delive
 Write up a detailed description `inst/refs/08-sprints.md`.
 Explain the goals of each sprint and what can be done after a sprint is complete within the document.
 Each sprint should have a preamble and a table of functions.
+
+## Implementation plan f (Opus 4.6 high)
+
+Now, take everything from this stage and provide two documents.
+First, a full implementation plan for stages 3--7 from `inst/notes/goals.md`.
+Make this detailed so that the stages and everything we've done have sufficient notes to continue forward.
+
+Second, write `stage-02-notes.md` that summarizes everything we have done in this stage.
+
+# Test implementation
+
+We are starting a project to translate splink, a python package for record linkage, into R.
+A local copy of the splink library is available at `../splink`.
+We have some background research in `inst/refs/stage-01-notes.md` and implementation plans in `inst/refs/stage-02-notes.md`.
+
+Our next stage is building out complete tests for the package.
+I have already initialized testthat, which we will use for testing.
+
+First, make a helper function for testthat like
+`skip_if_sprint_le(sprint, x)` where `sprint` should be defined in `tests/testthat/setup.R` and you assign a value `x` for each test.
+
+I need you to read `inst/refs/08-sprints.md` and Stage 3 of `inst/refs/09-implementation-plan.md`.
+
+Then, using that information, review every single test in splink and copy it to our testthat.
+When copied, we need to translate their syntax into our functions.
+
+Procceed in 4 steps.
+
+1. Make an inventory of the tests in splink.
+2. Identify our translation for each test.
+3. Write a test for each of their tests. Attempt to match their expectations. *Never* put expectation statements from testthat in a loop, as it inflates the test count without providing new information and makes it hard to track failures in the future.
+4. Compare with notes in 08 and 09 to identify which sprint it will be implemented in..
