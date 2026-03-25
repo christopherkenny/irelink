@@ -217,3 +217,12 @@ Only proceed to the next sprint once the tests pass.
 The tests are presumed correct until proven otherwise.
 
 After each sprint, write an update to `inst/refs/11-writing-r.md`.
+
+## Stage wrapups (Opus 4.6)
+
+Based on what you've done for testing in `inst/refs/10`, write a stage summary, `inst/refs/stage-03-notes.md`.
+
+Similarly, based on what you've just finished for the implementation and your notes in `inst/refs/11`, write a stage summary, `inst/refs/stage-04-notes.md`.
+
+
+Both should be executive summaries with key references back to the other files.

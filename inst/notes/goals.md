@@ -21,8 +21,9 @@ Beyond that, how well can we extend opensource using LLMs by translating tools?
     a. Create references to be stored in `inst/refs` on splink itself
     b. Define the R interface for irelink
     c. Write the target roxygen for irelink
-    d. Organize all functions into stages from core functionality to broader pieces
-    e. Write a full, detailed implementation plan for stages 3--7
+    d. Verify that this software coverage is sufficient to cover all core features
+    e. Organize all functions into stages from core functionality to broader pieces
+    f. Write a full, detailed implementation plan for stages 3--7
 3. Test implementation
     a. For the desired interface, write every test from splink into irelink
     b. Note the stage for every test
