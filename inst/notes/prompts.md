@@ -177,6 +177,8 @@ Second, write `stage-02-notes.md` that summarizes everything we have done in thi
 
 # Test implementation
 
+## Initial translation a-b (Opus 4.6 high)
+
 We are starting a project to translate splink, a python package for record linkage, into R.
 A local copy of the splink library is available at `../splink`.
 We have some background research in `inst/refs/stage-01-notes.md` and implementation plans in `inst/refs/stage-02-notes.md`.
@@ -187,14 +189,31 @@ I have already initialized testthat, which we will use for testing.
 First, make a helper function for testthat like
 `skip_if_sprint_le(sprint, x)` where `sprint` should be defined in `tests/testthat/setup.R` and you assign a value `x` for each test.
 
-I need you to read `inst/refs/08-sprints.md` and Stage 3 of `inst/refs/09-implementation-plan.md`.
+Then, I need you to read `inst/refs/08-sprints.md` and Stage 3 of `inst/refs/09-implementation-plan.md`.
 
-Then, using that information, review every single test in splink and copy it to our testthat.
+Third, using that information, review every single test in splink and copy it to our testthat.
 When copied, we need to translate their syntax into our functions.
 
-Procceed in 4 steps.
+For this last stage, proceed in 4 steps.
 
 1. Make an inventory of the tests in splink.
 2. Identify our translation for each test.
 3. Write a test for each of their tests. Attempt to match their expectations. *Never* put expectation statements from testthat in a loop, as it inflates the test count without providing new information and makes it hard to track failures in the future.
-4. Compare with notes in 08 and 09 to identify which sprint it will be implemented in..
+4. Compare with notes in 08 and 09 to identify which sprint it will be implemented in.
+
+Make a detailed report on testing in `inst/refs/10-testing-translation.md`.
+
+## Update translation (Opus 4.6 high)
+
+Can you also look at every test suggestion in `inst/refs/09` and see if it should be added to the stages?
+I believe those are aimed more at our objects and less at splink things.
+
+# R code implementation
+
+Following the implementation plan in `inst/refs/08-sprints.md` and `inst/refs/09-implementation-plan.md`, write the package.
+
+Go sprint by sprint.
+Only proceed to the next sprint once the tests pass.
+The tests are presumed correct until proven otherwise.
+
+After each sprint, write an update to `inst/refs/11-writing-r.md`.

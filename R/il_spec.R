@@ -14,8 +14,7 @@
 #'   il_block_on(surname)
 #' }
 il_spec <- function() {
-  cli::cli_warn("Function {.fn il_spec} is not yet implemented.")
-  invisible(NULL)
+  new_il_spec()
 }
 
 #' Print an irelink Specification
@@ -36,7 +35,31 @@ il_spec <- function() {
 #' print(spec)
 #' }
 print.il_spec <- function(x, ...) {
-  cli::cli_warn("Function {.fn print.il_spec} is not yet implemented.")
+  cli::cli_h1("Linkage Specification")
+
+  comps <- x$comparisons
+  if (length(comps) == 0L) {
+    cli::cli_text("Comparisons: {.emph none}")
+  } else {
+    cli::cli_text("Comparisons ({length(comps)}):")
+    for (comp in comps) {
+      cols <- paste(comp$columns, collapse = ", ")
+      method <- comp$comparison$method %||% "custom"
+      cli::cli_bullets(c(" " = "{cols} : {method}"))
+    }
+  }
+
+  rules <- x$blocking_rules
+  if (length(rules) == 0L) {
+    cli::cli_text("Blocking rules: {.emph none}")
+  } else {
+    cli::cli_text("Blocking rules ({length(rules)}, OR-ed):")
+    for (i in seq_along(rules)) {
+      cols <- paste(rules[[i]]$columns, collapse = ", ")
+      cli::cli_bullets(c(" " = "{i}. {cols}"))
+    }
+  }
+
   invisible(x)
 }
 

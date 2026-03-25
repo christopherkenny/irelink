@@ -31,7 +31,11 @@ validate_il_spec <- function(x) {
   if (!inherits(x, "il_spec")) {
     cli::cli_abort("{.arg spec} must be an {.cls il_spec} object.")
   }
-
+  if (!is.list(x) || is.null(x$comparisons) || is.null(x$blocking_rules)) {
+    cli::cli_abort(
+      "{.cls il_spec} must contain {.field comparisons} and {.field blocking_rules}."
+    )
+  }
   invisible(x)
 }
 
