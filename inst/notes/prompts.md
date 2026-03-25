@@ -79,3 +79,90 @@ What types of layers and aesthetics would go into it for a ggplot summary?
 Finally, write your findings to `inst/refs/04-irelink-core-interface.md`.
 This should detail the types, the major inputs, and any other details about how this can be friendly for tidyverse users.
 Ensure that there are examples in this document.
+
+## Follow up b (Opus 4.6 high)
+
+This looks very good.
+Please also look at `gt`, which has a slightly more modern interface than `ggplot2`.
+It is also made by Posit.
+Check for any improvements that we should make based on how they handle the data and building complicated calls.
+
+## Implement b (Opus 4.6 high)
+
+Now, based on the interface and examples in `inst/refs/04-irelink-core-interface.md`, build out the R files that will hold these.
+Functions should all be a stub for now that simply look internally as:
+
+```
+cli::cli_warn('Function {.fn THE NAME} is not yet implemented.')
+invisible(NULL)
+```
+
+Put one major function in each file.
+Name the files after the function (though you may omit prefixes unless those help sort them).
+If there are planned common utility functions, place those in `R/utils-INFORMATIVE NAME.R`.
+
+We can edit the function signatures later, but pay careful attention to what arguments are included and in what order.
+Make sure functions remain "tidy" and pipe-able.
+
+Write a summary of this, with key details, to `utils/refs/05-file-function-structure.md`.
+
+## Roxygen c (Opus 4.6 high)
+
+Now, based on the interface, examples, and details in `inst/refs/04-irelink-core-interface.md` and `utils/refs/05-file-function-structure.md`, start writing roxygen documentation for every function.
+Functions should remain as stubs for now.
+
+Every single exported function should have roxygen documentation.
+They should all have arguments that look like the below:
+
+```
+#' Title
+#'
+#' A brief sentence or two description
+#'
+#' @param smthn some parameter
+#'
+#' @return type of return and a few words
+#' @export
+#'
+#' @examples
+#' AN ACTUAL EXAMPLE THAT (will eventually) RUN
+my_fn <- function(smthn) {
+    cli::cli_warn('Function {.fn THE NAME} is not yet implemented.')
+    invisible(NULL)
+}
+```
+
+Internal functions should still be documented, but should replace @export with @noRd.
+
+Make sure every function has at least these arguments and that they keep this order and spacing.
+This ensures that we have sufficient information for the next stage and that they can be parsed as text cleanly.
+
+Write a summary of this, with key details, to `utils/refs/06-function-draft-documentation.md`.
+
+## Roxygen d (Opus 4.6 high)
+
+Verify that this software is sufficient to cover all core features in the translation from splink.
+Refresh your memory with `refs/03-splink-functions.md`.
+For any features that are not implemented, make a determination of it they should be in the core set of things that we first build out.
+Otherwise, make a note in `utils/refs/07-features-for-later.md`.
+
+For truly optional things like interactive plots, leave those as a note.
+
+## Organization e (Opus 4.6 high)
+
+Now, we need to organize the package implementation into sprints.
+
+We want to break up the implementation into 10 or so concrete pieces.
+This should allow us to start with the core of the core: the main features that everything needs.
+Then, we can build out slowly in stages until everything has moved from a stub implementation to actual, functioning code.
+
+Identify which functions go into which sprints.
+Functions can rely on functions in prior, but not later, sprints.
+
+For implementing this, we will then take a tests-first approach.
+Be aware that this means each sprint should have some features that are user facing and can be verified against
+Consider this when designing the sprints to make sure we can proceed with deliverables from a sprint.
+
+Write up a detailed description `inst/refs/08-sprints.md`.
+Explain the goals of each sprint and what can be done after a sprint is complete within the document.
+Each sprint should have a preamble and a table of functions.
