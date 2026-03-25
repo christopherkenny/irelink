@@ -20,6 +20,10 @@
 #'   ggplot2::coord_equal()
 #' }
 il_roc <- function(model, labels) {
-  cli::cli_warn("Function {.fn il_roc} is not yet implemented.")
-  invisible(NULL)
+  acc <- il_accuracy(model, labels)
+  tibble::tibble(
+    threshold = acc$threshold,
+    fpr = acc$fp / pmax(acc$fp + acc$tn, 1L),
+    tpr = acc$tp / pmax(acc$tp + acc$fn, 1L)
+  )
 }

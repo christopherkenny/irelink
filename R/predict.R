@@ -32,6 +32,74 @@
 #' }
 predict.il_model <- function(object, threshold = 0.85,
                              type = c("pairs", "weights"), ...) {
-  cli::cli_warn("Function {.fn predict.il_model} is not yet implemented.")
-  invisible(NULL)
+  type <- match.arg(type)
+  validate_il_model(object)
+
+  if (!object$trained) {
+    cli::cli_abort("Model must be trained before prediction. Use {.fn il_estimate_em} first.")
+  }
+
+  comparisons <- object$spec$comparisons
+  params <- object$params$comparisons
+  prior <- object$params$prior %||% 0.05
+  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+
+  # Collect blocked pairs from all blocking rules
+  blocking_rules <- object$spec$blocking_rules
+  all_pairs <- list()
+  for (br in blocking_rules) {
+    bp <- get_blocked_pairs(object, br)
+    if (nrow(bp) > 0L) all_pairs <- c(all_pairs, list(bp))
+  }
+
+  if (length(all_pairs) == 0L) {
+    empty <- tibble::tibble(
+      unique_id_l = integer(0), unique_id_r = integer(0),
+      match_weight = numeric(0), match_probability = numeric(0)
+    )
+    return(new_il_compared(empty, model = object))
+  }
+
+  pairs <- do.call(rbind, all_pairs)
+  pair_key <- paste(pairs$l_unique_id, pairs$r_unique_id, sep = "||")
+  pairs <- pairs[!duplicated(pair_key), , drop = FALSE]
+
+  gamma_mat <- compute_gamma_matrix(pairs, comparisons)
+  n_comp <- length(comparisons)
+
+  m_match <- u_match <- m_nonmatch <- u_nonmatch <- numeric(n_comp)
+  for (j in seq_len(n_comp)) {
+    cn <- comp_names[j]
+    m_match[j]    <- params$m[params$comparison == cn & params$level == "match"]
+    m_nonmatch[j] <- params$m[params$comparison == cn & params$level == "non_match"]
+    u_match[j]    <- params$u[params$comparison == cn & params$level == "match"]
+    u_nonmatch[j] <- params$u[params$comparison == cn & params$level == "non_match"]
+  }
+
+  match_weight <- numeric(nrow(pairs))
+  for (j in seq_len(n_comp)) {
+    g <- gamma_mat[, j]
+    w <- ifelse(g == 1L,
+      log2(pmax(m_match[j], 1e-10) / pmax(u_match[j], 1e-10)),
+      log2(pmax(m_nonmatch[j], 1e-10) / pmax(u_nonmatch[j], 1e-10))
+    )
+    match_weight <- match_weight + w
+  }
+
+  log_odds <- log(prior / (1 - prior)) + match_weight * log(2)
+  match_probability <- 1 / (1 + exp(-log_odds))
+
+  result <- tibble::tibble(
+    unique_id_l = pairs$l_unique_id,
+    unique_id_r = pairs$r_unique_id,
+    match_weight = match_weight,
+    match_probability = match_probability
+  )
+  for (j in seq_len(n_comp)) {
+    result[[paste0("gamma_", comp_names[j])]] <- gamma_mat[, j]
+  }
+
+  result <- result[result$match_probability >= threshold, , drop = FALSE]
+  result <- tibble::as_tibble(result)
+  new_il_compared(result, model = object)
 }

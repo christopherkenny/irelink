@@ -15,8 +15,14 @@
 #'   il_compare(first_name, cl_name())
 #' }
 cl_name <- function(...) {
-  cli::cli_warn("Function {.fn cl_name} is not yet implemented.")
-  invisible(NULL)
+  cl_levels(
+    cl_null(),
+    cl_exact(),
+    cl_jaro_winkler(0.92),
+    cl_jaro_winkler(0.88),
+    cl_jaro_winkler(0.7),
+    cl_else()
+  )
 }
 
 #' Date of Birth Comparison
@@ -36,8 +42,15 @@ cl_name <- function(...) {
 #'   il_compare(dob, cl_dob())
 #' }
 cl_dob <- function(...) {
-  cli::cli_warn("Function {.fn cl_dob} is not yet implemented.")
-  invisible(NULL)
+  cl_levels(
+    cl_null(),
+    cl_exact(),
+    cl_damerau_levenshtein(1),
+    cl_date_diff(months(1)),
+    cl_date_diff(years(1)),
+    cl_date_diff(years(10)),
+    cl_else()
+  )
 }
 
 #' Email Address Comparison
@@ -56,8 +69,14 @@ cl_dob <- function(...) {
 #'   il_compare(email, cl_email())
 #' }
 cl_email <- function(...) {
-  cli::cli_warn("Function {.fn cl_email} is not yet implemented.")
-  invisible(NULL)
+  cl_levels(
+    cl_null(),
+    cl_exact(),
+    cl_custom("LOWER(SUBSTR(l.{col}, 1, INSTR(l.{col}, '@') - 1)) = LOWER(SUBSTR(r.{col}, 1, INSTR(r.{col}, '@') - 1))"),
+    cl_jaro_winkler(0.88),
+    cl_custom("LOWER(SUBSTR(l.{col}, INSTR(l.{col}, '@'), LENGTH(l.{col}))) = LOWER(SUBSTR(r.{col}, INSTR(r.{col}, '@'), LENGTH(r.{col})))"),
+    cl_else()
+  )
 }
 
 #' Forename and Surname Comparison with Swap Detection
@@ -77,8 +96,15 @@ cl_email <- function(...) {
 #'   il_compare(first_name, cl_forename_surname())
 #' }
 cl_forename_surname <- function(...) {
-  cli::cli_warn("Function {.fn cl_forename_surname} is not yet implemented.")
-  invisible(NULL)
+  cl_levels(
+    cl_null(),
+    cl_exact(),
+    cl_custom("l.{col_forename} = r.{col_surname} AND l.{col_surname} = r.{col_forename}"),
+    cl_jaro_winkler(0.92),
+    cl_jaro_winkler(0.88),
+    cl_custom("l.{col_forename} = r.{col_forename}"),
+    cl_else()
+  )
 }
 
 #' Postcode Comparison
@@ -97,6 +123,12 @@ cl_forename_surname <- function(...) {
 #'   il_compare(postcode, cl_postcode())
 #' }
 cl_postcode <- function(...) {
-  cli::cli_warn("Function {.fn cl_postcode} is not yet implemented.")
-  invisible(NULL)
+  cl_levels(
+    cl_null(),
+    cl_exact(),
+    cl_custom("SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 1) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 1)"),
+    cl_custom("SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 2) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 2)"),
+    cl_custom("SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 3) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 3)"),
+    cl_else()
+  )
 }

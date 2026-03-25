@@ -25,6 +25,23 @@
 #' )
 #' }
 il_compare_records <- function(record_a, record_b, spec, con) {
-  cli::cli_warn("Function {.fn il_compare_records} is not yet implemented.")
-  invisible(NULL)
+  validate_il_spec(spec)
+  comparisons <- spec$comparisons
+
+  a <- as.data.frame(record_a, stringsAsFactors = FALSE)
+  b <- as.data.frame(record_b, stringsAsFactors = FALSE)
+
+  pair <- as.data.frame(c(
+    stats::setNames(as.list(a[1, , drop = FALSE]), paste0("l_", names(a))),
+    stats::setNames(as.list(b[1, , drop = FALSE]), paste0("r_", names(b)))
+  ))
+
+  gamma_mat <- compute_gamma_matrix(pair, comparisons)
+  comp_names <- colnames(gamma_mat)
+
+  result <- tibble::tibble(.rows = 1L)
+  for (j in seq_along(comp_names)) {
+    result[[paste0("gamma_", comp_names[j])]] <- gamma_mat[1, j]
+  }
+  result
 }

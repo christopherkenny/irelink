@@ -20,6 +20,53 @@
 #'   il_estimate_prior(block_on(first_name, surname, dob), recall = 0.7)
 #' }
 il_estimate_prior <- function(model, ..., recall = 0.7) {
-  cli::cli_warn("Function {.fn il_estimate_prior} is not yet implemented.")
-  invisible(NULL)
+  validate_il_model(model)
+  rules <- list(...)
+
+  if (length(rules) == 0L) {
+    cli::cli_abort("{.fn il_estimate_prior} requires at least one blocking rule.")
+  }
+
+  con <- model$con
+  tbl <- model$data$tbl_l
+  n_total <- model$data$n_records_l
+
+  if (model$link_type == "dedupe") {
+    total_pairs <- n_total * (n_total - 1L) / 2L
+  } else {
+    n_r <- model$data$n_records_r %||% n_total
+    total_pairs <- n_total * n_r
+  }
+
+  # Count pairs produced by each blocking rule
+  n_blocked <- 0L
+  for (rule in rules) {
+    if (!inherits(rule, "il_blocking_rule")) next
+    cols <- rule$columns
+    conditions <- vapply(cols, function(col) {
+      sprintf("l.%s = r.%s", col, col)
+    }, character(1))
+    where <- paste(conditions, collapse = " AND ")
+
+    if (model$link_type == "dedupe") {
+      sql <- sprintf(
+        "SELECT COUNT(*) AS n FROM %s l, %s r WHERE l.rowid < r.rowid AND %s",
+        tbl, tbl, where
+      )
+    } else {
+      tbl_r <- model$data$tbl_r %||% tbl
+      sql <- sprintf(
+        "SELECT COUNT(*) AS n FROM %s l, %s r WHERE %s",
+        tbl, tbl_r, where
+      )
+    }
+    res <- DBI::dbGetQuery(con, sql)
+    n_blocked <- n_blocked + res$n[1]
+  }
+
+  estimated_matches <- n_blocked / recall
+  prior <- min(max(estimated_matches / total_pairs, 1e-6), 1 - 1e-6)
+
+  model$params$prior <- prior
+  model
 }

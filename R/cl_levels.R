@@ -26,8 +26,36 @@
 #'   )
 #' }
 cl_levels <- function(...) {
-  cli::cli_warn("Function {.fn cl_levels} is not yet implemented.")
-  invisible(NULL)
+  levels <- list(...)
+  if (length(levels) == 0L) {
+    cli::cli_abort("{.fn cl_levels} requires at least one level.")
+  }
+  for (i in seq_along(levels)) {
+    if (!inherits(levels[[i]], "il_comparison_level")) {
+      cli::cli_abort("All arguments to {.fn cl_levels} must be comparison level objects.")
+    }
+  }
+  # Validate cl_null() is first if present
+  null_positions <- which(vapply(levels, function(l) isTRUE(l$is_null_level), logical(1)))
+  if (length(null_positions) > 0L && null_positions[1] != 1L) {
+    cli::cli_abort(
+      "{.fn cl_null} must be the first level in {.fn cl_levels}.",
+      class = "il_error_validation"
+    )
+  }
+  # Validate cl_else() is last if present
+  else_positions <- which(vapply(levels, function(l) isTRUE(l$is_else_level), logical(1)))
+  if (length(else_positions) > 0L && else_positions[length(else_positions)] != length(levels)) {
+    cli::cli_abort(
+      "{.fn cl_else} must be the last level in {.fn cl_levels}.",
+      class = "il_error_validation"
+    )
+  }
+  structure(
+    list(method = "levels", levels = levels,
+         is_null_level = FALSE, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }
 
 #' Null / Missing Value Level
@@ -43,8 +71,10 @@ cl_levels <- function(...) {
 #' cl_levels(cl_null(), cl_exact(), cl_else())
 #' }
 cl_null <- function() {
-  cli::cli_warn("Function {.fn cl_null} is not yet implemented.")
-  invisible(NULL)
+  structure(
+    list(method = "null", is_null_level = TRUE, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }
 
 #' Catch-All Else Level
@@ -60,8 +90,10 @@ cl_null <- function() {
 #' cl_levels(cl_null(), cl_exact(), cl_else())
 #' }
 cl_else <- function() {
-  cli::cli_warn("Function {.fn cl_else} is not yet implemented.")
-  invisible(NULL)
+  structure(
+    list(method = "else", is_null_level = FALSE, is_else_level = TRUE),
+    class = "il_comparison_level"
+  )
 }
 
 #' Combine Comparison Conditions with AND
@@ -79,8 +111,16 @@ cl_else <- function() {
 #' cl_and(cl_exact(first_name), cl_exact(surname))
 #' }
 cl_and <- function(...) {
-  cli::cli_warn("Function {.fn cl_and} is not yet implemented.")
-  invisible(NULL)
+  children <- list(...)
+  if (length(children) == 0L) {
+    cli::cli_abort("{.fn cl_and} requires at least one argument.")
+  }
+  all_null <- all(vapply(children, function(l) isTRUE(l$is_null_level), logical(1)))
+  structure(
+    list(method = "and", children = children,
+         is_null_level = all_null, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }
 
 #' Combine Comparison Conditions with OR
@@ -98,8 +138,16 @@ cl_and <- function(...) {
 #' cl_or(cl_jaro_winkler(name, 0.9), cl_levenshtein(name, 1))
 #' }
 cl_or <- function(...) {
-  cli::cli_warn("Function {.fn cl_or} is not yet implemented.")
-  invisible(NULL)
+  children <- list(...)
+  if (length(children) == 0L) {
+    cli::cli_abort("{.fn cl_or} requires at least one argument.")
+  }
+  all_null <- all(vapply(children, function(l) isTRUE(l$is_null_level), logical(1)))
+  structure(
+    list(method = "or", children = children,
+         is_null_level = all_null, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }
 
 #' Negate a Comparison Condition
@@ -117,6 +165,12 @@ cl_or <- function(...) {
 #' cl_not(cl_exact(name))
 #' }
 cl_not <- function(x) {
-  cli::cli_warn("Function {.fn cl_not} is not yet implemented.")
-  invisible(NULL)
+  if (missing(x)) {
+    cli::cli_abort("{.fn cl_not} requires one argument.")
+  }
+  structure(
+    list(method = "not", child = x,
+         is_null_level = FALSE, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }

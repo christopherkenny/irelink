@@ -21,6 +21,30 @@
 #'   il_compare(dob, cl_date_diff(months(1), years(1)))
 #' }
 cl_date_diff <- function(...) {
-  cli::cli_warn("Function {.fn cl_date_diff} is not yet implemented.")
-  invisible(NULL)
+  args <- list(...)
+  if (length(args) == 0L) {
+    cli::cli_abort("{.fn cl_date_diff} requires at least one threshold.")
+  }
+  valid_units <- c("days", "months", "years")
+  thresholds <- vapply(args, function(a) {
+    if (is.numeric(a) && length(a) == 1L) return(a)
+    if (is.list(a) && !is.null(a$unit)) {
+      if (!a$unit %in% valid_units) {
+        cli::cli_abort(
+          "{.fn cl_date_diff} accepts {.or {.val {valid_units}}} units, not {.val {a$unit}}."
+        )
+      }
+      return(a$value)
+    }
+    cli::cli_abort("Invalid threshold for {.fn cl_date_diff}.")
+  }, numeric(1))
+  units <- vapply(args, function(a) {
+    if (is.numeric(a) && length(a) == 1L) return("days")
+    a$unit
+  }, character(1))
+  structure(
+    list(method = "date_diff", thresholds = thresholds, units = units,
+         is_null_level = FALSE, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }

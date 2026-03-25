@@ -43,7 +43,7 @@ test_that("il_save() creates a valid JSON file", {
 
   df <- data.frame(
     unique_id = 1:5,
-    first_name = c("A", "B", "C", "D", "E"),
+    first_name = c("A", "A", "B", "B", "C"),
     surname = rep("X", 5)
   )
 

@@ -17,8 +17,12 @@
 #'   il_compare(name, cl_levenshtein(1, 2))
 #' }
 cl_levenshtein <- function(...) {
-  cli::cli_warn("Function {.fn cl_levenshtein} is not yet implemented.")
-  invisible(NULL)
+  thresholds <- check_distance_thresholds(c(...), "cl_levenshtein")
+  structure(
+    list(method = "levenshtein", thresholds = thresholds,
+         is_null_level = FALSE, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }
 
 #' Damerau-Levenshtein Edit-Distance Comparison
@@ -39,6 +43,10 @@ cl_levenshtein <- function(...) {
 #'   il_compare(name, cl_damerau_levenshtein(1))
 #' }
 cl_damerau_levenshtein <- function(...) {
-  cli::cli_warn("Function {.fn cl_damerau_levenshtein} is not yet implemented.")
-  invisible(NULL)
+  thresholds <- check_distance_thresholds(c(...), "cl_damerau_levenshtein")
+  structure(
+    list(method = "damerau_levenshtein", thresholds = thresholds,
+         is_null_level = FALSE, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }

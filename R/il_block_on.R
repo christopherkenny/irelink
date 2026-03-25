@@ -27,8 +27,24 @@
 #'   il_block_on(state, year)
 #' }
 il_block_on <- function(spec, ..., .where = NULL) {
-  cli::cli_warn("Function {.fn il_block_on} is not yet implemented.")
-  invisible(NULL)
+  if (!inherits(spec, "il_spec")) {
+    cli::cli_abort(
+      "{.arg spec} must be an {.cls il_spec} object, not {.obj_type_friendly {spec}}.",
+      class = "il_error_type"
+    )
+  }
+  col_exprs <- rlang::enquos(...)
+  columns <- vapply(col_exprs, function(q) {
+    expr <- rlang::quo_get_expr(q)
+    if (rlang::is_symbol(expr)) as.character(expr)
+    else deparse(expr)
+  }, character(1))
+  rule <- structure(
+    list(columns = columns, where = .where),
+    class = "il_blocking_rule"
+  )
+  spec$blocking_rules <- c(spec$blocking_rules, list(rule))
+  spec
 }
 
 #' Create a Training-Time Blocking Rule
@@ -51,6 +67,17 @@ il_block_on <- function(spec, ..., .where = NULL) {
 #'   il_estimate_em(block_on(first_name, surname))
 #' }
 block_on <- function(...) {
-  cli::cli_warn("Function {.fn block_on} is not yet implemented.")
-  invisible(NULL)
+  col_exprs <- rlang::enquos(...)
+  if (length(col_exprs) == 0L) {
+    cli::cli_abort("{.fn block_on} requires at least one column.")
+  }
+  columns <- vapply(col_exprs, function(q) {
+    expr <- rlang::quo_get_expr(q)
+    if (rlang::is_symbol(expr)) as.character(expr)
+    else deparse(expr)
+  }, character(1))
+  structure(
+    list(columns = columns),
+    class = "il_blocking_rule"
+  )
 }

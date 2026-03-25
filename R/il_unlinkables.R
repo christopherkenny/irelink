@@ -17,6 +17,21 @@
 #'   ggplot2::geom_line()
 #' }
 il_unlinkables <- function(model) {
-  cli::cli_warn("Function {.fn il_unlinkables} is not yet implemented.")
-  invisible(NULL)
+  validate_il_model(model)
+  all_pairs <- predict(model, threshold = 0.0)
+  n_records <- model$data$n_records_l
+
+  thresholds <- seq(0, 1, by = 0.05)
+
+  results <- lapply(thresholds, function(t) {
+    linked <- all_pairs[all_pairs$match_probability >= t, ]
+    linked_ids <- unique(c(
+      as.character(linked$unique_id_l),
+      as.character(linked$unique_id_r)
+    ))
+    pct <- 1 - length(linked_ids) / n_records
+    tibble::tibble(threshold = t, pct_unlinkable = pct)
+  })
+
+  do.call(rbind, results)
 }

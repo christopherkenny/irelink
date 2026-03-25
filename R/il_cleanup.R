@@ -15,6 +15,15 @@
 #' il_cleanup(model)
 #' }
 il_cleanup <- function(model) {
-  cli::cli_warn("Function {.fn il_cleanup} is not yet implemented.")
-  invisible(NULL)
+  validate_il_model(model)
+  con <- model$con
+  if (is.null(con) || !DBI::dbIsValid(con)) {
+    return(invisible(model))
+  }
+  tables <- DBI::dbListTables(con)
+  il_tables <- tables[grepl("^__il_", tables)]
+  for (tbl in il_tables) {
+    DBI::dbRemoveTable(con, tbl, fail_if_missing = FALSE)
+  }
+  invisible(model)
 }

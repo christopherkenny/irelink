@@ -16,6 +16,10 @@
 #'   il_compare(tags, cl_array_intersect(2, 1))
 #' }
 cl_array_intersect <- function(...) {
-  cli::cli_warn("Function {.fn cl_array_intersect} is not yet implemented.")
-  invisible(NULL)
+  thresholds <- check_distance_thresholds(c(...), "cl_array_intersect")
+  structure(
+    list(method = "array_intersect", thresholds = thresholds,
+         is_null_level = FALSE, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }

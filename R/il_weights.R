@@ -19,6 +19,23 @@
 #'   ggplot2::coord_flip()
 #' }
 il_weights <- function(model) {
-  cli::cli_warn("Function {.fn il_weights} is not yet implemented.")
-  invisible(NULL)
+  validate_il_model(model)
+  params <- model$params$comparisons
+  if (is.null(params)) {
+    cli::cli_abort("Model has no parameters yet. Run training verbs first.")
+  }
+  m <- params$m
+  u <- params$u
+  # Guard against log(0) or division by zero
+  m <- pmax(m, 1e-10)
+  u <- pmax(u, 1e-10)
+  match_weight <- log2(m / u)
+
+  tibble::tibble(
+    comparison = params$comparison,
+    level = params$level,
+    m_prob = params$m,
+    u_prob = params$u,
+    weight = match_weight
+  )
 }

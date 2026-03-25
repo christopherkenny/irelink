@@ -6,7 +6,7 @@
 
 # Current implementation sprint. Increase as sprints are completed.
 # Sprint 0 means nothing is implemented yet (all tests skip).
-current_sprint <- 1L
+current_sprint <- 10L
 
 #' Skip a test if the current sprint has not reached the required level
 #'

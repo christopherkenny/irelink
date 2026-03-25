@@ -35,8 +35,60 @@
 #' }
 il_model <- function(.data, ..., spec, con,
                      link_type = c("dedupe", "link", "link_and_dedupe")) {
-  cli::cli_warn("Function {.fn il_model} is not yet implemented.")
-  invisible(NULL)
+  link_type <- match.arg(link_type)
+  extra_dfs <- list(...)
+
+  validate_il_spec(spec)
+
+  if (nrow(.data) == 0L) {
+    cli::cli_abort("Cannot create a model from a zero-row data frame.")
+  }
+
+  # Convert factors to character
+  .data <- factor_to_char(.data)
+
+  # Validate columns referenced in spec exist in data
+  spec_cols <- get_spec_columns(spec)
+  missing_cols <- setdiff(spec_cols, names(.data))
+  if (length(missing_cols) > 0L) {
+    cli::cli_abort(
+      "Column{?s} {.field {missing_cols}} referenced in the spec but not found in the data."
+    )
+  }
+
+  if (link_type == "link" && length(extra_dfs) == 0L) {
+    cli::cli_abort(
+      "{.arg link_type} is {.val link} but only one dataset was provided. Supply a second data frame."
+    )
+  }
+
+  # Upload data to database
+  tbl_name_l <- "__il_data_l"
+  DBI::dbWriteTable(con, tbl_name_l, .data, overwrite = TRUE)
+
+  tbl_name_r <- NULL
+  if (length(extra_dfs) > 0L) {
+    extra_dfs[[1]] <- factor_to_char(extra_dfs[[1]])
+    tbl_name_r <- "__il_data_r"
+    DBI::dbWriteTable(con, tbl_name_r, extra_dfs[[1]], overwrite = TRUE)
+  }
+
+  data_info <- list(
+    n_records_l = nrow(.data),
+    n_records_r = if (!is.null(tbl_name_r)) nrow(extra_dfs[[1]]) else NULL,
+    tbl_l = tbl_name_l,
+    tbl_r = tbl_name_r,
+    columns = names(.data)
+  )
+
+  new_il_model(
+    spec = spec,
+    data = data_info,
+    con = con,
+    link_type = link_type,
+    params = list(),
+    trained = FALSE
+  )
 }
 
 #' Print an irelink Model
@@ -55,7 +107,20 @@ il_model <- function(.data, ..., spec, con,
 #' print(model)
 #' }
 print.il_model <- function(x, ...) {
-  cli::cli_warn("Function {.fn print.il_model} is not yet implemented.")
+  status <- if (x$trained) "Trained" else "Untrained"
+  n_records <- x$data$n_records_l
+  n_comparisons <- length(x$spec$comparisons)
+  n_blocking <- length(x$spec$blocking_rules)
+
+  cat("irelink Model\n")
+  cat(sprintf("  Status: %s\n", status))
+  cat(sprintf("  Link type: %s\n", x$link_type))
+  cat(sprintf("  Records: %d\n", n_records))
+  if (!is.null(x$data$n_records_r)) {
+    cat(sprintf("  Records (right): %d\n", x$data$n_records_r))
+  }
+  cat(sprintf("  Comparisons: %d\n", n_comparisons))
+  cat(sprintf("  Blocking rules: %d\n", n_blocking))
   invisible(x)
 }
 
@@ -76,8 +141,17 @@ print.il_model <- function(x, ...) {
 #' summary(model)
 #' }
 summary.il_model <- function(object, ...) {
-  cli::cli_warn("Function {.fn summary.il_model} is not yet implemented.")
-  invisible(NULL)
+  print.il_model(object, ...)
+  if (object$trained) {
+    cat("\n  Parameters:\n")
+    params <- object$params
+    if (length(params) > 0L) {
+      for (nm in names(params)) {
+        cat(sprintf("    %s: %s\n", nm, format(params[[nm]])))
+      }
+    }
+  }
+  invisible(object)
 }
 
 #' Test if an Object is an irelink Model

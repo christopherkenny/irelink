@@ -18,6 +18,10 @@
 #'   ggplot2::geom_line()
 #' }
 il_precision_recall <- function(model, labels) {
-  cli::cli_warn("Function {.fn il_precision_recall} is not yet implemented.")
-  invisible(NULL)
+  acc <- il_accuracy(model, labels)
+  tibble::tibble(
+    threshold = acc$threshold,
+    precision = acc$precision,
+    recall = acc$recall
+  )
 }

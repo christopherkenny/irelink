@@ -29,6 +29,53 @@
 il_deterministic_link <- function(.data, ..., spec, con,
                                   link_type = c("dedupe", "link",
                                                 "link_and_dedupe")) {
-  cli::cli_warn("Function {.fn il_deterministic_link} is not yet implemented.")
-  invisible(NULL)
+  link_type <- match.arg(link_type)
+  validate_il_spec(spec)
+
+  .data <- factor_to_char(.data)
+  comparisons <- spec$comparisons
+  blocking_rules <- spec$blocking_rules
+
+  tbl_name <- "__il_det_data"
+  DBI::dbWriteTable(con, tbl_name, .data, overwrite = TRUE)
+  on.exit(try(DBI::dbRemoveTable(con, tbl_name), silent = TRUE))
+
+  cols <- names(.data)
+  select_l <- paste(sprintf("l.%s AS l_%s", cols, cols), collapse = ", ")
+  select_r <- paste(sprintf("r.%s AS r_%s", cols, cols), collapse = ", ")
+
+  if (length(blocking_rules) > 0L) {
+    block_sqls <- vapply(blocking_rules, function(br) {
+      conds <- vapply(br$columns, function(col) sprintf("l.%s = r.%s", col, col), character(1))
+      paste0("(", paste(conds, collapse = " AND "), ")")
+    }, character(1))
+    block_where <- paste(block_sqls, collapse = " OR ")
+  } else {
+    block_where <- "1 = 1"
+  }
+
+  sql <- sprintf(
+    "SELECT %s, %s FROM %s l, %s r WHERE l.rowid < r.rowid AND %s",
+    select_l, select_r, tbl_name, tbl_name, block_where
+  )
+  pairs <- DBI::dbGetQuery(con, sql)
+
+  if (nrow(pairs) == 0L) {
+    return(tibble::tibble(unique_id_l = integer(0), unique_id_r = integer(0)))
+  }
+
+  # Keep only pairs where ALL comparison columns match exactly
+  keep <- rep(TRUE, nrow(pairs))
+  for (comp in comparisons) {
+    col <- comp$columns
+    val_l <- pairs[[paste0("l_", col)]]
+    val_r <- pairs[[paste0("r_", col)]]
+    keep <- keep & !is.na(val_l) & !is.na(val_r) & val_l == val_r
+  }
+  pairs <- pairs[keep, , drop = FALSE]
+
+  tibble::tibble(
+    unique_id_l = pairs$l_unique_id,
+    unique_id_r = pairs$r_unique_id
+  )
 }

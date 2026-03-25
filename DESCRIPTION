@@ -49,7 +49,16 @@ Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Imports: 
     cli,
+    DBI,
+    rlang,
+    stringdist,
     tibble
 Suggests: 
-    testthat (>= 3.0.0)
+    dplyr,
+    ggplot2,
+    igraph,
+    jsonlite,
+    RSQLite,
+    testthat (>= 3.0.0),
+    withr
 Config/testthat/edition: 3

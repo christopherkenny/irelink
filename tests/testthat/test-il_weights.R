@@ -25,7 +25,7 @@ test_that("il_weights() returns a tibble with expected columns", {
   expect_s3_class(w, "tbl_df")
   expect_true("comparison" %in% names(w))
   expect_true("level" %in% names(w))
-  expect_true("match_weight" %in% names(w))
+  expect_true("weight" %in% names(w))
 })
 
 test_that("il_weights() has one row per comparison level", {

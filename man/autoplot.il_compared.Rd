@@ -4,7 +4,7 @@
 \alias{autoplot.il_compared}
 \title{Quick Plot for Scored Pairs}
 \usage{
-autoplot.il_compared(object, which = NULL, ...)
+\method{autoplot}{il_compared}(object, which = NULL, ...)
 }
 \arguments{
 \item{object}{An \code{il_compared} tibble from \code{\link[=predict.il_model]{predict.il_model()}}.}
@@ -23,13 +23,4 @@ Produces a match-weight histogram from scored pairs, or a waterfall
 chart for a single pair when \code{which} is provided. This is a
 convenience wrapper; for full control, use \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}}
 directly on the tibble or on data from \code{\link[=il_waterfall]{il_waterfall()}}.
-}
-\examples{
-\dontrun{
-# Match-weight histogram
-autoplot(pairs)
-
-# Waterfall for the first pair
-autoplot(pairs, which = 1)
-}
 }

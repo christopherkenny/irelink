@@ -16,6 +16,10 @@
 #'   il_compare(name, cl_jaccard(0.9))
 #' }
 cl_jaccard <- function(...) {
-  cli::cli_warn("Function {.fn cl_jaccard} is not yet implemented.")
-  invisible(NULL)
+  thresholds <- check_similarity_thresholds(c(...), "cl_jaccard")
+  structure(
+    list(method = "jaccard", thresholds = thresholds,
+         is_null_level = FALSE, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }

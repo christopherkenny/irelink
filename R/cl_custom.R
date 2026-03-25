@@ -18,6 +18,12 @@
 #'   il_compare(score, cl_custom("l.score + r.score > 10"))
 #' }
 cl_custom <- function(sql_expr, ...) {
-  cli::cli_warn("Function {.fn cl_custom} is not yet implemented.")
-  invisible(NULL)
+  if (!is.character(sql_expr) || length(sql_expr) != 1L) {
+    cli::cli_abort("{.arg sql_expr} must be a single character string.")
+  }
+  structure(
+    list(method = "custom", sql_expr = sql_expr,
+         is_null_level = FALSE, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }

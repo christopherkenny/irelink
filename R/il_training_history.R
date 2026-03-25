@@ -18,6 +18,10 @@
 #'   ggplot2::facet_wrap(~ comparison, scales = "free_y")
 #' }
 il_training_history <- function(model) {
-  cli::cli_warn("Function {.fn il_training_history} is not yet implemented.")
-  invisible(NULL)
+  validate_il_model(model)
+  history <- model$params$history
+  if (is.null(history) || length(history) == 0L) {
+    cli::cli_abort("No training history available. Run {.fn il_estimate_em} first.")
+  }
+  do.call(rbind, history)
 }

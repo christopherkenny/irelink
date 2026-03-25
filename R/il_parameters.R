@@ -16,6 +16,10 @@
 #'   ggplot2::geom_point(size = 3)
 #' }
 il_parameters <- function(model) {
-  cli::cli_warn("Function {.fn il_parameters} is not yet implemented.")
-  invisible(NULL)
+  validate_il_model(model)
+  params <- model$params$comparisons
+  if (is.null(params)) {
+    cli::cli_abort("Model has no parameters yet. Run training verbs first.")
+  }
+  params
 }

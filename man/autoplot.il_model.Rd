@@ -4,7 +4,7 @@
 \alias{autoplot.il_model}
 \title{Quick Match-Weights Plot for a Model}
 \usage{
-autoplot.il_model(object, ...)
+\method{autoplot}{il_model}(object, ...)
 }
 \arguments{
 \item{object}{A trained \code{il_model} object.}
@@ -18,9 +18,4 @@ A \code{ggplot} object.
 Produces a ready-made match-weights chart from a trained model. This
 is a convenience wrapper; for full control, extract data with
 \code{\link[=il_weights]{il_weights()}} and build a custom \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}}.
-}
-\examples{
-\dontrun{
-autoplot(model)
-}
 }

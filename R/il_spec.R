@@ -35,28 +35,28 @@ il_spec <- function() {
 #' print(spec)
 #' }
 print.il_spec <- function(x, ...) {
-  cli::cli_h1("Linkage Specification")
+  cat("Linkage Specification\n")
 
   comps <- x$comparisons
   if (length(comps) == 0L) {
-    cli::cli_text("Comparisons: {.emph none}")
+    cat("  Comparisons: (none)\n")
   } else {
-    cli::cli_text("Comparisons ({length(comps)}):")
+    cat(sprintf("  Comparisons (%d):\n", length(comps)))
     for (comp in comps) {
       cols <- paste(comp$columns, collapse = ", ")
-      method <- comp$comparison$method %||% "custom"
-      cli::cli_bullets(c(" " = "{cols} : {method}"))
+      method <- comp$method$method %||% "custom"
+      cat(sprintf("    %s : %s\n", cols, method))
     }
   }
 
   rules <- x$blocking_rules
   if (length(rules) == 0L) {
-    cli::cli_text("Blocking rules: {.emph none}")
+    cat("  Blocking rules: (none)\n")
   } else {
-    cli::cli_text("Blocking rules ({length(rules)}, OR-ed):")
+    cat(sprintf("  Blocking rules (%d, OR-ed):\n", length(rules)))
     for (i in seq_along(rules)) {
       cols <- paste(rules[[i]]$columns, collapse = ", ")
-      cli::cli_bullets(c(" " = "{i}. {cols}"))
+      cat(sprintf("    %d. %s\n", i, cols))
     }
   }
 

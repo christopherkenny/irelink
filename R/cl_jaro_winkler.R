@@ -18,8 +18,12 @@
 #'   il_compare(surname, cl_jaro_winkler(0.9))
 #' }
 cl_jaro_winkler <- function(...) {
-  cli::cli_warn("Function {.fn cl_jaro_winkler} is not yet implemented.")
-  invisible(NULL)
+  thresholds <- check_similarity_thresholds(c(...), "cl_jaro_winkler")
+  structure(
+    list(method = "jaro_winkler", thresholds = thresholds,
+         is_null_level = FALSE, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }
 
 #' Jaro String Similarity Comparison
@@ -39,6 +43,10 @@ cl_jaro_winkler <- function(...) {
 #'   il_compare(name, cl_jaro(0.9))
 #' }
 cl_jaro <- function(...) {
-  cli::cli_warn("Function {.fn cl_jaro} is not yet implemented.")
-  invisible(NULL)
+  thresholds <- check_similarity_thresholds(c(...), "cl_jaro")
+  structure(
+    list(method = "jaro", thresholds = thresholds,
+         is_null_level = FALSE, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }

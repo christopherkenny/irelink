@@ -16,8 +16,12 @@
 #'   il_compare(age, cl_numeric_diff(1, 5))
 #' }
 cl_numeric_diff <- function(...) {
-  cli::cli_warn("Function {.fn cl_numeric_diff} is not yet implemented.")
-  invisible(NULL)
+  thresholds <- check_distance_thresholds(c(...), "cl_numeric_diff")
+  structure(
+    list(method = "numeric_diff", thresholds = thresholds,
+         is_null_level = FALSE, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }
 
 #' Numeric Percentage Difference Comparison
@@ -38,6 +42,10 @@ cl_numeric_diff <- function(...) {
 #'   il_compare(income, cl_pct_diff(0.05, 0.2))
 #' }
 cl_pct_diff <- function(...) {
-  cli::cli_warn("Function {.fn cl_pct_diff} is not yet implemented.")
-  invisible(NULL)
+  thresholds <- check_distance_thresholds(c(...), "cl_pct_diff")
+  structure(
+    list(method = "pct_diff", thresholds = thresholds,
+         is_null_level = FALSE, is_else_level = FALSE),
+    class = "il_comparison_level"
+  )
 }
