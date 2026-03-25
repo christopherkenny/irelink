@@ -2,17 +2,18 @@
 
 > This document defines the user-facing R interface for irelink.
 > The design follows tidyverse conventions so that the package feels native
-> to analysts who already use dplyr, ggplot2, and DBI.
+> to analysts who already use dplyr, ggplot2, DBI, and gt.
 
 ---
 
 ## 1 Design Principles
 
-Five rules govern every public function in irelink:
+Six rules govern every public function in irelink:
 
 1. **Data first.** The primary object is always the first argument, enabling
-   the pipe operator (`|>`). This mirrors dplyr, where `filter(df, ...)` puts
-   the data frame first.
+   the native pipe operator (`|>`). This mirrors every modern Posit package:
+   dplyr puts the data frame first (`filter(df, ...)`), gt puts the table
+   first (`tab_header(data, ...)`), and irelink puts the spec or model first.
 
 2. **Verbs describe actions.** Functions are named as imperative verbs:
    `il_compare()`, `il_block_on()`, `il_estimate_u()`. dplyr uses the same
@@ -23,14 +24,20 @@ Five rules govern every public function in irelink:
    flow directly into dplyr, ggplot2, or any other tidyverse tool.
 
 4. **Specification helpers.** Small constructor functions (`cl_exact()`,
-   `cl_jaro_winkler()`) build declarative objects that describe *what* to do,
-   not *how*. This is the same role `aes()` plays in ggplot2 and `join_by()`
-   plays in dplyr.
+   `cl_jaro_winkler()`, `days()`, `km()`) build declarative objects that
+   describe *what* to do, not *how*. This is the same role `aes()` plays in
+   ggplot2, `join_by()` plays in dplyr, and `cell_text()` / `cells_body()`
+   play in gt.
 
 5. **Familiar generics.** Standard S3 generics — `predict()`, `print()`,
    `summary()`, `autoplot()` — work on irelink objects. A user who knows how
    `predict(lm_fit, newdata = ...)` works already knows how
    `predict(il_model, ...)` works.
+
+6. **Pure pipes, no `+`.** irelink uses `|>` throughout, following gt's
+   modern convention rather than ggplot2's `+` operator. Every builder
+   function takes the object as its first argument and returns the same
+   class, so pipes chain without operators or wrapper calls.
 
 ---
 
@@ -63,7 +70,7 @@ with `+`.
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_compare(surname,    cl_jaro_winkler(0.9, 0.7)) |>
-  il_compare(dob,        cl_date_diff(30, 365)) |>
+  il_compare(dob,        cl_date_diff(days(30), days(365))) |>
   il_compare(city,       cl_exact(term_frequency = TRUE)) |>
   il_compare(email,      cl_email()) |>
   il_block_on(first_name) |>
@@ -74,14 +81,22 @@ Each `il_compare()` call is a layer that says "compare this column using
 this method." Each `il_block_on()` call adds a prediction-blocking rule.
 The spec records these declarations without touching any data.
 
-#### Comparison to ggplot2
+#### Comparison to ggplot2 and gt
 
-| ggplot2 | irelink | Shared idea |
-|---------|---------|-------------|
-| `ggplot()` | `il_spec()` | Create an empty canvas |
-| `aes(x = ..., y = ...)` | `cl_jaro_winkler(0.9)` | Declarative specification helper |
-| `+ geom_point()` | `\|> il_compare(col, cl_*())` | Add a layer describing one visual / comparison |
-| `+ facet_wrap(~g)` | `\|> il_block_on(col)` | Structural modifier on the whole object |
+irelink's specification layer draws from both ggplot2 and gt. Like
+ggplot2, it accumulates declarative layers. Like gt, it uses `|>` pipes
+(not `+`) and tidyselect for column targeting.
+
+| Package | Pattern | irelink equivalent |
+|---------|---------|-------------------|
+| ggplot2 | `ggplot()` creates an empty canvas | `il_spec()` creates an empty spec |
+| ggplot2 | `aes(x = ..., y = ...)` declares aesthetics | `cl_jaro_winkler(0.9)` declares a method |
+| ggplot2 | `+ geom_point()` adds a layer | `\|> il_compare(col, cl_*())` adds a comparison |
+| gt | `gt(data)` creates from data, then pipe | `il_spec() \|> il_compare() \|> ...` pure pipe chain |
+| gt | `tab_header(data, ...)` always returns `gt_tbl` | `il_compare(spec, ...)` always returns `il_spec` |
+| gt | `fmt_number(columns = c(x, y))` tidyselect | `il_compare(c(first_name, last_name), ...)` tidyselect |
+| gt | `cells_body()` targets locations | `block_on()` targets blocking conditions |
+| gt | `cell_text()` / `cell_fill()` spec helpers | `cl_exact()` / `cl_jaro_winkler()` spec helpers |
 
 ### 3.2 `il_compare()`
 
@@ -92,12 +107,27 @@ il_compare(spec, col, method, ...)
 | Argument | Type | Description |
 |----------|------|-------------|
 | `spec` | `il_spec` | The specification to modify (piped in) |
-| `col` | unquoted name | Column to compare; uses tidy evaluation |
+| `col` | tidyselect | Column(s) to compare; supports bare names, `c()`, and tidyselect helpers |
 | `method` | comparison helper | A `cl_*()` object describing the comparison |
 | `...` | | Reserved for future use |
 
-`col` is captured with `rlang::ensym()`, so users write bare column names
-exactly as they do in `dplyr::select()`.
+`col` accepts tidyselect expressions, following gt's `columns` convention.
+A single bare name targets one column; `c(first_name, last_name)` applies
+the same comparison method to both columns, and `starts_with("addr_")`
+applies it to every matching column. Each targeted column gets its own
+comparison layer in the spec.
+
+```r
+# These are equivalent:
+spec |>
+  il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
+  il_compare(last_name,  cl_jaro_winkler(0.9, 0.7))
+
+spec |>
+  il_compare(c(first_name, last_name), cl_jaro_winkler(0.9, 0.7))
+```
+
+This mirrors gt's `fmt_number(columns = c(price, cost), ...)` pattern.
 
 Returns: the updated `il_spec` (a new copy, not a mutation).
 
@@ -153,8 +183,8 @@ level, an exact-match level, threshold levels, and an else level.
 | `cl_damerau_levenshtein(...)` | String | `il_compare(name, cl_damerau_levenshtein(1))` |
 | `cl_jaccard(...)` | String | `il_compare(name, cl_jaccard(0.9))` |
 | `cl_cosine(...)` | Numeric/vector | `il_compare(vec, cl_cosine(0.8))` |
-| `cl_date_diff(...)` | Date | `il_compare(dob, cl_date_diff(30, 365))` |
-| `cl_distance_km(...)` | Lat/lon pair | `il_compare(lat, lon, cl_distance_km(5, 50))` |
+| `cl_date_diff(...)` | Date | `il_compare(dob, cl_date_diff(days(30), days(365)))` |
+| `cl_distance_km(...)` | Lat/lon pair | `il_compare(lat, lon, cl_distance_km(km(5), km(50)))` |
 | `cl_numeric_diff(...)` | Numeric | `il_compare(age, cl_numeric_diff(1, 5))` |
 | `cl_pct_diff(...)` | Numeric | `il_compare(income, cl_pct_diff(0.05, 0.2))` |
 | `cl_array_intersect(...)` | Array/list | `il_compare(tags, cl_array_intersect(2, 1))` |
@@ -176,7 +206,41 @@ recipes `step_*` functions that bundle common preprocessing.
 | `cl_forename_surname()` | Forename + surname with cross-field swap detection |
 | `cl_postcode()` | Postcode comparison with optional geographic fallback |
 
-### 4.3 Composing Custom Levels
+### 4.3 Unit Helpers
+
+gt provides `px()`, `pct()`, and `md()` — small tagged-value constructors
+that make function calls self-documenting and type-safe. irelink follows
+this pattern for threshold arguments that carry physical or temporal units.
+
+| Helper | Returns | Example |
+|--------|---------|---------|
+| `days(n)` | A duration in days | `cl_date_diff(days(30), days(365))` |
+| `months(n)` | A duration in months | `cl_date_diff(months(1), months(12))` |
+| `years(n)` | A duration in years | `cl_date_diff(years(1))` |
+| `km(n)` | A distance in kilometres | `cl_distance_km(km(5), km(50))` |
+| `mi(n)` | A distance in miles | `cl_distance_km(mi(3), mi(30))` |
+
+These are intentionally tiny: each creates a one-element list with a class
+tag (e.g., `il_days`). The `cl_*()` helper reads the tag and converts to
+the appropriate SQL expression.
+
+```r
+# Without helpers — ambiguous units, fragile
+il_compare(dob, cl_date_diff(30, 365))
+
+# With helpers — self-documenting, unit-safe
+il_compare(dob, cl_date_diff(days(30), days(365)))
+
+# Mix units freely — converted internally
+il_compare(dob, cl_date_diff(months(1), years(1)))
+```
+
+The unit helpers are optional: bare numerics still work for callers who
+prefer brevity. But when a function accepts multiple threshold arguments,
+the helpers prevent mistakes like passing months where days are expected.
+This mirrors how gt's `px(12)` makes clear what `12` means.
+
+### 4.4 Composing Custom Levels
 
 When the built-in comparisons do not fit, users build levels from
 scratch. This is the equivalent of writing a custom ggplot `stat_*()`.
@@ -700,7 +764,7 @@ il_demo("fake_1000") |>
     spec = il_spec() |>
       il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
       il_compare(surname,    cl_jaro_winkler(0.9, 0.7)) |>
-      il_compare(dob,        cl_date_diff(30, 365)) |>
+      il_compare(dob,        cl_date_diff(days(30), days(365))) |>
       il_compare(city,       cl_exact()) |>
       il_compare(email,      cl_email()) |>
       il_block_on(first_name) |>
@@ -709,7 +773,6 @@ il_demo("fake_1000") |>
   ) |>
   il_estimate_u() |>
   il_estimate_em(block_on(first_name, surname)) |>
-  il_estimate_em(block_on(dob)) |>
   predict(threshold = 0.95) |>
   il_cluster()
 ```
@@ -734,7 +797,7 @@ il_completeness(voters_2020, voters_2024, con = con) |>
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_compare(last_name,  cl_jaro_winkler(0.9, 0.7)) |>
-  il_compare(dob,        cl_date_diff(30, 365)) |>
+  il_compare(dob,        cl_date_diff(days(30), days(365))) |>
   il_compare(county,     cl_exact(term_frequency = TRUE)) |>
   il_block_on(last_name) |>
   il_block_on(first_name, county)
@@ -920,27 +983,201 @@ il_compare_records(
 |----------|--------|-----------|
 | Class system | S3 | Simpler; idiomatic R; pipe-friendly without reference semantics; trained state stored as list elements (like a fitted lm) |
 | Object mutation | Functional (copy-on-modify) | Each training verb returns a new object; no side effects; matches dplyr convention |
-| Prefix convention | `il_` for verbs, `cl_` for comparison helpers, `block_on()` unprefixed | Mirrors ggplot2's `geom_`/`scale_`/`stat_` prefix grouping |
+| Prefix convention | `il_` for verbs, `cl_` for comparison helpers | Mirrors ggplot2's `geom_`/`scale_`/`stat_` and gt's `tab_`/`fmt_`/`cols_` prefix grouping |
+| Pipe operator | `\|>` (no `+`) | Follows gt's modern convention; works natively in R >= 4.1 |
+| Unit helpers | `days()`, `km()`, `mi()`, etc. | Self-documenting thresholds; mirrors gt's `px()`, `pct()` pattern |
+| Column selection | Tidyselect (`tidyselect` / `rlang`) | Bare names, `c()`, and select helpers; matches gt's `columns` convention and dplyr everywhere |
 | Database interface | DBI connections | Users already know `DBI::dbConnect()`; no new connection API; identical to dbplyr |
 | SQL generation | dbplyr + glue for template assembly | Leverage existing dialect translations; inject backend-specific functions via `sql()` |
 | Visualization | Tidy data + ggplot2 | No custom chart library; users control every aesthetic; `autoplot()` for convenience |
 | Predictions and clusters | Plain tibbles | Flow into dplyr, ggplot2, readr, and everything else without conversion |
-| Column selection | Tidy evaluation (`rlang`) | Bare column names, exactly like dplyr |
 
 ---
 
-## Appendix: Tidyverse Comparison Table
+## 14 Lessons from gt
 
-| Tidyverse concept | Tidyverse example | irelink equivalent |
-|-------------------|-------------------|-------------------|
+This section documents specific patterns adopted from or influenced by
+the gt package (Posit's table-formatting library, 200+ exports). gt
+represents Posit's most modern API design and validates several irelink
+decisions while inspiring new ones.
+
+### 14.1 Pure Pipe Chains
+
+gt abandoned the `+` operator used by ggplot2 and instead chains every
+call with `|>`. Every `tab_*()`, `fmt_*()`, and `cols_*()` function
+takes a `gt_tbl` as its first argument and returns a `gt_tbl`:
+
+```r
+# gt
+gt(data) |>
+  tab_header(title = "Sales") |>
+  fmt_number(columns = price, decimals = 0) |>
+  cols_label(price = "Price (USD)")
+
+# irelink — same pattern
+il_spec() |>
+  il_compare(first_name, cl_jaro_winkler(0.9)) |>
+  il_compare(dob, cl_date_diff(days(30))) |>
+  il_block_on(state)
+```
+
+This was already the irelink design, but gt's success at scale (200+ functions
+chained with `|>`) confirms it works for large APIs without confusion.
+
+### 14.2 Prefix Families
+
+gt organises its 200+ exports into systematic prefix groups:
+
+| Prefix | Count | Purpose |
+|--------|-------|---------|
+| `fmt_` | 32 | Format cell values |
+| `vec_` | 18 | Vectorised formatting (non-table) |
+| `cols_` | 17 | Column operations |
+| `opt_` | 14 | Global options |
+| `cells_` | 14 | Location targeting |
+| `tab_` | 13 | Table structure |
+| `cell_` | 6 | Style specifications |
+
+irelink follows the same strategy with fewer groups:
+
+| Prefix | Purpose | gt analogy |
+|--------|---------|------------|
+| `il_` | Core verbs (spec, model, prediction, clustering) | `tab_` + `fmt_` |
+| `cl_` | Comparison-level helpers (method specification) | `cells_` + `cell_` |
+| (none) | Unit helpers (`days()`, `km()`, `mi()`) | `px()`, `pct()` |
+
+The `il_` prefix is larger than any single gt prefix because irelink has
+fewer total exports. If the API grows, we can carve out sub-prefixes
+(e.g., `il_eval_*()` for evaluation functions) without breaking changes.
+
+### 14.3 Specification vs. Location Separation
+
+gt's `tab_style()` cleanly separates **what** to apply from **where**:
+
+```r
+tab_style(
+  data,
+  style     = cell_text(weight = "bold"),     # WHAT
+  locations = cells_body(columns = price)     # WHERE
+)
+```
+
+irelink's `il_compare()` follows the same separation:
+
+```r
+il_compare(
+  spec,
+  col    = first_name,              # WHERE (which column)
+  method = cl_jaro_winkler(0.9)     # WHAT (comparison method)
+)
+```
+
+And `cl_levels()` composes method layers just as `list(cell_text(...),
+cell_fill(...))` composes style layers:
+
+```r
+il_compare(
+  spec,
+  col    = name,
+  method = cl_levels(
+    cl_exact(),
+    cl_jaro_winkler(0.95),
+    cl_else()
+  )
+)
+```
+
+### 14.4 Tidyselect for All Column Arguments
+
+gt accepts tidyselect everywhere a `columns` argument appears:
+
+```r
+fmt_number(data, columns = c(price, cost), decimals = 2)
+fmt_number(data, columns = starts_with("amt_"), decimals = 0)
+fmt_number(data, columns = where(is.numeric), decimals = 2)
+```
+
+irelink adopts this for `il_compare()`:
+
+```r
+il_compare(spec, c(first_name, last_name), cl_jaro_winkler(0.9))
+il_compare(spec, starts_with("addr_"), cl_levenshtein(2))
+```
+
+And for `il_block_on()`:
+
+```r
+il_block_on(spec, starts_with("geo_"))
+```
+
+This eliminates the need for loop-style column iteration that splink
+often requires.
+
+### 14.5 Tagged-Value Helpers
+
+gt provides `px()`, `pct()`, `md()`, and `html()` — tiny functions that
+create tagged values. These do nothing complex: `px(12)` returns a list
+with class `"px"` and value `12`. Their purpose is self-documentation
+and type safety.
+
+irelink's unit helpers follow the same principle:
+
+| gt helper | irelink helper | Purpose |
+|-----------|---------------|---------|
+| `px(12)` | `days(30)` | Tagged numeric with unit semantics |
+| `pct(50)` | `km(5)` | Tagged numeric with unit semantics |
+| `md("**bold**")` | `cl_custom("l.x + r.x")` | Tagged string with processing semantics |
+
+### 14.6 Accumulation Without Replacement
+
+In gt, repeated calls to the same verb accumulate rather than replace:
+
+```r
+gt(data) |>
+  tab_footnote("Source A", locations = cells_body(columns = x)) |>
+  tab_footnote("Source B", locations = cells_body(columns = y))
+# Both footnotes appear
+```
+
+irelink follows the same rule:
+
+```r
+il_spec() |>
+  il_compare(first_name, cl_jaro_winkler(0.9)) |>
+  il_compare(last_name,  cl_jaro_winkler(0.9))
+# Both comparisons are registered
+
+il_spec() |>
+  il_block_on(state) |>
+  il_block_on(first_name)
+# Both blocking rules are registered (OR-ed)
+```
+
+This is a departure from option-setter APIs where the last call wins.
+Every `il_compare()` and `il_block_on()` adds to the spec, never
+overwrites. This matches both gt's accumulation and ggplot2's layer
+stacking.
+
+---
+
+## Appendix: Tidyverse and gt Comparison Table
+
+| Concept | Tidyverse / gt example | irelink equivalent |
+|---------|----------------------|-------------------|
 | Pipe chain | `df \|> filter() \|> mutate()` | `model \|> il_estimate_u() \|> il_estimate_em()` |
+| Pure pipes (no `+`) | `gt(data) \|> tab_header() \|> fmt_number()` | `il_spec() \|> il_compare() \|> il_block_on()` |
 | Specification helper | `aes(x = mpg, y = hp)` | `cl_jaro_winkler(0.9, 0.7)` |
+| Location helper | `cells_body(columns = price)` | `il_block_on(state)` |
+| Style spec helper | `cell_text(weight = "bold")` | `cl_exact(term_frequency = TRUE)` |
+| Unit helper | `px(12)`, `pct(50)` | `days(30)`, `km(5)` |
+| Tidyselect columns | `fmt_number(columns = c(x, y))` | `il_compare(c(first_name, last_name), ...)` |
 | Layer accumulation | `ggplot() + geom_point() + geom_line()` | `il_spec() \|> il_compare(...) \|> il_compare(...)` |
-| Join condition | `join_by(a == b)` | `block_on(first_name, surname)` |
+| Accumulation (gt) | `tab_footnote(...) \|> tab_footnote(...)` | `il_block_on(...) \|> il_block_on(...)` |
+| Join condition | `join_by(a == b)` | `il_block_on(first_name, surname)` |
 | Lazy table reference | `tbl(con, "flights")` | `il_model(df, spec = spec, con = con)` |
 | Model fitting | `fit(workflow, data)` | `il_estimate_em(model, block_on(...))` |
 | Prediction | `predict(fit, newdata)` | `predict(model, threshold = 0.85)` |
 | Group assignment | `group_by(department)` | `il_cluster(pairs)` |
 | Plot convenience | `autoplot(decomposition)` | `autoplot(model)` |
-| Tidy output | Every verb returns a tibble | Every irelink function returns a tibble (or an S3 object that pipes) |
+| Tidy output | Every verb returns a tibble | Every irelink function returns a tibble (or S3 that pipes) |
 | Database backend | `DBI::dbConnect(duckdb())` | `DBI::dbConnect(duckdb())` — identical |
