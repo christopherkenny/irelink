@@ -17,26 +17,10 @@
 #' il_accuracy(model, labels = labelled_pairs)
 #' }
 il_accuracy <- function(model, labels) {
-  validate_il_model(model)
+  scored <- score_labeled_pairs(model, labels)
+  label_probs <- scored$label_probs
+  actual_positive <- scored$actual_positive
 
-  all_pairs <- predict(model, threshold = 0.0)
-
-  # Canonical key (lower id first) for matching pairs across directions
-  pair_key_fn <- function(l, r) {
-    l <- as.character(l)
-    r <- as.character(r)
-    paste(pmin(l, r), pmax(l, r), sep = "||")
-  }
-
-  pred_keys <- pair_key_fn(all_pairs$unique_id_l, all_pairs$unique_id_r)
-  pred_probs <- setNames(all_pairs$match_probability, pred_keys)
-
-  label_keys <- pair_key_fn(labels$unique_id_l, labels$unique_id_r)
-  label_probs <- vapply(label_keys, function(k) {
-    if (k %in% names(pred_probs)) pred_probs[[k]] else 0.0
-  }, numeric(1), USE.NAMES = FALSE)
-
-  actual_positive <- as.logical(labels$is_match)
   thresholds <- sort(unique(c(seq(0, 1, by = 0.05))))
 
   results <- lapply(thresholds, function(t) {

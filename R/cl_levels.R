@@ -51,11 +51,7 @@ cl_levels <- function(...) {
       class = "il_error_validation"
     )
   }
-  structure(
-    list(method = "levels", levels = levels,
-         is_null_level = FALSE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("levels", levels = levels)
 }
 
 #' Null / Missing Value Level
@@ -71,10 +67,7 @@ cl_levels <- function(...) {
 #' cl_levels(cl_null(), cl_exact(), cl_else())
 #' }
 cl_null <- function() {
-  structure(
-    list(method = "null", is_null_level = TRUE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("null", is_null_level = TRUE)
 }
 
 #' Catch-All Else Level
@@ -90,10 +83,7 @@ cl_null <- function() {
 #' cl_levels(cl_null(), cl_exact(), cl_else())
 #' }
 cl_else <- function() {
-  structure(
-    list(method = "else", is_null_level = FALSE, is_else_level = TRUE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("else", is_else_level = TRUE)
 }
 
 #' Combine Comparison Conditions with AND
@@ -116,11 +106,7 @@ cl_and <- function(...) {
     cli::cli_abort("{.fn cl_and} requires at least one argument.")
   }
   all_null <- all(vapply(children, function(l) isTRUE(l$is_null_level), logical(1)))
-  structure(
-    list(method = "and", children = children,
-         is_null_level = all_null, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("and", children = children, is_null_level = all_null)
 }
 
 #' Combine Comparison Conditions with OR
@@ -143,11 +129,7 @@ cl_or <- function(...) {
     cli::cli_abort("{.fn cl_or} requires at least one argument.")
   }
   all_null <- all(vapply(children, function(l) isTRUE(l$is_null_level), logical(1)))
-  structure(
-    list(method = "or", children = children,
-         is_null_level = all_null, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("or", children = children, is_null_level = all_null)
 }
 
 #' Negate a Comparison Condition
@@ -168,9 +150,5 @@ cl_not <- function(x) {
   if (missing(x)) {
     cli::cli_abort("{.fn cl_not} requires one argument.")
   }
-  structure(
-    list(method = "not", child = x,
-         is_null_level = FALSE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("not", child = x)
 }

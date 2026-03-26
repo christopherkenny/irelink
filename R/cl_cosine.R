@@ -17,9 +17,5 @@
 #' }
 cl_cosine <- function(...) {
   thresholds <- check_similarity_thresholds(c(...), "cl_cosine")
-  structure(
-    list(method = "cosine", thresholds = thresholds,
-         is_null_level = FALSE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("cosine", thresholds = thresholds)
 }

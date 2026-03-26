@@ -33,30 +33,17 @@ il_waterfall <- function(pairs, which = 1L) {
   params <- model$params$comparisons
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
 
-  steps <- character(length(comp_names))
-  contributions <- numeric(length(comp_names))
-
-  for (j in seq_along(comp_names)) {
-    cn <- comp_names[j]
-    g <- row[[paste0("gamma_", cn)]]
-    m_match_j    <- params$m[params$comparison == cn & params$level == "match"]
-    m_nonmatch_j <- params$m[params$comparison == cn & params$level == "non_match"]
-    u_match_j    <- params$u[params$comparison == cn & params$level == "match"]
-    u_nonmatch_j <- params$u[params$comparison == cn & params$level == "non_match"]
-
-    if (g == 1L) {
-      contributions[j] <- log2(pmax(m_match_j, 1e-10) / pmax(u_match_j, 1e-10))
-    } else {
-      contributions[j] <- log2(pmax(m_nonmatch_j, 1e-10) / pmax(u_nonmatch_j, 1e-10))
-    }
-    steps[j] <- cn
-  }
+  mu <- extract_mu_vectors(params, comp_names)
+  gamma <- vapply(comp_names, function(cn) {
+    as.integer(row[[paste0("gamma_", cn)]])
+  }, integer(1))
+  contributions <- per_comparison_contribution(gamma, mu)
 
   direction <- ifelse(contributions >= 0, "positive", "negative")
 
   tibble::tibble(
-    step = steps,
-    order = seq_along(steps),
+    step = comp_names,
+    order = seq_along(comp_names),
     contribution = contributions,
     direction = direction
   )

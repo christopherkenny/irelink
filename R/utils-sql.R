@@ -163,3 +163,56 @@ sql_join_condition <- function(link_type = "dedupe") {
   }
   "l.__source_table <> r.__source_table"
 }
+
+#' Build aliased SELECT clauses for left/right tables
+#'
+#' Generates `l.col AS l_col, ...` and `r.col AS r_col, ...`.
+#'
+#' @param cols Character vector of column names.
+#' @return A named list with `left` and `right` SQL fragments.
+#' @noRd
+build_select_aliases <- function(cols) {
+  list(
+    left = paste(sprintf("l.%s AS l_%s", cols, cols), collapse = ", "),
+    right = paste(sprintf("r.%s AS r_%s", cols, cols), collapse = ", ")
+  )
+}
+
+#' Build a WHERE clause for blocking on equality
+#'
+#' @param columns Character vector of column names to block on.
+#' @return A character string like `"l.col1 = r.col1 AND l.col2 = r.col2"`.
+#' @noRd
+build_blocking_condition <- function(columns) {
+  conds <- vapply(columns, function(col) {
+    sprintf("l.%s = r.%s", col, col)
+  }, character(1))
+  paste(conds, collapse = " AND ")
+}
+
+#' Build and execute a pair-count query
+#'
+#' Counts pairs produced by a blocking rule, handling dedupe vs link.
+#'
+#' @param con A DBI connection.
+#' @param tbl_l Left table name.
+#' @param tbl_r Right table name (same as tbl_l for dedupe).
+#' @param where A SQL WHERE fragment for blocking.
+#' @param dedupe Logical; if TRUE, add `l.rowid < r.rowid`.
+#' @return Integer count of pairs.
+#' @noRd
+count_blocked_pairs <- function(con, tbl_l, tbl_r, where, dedupe = TRUE) {
+  if (dedupe) {
+    sql <- sprintf(
+      "SELECT COUNT(*) AS n FROM %s l, %s r WHERE l.rowid < r.rowid AND %s",
+      tbl_l, tbl_r, where
+    )
+  } else {
+    sql <- sprintf(
+      "SELECT COUNT(*) AS n FROM %s l, %s r WHERE %s",
+      tbl_l, tbl_r, where
+    )
+  }
+  res <- DBI::dbGetQuery(con, sql)
+  as.integer(res$n[1])
+}

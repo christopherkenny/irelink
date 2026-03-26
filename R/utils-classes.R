@@ -117,3 +117,25 @@ validate_il_compared <- function(x) {
   }
   invisible(x)
 }
+
+#' Construct an il_comparison_level Object
+#'
+#' Shared constructor used by all `cl_*()` helpers to avoid repeating the
+#' `structure(list(..., is_null_level = FALSE, is_else_level = FALSE),
+#' class = "il_comparison_level")` boilerplate.
+#'
+#' @param method Character string naming the comparison method.
+#' @param ... Additional named fields stored in the level (e.g., `thresholds`).
+#' @param is_null_level Logical; TRUE for null sentinel levels.
+#' @param is_else_level Logical; TRUE for else fallback levels.
+#'
+#' @return An `il_comparison_level` S3 object.
+#' @noRd
+new_comparison_level <- function(method, ..., is_null_level = FALSE,
+                                 is_else_level = FALSE) {
+  structure(
+    c(list(method = method), list(...),
+      list(is_null_level = is_null_level, is_else_level = is_else_level)),
+    class = "il_comparison_level"
+  )
+}

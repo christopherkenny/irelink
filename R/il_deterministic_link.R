@@ -41,13 +41,11 @@ il_deterministic_link <- function(.data, ..., spec, con,
   on.exit(try(DBI::dbRemoveTable(con, tbl_name), silent = TRUE))
 
   cols <- names(.data)
-  select_l <- paste(sprintf("l.%s AS l_%s", cols, cols), collapse = ", ")
-  select_r <- paste(sprintf("r.%s AS r_%s", cols, cols), collapse = ", ")
+  sel <- build_select_aliases(cols)
 
   if (length(blocking_rules) > 0L) {
     block_sqls <- vapply(blocking_rules, function(br) {
-      conds <- vapply(br$columns, function(col) sprintf("l.%s = r.%s", col, col), character(1))
-      paste0("(", paste(conds, collapse = " AND "), ")")
+      paste0("(", build_blocking_condition(br$columns), ")")
     }, character(1))
     block_where <- paste(block_sqls, collapse = " OR ")
   } else {
@@ -56,7 +54,7 @@ il_deterministic_link <- function(.data, ..., spec, con,
 
   sql <- sprintf(
     "SELECT %s, %s FROM %s l, %s r WHERE l.rowid < r.rowid AND %s",
-    select_l, select_r, tbl_name, tbl_name, block_where
+    sel$left, sel$right, tbl_name, tbl_name, block_where
   )
   pairs <- DBI::dbGetQuery(con, sql)
 

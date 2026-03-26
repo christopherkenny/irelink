@@ -30,7 +30,7 @@ Beyond that, how well can we extend opensource using LLMs by translating tools?
 4. R code implementation
     a. In steps, implement each function
 5. Code simplification
-    a.
+    a. Identify places where code is duplicated
 6. Test review
     a. Fill in tests for R-style aspects that splink wouldn't have to test for
 7. Performance review

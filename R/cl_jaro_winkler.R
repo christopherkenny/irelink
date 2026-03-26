@@ -19,11 +19,7 @@
 #' }
 cl_jaro_winkler <- function(...) {
   thresholds <- check_similarity_thresholds(c(...), "cl_jaro_winkler")
-  structure(
-    list(method = "jaro_winkler", thresholds = thresholds,
-         is_null_level = FALSE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("jaro_winkler", thresholds = thresholds)
 }
 
 #' Jaro String Similarity Comparison
@@ -44,9 +40,5 @@ cl_jaro_winkler <- function(...) {
 #' }
 cl_jaro <- function(...) {
   thresholds <- check_similarity_thresholds(c(...), "cl_jaro")
-  structure(
-    list(method = "jaro", thresholds = thresholds,
-         is_null_level = FALSE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("jaro", thresholds = thresholds)
 }

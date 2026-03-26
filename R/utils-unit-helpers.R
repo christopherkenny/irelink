@@ -9,8 +9,8 @@
 
 # Internal validator for unit helper inputs
 check_unit_input <- function(n, unit) {
-  if (!is.numeric(n) || length(n) != 1L || is.na(n)) {
-    cli::cli_abort("{.arg n} must be a single numeric value, not {.obj_type_friendly {n}}.")
+  if (!is.numeric(n) || length(n) != 1L || is.na(n) || is.infinite(n) || is.nan(n)) {
+    cli::cli_abort("{.arg n} must be a single finite numeric value, not {.obj_type_friendly {n}}.")
   }
   if (n < 0) {
     cli::cli_abort("{.arg n} must be non-negative for {.fn {unit}}.")

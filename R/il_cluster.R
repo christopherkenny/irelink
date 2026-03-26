@@ -39,7 +39,7 @@ il_cluster <- function(pairs, threshold = NULL,
 
   # Apply threshold filter to edges only
   if (!is.null(threshold)) {
-    pairs <- pairs[pairs$match_probability >= threshold, , drop = FALSE]
+    pairs <- pairs[which(pairs$match_probability >= threshold), , drop = FALSE]
   }
 
   if (method == "best_link") {

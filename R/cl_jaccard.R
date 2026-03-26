@@ -17,9 +17,5 @@
 #' }
 cl_jaccard <- function(...) {
   thresholds <- check_similarity_thresholds(c(...), "cl_jaccard")
-  structure(
-    list(method = "jaccard", thresholds = thresholds,
-         is_null_level = FALSE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("jaccard", thresholds = thresholds)
 }

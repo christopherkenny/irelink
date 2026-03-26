@@ -65,33 +65,12 @@ il_count_pairs <- function(.data, ..., con,
 
   results <- lapply(blocking_rules, function(rule) {
     cols <- rule$columns
-    conditions <- vapply(cols, function(col) {
-      sprintf("l.%s = r.%s",
-        DBI::dbQuoteIdentifier(con, col),
-        DBI::dbQuoteIdentifier(con, col))
-    }, character(1))
-    where <- paste(conditions, collapse = " AND ")
-
-    if (link_type == "dedupe") {
-      sql <- sprintf(
-        "SELECT COUNT(*) AS n FROM %s l, %s r WHERE l.rowid < r.rowid AND %s",
-        DBI::dbQuoteIdentifier(con, tbl_l),
-        DBI::dbQuoteIdentifier(con, tbl_r),
-        where
-      )
-    } else {
-      sql <- sprintf(
-        "SELECT COUNT(*) AS n FROM %s l, %s r WHERE %s",
-        DBI::dbQuoteIdentifier(con, tbl_l),
-        DBI::dbQuoteIdentifier(con, tbl_r),
-        where
-      )
-    }
-
-    res <- DBI::dbGetQuery(con, sql)
+    where <- build_blocking_condition(cols)
+    n <- count_blocked_pairs(con, tbl_l, tbl_r, where,
+                             dedupe = (link_type == "dedupe"))
     tibble::tibble(
       rule = paste(cols, collapse = " & "),
-      n_pairs = as.integer(res$n)
+      n_pairs = as.integer(n)
     )
   })
 

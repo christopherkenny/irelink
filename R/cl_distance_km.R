@@ -36,9 +36,5 @@ cl_distance_km <- function(...) {
     }
     cli::cli_abort("Invalid threshold for {.fn cl_distance_km}.")
   }, numeric(1))
-  structure(
-    list(method = "distance_km", thresholds = thresholds,
-         is_null_level = FALSE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("distance_km", thresholds = thresholds)
 }

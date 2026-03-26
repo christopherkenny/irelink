@@ -17,9 +17,5 @@
 #' }
 cl_array_intersect <- function(...) {
   thresholds <- check_distance_thresholds(c(...), "cl_array_intersect")
-  structure(
-    list(method = "array_intersect", thresholds = thresholds,
-         is_null_level = FALSE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("array_intersect", thresholds = thresholds)
 }

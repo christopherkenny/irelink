@@ -224,5 +224,18 @@ Based on what you've done for testing in `inst/refs/10`, write a stage summary, 
 
 Similarly, based on what you've just finished for the implementation and your notes in `inst/refs/11`, write a stage summary, `inst/refs/stage-04-notes.md`.
 
-
 Both should be executive summaries with key references back to the other files.
+
+# Code simplification
+
+Now, identify places in the code base where there is duplication.
+If there are places where logic is being repeated, move them to helper functions placed in correctly named utils files.
+If there are very similar patterns in multiple places, with small differences, write these to helpers with options.
+
+Reefer to `inst/refs/09-implementation-plan.md` stage 5 for notes on some common things to look for.
+
+Make a detailed report on simplification in `inst/refs/12-simplifying-r.md`.
+
+# Test review
+
+Review the notes on tests for thsi package in stage-03-notes.

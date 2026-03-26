@@ -42,26 +42,11 @@ il_estimate_prior <- function(model, ..., recall = 0.7) {
   n_blocked <- 0L
   for (rule in rules) {
     if (!inherits(rule, "il_blocking_rule")) next
-    cols <- rule$columns
-    conditions <- vapply(cols, function(col) {
-      sprintf("l.%s = r.%s", col, col)
-    }, character(1))
-    where <- paste(conditions, collapse = " AND ")
-
-    if (model$link_type == "dedupe") {
-      sql <- sprintf(
-        "SELECT COUNT(*) AS n FROM %s l, %s r WHERE l.rowid < r.rowid AND %s",
-        tbl, tbl, where
-      )
-    } else {
-      tbl_r <- model$data$tbl_r %||% tbl
-      sql <- sprintf(
-        "SELECT COUNT(*) AS n FROM %s l, %s r WHERE %s",
-        tbl, tbl_r, where
-      )
-    }
-    res <- DBI::dbGetQuery(con, sql)
-    n_blocked <- n_blocked + res$n[1]
+    tbl_r <- if (model$link_type == "dedupe") tbl else (model$data$tbl_r %||% tbl)
+    where <- build_blocking_condition(rule$columns)
+    n_blocked <- n_blocked + count_blocked_pairs(
+      con, tbl, tbl_r, where, dedupe = (model$link_type == "dedupe")
+    )
   }
 
   estimated_matches <- n_blocked / recall

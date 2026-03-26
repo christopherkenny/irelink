@@ -35,15 +35,8 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
   existing <- DBI::dbReadTable(con, model$data$tbl_l)
   all_results <- list()
 
+  mu <- extract_mu_vectors(params, comp_names)
   n_comp <- length(comparisons)
-  m_match <- u_match <- m_nonmatch <- u_nonmatch <- numeric(n_comp)
-  for (j in seq_len(n_comp)) {
-    cn <- comp_names[j]
-    m_match[j]    <- params$m[params$comparison == cn & params$level == "match"]
-    m_nonmatch[j] <- params$m[params$comparison == cn & params$level == "non_match"]
-    u_match[j]    <- params$u[params$comparison == cn & params$level == "match"]
-    u_nonmatch[j] <- params$u[params$comparison == cn & params$level == "non_match"]
-  }
 
   for (i in seq_len(nrow(new_records))) {
     new_rec <- new_records[i, , drop = FALSE]
@@ -83,18 +76,8 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     }
 
     gamma_mat <- compute_gamma_matrix(pairs, comparisons)
-    match_weight <- numeric(n_cand)
-    for (j in seq_len(n_comp)) {
-      g <- gamma_mat[, j]
-      w <- ifelse(g == 1L,
-        log2(pmax(m_match[j], 1e-10) / pmax(u_match[j], 1e-10)),
-        log2(pmax(m_nonmatch[j], 1e-10) / pmax(u_nonmatch[j], 1e-10))
-      )
-      match_weight <- match_weight + w
-    }
-
-    log_odds <- log(prior / (1 - prior)) + match_weight * log(2)
-    match_probability <- 1 / (1 + exp(-log_odds))
+    match_weight <- score_gamma_matrix(gamma_mat, mu)
+    match_probability <- weight_to_probability(match_weight, prior)
 
     res <- tibble::tibble(
       unique_id_r = candidates$unique_id,

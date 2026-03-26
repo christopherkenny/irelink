@@ -101,24 +101,19 @@ get_blocked_pairs <- function(model, blocking) {
   tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
 
   cols <- model$data$columns
-  select_l <- paste(sprintf("l.%s AS l_%s", cols, cols), collapse = ", ")
-  select_r <- paste(sprintf("r.%s AS r_%s", cols, cols), collapse = ", ")
-
-  block_conds <- vapply(blocking$columns, function(col) {
-    sprintf("l.%s = r.%s", col, col)
-  }, character(1))
-  block_where <- paste(block_conds, collapse = " AND ")
+  sel <- build_select_aliases(cols)
+  block_where <- build_blocking_condition(blocking$columns)
 
   if (is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l) {
     dedup_cond <- "l.rowid < r.rowid"
     sql <- sprintf(
       "SELECT %s, %s FROM %s l, %s r WHERE %s AND %s",
-      select_l, select_r, tbl_l, tbl_r, dedup_cond, block_where
+      sel$left, sel$right, tbl_l, tbl_r, dedup_cond, block_where
     )
   } else {
     sql <- sprintf(
       "SELECT %s, %s FROM %s l, %s r WHERE %s",
-      select_l, select_r, tbl_l, tbl_r, block_where
+      sel$left, sel$right, tbl_l, tbl_r, block_where
     )
   }
 
@@ -133,18 +128,17 @@ get_all_pairs <- function(model, max_pairs = 1e6) {
   tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
 
   cols <- model$data$columns
-  select_l <- paste(sprintf("l.%s AS l_%s", cols, cols), collapse = ", ")
-  select_r <- paste(sprintf("r.%s AS r_%s", cols, cols), collapse = ", ")
+  sel <- build_select_aliases(cols)
 
   if (is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l) {
     sql <- sprintf(
       "SELECT %s, %s FROM %s l, %s r WHERE l.rowid < r.rowid LIMIT %d",
-      select_l, select_r, tbl_l, tbl_r, as.integer(max_pairs)
+      sel$left, sel$right, tbl_l, tbl_r, as.integer(max_pairs)
     )
   } else {
     sql <- sprintf(
       "SELECT %s, %s FROM %s l, %s r LIMIT %d",
-      select_l, select_r, tbl_l, tbl_r, as.integer(max_pairs)
+      sel$left, sel$right, tbl_l, tbl_r, as.integer(max_pairs)
     )
   }
 

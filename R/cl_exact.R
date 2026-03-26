@@ -18,9 +18,5 @@
 #'   il_compare(county, cl_exact(term_frequency = TRUE))
 #' }
 cl_exact <- function(term_frequency = FALSE) {
-  structure(
-    list(method = "exact", term_frequency = term_frequency,
-         is_null_level = FALSE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("exact", term_frequency = term_frequency)
 }

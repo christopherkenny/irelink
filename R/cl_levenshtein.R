@@ -18,11 +18,7 @@
 #' }
 cl_levenshtein <- function(...) {
   thresholds <- check_distance_thresholds(c(...), "cl_levenshtein")
-  structure(
-    list(method = "levenshtein", thresholds = thresholds,
-         is_null_level = FALSE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("levenshtein", thresholds = thresholds)
 }
 
 #' Damerau-Levenshtein Edit-Distance Comparison
@@ -44,9 +40,5 @@ cl_levenshtein <- function(...) {
 #' }
 cl_damerau_levenshtein <- function(...) {
   thresholds <- check_distance_thresholds(c(...), "cl_damerau_levenshtein")
-  structure(
-    list(method = "damerau_levenshtein", thresholds = thresholds,
-         is_null_level = FALSE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("damerau_levenshtein", thresholds = thresholds)
 }

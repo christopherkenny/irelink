@@ -42,9 +42,5 @@ cl_date_diff <- function(...) {
     if (is.numeric(a) && length(a) == 1L) return("days")
     a$unit
   }, character(1))
-  structure(
-    list(method = "date_diff", thresholds = thresholds, units = units,
-         is_null_level = FALSE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("date_diff", thresholds = thresholds, units = units)
 }

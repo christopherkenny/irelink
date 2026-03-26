@@ -67,27 +67,9 @@ predict.il_model <- function(object, threshold = 0.85,
   gamma_mat <- compute_gamma_matrix(pairs, comparisons)
   n_comp <- length(comparisons)
 
-  m_match <- u_match <- m_nonmatch <- u_nonmatch <- numeric(n_comp)
-  for (j in seq_len(n_comp)) {
-    cn <- comp_names[j]
-    m_match[j]    <- params$m[params$comparison == cn & params$level == "match"]
-    m_nonmatch[j] <- params$m[params$comparison == cn & params$level == "non_match"]
-    u_match[j]    <- params$u[params$comparison == cn & params$level == "match"]
-    u_nonmatch[j] <- params$u[params$comparison == cn & params$level == "non_match"]
-  }
-
-  match_weight <- numeric(nrow(pairs))
-  for (j in seq_len(n_comp)) {
-    g <- gamma_mat[, j]
-    w <- ifelse(g == 1L,
-      log2(pmax(m_match[j], 1e-10) / pmax(u_match[j], 1e-10)),
-      log2(pmax(m_nonmatch[j], 1e-10) / pmax(u_nonmatch[j], 1e-10))
-    )
-    match_weight <- match_weight + w
-  }
-
-  log_odds <- log(prior / (1 - prior)) + match_weight * log(2)
-  match_probability <- 1 / (1 + exp(-log_odds))
+  mu <- extract_mu_vectors(params, comp_names)
+  match_weight <- score_gamma_matrix(gamma_mat, mu)
+  match_probability <- weight_to_probability(match_weight, prior)
 
   result <- tibble::tibble(
     unique_id_l = pairs$l_unique_id,

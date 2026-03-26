@@ -17,11 +17,7 @@
 #' }
 cl_numeric_diff <- function(...) {
   thresholds <- check_distance_thresholds(c(...), "cl_numeric_diff")
-  structure(
-    list(method = "numeric_diff", thresholds = thresholds,
-         is_null_level = FALSE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("numeric_diff", thresholds = thresholds)
 }
 
 #' Numeric Percentage Difference Comparison
@@ -43,9 +39,5 @@ cl_numeric_diff <- function(...) {
 #' }
 cl_pct_diff <- function(...) {
   thresholds <- check_distance_thresholds(c(...), "cl_pct_diff")
-  structure(
-    list(method = "pct_diff", thresholds = thresholds,
-         is_null_level = FALSE, is_else_level = FALSE),
-    class = "il_comparison_level"
-  )
+  new_comparison_level("pct_diff", thresholds = thresholds)
 }
