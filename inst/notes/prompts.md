@@ -226,7 +226,7 @@ Similarly, based on what you've just finished for the implementation and your no
 
 Both should be executive summaries with key references back to the other files.
 
-# Code simplification
+# Code simplification (Opus 4.6)
 
 Now, identify places in the code base where there is duplication.
 If there are places where logic is being repeated, move them to helper functions placed in correctly named utils files.
@@ -238,4 +238,50 @@ Make a detailed report on simplification in `inst/refs/12-simplifying-r.md`.
 
 # Test review
 
-Review the notes on tests for thsi package in stage-03-notes.
+## Starter prompt (Opus 4.6 high)
+
+Review the notes on tests for this package in stage-03-notes.
+The tests are primarily translations from python.
+Scan the tests and look for any things that may be missing due to using a more function-based interface, R objects, or things like R's vectorization.
+Add tests for anything missing.
+
+Write a summary to `inst/refs/13-tests-for-r.md`.
+
+## Agent-suggested review points (Opus 4.6 high)
+
+Now go through all of the suggested things to check for in the Stage 6 notes of `inst/refs/09-implementation-plan.md`.
+
+Write a summary to `inst/refs/14-more-tests-for-r.md`.
+
+## Stage wrapups (Opus 4.6 high)
+
+Summarize anything you've just done with `inst/refs/13-tests-for-r.md` and `inst/refs/14-more-tests-for-r.md` into `inst/refs/stage-06-notes.md`
+
+I also forgot to write a `inst/refs/stage-05-notes.md`.
+Can you add an executive summary of `inst/refs/12-simplifying-r.md` to it.
+
+# Performance review (Opus 4.6 high)
+
+Review `inst/refs/09-implementation-plan.md` Stage 7.
+Do not actually create direct comparisons with splink, yet.
+
+First, run steps 7a-7e, focused specifically on our R and SQL implementation.
+If necessary and things are surprisingly slow, consider C implementations.
+Don't add C implementations yet, but do note them.
+
+Write a summary in `inst/refs/15-performance-in-r.md`.
+If there are things you suggest rewriting in C, note them in the document and in your response to me.
+
+# Polish
+
+## Some taste things (Opus 4.6 high)
+
+Can you review the code in the package and identify things that could be cleaned up.
+
+First, all examples should run.
+
+Then, review the internals, especially the pieces that write strings and sql.
+Let's use the `glue` package internally since there seems to be a lot of string building.
+Additionally,
+
+Make sure that devtools::check() comes back cleanly.
