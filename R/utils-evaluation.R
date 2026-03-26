@@ -17,8 +17,8 @@ canonical_pair_key <- function(id_l, id_r) {
 
 #' Score labeled pairs against model predictions
 #'
-#' Predicts all pairs (threshold = 0), then looks up each labeled pair's
-#' match probability and match weight.
+#' Scores only the labeled pairs directly instead of predicting all pairs.
+#' Builds pair rows from the model's data and scores them in one batch.
 #'
 #' @param model A trained `il_model`.
 #' @param labels A data frame with `unique_id_l`, `unique_id_r`, `is_match`.
@@ -29,21 +29,41 @@ canonical_pair_key <- function(id_l, id_r) {
 #' @noRd
 score_labeled_pairs <- function(model, labels) {
   validate_il_model(model)
-  all_pairs <- predict(model, threshold = 0.0)
 
-  pred_keys <- canonical_pair_key(all_pairs$unique_id_l, all_pairs$unique_id_r)
-  pred_probs <- setNames(all_pairs$match_probability, pred_keys)
-  pred_weights <- setNames(all_pairs$match_weight, pred_keys)
+  comparisons <- model$spec$comparisons
+  params <- model$params$comparisons
+  prior <- model$params$prior %||% 0.05
+  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  mu <- extract_mu_vectors(params, comp_names)
 
-  label_keys <- canonical_pair_key(labels$unique_id_l, labels$unique_id_r)
+  con <- model$con
+  tbl_l <- model$data$tbl_l
+  tbl_r <- model$data$tbl_r %||% tbl_l
 
-  label_probs <- vapply(label_keys, function(k) {
-    if (k %in% names(pred_probs)) pred_probs[[k]] else 0.0
-  }, numeric(1), USE.NAMES = FALSE)
+  # Read the source data and index by unique_id
+  src_l <- DBI::dbReadTable(con, tbl_l)
+  rownames(src_l) <- as.character(src_l$unique_id)
+  if (tbl_r == tbl_l) {
+    src_r <- src_l
+  } else {
+    src_r <- DBI::dbReadTable(con, tbl_r)
+    rownames(src_r) <- as.character(src_r$unique_id)
+  }
 
-  label_weights <- vapply(label_keys, function(k) {
-    if (k %in% names(pred_weights)) pred_weights[[k]] else NA_real_
-  }, numeric(1), USE.NAMES = FALSE)
+  id_l <- as.character(labels$unique_id_l)
+  id_r <- as.character(labels$unique_id_r)
+
+  # Build pair data frame for the labeled subset only
+  n_labels <- nrow(labels)
+  pairs <- data.frame(row.names = seq_len(n_labels))
+  for (col in comp_names) {
+    pairs[[paste0("l_", col)]] <- src_l[id_l, col]
+    pairs[[paste0("r_", col)]] <- src_r[id_r, col]
+  }
+
+  gamma_mat <- compute_gamma_matrix(pairs, comparisons)
+  label_weights <- score_gamma_matrix(gamma_mat, mu)
+  label_probs <- weight_to_probability(label_weights, prior)
 
   list(
     label_probs = label_probs,

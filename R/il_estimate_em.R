@@ -60,37 +60,26 @@ il_estimate_em <- function(model, blocking, ...) {
   history <- list()
 
   for (iter in seq_len(max_iter)) {
-    # E-step: compute posterior match probability
-    log_match <- rep(log(prior), n_pairs)
-    log_nonmatch <- rep(log(1 - prior), n_pairs)
+    # E-step: compute posterior match probability via matrix multiply
+    log_m1 <- log(pmax(m_match, 1e-10))
+    log_m0 <- log(pmax(m_nonmatch, 1e-10))
+    log_u1 <- log(pmax(u_match, 1e-10))
+    log_u0 <- log(pmax(u_nonmatch, 1e-10))
 
-    for (j in seq_len(n_comp)) {
-      g <- gamma_mat[, j]
-      lm_1 <- log(pmax(m_match[j], 1e-10))
-      lm_0 <- log(pmax(m_nonmatch[j], 1e-10))
-      lu_1 <- log(pmax(u_match[j], 1e-10))
-      lu_0 <- log(pmax(u_nonmatch[j], 1e-10))
-
-      log_match <- log_match + ifelse(g == 1L, lm_1, lm_0)
-      log_nonmatch <- log_nonmatch + ifelse(g == 1L, lu_1, lu_0)
-    }
+    log_match    <- log(prior) + as.numeric(gamma_mat %*% (log_m1 - log_m0)) + sum(log_m0)
+    log_nonmatch <- log(1 - prior) + as.numeric(gamma_mat %*% (log_u1 - log_u0)) + sum(log_u0)
 
     max_log <- pmax(log_match, log_nonmatch)
     weights <- exp(log_match - max_log) /
       (exp(log_match - max_log) + exp(log_nonmatch - max_log))
 
-    # M-step: update m (u stays from estimate_u)
+    # M-step: update m via matrix-vector multiply (u stays from estimate_u)
     sum_w <- sum(weights)
-    sum_1mw <- sum(1 - weights)
 
     old_m_match <- m_match
-    for (j in seq_len(n_comp)) {
-      g <- gamma_mat[, j]
-      # Laplace smoothing + clamping to prevent degenerate estimates
-      raw <- (sum(weights * g) + 0.5) / (sum_w + 1.0)
-      m_match[j] <- max(min(raw, 0.99), 0.01)
-      m_nonmatch[j] <- 1 - m_match[j]
-    }
+    raw <- (as.numeric(crossprod(gamma_mat, weights)) + 0.5) / (sum_w + 1.0)
+    m_match <- pmax(pmin(raw, 0.99), 0.01)
+    m_nonmatch <- 1 - m_match
 
     history[[iter]] <- tibble::tibble(
       iteration = iter,

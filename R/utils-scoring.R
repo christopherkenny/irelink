@@ -27,24 +27,16 @@ extract_mu_vectors <- function(params, comp_names) {
 #'
 #' Each row of the gamma matrix is a record pair; each column is a comparison.
 #' Returns the log2 Bayes factor (match weight) summed across comparisons.
+#' Uses a single matrix-vector multiply for speed.
 #'
 #' @param gamma_mat An integer matrix (n_pairs x n_comparisons).
 #' @param mu A list from [extract_mu_vectors()].
 #' @return A numeric vector of match weights (length = nrow(gamma_mat)).
 #' @noRd
 score_gamma_matrix <- function(gamma_mat, mu) {
-  n_pairs <- nrow(gamma_mat)
-  n_comp <- ncol(gamma_mat)
-  match_weight <- numeric(n_pairs)
-  for (j in seq_len(n_comp)) {
-    g <- gamma_mat[, j]
-    w <- ifelse(g == 1L,
-      log2(pmax(mu$m_match[j], 1e-10) / pmax(mu$u_match[j], 1e-10)),
-      log2(pmax(mu$m_nonmatch[j], 1e-10) / pmax(mu$u_nonmatch[j], 1e-10))
-    )
-    match_weight <- match_weight + w
-  }
-  match_weight
+  w1 <- log2(pmax(mu$m_match, 1e-10) / pmax(mu$u_match, 1e-10))
+  w0 <- log2(pmax(mu$m_nonmatch, 1e-10) / pmax(mu$u_nonmatch, 1e-10))
+  as.numeric(gamma_mat %*% (w1 - w0)) + sum(w0)
 }
 
 #' Convert match weights to match probabilities via logistic transform
@@ -67,14 +59,7 @@ weight_to_probability <- function(match_weight, prior) {
 #' @return Numeric vector of contributions (one per comparison).
 #' @noRd
 per_comparison_contribution <- function(gamma, mu) {
-  n <- length(gamma)
-  contrib <- numeric(n)
-  for (j in seq_len(n)) {
-    if (gamma[j] == 1L) {
-      contrib[j] <- log2(pmax(mu$m_match[j], 1e-10) / pmax(mu$u_match[j], 1e-10))
-    } else {
-      contrib[j] <- log2(pmax(mu$m_nonmatch[j], 1e-10) / pmax(mu$u_nonmatch[j], 1e-10))
-    }
-  }
-  contrib
+  w1 <- log2(pmax(mu$m_match, 1e-10) / pmax(mu$u_match, 1e-10))
+  w0 <- log2(pmax(mu$m_nonmatch, 1e-10) / pmax(mu$u_nonmatch, 1e-10))
+  ifelse(gamma == 1L, w1, w0)
 }
