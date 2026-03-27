@@ -6,7 +6,16 @@
 \alias{irelink-package}
 \title{irelink: Fast Probabilistic Record Linkage}
 \description{
+\if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
+
 Performs fast, scalable probabilistic record linkage and deduplication using the Fellegi-Sunter model. Records lacking a shared unique identifier are compared across configurable dimensions using exact, fuzzy, and distance-based comparisons, with model parameters estimated via unsupervised Expectation-Maximisation. Multiple SQL backends are supported through 'DBI', enabling execution from laptop-scale ('DuckDB') through to distributed engines. This package is a translation of the Python 'splink' library by Linacre et al. into idiomatic R.
+}
+\seealso{
+Useful links:
+\itemize{
+  \item \url{http://christophertkenny.com/irelink/}
+}
+
 }
 \author{
 \strong{Maintainer}: Christopher T. Kenny \email{ctkenny@proton.me} (\href{https://orcid.org/0000-0002-9386-6860}{ORCID})

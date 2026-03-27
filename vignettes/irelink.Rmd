@@ -1,0 +1,167 @@
+---
+title: "Getting Started"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{irelink}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+## What is record linkage?
+
+Record linkage (also called entity resolution or deduplication) is the task of identifying records in one or more datasets that refer to the same real-world entity.
+When datasets lack a shared unique identifier, you must rely on imperfect fields like names, dates of birth, and addresses to decide which rows belong together.
+Probabilistic record linkage formalises this by estimating the likelihood that two records are a match given how similar they are across multiple fields.
+
+`irelink` implements the Fellegi-Sunter model of probabilistic record linkage.
+Parameters are estimated via unsupervised Expectation-Maximisation, so no labelled training data is required to get started.
+
+## A typical workflow
+
+Every linkage task follows the same general pattern:
+
+1. **Define a specification** — choose which columns to compare and how.
+2. **Build a model** — load data into a SQL backend and attach the specification.
+3. **Train parameters** — estimate u-probabilities, then run EM to learn m-probabilities.
+4. **Predict** — score every candidate pair and threshold to get likely matches.
+5. **Cluster** — resolve pairwise links into groups of records that represent the same entity.
+
+The example below walks through each step using a small built-in dataset.
+
+## Step 1: Define a specification
+
+A specification describes the comparisons and blocking rules that drive the model.
+Comparisons tell `irelink` how to score similarity on each field.
+Blocking rules limit which record pairs are compared, making linkage tractable on large data.
+
+```{r spec}
+library(irelink)
+
+spec <- il_spec() |>
+  il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
+  il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
+  il_compare(dob, cl_exact()) |>
+  il_block_on(surname) |>
+  il_block_on(first_name)
+
+spec
+```
+
+Each call to `il_compare()` adds a comparison dimension.
+`cl_jaro_winkler(0.9, 0.7)` means: score a pair as level 2 if Jaro-Winkler similarity is at least 0.9, level 1 if at least 0.7, and level 0 otherwise.
+`cl_exact()` is a simple binary match.
+
+Blocking rules defined with `il_block_on()` restrict candidate pairs to records that share the same value in the blocking column.
+Multiple blocking rules are combined with OR logic, so a pair is compared if it satisfies any rule.
+
+## Step 2: Build a model
+
+`il_model()` uploads the data to a SQL backend and attaches the specification.
+Any DBI-compatible connection works.
+Here we use an in-memory SQLite database:
+
+```{r model}
+df <- il_demo("fake_20")
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+
+model <- il_model(df, spec = spec, con = con)
+model
+```
+
+## Step 3: Train parameters
+
+Training is a two-step process.
+First, estimate u-probabilities (the chance two random non-matching records agree on each comparison level) from a random sample of pairs:
+
+```{r train-u}
+model <- il_estimate_u(model)
+```
+
+Then run Expectation-Maximisation to learn m-probabilities (the chance true matches agree on each level).
+You supply a blocking rule to generate the training pairs:
+
+```{r train-em}
+model <- il_estimate_em(model, block_on(surname))
+```
+
+You can inspect the learned parameters at any time:
+
+```{r weights}
+il_weights(model)
+```
+
+## Step 4: Predict
+
+`predict()` scores every candidate pair and returns those above a match-weight threshold:
+```{r predict}
+pairs <- predict(model, threshold = 0.5)
+head(pairs)
+```
+
+Each row is a candidate pair with columns for the left and right record identifiers, the per-comparison gamma values, and the overall match weight and probability.
+
+## Step 5: Cluster
+
+`il_cluster()` resolves pairwise predictions into entity clusters using connected-components analysis:
+
+```{r cluster}
+clusters <- il_cluster(pairs)
+head(clusters)
+```
+
+Each record is assigned a `cluster_id`.
+Records sharing the same cluster are considered to be the same entity.
+
+## Comparison levels
+
+`irelink` ships with a rich library of comparison levels for common field types:
+
+| Level | Use case |
+|-------|----------|
+| `cl_exact()` | Binary exact match |
+| `cl_jaro_winkler()` | Names, short strings |
+| `cl_levenshtein()` | General fuzzy strings |
+| `cl_damerau_levenshtein()` | Strings with transpositions |
+| `cl_jaro()` | Lightweight string similarity |
+| `cl_jaccard()` | Token-set overlap |
+| `cl_cosine()` | Embedding similarity |
+| `cl_numeric_diff()` | Numeric fields (e.g., age) |
+| `cl_pct_diff()` | Percentage difference |
+| `cl_date_diff()` | Date or time fields |
+| `cl_distance_km()` | Geographic coordinates |
+| `cl_array_intersect()` | Array or set overlap |
+
+For common field types, domain-specific helpers compose multiple levels into a single call:
+
+| Helper | Fields |
+|--------|--------|
+| `cl_name()` | Generic name field |
+| `cl_forename_surname()` | First name and last name together |
+| `cl_dob()` | Date of birth |
+| `cl_email()` | Email addresses |
+| `cl_postcode()` | Postal codes |
+
+## Evaluation
+
+If you have labelled data (pairs known to be matches or non-matches), `irelink` provides tools to assess model quality:
+
+- `il_accuracy()` — overall accuracy at a threshold
+- `il_precision_recall()` — precision and recall across thresholds
+- `il_roc()` — ROC curve data
+- `il_errors()` — inspect false positives and false negatives
+
+## Cleaning up
+
+When you are done, release the database resources:
+
+```{r cleanup}
+il_cleanup(model)
+DBI::dbDisconnect(con)
+```

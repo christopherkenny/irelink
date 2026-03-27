@@ -292,3 +292,15 @@ Avoid using `cat`.
 `print` and `format` should be used rarely, primarily for custom classes where necessary.
 
 Make sure that devtools::check() comes back cleanly.
+
+## Docs (Opus 4.6 high)
+
+Awesome. I have done 3 things:
+
+1. Added a pkgdown site. Add all of the functions by category. Check it with `pkgdown::check_pkgdown()`.
+2. Added an empty intro vignette `irelink.Rmd`. Fill it out with a descriptive starter info. Use what splink discusses as the baseline for what to include. Don't just copy text though.
+3. Added an empty irelink <--> splink vignette `from_splink.Rmd`. Add primary tables of references between the two. Then, provide a few comparison examples of code. Don't go crazy with the examples, but demo what some of the main things people would do and how it can be done. This should mostly be a series of tables separated clearly by grouping. The categories from (1) may help.
+
+Finally, check that the readme.Rmd is up to date and add info if necessary, but keep the document clean.
+
+Check that it still builds cleanly with devtools::check() and that this is only moderately slower. (Try to keep the full check to under 3:15 with the vignettes.)

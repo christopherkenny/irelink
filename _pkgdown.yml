@@ -1,0 +1,114 @@
+url: http://christophertkenny.com/irelink/
+template:
+  bootstrap: 5
+
+reference:
+  - title: "Linkage Specification"
+    desc: "Define the comparisons and blocking rules that drive the model."
+    contents:
+      - il_spec
+      - il_compare
+      - il_block_on
+      - block_on
+      - is_il_spec
+
+  - title: "Comparison Levels"
+    desc: "Building blocks for scoring how similar two records are on a given field."
+    contents:
+      - cl_exact
+      - cl_levenshtein
+      - cl_damerau_levenshtein
+      - cl_jaro
+      - cl_jaro_winkler
+      - cl_jaccard
+      - cl_cosine
+      - cl_numeric_diff
+      - cl_pct_diff
+      - cl_date_diff
+      - cl_distance_km
+      - cl_array_intersect
+      - cl_custom
+      - cl_null
+      - cl_else
+      - cl_levels
+      - cl_and
+      - cl_or
+      - cl_not
+
+  - title: "Domain-Specific Comparisons"
+    desc: "Pre-configured multi-level comparisons for common field types."
+    contents:
+      - cl_name
+      - cl_forename_surname
+      - cl_dob
+      - cl_email
+      - cl_postcode
+
+  - title: "Model Fitting"
+    desc: "Create and train a probabilistic linkage model."
+    contents:
+      - il_model
+      - il_estimate_u
+      - il_estimate_em
+      - il_estimate_prior
+      - il_estimate_m_from_column
+      - il_estimate_m_from_labels
+      - is_il_model
+
+  - title: "Prediction and Clustering"
+    desc: "Score record pairs and resolve them into linked entities."
+    contents:
+      - predict.il_model
+      - il_cluster
+      - il_deterministic_link
+      - il_find_matches
+
+  - title: "Model Inspection"
+    desc: "Examine parameters, weights, and training diagnostics."
+    contents:
+      - il_parameters
+      - il_weights
+      - il_training_history
+      - il_waterfall
+      - il_compare_records
+      - il_string_similarity
+      - print.il_model
+      - print.il_spec
+      - summary.il_model
+      - autoplot.il_model
+      - autoplot.il_compared
+
+  - title: "Evaluation"
+    desc: "Assess model quality against labelled data."
+    contents:
+      - il_accuracy
+      - il_precision_recall
+      - il_roc
+      - il_errors
+      - il_unlinkables
+      - il_graph_metrics
+
+  - title: "Data Profiling"
+    desc: "Explore and summarise input data before linkage."
+    contents:
+      - il_completeness
+      - il_count_pairs
+      - il_profile
+
+  - title: "Persistence and Utilities"
+    desc: "Save, load, and manage linkage models and resources."
+    contents:
+      - il_save
+      - il_load
+      - il_cleanup
+      - il_demo
+
+  - title: "Unit Helpers"
+    desc: "Lightweight constructors for physical and temporal units."
+    contents:
+      - days
+      - months
+      - years
+      - km
+      - mi
+

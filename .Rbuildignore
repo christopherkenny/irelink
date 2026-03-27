@@ -6,3 +6,7 @@
 ^README\.Rmd$
 ^inst/notes/.*\.md$
 ^inst/refs/.*\.md$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
