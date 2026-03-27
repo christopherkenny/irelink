@@ -73,7 +73,7 @@
 <div class="section level2">
 <h2 id="example">Example<a class="anchor" aria-label="anchor" href="#example"></a>
 </h2>
-<p>A typical linkage workflow defines comparisons, trains a model, predicts matches, and clusters results:</p>
+<p>Start by loading a demo dataset and connecting to a SQL backend.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://christophertkenny.com/irelink/">irelink</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -83,37 +83,60 @@
 <span><span class="co">#&gt;     months</span></span>
 <span></span>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_demo.html">il_demo</a></span><span class="op">(</span><span class="st">"fake_20"</span><span class="op">)</span></span>
-<span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">RSQLite</span><span class="fu">::</span><span class="fu"><a href="https://rsqlite.r-dbi.org/reference/SQLite.html" class="external-link">SQLite</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">":memory:"</span><span class="op">)</span></span>
-<span></span>
-<span><span class="co"># Define how to compare records</span></span>
-<span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">RSQLite</span><span class="fu">::</span><span class="fu"><a href="https://rsqlite.r-dbi.org/reference/SQLite.html" class="external-link">SQLite</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">":memory:"</span><span class="op">)</span></span></code></pre></div>
+<p>Define an <code>il_spec</code> with comparison functions and blocking rules, then train:</p>
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">first_name</span>, <span class="fu"><a href="reference/cl_jaro_winkler.html">cl_jaro_winkler</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="fl">0.7</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">surname</span>, <span class="fu"><a href="reference/cl_jaro_winkler.html">cl_jaro_winkler</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="fl">0.7</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">dob</span>, <span class="fu"><a href="reference/cl_exact.html">cl_exact</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/il_block_on.html">il_block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/il_block_on.html">il_block_on</a></span><span class="op">(</span><span class="va">first_name</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># Build and train the model</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_model.html">il_model</a></span><span class="op">(</span><span class="va">df</span>, spec <span class="op">=</span> <span class="va">spec</span>, con <span class="op">=</span> <span class="va">con</span><span class="op">)</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_estimate_u.html">il_estimate_u</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
-<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p>Score candidate pairs above a match-probability threshold, then cluster into entities:</p>
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="va">pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
+<span><span class="va">pairs</span></span>
+<span><span class="co">#&gt; # A tibble: 11 × 7</span></span>
+<span><span class="co">#&gt;    unique_id_l unique_id_r match_weight match_probability gamma_first_name</span></span>
+<span><span class="co">#&gt;  *       &lt;int&gt;       &lt;int&gt;        &lt;dbl&gt;             &lt;dbl&gt;            &lt;int&gt;</span></span>
+<span><span class="co">#&gt;  1           1           2         9.20             0.969                1</span></span>
+<span><span class="co">#&gt;  2           1          11         9.20             0.969                1</span></span>
+<span><span class="co">#&gt;  3           2          11         9.20             0.969                1</span></span>
+<span><span class="co">#&gt;  4           3           4         9.20             0.969                1</span></span>
+<span><span class="co">#&gt;  5           3          13         9.20             0.969                1</span></span>
+<span><span class="co">#&gt;  6           4          13         9.20             0.969                1</span></span>
+<span><span class="co">#&gt;  7           5           6         9.20             0.969                1</span></span>
+<span><span class="co">#&gt;  8           5          15         9.20             0.969                1</span></span>
+<span><span class="co">#&gt;  9           6          15         9.20             0.969                1</span></span>
+<span><span class="co">#&gt; 10           7          17         9.20             0.969                1</span></span>
+<span><span class="co">#&gt; 11           9          19         9.20             0.969                1</span></span>
+<span><span class="co">#&gt; # ℹ 2 more variables: gamma_surname &lt;int&gt;, gamma_dob &lt;int&gt;</span></span>
 <span></span>
-<span><span class="co"># Predict and cluster</span></span>
-<span><span class="va">pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">pairs</span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">clusters</span><span class="op">)</span></span>
-<span><span class="co">#&gt; # A tibble: 6 × 2</span></span>
-<span><span class="co">#&gt;   unique_id cluster_id</span></span>
-<span><span class="co">#&gt;   &lt;chr&gt;     &lt;chr&gt;     </span></span>
-<span><span class="co">#&gt; 1 1         cluster_1 </span></span>
-<span><span class="co">#&gt; 2 2         cluster_1 </span></span>
-<span><span class="co">#&gt; 3 3         cluster_2 </span></span>
-<span><span class="co">#&gt; 4 4         cluster_2 </span></span>
-<span><span class="co">#&gt; 5 5         cluster_3 </span></span>
-<span><span class="co">#&gt; 6 6         cluster_3</span></span>
-<span></span>
-<span><span class="co"># Clean up</span></span>
-<span><span class="fu"><a href="reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
+<span><span class="va">clusters</span></span>
+<span><span class="co">#&gt; # A tibble: 13 × 2</span></span>
+<span><span class="co">#&gt;    unique_id cluster_id</span></span>
+<span><span class="co">#&gt;    &lt;chr&gt;     &lt;chr&gt;     </span></span>
+<span><span class="co">#&gt;  1 1         cluster_1 </span></span>
+<span><span class="co">#&gt;  2 2         cluster_1 </span></span>
+<span><span class="co">#&gt;  3 3         cluster_2 </span></span>
+<span><span class="co">#&gt;  4 4         cluster_2 </span></span>
+<span><span class="co">#&gt;  5 5         cluster_3 </span></span>
+<span><span class="co">#&gt;  6 6         cluster_3 </span></span>
+<span><span class="co">#&gt;  7 7         cluster_4 </span></span>
+<span><span class="co">#&gt;  8 9         cluster_5 </span></span>
+<span><span class="co">#&gt;  9 11        cluster_1 </span></span>
+<span><span class="co">#&gt; 10 13        cluster_2 </span></span>
+<span><span class="co">#&gt; 11 15        cluster_3 </span></span>
+<span><span class="co">#&gt; 12 17        cluster_4 </span></span>
+<span><span class="co">#&gt; 13 19        cluster_5</span></span></code></pre></div>
+<p>Finally, drop the temporary tables and close the connection:</p>
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="fu"><a href="reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span><span class="op">)</span></span></code></pre></div>
 </div>
 </div>
