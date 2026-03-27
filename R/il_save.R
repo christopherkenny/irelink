@@ -1,4 +1,18 @@
-#' Save a Model to Disk
+unclass_comparison_level <- function(x) {
+  x <- unclass(x)
+  if (!is.null(x$levels)) {
+    x$levels <- lapply(x$levels, unclass_comparison_level)
+  }
+  if (!is.null(x$children)) {
+    x$children <- lapply(x$children, unclass_comparison_level)
+  }
+  if (!is.null(x$child)) {
+    x$child <- unclass_comparison_level(x$child)
+  }
+  x
+}
+
+#' Save a model to disk
 #'
 #' Serialises a trained `il_model` object to a file so that it can be
 #' loaded later without re-training.
@@ -6,6 +20,8 @@
 #' @param model A trained `il_model` object.
 #' @param path A file path (character string) where the model will be
 #'   saved.
+#' @param overwrite If `TRUE`, overwrite an existing file at `path`.
+#'   Defaults to `FALSE`.
 #'
 #' @return `model`, invisibly.
 #' @export
@@ -62,20 +78,6 @@
 #'
 #' il_save(model, tmp)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-unclass_comparison_level <- function(x) {
-  x <- unclass(x)
-  if (!is.null(x$levels)) {
-    x$levels <- lapply(x$levels, unclass_comparison_level)
-  }
-  if (!is.null(x$children)) {
-    x$children <- lapply(x$children, unclass_comparison_level)
-  }
-  if (!is.null(x$child)) {
-    x$child <- unclass_comparison_level(x$child)
-  }
-  x
-}
-
 il_save <- function(model, path, overwrite = FALSE) {
   validate_il_model(model)
   if (file.exists(path) && !overwrite) {
