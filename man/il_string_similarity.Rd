@@ -21,7 +21,5 @@ single call. No database connection is required. Useful for quick
 exploration of how names or other text fields compare.
 }
 \examples{
-\dontrun{
 il_string_similarity("John", "Jon")
-}
 }

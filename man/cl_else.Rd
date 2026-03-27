@@ -14,7 +14,5 @@ Creates a residual level that matches any pair not captured by previous
 levels. Typically used as the last level inside \code{\link[=cl_levels]{cl_levels()}}.
 }
 \examples{
-\dontrun{
 cl_levels(cl_null(), cl_exact(), cl_else())
-}
 }

@@ -18,8 +18,6 @@ in kilometres. Use inside \code{\link[=cl_distance_km]{cl_distance_km()}} for se
 thresholds.
 }
 \examples{
-\dontrun{
 il_spec() |>
-  il_compare(lat, lon, cl_distance_km(km(5), km(50)))
-}
+  il_compare(c(lat, lon), cl_distance_km(km(5), km(50)))
 }

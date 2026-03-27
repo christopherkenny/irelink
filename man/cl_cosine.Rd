@@ -19,8 +19,6 @@ numeric or vectorised columns. Thresholds are between 0 and 1, ordered
 from strictest to most lenient.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(embedding, cl_cosine(0.8))
-}
 }

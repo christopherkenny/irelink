@@ -11,10 +11,8 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(embedding, cl_cosine(0.8))
-#' }
 cl_cosine <- function(...) {
   thresholds <- check_similarity_thresholds(c(...), "cl_cosine")
   new_comparison_level("cosine", thresholds = thresholds)

@@ -10,10 +10,8 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(first_name, cl_name())
-#' }
 cl_name <- function(...) {
   cl_levels(
     cl_null(),
@@ -37,10 +35,8 @@ cl_name <- function(...) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(dob, cl_dob())
-#' }
 cl_dob <- function(...) {
   cl_levels(
     cl_null(),
@@ -64,10 +60,8 @@ cl_dob <- function(...) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(email, cl_email())
-#' }
 cl_email <- function(...) {
   cl_levels(
     cl_null(),
@@ -91,10 +85,8 @@ cl_email <- function(...) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(first_name, cl_forename_surname())
-#' }
 cl_forename_surname <- function(...) {
   cl_levels(
     cl_null(),
@@ -118,10 +110,8 @@ cl_forename_surname <- function(...) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(postcode, cl_postcode())
-#' }
 cl_postcode <- function(...) {
   cl_levels(
     cl_null(),

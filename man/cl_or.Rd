@@ -17,7 +17,5 @@ Creates a compound level that fires when any of the supplied conditions
 are satisfied.
 }
 \examples{
-\dontrun{
-cl_or(cl_jaro_winkler(name, 0.9), cl_levenshtein(name, 1))
-}
+cl_or(cl_jaro_winkler(0.9), cl_levenshtein(1))
 }

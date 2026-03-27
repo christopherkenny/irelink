@@ -19,8 +19,7 @@ datasets contain synthetic records with deliberate duplicates and
 typos, mirroring splink's demo data.
 }
 \examples{
-\dontrun{
-df <- il_demo("fake_1000")
+il_demo()
+df <- il_demo("fake_20")
 head(df)
-}
 }

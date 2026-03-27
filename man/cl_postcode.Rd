@@ -17,8 +17,6 @@ A pre-built domain comparison for postcodes. Supports exact matching
 with optional geographic-proximity fallback for partial matches.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(postcode, cl_postcode())
-}
 }

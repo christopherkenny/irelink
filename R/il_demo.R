@@ -11,12 +11,11 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' df <- il_demo("fake_1000")
+#' il_demo()
+#' df <- il_demo("fake_20")
 #' head(df)
-#' }
 il_demo <- function(name) {
-  available <- c("fake_1000", "fake_1000_links")
+  available <- c("fake_1000", "fake_1000_links", "fake_20")
 
   if (missing(name)) {
     return(available)
@@ -27,6 +26,39 @@ il_demo <- function(name) {
       c("Unknown demo dataset {.val {name}}.",
         "i" = "Available datasets: {.val {available}}.")
     )
+  }
+
+  if (name == "fake_20") {
+    return(tibble::tibble(
+      unique_id = 1:20,
+      first_name = c("John", "Jon", "Jane", "Jane", "Bob",
+                      "Bobby", "Alice", "Alicia", "Tom", "Thomas",
+                      "John", "Jon", "Jane", "Janet", "Bob",
+                      "Robert", "Alice", "Alison", "Tom", "Tomas"),
+      surname = c("Smith", "Smith", "Doe", "Doe", "Jones",
+                   "Jones", "Brown", "Brown", "White", "White",
+                   "Smith", "Smyth", "Doe", "Doe", "Jones",
+                   "Jones", "Brown", "Browne", "White", "White"),
+      dob = c("1990-01-01", "1990-01-01", "1985-06-15", "1985-06-15",
+              "2000-12-01", "2000-12-01", "1975-03-22", "1975-03-22",
+              "1988-07-04", "1988-07-04", "1990-01-01", "1990-01-02",
+              "1985-06-15", "1985-06-16", "2000-12-01", "2000-12-02",
+              "1975-03-22", "1975-03-23", "1988-07-04", "1988-07-05"),
+      city = c("London", "London", "Paris", "Paris", "Berlin",
+               "Berlin", "Rome", "Rome", "Madrid", "Madrid",
+               "London", "London", "Paris", "Paris", "Berlin",
+               "Berlin", "Rome", "Rome", "Madrid", "Madrid"),
+      email = c("john@example.com", "jon@example.com",
+                "jane@example.com", "jane@example.com",
+                "bob@example.com", "bobby@example.com",
+                "alice@example.com", "alicia@example.com",
+                "tom@example.com", "thomas@example.com",
+                "john@example.com", "jon@example.com",
+                "jane@example.com", "janet@example.com",
+                "bob@example.com", "robert@example.com",
+                "alice@example.com", "alison@example.com",
+                "tom@example.com", "tomas@example.com")
+    ))
   }
 
   set.seed(42L)

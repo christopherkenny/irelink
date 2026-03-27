@@ -16,7 +16,5 @@ A single logical value.
 Returns \code{TRUE} if \code{x} inherits from class \code{il_spec}.
 }
 \examples{
-\dontrun{
 is_il_spec(il_spec())
-}
 }

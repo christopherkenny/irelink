@@ -20,9 +20,7 @@ strictest to most lenient — the same direction you would read them in
 a waterfall chart.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_compare(surname, cl_jaro_winkler(0.9))
-}
 }

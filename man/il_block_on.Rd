@@ -26,7 +26,6 @@ columns are AND-ed. This mirrors \code{\link[dplyr:join_by]{dplyr::join_by()}} w
 conditions inside one call are AND-ed.
 }
 \examples{
-\dontrun{
 # Block on state OR first name (two calls = OR)
 spec <- il_spec() |>
   il_block_on(state) |>
@@ -35,5 +34,4 @@ spec <- il_spec() |>
 # Block where state AND year both match (one call = AND)
 spec <- il_spec() |>
   il_block_on(state, year)
-}
 }

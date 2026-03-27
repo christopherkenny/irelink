@@ -19,12 +19,10 @@ two latitude/longitude pairs. Thresholds should use the unit helpers
 \code{\link[=km]{km()}} or \code{\link[=mi]{mi()}} for clarity.
 }
 \examples{
-\dontrun{
 il_spec() |>
-  il_compare(lat, lon, cl_distance_km(km(5), km(50)))
+  il_compare(c(lat, lon), cl_distance_km(km(5), km(50)))
 
 # Use miles instead
 il_spec() |>
-  il_compare(lat, lon, cl_distance_km(mi(3), mi(30)))
-}
+  il_compare(c(lat, lon), cl_distance_km(mi(3), mi(30)))
 }

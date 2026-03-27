@@ -15,12 +15,50 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' new_arrivals <- data.frame(
-#'   first_name = "Jane", surname = "Doe", dob = "1992-05-10"
+#' df <- data.frame(
+#'   unique_id = 1:20,
+#'   first_name = c("John", "Jon", "Jane", "Jane", "Bob",
+#'                   "Bobby", "Alice", "Alicia", "Tom", "Thomas",
+#'                   "John", "Jon", "Jane", "Janet", "Bob",
+#'                   "Robert", "Alice", "Alison", "Tom", "Tomas"),
+#'   surname = c("Smith", "Smith", "Doe", "Doe", "Jones",
+#'               "Jones", "Brown", "Brown", "White", "White",
+#'               "Smith", "Smyth", "Doe", "Doe", "Jones",
+#'               "Jones", "Brown", "Browne", "White", "White"),
+#'   dob = c("1990-01-01", "1990-01-01", "1985-06-15", "1985-06-15",
+#'           "2000-12-01", "2000-12-01", "1975-03-22", "1975-03-22",
+#'           "1988-07-04", "1988-07-04", "1990-01-01", "1990-01-02",
+#'           "1985-06-15", "1985-06-16", "2000-12-01", "2000-12-02",
+#'           "1975-03-22", "1975-03-23", "1988-07-04", "1988-07-05"),
+#'   city = c("London", "London", "Paris", "Paris", "Berlin",
+#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid",
+#'            "London", "London", "Paris", "Paris", "Berlin",
+#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid"),
+#'   email = c("john@example.com", "jon@example.com", "jane@example.com",
+#'             "jane@example.com", "bob@example.com", "bobby@example.com",
+#'             "alice@example.com", "alicia@example.com", "tom@example.com",
+#'             "thomas@example.com", "john@example.com", "jon@example.com",
+#'             "jane@example.com", "janet@example.com", "bob@example.com",
+#'             "robert@example.com", "alice@example.com", "alison@example.com",
+#'             "tom@example.com", "tomas@example.com")
 #' )
-#' il_find_matches(model, new_arrivals, threshold = 0.85)
-#' }
+#' con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+#' spec <- il_spec() |>
+#'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
+#'   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
+#'   il_compare(dob, cl_exact()) |>
+#'   il_block_on(surname) |>
+#'   il_block_on(first_name)
+#' model <- il_model(df, spec = spec, con = con)
+#' model <- il_estimate_u(model)
+#' model <- il_estimate_em(model, block_on(surname))
+#' new_df <- data.frame(
+#'   first_name = "Jhon", surname = "Smith",
+#'   dob = "1990-01-15", city = "London"
+#' )
+#'
+#' il_find_matches(model, new_df, threshold = 0.5)
+#' DBI::dbDisconnect(con)
 il_find_matches <- function(model, new_records, threshold = 0.85) {
   validate_il_model(model)
 
@@ -49,25 +87,24 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
   block_cols <- unique(unlist(lapply(blocking_rules, function(r) r$columns)))
   needed_cols <- unique(c("unique_id", comp_cols, block_cols))
   new_cols <- intersect(needed_cols, names(new_records))
-  sel_l <- paste(sprintf("l.%s AS l_%s", new_cols, new_cols), collapse = ", ")
-  sel_r <- paste(sprintf("r.%s AS r_%s", needed_cols, needed_cols), collapse = ", ")
+  sel_l <- paste(glue::glue("l.{new_cols} AS l_{new_cols}"), collapse = ", ")
+  sel_r <- paste(glue::glue("r.{needed_cols} AS r_{needed_cols}"), collapse = ", ")
 
   # Collect candidate pairs via SQL joins for each blocking rule
   all_pair_frames <- list()
   if (length(blocking_rules) > 0L) {
     for (br in blocking_rules) {
       block_where <- build_blocking_condition(br$columns)
-      sql <- sprintf(
-        "SELECT %s, %s FROM %s l, %s r WHERE %s",
-        sel_l, sel_r, tbl_new, tbl_existing, block_where
+      sql <- glue::glue(
+        "SELECT {sel_l}, {sel_r} FROM {tbl_new} l, {tbl_existing} r ",
+        "WHERE {block_where}"
       )
       bp <- DBI::dbGetQuery(con, sql)
       if (nrow(bp) > 0L) all_pair_frames <- c(all_pair_frames, list(bp))
     }
   } else {
-    sql <- sprintf(
-      "SELECT %s, %s FROM %s l, %s r",
-      sel_l, sel_r, tbl_new, tbl_existing
+    sql <- glue::glue(
+      "SELECT {sel_l}, {sel_r} FROM {tbl_new} l, {tbl_existing} r"
     )
     bp <- DBI::dbGetQuery(con, sql)
     if (nrow(bp) > 0L) all_pair_frames <- list(bp)

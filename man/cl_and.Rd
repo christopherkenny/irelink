@@ -17,7 +17,5 @@ Creates a compound level that fires only when all supplied conditions
 are satisfied.
 }
 \examples{
-\dontrun{
-cl_and(cl_exact(first_name), cl_exact(surname))
-}
+cl_and(cl_exact(), cl_jaro_winkler(0.9))
 }

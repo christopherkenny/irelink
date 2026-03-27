@@ -13,10 +13,8 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(score, cl_custom("l.score + r.score > 10"))
-#' }
 cl_custom <- function(sql_expr, ...) {
   if (!is.character(sql_expr) || length(sql_expr) != 1L) {
     cli::cli_abort("{.arg sql_expr} must be a single character string.")

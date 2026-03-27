@@ -17,8 +17,6 @@ A tagged-value constructor that marks a numeric threshold as a number
 of years. Use inside \code{\link[=cl_date_diff]{cl_date_diff()}} for self-documenting thresholds.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(dob, cl_date_diff(years(1)))
-}
 }

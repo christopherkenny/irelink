@@ -14,7 +14,5 @@ Creates a level that fires when either or both record values are \code{NULL}
 or \code{NA}. Typically used as the first level inside \code{\link[=cl_levels]{cl_levels()}}.
 }
 \examples{
-\dontrun{
 cl_levels(cl_null(), cl_exact(), cl_else())
-}
 }

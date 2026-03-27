@@ -13,9 +13,36 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' il_profile(voters, first_name, surname, dob, con = con)
-#' }
+#' df <- data.frame(
+#'   unique_id = 1:20,
+#'   first_name = c("John", "Jon", "Jane", "Jane", "Bob",
+#'                   "Bobby", "Alice", "Alicia", "Tom", "Thomas",
+#'                   "John", "Jon", "Jane", "Janet", "Bob",
+#'                   "Robert", "Alice", "Alison", "Tom", "Tomas"),
+#'   surname = c("Smith", "Smith", "Doe", "Doe", "Jones",
+#'               "Jones", "Brown", "Brown", "White", "White",
+#'               "Smith", "Smyth", "Doe", "Doe", "Jones",
+#'               "Jones", "Brown", "Browne", "White", "White"),
+#'   dob = c("1990-01-01", "1990-01-01", "1985-06-15", "1985-06-15",
+#'           "2000-12-01", "2000-12-01", "1975-03-22", "1975-03-22",
+#'           "1988-07-04", "1988-07-04", "1990-01-01", "1990-01-02",
+#'           "1985-06-15", "1985-06-16", "2000-12-01", "2000-12-02",
+#'           "1975-03-22", "1975-03-23", "1988-07-04", "1988-07-05"),
+#'   city = c("London", "London", "Paris", "Paris", "Berlin",
+#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid",
+#'            "London", "London", "Paris", "Paris", "Berlin",
+#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid"),
+#'   email = c("john@example.com", "jon@example.com", "jane@example.com",
+#'             "jane@example.com", "bob@example.com", "bobby@example.com",
+#'             "alice@example.com", "alicia@example.com", "tom@example.com",
+#'             "thomas@example.com", "john@example.com", "jon@example.com",
+#'             "jane@example.com", "janet@example.com", "bob@example.com",
+#'             "robert@example.com", "alice@example.com", "alison@example.com",
+#'             "tom@example.com", "tomas@example.com")
+#' )
+#' con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+#' il_profile(df, first_name, surname, con = con)
+#' DBI::dbDisconnect(con)
 il_profile <- function(.data, ..., con) {
   col_exprs <- rlang::enquos(...)
   col_names <- vapply(col_exprs, function(q) {
@@ -31,11 +58,11 @@ il_profile <- function(.data, ..., con) {
   on.exit(DBI::dbRemoveTable(con, tbl_name, fail_if_missing = FALSE), add = TRUE)
 
   results <- lapply(col_names, function(col_nm) {
-    sql <- sprintf(
-      "SELECT %s AS value, COUNT(*) AS n FROM %s GROUP BY %s ORDER BY n DESC",
-      DBI::dbQuoteIdentifier(con, col_nm),
-      DBI::dbQuoteIdentifier(con, tbl_name),
-      DBI::dbQuoteIdentifier(con, col_nm)
+    quoted_col <- DBI::dbQuoteIdentifier(con, col_nm)
+    quoted_tbl <- DBI::dbQuoteIdentifier(con, tbl_name)
+    sql <- glue::glue(
+      "SELECT {quoted_col} AS value, COUNT(*) AS n FROM {quoted_tbl} ",
+      "GROUP BY {quoted_col} ORDER BY n DESC"
     )
     res <- DBI::dbGetQuery(con, sql)
     res$column <- col_nm

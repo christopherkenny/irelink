@@ -20,7 +20,6 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_compare(dob, cl_date_diff(days(30), days(365)))
@@ -28,7 +27,6 @@
 #' # Target multiple columns with the same method
 #' spec <- il_spec() |>
 #'   il_compare(c(first_name, last_name), cl_jaro_winkler(0.9, 0.7))
-#' }
 il_compare <- function(spec, col, method, ...) {
   if (!inherits(spec, "il_spec")) {
     cli::cli_abort(

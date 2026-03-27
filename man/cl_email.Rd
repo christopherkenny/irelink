@@ -17,8 +17,6 @@ A pre-built domain comparison for email addresses. Provides levels for
 exact match, username-only match, and domain-only match.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(email, cl_email())
-}
 }

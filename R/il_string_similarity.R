@@ -12,9 +12,7 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_string_similarity("John", "Jon")
-#' }
 il_string_similarity <- function(a, b) {
   if (!is.character(a) || !is.character(b)) {
     cli::cli_abort("{.arg a} and {.arg b} must be character strings.")

@@ -30,7 +30,7 @@ extract_mu_vectors <- function(params, comp_names) {
 #' Uses a single matrix-vector multiply for speed.
 #'
 #' @param gamma_mat An integer matrix (n_pairs x n_comparisons).
-#' @param mu A list from [extract_mu_vectors()].
+#' @param mu A list from `extract_mu_vectors()`.
 #' @return A numeric vector of match weights (length = nrow(gamma_mat)).
 #' @noRd
 score_gamma_matrix <- function(gamma_mat, mu) {
@@ -43,7 +43,7 @@ score_gamma_matrix <- function(gamma_mat, mu) {
 #'
 #' @param match_weight Numeric vector of match weights (log2 Bayes factors).
 #' @param prior Scalar prior match probability.
-#' @return Numeric vector of match probabilities in [0, 1].
+#' @return Numeric vector of match probabilities in \[0, 1\].
 #' @noRd
 weight_to_probability <- function(match_weight, prior) {
   log_odds <- log(prior / (1 - prior)) + match_weight * log(2)
@@ -55,7 +55,7 @@ weight_to_probability <- function(match_weight, prior) {
 #' Used by [il_waterfall()] to decompose a match weight into parts.
 #'
 #' @param gamma Integer vector (one per comparison) for a single pair.
-#' @param mu A list from [extract_mu_vectors()].
+#' @param mu A list from `extract_mu_vectors()`.
 #' @return Numeric vector of contributions (one per comparison).
 #' @noRd
 per_comparison_contribution <- function(gamma, mu) {

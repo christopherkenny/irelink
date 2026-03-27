@@ -18,8 +18,6 @@ of months. Use inside \code{\link[=cl_date_diff]{cl_date_diff()}} for self-docum
 thresholds.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(dob, cl_date_diff(months(1), months(12)))
-}
 }

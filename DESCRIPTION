@@ -44,12 +44,14 @@ Description: Performs fast, scalable probabilistic record linkage and
     is a translation of the Python 'splink' library by Linacre et al.
     into idiomatic R.
 License: MIT + file LICENSE
+Depends: R (>= 4.1.0)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.3
 Imports: 
     cli,
     DBI,
+    glue,
     rlang,
     stringdist,
     tibble
@@ -60,5 +62,6 @@ Suggests:
     jsonlite,
     RSQLite,
     testthat (>= 3.0.0),
+    tidyselect,
     withr
 Config/testthat/edition: 3

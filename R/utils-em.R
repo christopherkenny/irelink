@@ -106,14 +106,14 @@ get_blocked_pairs <- function(model, blocking) {
 
   if (is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l) {
     dedup_cond <- "l.rowid < r.rowid"
-    sql <- sprintf(
-      "SELECT %s, %s FROM %s l, %s r WHERE %s AND %s",
-      sel$left, sel$right, tbl_l, tbl_r, dedup_cond, block_where
+    sql <- glue::glue(
+      "SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ",
+      "WHERE {dedup_cond} AND {block_where}"
     )
   } else {
-    sql <- sprintf(
-      "SELECT %s, %s FROM %s l, %s r WHERE %s",
-      sel$left, sel$right, tbl_l, tbl_r, block_where
+    sql <- glue::glue(
+      "SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ",
+      "WHERE {block_where}"
     )
   }
 
@@ -130,15 +130,16 @@ get_all_pairs <- function(model, max_pairs = 1e6) {
   cols <- model$data$columns
   sel <- build_select_aliases(cols)
 
+  max_pairs <- as.integer(max_pairs)
   if (is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l) {
-    sql <- sprintf(
-      "SELECT %s, %s FROM %s l, %s r WHERE l.rowid < r.rowid LIMIT %d",
-      sel$left, sel$right, tbl_l, tbl_r, as.integer(max_pairs)
+    sql <- glue::glue(
+      "SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ",
+      "WHERE l.rowid < r.rowid LIMIT {max_pairs}"
     )
   } else {
-    sql <- sprintf(
-      "SELECT %s, %s FROM %s l, %s r LIMIT %d",
-      sel$left, sel$right, tbl_l, tbl_r, as.integer(max_pairs)
+    sql <- glue::glue(
+      "SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ",
+      "LIMIT {max_pairs}"
     )
   }
 

@@ -20,7 +20,6 @@ and you need full control over the level hierarchy. Analogous to
 writing a custom \code{\link[ggplot2:stat_identity]{ggplot2::stat_identity()}} layer.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(
     name,
@@ -32,5 +31,4 @@ il_spec() |>
       cl_else()
     )
   )
-}
 }

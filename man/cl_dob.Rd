@@ -18,8 +18,6 @@ string-parsing, date-difference, and component-matching levels to
 handle common date-of-birth errors (transpositions, partial dates).
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(dob, cl_dob())
-}
 }

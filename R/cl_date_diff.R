@@ -12,14 +12,12 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(dob, cl_date_diff(days(30), days(365)))
 #'
 #' # Mix units freely
 #' il_spec() |>
 #'   il_compare(dob, cl_date_diff(months(1), years(1)))
-#' }
 cl_date_diff <- function(...) {
   args <- list(...)
   if (length(args) == 0L) {

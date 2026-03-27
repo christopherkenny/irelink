@@ -22,8 +22,6 @@ Analogous to \code{\link[gt:md]{gt::md()}} — a tagged-string helper with proce
 semantics.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(score, cl_custom("l.score + r.score > 10"))
-}
 }

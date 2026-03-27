@@ -8,11 +8,9 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_block_on(surname)
-#' }
 il_spec <- function() {
   new_il_spec()
 }
@@ -29,11 +27,9 @@ il_spec <- function() {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_exact())
 #' print(spec)
-#' }
 print.il_spec <- function(x, ...) {
   cat("Linkage Specification\n")
 
@@ -73,9 +69,7 @@ print.il_spec <- function(x, ...) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' is_il_spec(il_spec())
-#' }
 is_il_spec <- function(x) {
   inherits(x, "il_spec")
 }

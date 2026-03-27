@@ -20,12 +20,10 @@ dates. Thresholds should use the unit helpers \code{\link[=days]{days()}}, \code
 are interpreted as days.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(dob, cl_date_diff(days(30), days(365)))
 
 # Mix units freely
 il_spec() |>
   il_compare(dob, cl_date_diff(months(1), years(1)))
-}
 }

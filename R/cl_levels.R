@@ -12,7 +12,6 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(
 #'     name,
@@ -24,7 +23,6 @@
 #'       cl_else()
 #'     )
 #'   )
-#' }
 cl_levels <- function(...) {
   levels <- list(...)
   if (length(levels) == 0L) {
@@ -63,9 +61,7 @@ cl_levels <- function(...) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' cl_levels(cl_null(), cl_exact(), cl_else())
-#' }
 cl_null <- function() {
   new_comparison_level("null", is_null_level = TRUE)
 }
@@ -79,9 +75,7 @@ cl_null <- function() {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' cl_levels(cl_null(), cl_exact(), cl_else())
-#' }
 cl_else <- function() {
   new_comparison_level("else", is_else_level = TRUE)
 }
@@ -97,9 +91,7 @@ cl_else <- function() {
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' cl_and(cl_exact(first_name), cl_exact(surname))
-#' }
+#' cl_and(cl_exact(), cl_jaro_winkler(0.9))
 cl_and <- function(...) {
   children <- list(...)
   if (length(children) == 0L) {
@@ -120,9 +112,7 @@ cl_and <- function(...) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' cl_or(cl_jaro_winkler(name, 0.9), cl_levenshtein(name, 1))
-#' }
+#' cl_or(cl_jaro_winkler(0.9), cl_levenshtein(1))
 cl_or <- function(...) {
   children <- list(...)
   if (length(children) == 0L) {
@@ -143,9 +133,7 @@ cl_or <- function(...) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' cl_not(cl_exact(name))
-#' }
+#' cl_not(cl_exact())
 cl_not <- function(x) {
   if (missing(x)) {
     cli::cli_abort("{.fn cl_not} requires one argument.")

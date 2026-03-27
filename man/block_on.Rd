@@ -21,8 +21,5 @@ Analogous to \code{\link[dplyr:join_by]{dplyr::join_by()}} — a specification o
 how to partition pairs during training.
 }
 \examples{
-\dontrun{
-model |>
-  il_estimate_em(block_on(first_name, surname))
-}
+block_on(first_name, surname)
 }

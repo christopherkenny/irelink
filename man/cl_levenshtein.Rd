@@ -20,8 +20,6 @@ substitutions). Thresholds are integer counts, ordered from strictest
 (smallest distance) to most lenient.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(name, cl_levenshtein(1, 2))
-}
 }

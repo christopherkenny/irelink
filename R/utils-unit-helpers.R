@@ -81,10 +81,8 @@ extract_numeric <- function(x, expected_unit = NULL) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(dob, cl_date_diff(days(30), days(365)))
-#' }
 days <- function(n) {
   check_unit_input(n, "days")
   structure(list(value = n, unit = "days"), class = "il_days")
@@ -102,10 +100,8 @@ days <- function(n) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(dob, cl_date_diff(months(1), months(12)))
-#' }
 months <- function(n) {
   check_unit_input(n, "months")
   structure(list(value = n, unit = "months"), class = "il_months")
@@ -122,10 +118,8 @@ months <- function(n) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(dob, cl_date_diff(years(1)))
-#' }
 years <- function(n) {
   check_unit_input(n, "years")
   structure(list(value = n, unit = "years"), class = "il_years")
@@ -143,10 +137,8 @@ years <- function(n) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
-#'   il_compare(lat, lon, cl_distance_km(km(5), km(50)))
-#' }
+#'   il_compare(c(lat, lon), cl_distance_km(km(5), km(50)))
 km <- function(n) {
   check_unit_input(n, "km")
   structure(list(value = n, unit = "km"), class = "il_km")
@@ -163,10 +155,8 @@ km <- function(n) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
-#'   il_compare(lat, lon, cl_distance_km(mi(3), mi(30)))
-#' }
+#'   il_compare(c(lat, lon), cl_distance_km(mi(3), mi(30)))
 mi <- function(n) {
   check_unit_input(n, "mi")
   structure(list(value = n, unit = "mi"), class = "il_mi")

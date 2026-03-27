@@ -20,9 +20,7 @@ Optionally applies term-frequency adjustments so that rare values
 ones.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(city, cl_exact()) |>
   il_compare(county, cl_exact(term_frequency = TRUE))
-}
 }

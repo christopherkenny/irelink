@@ -19,8 +19,6 @@ intersection to the union of character n-gram sets. Thresholds are
 between 0 and 1, ordered from strictest to most lenient.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(name, cl_jaccard(0.9))
-}
 }

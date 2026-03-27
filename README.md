@@ -36,5 +36,10 @@ This is a basic example which shows you how to solve a common problem:
 
 ``` r
 library(irelink)
+#> 
+#> Attaching package: 'irelink'
+#> The following object is masked from 'package:base':
+#> 
+#>     months
 ## basic example code
 ```

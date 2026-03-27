@@ -12,11 +12,9 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(city, cl_exact()) |>
 #'   il_compare(county, cl_exact(term_frequency = TRUE))
-#' }
 cl_exact <- function(term_frequency = FALSE) {
   new_comparison_level("exact", term_frequency = term_frequency)
 }

@@ -19,8 +19,6 @@ numeric values. Thresholds are ordered from strictest (smallest
 permitted difference) to most lenient.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(age, cl_numeric_diff(1, 5))
-}
 }

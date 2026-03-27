@@ -17,8 +17,6 @@ A tagged-value constructor that marks a numeric threshold as a distance
 in miles. Converted to kilometres internally by \code{\link[=cl_distance_km]{cl_distance_km()}}.
 }
 \examples{
-\dontrun{
 il_spec() |>
-  il_compare(lat, lon, cl_distance_km(mi(3), mi(30)))
-}
+  il_compare(c(lat, lon), cl_distance_km(mi(3), mi(30)))
 }

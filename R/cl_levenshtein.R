@@ -12,10 +12,8 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(name, cl_levenshtein(1, 2))
-#' }
 cl_levenshtein <- function(...) {
   thresholds <- check_distance_thresholds(c(...), "cl_levenshtein")
   new_comparison_level("levenshtein", thresholds = thresholds)
@@ -34,10 +32,8 @@ cl_levenshtein <- function(...) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(name, cl_damerau_levenshtein(1))
-#' }
 cl_damerau_levenshtein <- function(...) {
   thresholds <- check_distance_thresholds(c(...), "cl_damerau_levenshtein")
   new_comparison_level("damerau_levenshtein", thresholds = thresholds)

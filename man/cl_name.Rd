@@ -18,8 +18,6 @@ matching, Jaro-Winkler, and Jaro levels with thresholds tuned for
 typical name variation.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(first_name, cl_name())
-}
 }

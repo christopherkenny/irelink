@@ -17,7 +17,5 @@ Creates a level that fires when the supplied condition does \strong{not}
 hold.
 }
 \examples{
-\dontrun{
-cl_not(cl_exact(name))
-}
+cl_not(cl_exact())
 }

@@ -16,7 +16,6 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' # Block on state OR first name (two calls = OR)
 #' spec <- il_spec() |>
 #'   il_block_on(state) |>
@@ -25,7 +24,6 @@
 #' # Block where state AND year both match (one call = AND)
 #' spec <- il_spec() |>
 #'   il_block_on(state, year)
-#' }
 il_block_on <- function(spec, ..., .where = NULL) {
   if (!inherits(spec, "il_spec")) {
     cli::cli_abort(
@@ -62,10 +60,7 @@ il_block_on <- function(spec, ..., .where = NULL) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' model |>
-#'   il_estimate_em(block_on(first_name, surname))
-#' }
+#' block_on(first_name, surname)
 block_on <- function(...) {
   col_exprs <- rlang::enquos(...)
   if (length(col_exprs) == 0L) {

@@ -23,9 +23,16 @@ alternative to \code{\link[=il_estimate_m_from_labels]{il_estimate_m_from_labels
 separate table of pairwise labels.
 }
 \examples{
-\dontrun{
-model <- il_model(voters, spec = spec, con = con) |>
-  il_estimate_u() |>
-  il_estimate_m_from_column(true_person_id)
-}
+df <- il_demo("fake_20")
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+spec <- il_spec() |>
+  il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
+  il_compare(surname, cl_exact()) |>
+  il_compare(dob, cl_exact()) |>
+  il_block_on(surname)
+model <- il_model(df, spec = spec, con = con)
+model <- il_estimate_u(model)
+
+model <- il_estimate_m_from_column(model, city)
+DBI::dbDisconnect(con)
 }

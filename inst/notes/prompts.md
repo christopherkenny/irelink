@@ -279,9 +279,16 @@ If there are things you suggest rewriting in C, note them in the document and in
 Can you review the code in the package and identify things that could be cleaned up.
 
 First, all examples should run.
+They should not use `\dontrun` unless there is a very good reason why they can't such as needing an API key.
+Long running examples can be wrapped with `\donttest`.
+The use of either of these should be extremely unlikely and I suspect we do not need either.
 
 Then, review the internals, especially the pieces that write strings and sql.
 Let's use the `glue` package internally since there seems to be a lot of string building.
-Additionally,
+Look in particular at `glue::glue()`, `glue::glue_sql()`, and the other glue sql functions.
+
+Finally, make sure all printing to the console is done with `cli`.
+Avoid using `cat`.
+`print` and `format` should be used rarely, primarily for custom classes where necessary.
 
 Make sure that devtools::check() comes back cleanly.

@@ -11,10 +11,8 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(age, cl_numeric_diff(1, 5))
-#' }
 cl_numeric_diff <- function(...) {
   thresholds <- check_distance_thresholds(c(...), "cl_numeric_diff")
   new_comparison_level("numeric_diff", thresholds = thresholds)
@@ -33,10 +31,8 @@ cl_numeric_diff <- function(...) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' il_spec() |>
 #'   il_compare(income, cl_pct_diff(0.05, 0.2))
-#' }
 cl_pct_diff <- function(...) {
   thresholds <- check_distance_thresholds(c(...), "cl_pct_diff")
   new_comparison_level("pct_diff", thresholds = thresholds)

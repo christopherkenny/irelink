@@ -16,9 +16,8 @@ check_similarity_thresholds <- function(thresholds, fn_name) {
     cli::cli_abort("Thresholds for {.fn {fn_name}} must be between 0 and 1.")
   }
   if (length(thresholds) > 1L && is.unsorted(rev(thresholds))) {
-    warning(
-      sprintf("Thresholds for %s() should be in descending order; re-ordering.", fn_name),
-      call. = FALSE
+    cli::cli_warn(
+      "Thresholds for {.fn {fn_name}} should be in descending order; re-ordering."
     )
     thresholds <- sort(thresholds, decreasing = TRUE)
   }

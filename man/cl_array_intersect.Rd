@@ -19,8 +19,6 @@ between two array or list columns. Thresholds are integer counts,
 ordered from strictest (most shared elements required) to most lenient.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(tags, cl_array_intersect(2, 1))
-}
 }

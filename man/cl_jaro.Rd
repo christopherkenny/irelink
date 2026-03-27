@@ -18,8 +18,6 @@ Creates comparison levels based on the Jaro similarity score (0 to 1).
 A simpler variant of \code{\link[=cl_jaro_winkler]{cl_jaro_winkler()}} without the prefix bonus.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(name, cl_jaro(0.9))
-}
 }

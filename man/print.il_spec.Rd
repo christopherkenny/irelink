@@ -19,9 +19,7 @@ Displays a human-readable summary of the comparisons and blocking rules
 stored in an \code{il_spec} object.
 }
 \examples{
-\dontrun{
 spec <- il_spec() |>
   il_compare(first_name, cl_exact())
 print(spec)
-}
 }

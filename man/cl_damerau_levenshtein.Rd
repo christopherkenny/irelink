@@ -19,8 +19,6 @@ which extends \code{\link[=cl_levenshtein]{cl_levenshtein()}} by also counting t
 two adjacent characters as a single edit.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(name, cl_damerau_levenshtein(1))
-}
 }

@@ -15,9 +15,7 @@ blocking rules are added with \code{\link[=il_compare]{il_compare()}} and \code{
 Analogous to \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} creating an empty canvas.
 }
 \examples{
-\dontrun{
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_block_on(surname)
-}
 }

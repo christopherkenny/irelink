@@ -18,8 +18,6 @@ columns, including a cross-field swap-detection level (where first name
 and surname are accidentally transposed).
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(first_name, cl_forename_surname())
-}
 }

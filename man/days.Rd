@@ -18,8 +18,6 @@ of days. Inspired by \code{\link[gt:px]{gt::px()}} and \code{\link[gt:pct]{gt::p
 \code{\link[=cl_date_diff]{cl_date_diff()}} for self-documenting, unit-safe thresholds.
 }
 \examples{
-\dontrun{
 il_spec() |>
   il_compare(dob, cl_date_diff(days(30), days(365)))
-}
 }

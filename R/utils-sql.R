@@ -11,68 +11,68 @@ sql_for_comparison_level <- function(level, col, dialect = "duckdb") {
   method <- level$method
 
   if (method == "exact") {
-    return(sprintf("l.%s = r.%s", col, col))
+    return(glue::glue("l.{col} = r.{col}"))
   }
 
   if (method == "jaro_winkler") {
     thresholds <- level$thresholds
     fn_name <- if (dialect == "sqlite") "jaro_winkler_similarity" else "jaro_winkler_similarity"
     parts <- vapply(thresholds, function(t) {
-      sprintf("WHEN %s(l.%s, r.%s) >= %s THEN %s", fn_name, col, col, t, t)
+      glue::glue("WHEN {fn_name}(l.{col}, r.{col}) >= {t} THEN {t}")
     }, character(1))
-    return(sprintf("CASE %s ELSE -1 END", paste(parts, collapse = " ")))
+    return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == "jaro") {
     thresholds <- level$thresholds
     parts <- vapply(thresholds, function(t) {
-      sprintf("WHEN jaro_similarity(l.%s, r.%s) >= %s THEN %s", col, col, t, t)
+      glue::glue("WHEN jaro_similarity(l.{col}, r.{col}) >= {t} THEN {t}")
     }, character(1))
-    return(sprintf("CASE %s ELSE -1 END", paste(parts, collapse = " ")))
+    return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method %in% c("levenshtein", "damerau_levenshtein")) {
     thresholds <- level$thresholds
     fn_name <- method
     parts <- vapply(thresholds, function(t) {
-      sprintf("WHEN %s(l.%s, r.%s) <= %s THEN %s", fn_name, col, col, t, t)
+      glue::glue("WHEN {fn_name}(l.{col}, r.{col}) <= {t} THEN {t}")
     }, character(1))
-    return(sprintf("CASE %s ELSE -1 END", paste(parts, collapse = " ")))
+    return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == "jaccard") {
     thresholds <- level$thresholds
     parts <- vapply(thresholds, function(t) {
-      sprintf("WHEN jaccard(l.%s, r.%s) >= %s THEN %s", col, col, t, t)
+      glue::glue("WHEN jaccard(l.{col}, r.{col}) >= {t} THEN {t}")
     }, character(1))
-    return(sprintf("CASE %s ELSE -1 END", paste(parts, collapse = " ")))
+    return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == "cosine") {
     thresholds <- level$thresholds
     parts <- vapply(thresholds, function(t) {
-      sprintf("WHEN cosine_similarity(l.%s, r.%s) >= %s THEN %s", col, col, t, t)
+      glue::glue("WHEN cosine_similarity(l.{col}, r.{col}) >= {t} THEN {t}")
     }, character(1))
-    return(sprintf("CASE %s ELSE -1 END", paste(parts, collapse = " ")))
+    return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == "numeric_diff") {
     thresholds <- level$thresholds
     parts <- vapply(thresholds, function(t) {
-      sprintf("WHEN ABS(l.%s - r.%s) <= %s THEN %s", col, col, t, t)
+      glue::glue("WHEN ABS(l.{col} - r.{col}) <= {t} THEN {t}")
     }, character(1))
-    return(sprintf("CASE %s ELSE -1 END", paste(parts, collapse = " ")))
+    return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == "pct_diff") {
     thresholds <- level$thresholds
     parts <- vapply(thresholds, function(t) {
-      sprintf(
-        "WHEN ABS(l.%s - r.%s) / NULLIF(GREATEST(ABS(l.%s), ABS(r.%s)), 0) <= %s THEN %s",
-        col, col, col, col, t, t
+      glue::glue(
+        "WHEN ABS(l.{col} - r.{col}) / ",
+        "NULLIF(GREATEST(ABS(l.{col}), ABS(r.{col})), 0) <= {t} THEN {t}"
       )
     }, character(1))
-    return(sprintf("CASE %s ELSE -1 END", paste(parts, collapse = " ")))
+    return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == "date_diff") {
@@ -86,28 +86,27 @@ sql_for_comparison_level <- function(level, col, dialect = "duckdb") {
         "years" = thresholds[i] * 365,
         thresholds[i]
       )
-      parts[i] <- sprintf(
-        "WHEN ABS(JULIANDAY(l.%s) - JULIANDAY(r.%s)) <= %s THEN %s",
-        col, col, days_val, i
+      parts[i] <- glue::glue(
+        "WHEN ABS(JULIANDAY(l.{col}) - JULIANDAY(r.{col})) <= {days_val} THEN {i}"
       )
     }
-    return(sprintf("CASE %s ELSE -1 END", paste(parts, collapse = " ")))
+    return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == "distance_km") {
     thresholds <- level$thresholds
     parts <- vapply(thresholds, function(t) {
-      sprintf("WHEN distance_km(l.%s, r.%s) <= %s THEN %s", col, col, t, t)
+      glue::glue("WHEN distance_km(l.{col}, r.{col}) <= {t} THEN {t}")
     }, character(1))
-    return(sprintf("CASE %s ELSE -1 END", paste(parts, collapse = " ")))
+    return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == "array_intersect") {
     thresholds <- level$thresholds
     parts <- vapply(thresholds, function(t) {
-      sprintf("WHEN array_intersect_count(l.%s, r.%s) >= %s THEN %s", col, col, t, t)
+      glue::glue("WHEN array_intersect_count(l.{col}, r.{col}) >= {t} THEN {t}")
     }, character(1))
-    return(sprintf("CASE %s ELSE -1 END", paste(parts, collapse = " ")))
+    return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == "custom") {
@@ -115,7 +114,7 @@ sql_for_comparison_level <- function(level, col, dialect = "duckdb") {
   }
 
   if (method == "null") {
-    return(sprintf("l.%s IS NULL OR r.%s IS NULL", col, col))
+    return(glue::glue("l.{col} IS NULL OR r.{col} IS NULL"))
   }
 
   if (method == "levels") {
@@ -125,7 +124,7 @@ sql_for_comparison_level <- function(level, col, dialect = "duckdb") {
     return(paste(parts, collapse = "\n"))
   }
 
-  sprintf("l.%s = r.%s", col, col)
+  glue::glue("l.{col} = r.{col}")
 }
 
 #' Generate SQL for a single blocking rule
@@ -136,7 +135,7 @@ sql_for_comparison_level <- function(level, col, dialect = "duckdb") {
 sql_for_blocking_rule <- function(rule, dialect = "duckdb") {
   columns <- rule$columns
   conditions <- vapply(columns, function(col) {
-    sprintf("l.%s = r.%s", col, col)
+    glue::glue("l.{col} = r.{col}")
   }, character(1))
   paste(conditions, collapse = " AND ")
 }
@@ -173,8 +172,8 @@ sql_join_condition <- function(link_type = "dedupe") {
 #' @noRd
 build_select_aliases <- function(cols) {
   list(
-    left = paste(sprintf("l.%s AS l_%s", cols, cols), collapse = ", "),
-    right = paste(sprintf("r.%s AS r_%s", cols, cols), collapse = ", ")
+    left = paste(glue::glue("l.{cols} AS l_{cols}"), collapse = ", "),
+    right = paste(glue::glue("r.{cols} AS r_{cols}"), collapse = ", ")
   )
 }
 
@@ -185,7 +184,7 @@ build_select_aliases <- function(cols) {
 #' @noRd
 build_blocking_condition <- function(columns) {
   conds <- vapply(columns, function(col) {
-    sprintf("l.%s = r.%s", col, col)
+    glue::glue("l.{col} = r.{col}")
   }, character(1))
   paste(conds, collapse = " AND ")
 }
@@ -203,14 +202,13 @@ build_blocking_condition <- function(columns) {
 #' @noRd
 count_blocked_pairs <- function(con, tbl_l, tbl_r, where, dedupe = TRUE) {
   if (dedupe) {
-    sql <- sprintf(
-      "SELECT COUNT(*) AS n FROM %s l, %s r WHERE l.rowid < r.rowid AND %s",
-      tbl_l, tbl_r, where
+    sql <- glue::glue(
+      "SELECT COUNT(*) AS n FROM {tbl_l} l, {tbl_r} r ",
+      "WHERE l.rowid < r.rowid AND {where}"
     )
   } else {
-    sql <- sprintf(
-      "SELECT COUNT(*) AS n FROM %s l, %s r WHERE %s",
-      tbl_l, tbl_r, where
+    sql <- glue::glue(
+      "SELECT COUNT(*) AS n FROM {tbl_l} l, {tbl_r} r WHERE {where}"
     )
   }
   res <- DBI::dbGetQuery(con, sql)
