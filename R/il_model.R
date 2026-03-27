@@ -121,6 +121,97 @@ il_model <- function(.data, ..., spec, con,
     compute_tf_tables()
 }
 
+#' Attach a Saved Model to Fresh Data
+#'
+#' Takes a loaded (or existing) `il_model` and binds it to new data and a
+#' fresh database connection, producing a model ready for [predict()] or
+#' further training.
+#'
+#' This is the key function for the production workflow:
+#' train once with [il_model()] → save with [il_save()] → later, load
+#' with [il_load()] and attach to new data with `il_attach()`.
+#'
+#' The loaded model's trained parameters (m, u, prior) are preserved.
+#' You can immediately call [predict()] on the attached model, or
+#' continue training with [il_estimate_em()] using the existing
+#' parameters as a warm start.
+#'
+#' @param model An `il_model` object, typically from [il_load()].
+#' @param .data A data frame or tibble. The first (or only) input dataset.
+#' @param ... Additional data frames for multi-table linkage.
+#' @param con A DBI connection object (e.g., from
+#'   `DBI::dbConnect(duckdb::duckdb())`).
+#' @param link_type Optionally override the model's link type. If `NULL`
+#'   (default), uses the link type stored in the model.
+#'
+#' @return The model, now connected to `con` with data uploaded, ready
+#'   for [predict()], [il_find_matches()], or further training.
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' # Production workflow: load a pre-trained model, attach to new data
+#' loaded <- il_load('trained_model.json')
+#' con <- DBI::dbConnect(duckdb::duckdb())
+#' model <- il_attach(loaded, new_data, con = con)
+#' pairs <- predict(model)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
+#' }
+il_attach <- function(model, .data, ..., con, link_type = NULL) {
+  validate_il_model(model)
+
+  if (nrow(.data) == 0L) {
+    cli::cli_abort('Cannot attach a zero-row data frame.')
+  }
+
+  link_type <- link_type %||% model$link_type %||% 'dedupe'
+  link_type <- match.arg(link_type, c('dedupe', 'link', 'link_and_dedupe'))
+  extra_dfs <- list(...)
+
+  # Convert factors to character
+  .data <- factor_to_char(.data)
+
+  # Validate columns
+  spec_cols <- get_spec_columns(model$spec)
+  missing_cols <- setdiff(spec_cols, names(.data))
+  if (length(missing_cols) > 0L) {
+    cli::cli_abort(
+      'Column{?s} {.field {missing_cols}} referenced in the model spec but not found in the data.'
+    )
+  }
+
+  if (link_type %in% c('link', 'link_and_dedupe') && length(extra_dfs) == 0L) {
+    cli::cli_abort(
+      '{.arg link_type} is {.val {link_type}} but only one dataset was provided. Supply a second data frame.'
+    )
+  }
+
+  # Upload data to database
+  tbl_name_l <- '__il_data_l'
+  DBI::dbWriteTable(con, tbl_name_l, .data, overwrite = TRUE)
+
+  tbl_name_r <- NULL
+  if (length(extra_dfs) > 0L) {
+    extra_dfs[[1]] <- factor_to_char(extra_dfs[[1]])
+    tbl_name_r <- '__il_data_r'
+    DBI::dbWriteTable(con, tbl_name_r, extra_dfs[[1]], overwrite = TRUE)
+  }
+
+  data_info <- list(
+    n_records_l = nrow(.data),
+    n_records_r = if (!is.null(tbl_name_r)) nrow(extra_dfs[[1]]) else NULL,
+    tbl_l = tbl_name_l,
+    tbl_r = tbl_name_r,
+    columns = names(.data)
+  )
+
+  model$data <- data_info
+  model$con <- con
+  model$link_type <- link_type
+
+  compute_tf_tables(model)
+}
+
 #' Print an irelink Model
 #'
 #' Displays a human-readable summary of the model's type, data, training

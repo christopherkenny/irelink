@@ -296,6 +296,38 @@ wrapper needed.
 
 ---
 
+## 14 Batched / Incremental Retraining
+
+**Splink feature:** None — splink does not support true incremental or
+streaming parameter updates either.
+
+**Production workflow (now supported):** The recommended pattern for both
+splink and irelink is: train once → save → load with new data → predict.
+Retrain from scratch only when data distribution changes materially.
+
+The `il_attach()` function (added in sprint 10) closes this gap:
+
+```r
+# Train and save
+model <- il_model(df, spec = spec, con = con) |>
+  il_estimate_u() |>
+  il_estimate_em(block_on(name))
+il_save(model, "trained_model.json")
+
+# Later: load and apply to fresh data
+loaded <- il_load("trained_model.json")
+con2 <- DBI::dbConnect(duckdb::duckdb())
+model2 <- il_attach(loaded, new_data, con = con2)
+pairs <- predict(model2)
+
+# Optional: warm-start retraining on new data
+model2 <- il_estimate_em(model2, block_on(name))
+```
+
+**Status:** Implemented. No further work needed.
+
+---
+
 ## Priority Summary
 
 | Priority | Features |

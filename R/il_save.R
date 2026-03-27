@@ -222,6 +222,10 @@ il_load <- function(path) {
     } else {
       raw$spec$blocking_rules[[i]]
     }
+    # jsonlite turns null → NA for data frame columns; restore to NULL
+    if (!is.null(br_data$where) && is.na(br_data$where)) {
+      br_data$where <- NULL
+    }
     structure(br_data, class = 'il_blocking_rule')
   })
 

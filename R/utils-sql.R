@@ -431,7 +431,7 @@ build_blocking_condition <- function(columns, where = NULL) {
       glue::glue('l.{col} = r.{col}')
     }, character(1))
   }
-  if (!is.null(where) && nzchar(where)) {
+  if (!is.null(where) && !is.na(where) && nzchar(where)) {
     parts <- c(parts, where)
   }
   paste(parts, collapse = ' AND ')
