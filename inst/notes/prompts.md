@@ -353,3 +353,8 @@ What's genuinely missing vs splink:
 No equivalent to splink's linker.visualisations.* charts -- only autoplot() for match weights. Splink's waterfall chart, parameter estimate comparisons, and unlinkables chart are popular; if those aren't rendered as interactive HTML, that's a notable gap.
 No phonetic blocking (Soundex, Metaphone). Splink doesn't have it either out of the box, but it's a common ask.
 No batched/incremental retraining API.
+
+
+#
+
+explain use of stringdist == bad and get rid of places where we do large computations outside of duckdb/the sql engine
