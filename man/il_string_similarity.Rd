@@ -21,5 +21,5 @@ single call. No database connection is required. Useful for quick
 exploration of how names or other text fields compare.
 }
 \examples{
-il_string_similarity("John", "Jon")
+il_string_similarity('John', 'Jon')
 }

@@ -10,16 +10,18 @@
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_model <- function(object, ...) {
-  if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    cli::cli_abort("Package {.pkg ggplot2} is required for autoplot.")
+  if (!requireNamespace('ggplot2', quietly = TRUE)) {
+    cli::cli_abort('Package {.pkg ggplot2} is required for autoplot.')
   }
   wt <- il_weights(object)
   ggplot2::ggplot(wt, ggplot2::aes(
-    x = .data[["comparison"]], y = .data[["weight"]], fill = .data[["level"]]
+    x = .data[['comparison']], y = .data[['weight']], fill = .data[['level']]
   )) +
-    ggplot2::geom_col(position = "dodge") +
-    ggplot2::labs(title = "Match Weights", x = "Comparison", y = "Weight (log2)",
-                  fill = "Level") +
+    ggplot2::geom_col(position = 'dodge') +
+    ggplot2::labs(
+      title = 'Match Weights', x = 'Comparison', y = 'Weight (log2)',
+      fill = 'Level'
+    ) +
     ggplot2::theme_minimal()
 }
 
@@ -39,25 +41,27 @@ autoplot.il_model <- function(object, ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_compared <- function(object, which = NULL, ...) {
-  if (!requireNamespace("ggplot2", quietly = TRUE)) {
-    cli::cli_abort("Package {.pkg ggplot2} is required for autoplot.")
+  if (!requireNamespace('ggplot2', quietly = TRUE)) {
+    cli::cli_abort('Package {.pkg ggplot2} is required for autoplot.')
   }
   if (!is.null(which)) {
     wf <- il_waterfall(object, which = which)
     return(
       ggplot2::ggplot(wf, ggplot2::aes(
-        x = stats::reorder(.data[["step"]], seq_len(nrow(wf))),
-        y = .data[["contribution"]]
+        x = stats::reorder(.data[['step']], seq_len(nrow(wf))),
+        y = .data[['contribution']]
       )) +
         ggplot2::geom_col() +
         ggplot2::coord_flip() +
-        ggplot2::labs(title = "Waterfall", x = "Comparison", y = "Contribution") +
+        ggplot2::labs(title = 'Waterfall', x = 'Comparison', y = 'Contribution') +
         ggplot2::theme_minimal()
     )
   }
-  ggplot2::ggplot(object, ggplot2::aes(x = .data[["match_weight"]])) +
-    ggplot2::geom_histogram(binwidth = 1, fill = "steelblue") +
-    ggplot2::labs(title = "Match Weight Distribution",
-                  x = "Match Weight (log2)", y = "Count") +
+  ggplot2::ggplot(object, ggplot2::aes(x = .data[['match_weight']])) +
+    ggplot2::geom_histogram(binwidth = 1, fill = 'steelblue') +
+    ggplot2::labs(
+      title = 'Match Weight Distribution',
+      x = 'Match Weight (log2)', y = 'Count'
+    ) +
     ggplot2::theme_minimal()
 }

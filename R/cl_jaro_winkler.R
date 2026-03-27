@@ -16,8 +16,8 @@
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_compare(surname, cl_jaro_winkler(0.9))
 cl_jaro_winkler <- function(...) {
-  thresholds <- check_similarity_thresholds(c(...), "cl_jaro_winkler")
-  new_comparison_level("jaro_winkler", thresholds = thresholds)
+  thresholds <- check_similarity_thresholds(c(...), 'cl_jaro_winkler')
+  new_comparison_level('jaro_winkler', thresholds = thresholds)
 }
 
 #' Jaro String Similarity Comparison
@@ -35,6 +35,6 @@ cl_jaro_winkler <- function(...) {
 #' il_spec() |>
 #'   il_compare(name, cl_jaro(0.9))
 cl_jaro <- function(...) {
-  thresholds <- check_similarity_thresholds(c(...), "cl_jaro")
-  new_comparison_level("jaro", thresholds = thresholds)
+  thresholds <- check_similarity_thresholds(c(...), 'cl_jaro')
+  new_comparison_level('jaro', thresholds = thresholds)
 }

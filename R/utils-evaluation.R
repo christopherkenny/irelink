@@ -12,7 +12,7 @@
 canonical_pair_key <- function(id_l, id_r) {
   l <- as.character(id_l)
   r <- as.character(id_r)
-  paste(pmin(l, r), pmax(l, r), sep = "||")
+  paste(pmin(l, r), pmax(l, r), sep = '||')
 }
 
 #' Score labeled pairs against model predictions
@@ -57,8 +57,8 @@ score_labeled_pairs <- function(model, labels) {
   n_labels <- nrow(labels)
   pairs <- data.frame(row.names = seq_len(n_labels))
   for (col in comp_names) {
-    pairs[[paste0("l_", col)]] <- src_l[id_l, col]
-    pairs[[paste0("r_", col)]] <- src_r[id_r, col]
+    pairs[[paste0('l_', col)]] <- src_l[id_l, col]
+    pairs[[paste0('r_', col)]] <- src_r[id_r, col]
   }
 
   gamma_mat <- compute_gamma_matrix(pairs, comparisons)

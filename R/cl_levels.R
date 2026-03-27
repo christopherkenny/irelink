@@ -26,30 +26,30 @@
 cl_levels <- function(...) {
   levels <- list(...)
   if (length(levels) == 0L) {
-    cli::cli_abort("{.fn cl_levels} requires at least one level.")
+    cli::cli_abort('{.fn cl_levels} requires at least one level.')
   }
   for (i in seq_along(levels)) {
-    if (!inherits(levels[[i]], "il_comparison_level")) {
-      cli::cli_abort("All arguments to {.fn cl_levels} must be comparison level objects.")
+    if (!inherits(levels[[i]], 'il_comparison_level')) {
+      cli::cli_abort('All arguments to {.fn cl_levels} must be comparison level objects.')
     }
   }
   # Validate cl_null() is first if present
   null_positions <- which(vapply(levels, function(l) isTRUE(l$is_null_level), logical(1)))
   if (length(null_positions) > 0L && null_positions[1] != 1L) {
     cli::cli_abort(
-      "{.fn cl_null} must be the first level in {.fn cl_levels}.",
-      class = "il_error_validation"
+      '{.fn cl_null} must be the first level in {.fn cl_levels}.',
+      class = 'il_error_validation'
     )
   }
   # Validate cl_else() is last if present
   else_positions <- which(vapply(levels, function(l) isTRUE(l$is_else_level), logical(1)))
   if (length(else_positions) > 0L && else_positions[length(else_positions)] != length(levels)) {
     cli::cli_abort(
-      "{.fn cl_else} must be the last level in {.fn cl_levels}.",
-      class = "il_error_validation"
+      '{.fn cl_else} must be the last level in {.fn cl_levels}.',
+      class = 'il_error_validation'
     )
   }
-  new_comparison_level("levels", levels = levels)
+  new_comparison_level('levels', levels = levels)
 }
 
 #' Null / Missing Value Level
@@ -63,7 +63,7 @@ cl_levels <- function(...) {
 #' @examples
 #' cl_levels(cl_null(), cl_exact(), cl_else())
 cl_null <- function() {
-  new_comparison_level("null", is_null_level = TRUE)
+  new_comparison_level('null', is_null_level = TRUE)
 }
 
 #' Catch-All Else Level
@@ -77,7 +77,7 @@ cl_null <- function() {
 #' @examples
 #' cl_levels(cl_null(), cl_exact(), cl_else())
 cl_else <- function() {
-  new_comparison_level("else", is_else_level = TRUE)
+  new_comparison_level('else', is_else_level = TRUE)
 }
 
 #' Combine Comparison Conditions with AND
@@ -95,10 +95,10 @@ cl_else <- function() {
 cl_and <- function(...) {
   children <- list(...)
   if (length(children) == 0L) {
-    cli::cli_abort("{.fn cl_and} requires at least one argument.")
+    cli::cli_abort('{.fn cl_and} requires at least one argument.')
   }
   all_null <- all(vapply(children, function(l) isTRUE(l$is_null_level), logical(1)))
-  new_comparison_level("and", children = children, is_null_level = all_null)
+  new_comparison_level('and', children = children, is_null_level = all_null)
 }
 
 #' Combine Comparison Conditions with OR
@@ -116,10 +116,10 @@ cl_and <- function(...) {
 cl_or <- function(...) {
   children <- list(...)
   if (length(children) == 0L) {
-    cli::cli_abort("{.fn cl_or} requires at least one argument.")
+    cli::cli_abort('{.fn cl_or} requires at least one argument.')
   }
   all_null <- all(vapply(children, function(l) isTRUE(l$is_null_level), logical(1)))
-  new_comparison_level("or", children = children, is_null_level = all_null)
+  new_comparison_level('or', children = children, is_null_level = all_null)
 }
 
 #' Negate a Comparison Condition
@@ -136,7 +136,7 @@ cl_or <- function(...) {
 #' cl_not(cl_exact())
 cl_not <- function(x) {
   if (missing(x)) {
-    cli::cli_abort("{.fn cl_not} requires one argument.")
+    cli::cli_abort('{.fn cl_not} requires one argument.')
   }
-  new_comparison_level("not", child = x)
+  new_comparison_level('not', child = x)
 }

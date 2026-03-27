@@ -21,30 +21,40 @@
 #' @examples
 #' df <- data.frame(
 #'   unique_id = 1:20,
-#'   first_name = c("John", "Jon", "Jane", "Jane", "Bob",
-#'                   "Bobby", "Alice", "Alicia", "Tom", "Thomas",
-#'                   "John", "Jon", "Jane", "Janet", "Bob",
-#'                   "Robert", "Alice", "Alison", "Tom", "Tomas"),
-#'   surname = c("Smith", "Smith", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Brown", "White", "White",
-#'               "Smith", "Smyth", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Browne", "White", "White"),
-#'   dob = c("1990-01-01", "1990-01-01", "1985-06-15", "1985-06-15",
-#'           "2000-12-01", "2000-12-01", "1975-03-22", "1975-03-22",
-#'           "1988-07-04", "1988-07-04", "1990-01-01", "1990-01-02",
-#'           "1985-06-15", "1985-06-16", "2000-12-01", "2000-12-02",
-#'           "1975-03-22", "1975-03-23", "1988-07-04", "1988-07-05"),
-#'   city = c("London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid",
-#'            "London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid"),
-#'   email = c("john@example.com", "jon@example.com", "jane@example.com",
-#'             "jane@example.com", "bob@example.com", "bobby@example.com",
-#'             "alice@example.com", "alicia@example.com", "tom@example.com",
-#'             "thomas@example.com", "john@example.com", "jon@example.com",
-#'             "jane@example.com", "janet@example.com", "bob@example.com",
-#'             "robert@example.com", "alice@example.com", "alison@example.com",
-#'             "tom@example.com", "tomas@example.com")
+#'   first_name = c(
+#'     'John', 'Jon', 'Jane', 'Jane', 'Bob',
+#'     'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas',
+#'     'John', 'Jon', 'Jane', 'Janet', 'Bob',
+#'     'Robert', 'Alice', 'Alison', 'Tom', 'Tomas'
+#'   ),
+#'   surname = c(
+#'     'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Brown', 'White', 'White',
+#'     'Smith', 'Smyth', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Browne', 'White', 'White'
+#'   ),
+#'   dob = c(
+#'     '1990-01-01', '1990-01-01', '1985-06-15', '1985-06-15',
+#'     '2000-12-01', '2000-12-01', '1975-03-22', '1975-03-22',
+#'     '1988-07-04', '1988-07-04', '1990-01-01', '1990-01-02',
+#'     '1985-06-15', '1985-06-16', '2000-12-01', '2000-12-02',
+#'     '1975-03-22', '1975-03-23', '1988-07-04', '1988-07-05'
+#'   ),
+#'   city = c(
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid',
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
+#'   ),
+#'   email = c(
+#'     'john@example.com', 'jon@example.com', 'jane@example.com',
+#'     'jane@example.com', 'bob@example.com', 'bobby@example.com',
+#'     'alice@example.com', 'alicia@example.com', 'tom@example.com',
+#'     'thomas@example.com', 'john@example.com', 'jon@example.com',
+#'     'jane@example.com', 'janet@example.com', 'bob@example.com',
+#'     'robert@example.com', 'alice@example.com', 'alison@example.com',
+#'     'tom@example.com', 'tomas@example.com'
+#'   )
 #' )
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
@@ -60,12 +70,12 @@
 #' pairs <- predict(model, threshold = 0.5)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 predict.il_model <- function(object, threshold = 0.85,
-                             type = c("pairs", "weights"), ...) {
+                             type = c('pairs', 'weights'), ...) {
   type <- match.arg(type)
   validate_il_model(object)
 
   if (!object$trained) {
-    cli::cli_abort("Model must be trained before prediction. Use {.fn il_estimate_em} first.")
+    cli::cli_abort('Model must be trained before prediction. Use {.fn il_estimate_em} first.')
   }
 
   comparisons <- object$spec$comparisons
@@ -98,7 +108,7 @@ predict.il_model <- function(object, threshold = 0.85,
     match_probability = match_probability
   )
   for (j in seq_len(n_comp)) {
-    result[[paste0("gamma_", comp_names[j])]] <- gamma_mat[, j]
+    result[[paste0('gamma_', comp_names[j])]] <- gamma_mat[, j]
   }
 
   result <- result[result$match_probability >= threshold, , drop = FALSE]

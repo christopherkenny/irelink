@@ -9,4 +9,4 @@
 library(testthat)
 library(irelink)
 
-test_check("irelink")
+test_check('irelink')

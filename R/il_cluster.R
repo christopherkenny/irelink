@@ -18,30 +18,40 @@
 #' @examples
 #' df <- data.frame(
 #'   unique_id = 1:20,
-#'   first_name = c("John", "Jon", "Jane", "Jane", "Bob",
-#'                   "Bobby", "Alice", "Alicia", "Tom", "Thomas",
-#'                   "John", "Jon", "Jane", "Janet", "Bob",
-#'                   "Robert", "Alice", "Alison", "Tom", "Tomas"),
-#'   surname = c("Smith", "Smith", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Brown", "White", "White",
-#'               "Smith", "Smyth", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Browne", "White", "White"),
-#'   dob = c("1990-01-01", "1990-01-01", "1985-06-15", "1985-06-15",
-#'           "2000-12-01", "2000-12-01", "1975-03-22", "1975-03-22",
-#'           "1988-07-04", "1988-07-04", "1990-01-01", "1990-01-02",
-#'           "1985-06-15", "1985-06-16", "2000-12-01", "2000-12-02",
-#'           "1975-03-22", "1975-03-23", "1988-07-04", "1988-07-05"),
-#'   city = c("London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid",
-#'            "London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid"),
-#'   email = c("john@example.com", "jon@example.com", "jane@example.com",
-#'             "jane@example.com", "bob@example.com", "bobby@example.com",
-#'             "alice@example.com", "alicia@example.com", "tom@example.com",
-#'             "thomas@example.com", "john@example.com", "jon@example.com",
-#'             "jane@example.com", "janet@example.com", "bob@example.com",
-#'             "robert@example.com", "alice@example.com", "alison@example.com",
-#'             "tom@example.com", "tomas@example.com")
+#'   first_name = c(
+#'     'John', 'Jon', 'Jane', 'Jane', 'Bob',
+#'     'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas',
+#'     'John', 'Jon', 'Jane', 'Janet', 'Bob',
+#'     'Robert', 'Alice', 'Alison', 'Tom', 'Tomas'
+#'   ),
+#'   surname = c(
+#'     'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Brown', 'White', 'White',
+#'     'Smith', 'Smyth', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Browne', 'White', 'White'
+#'   ),
+#'   dob = c(
+#'     '1990-01-01', '1990-01-01', '1985-06-15', '1985-06-15',
+#'     '2000-12-01', '2000-12-01', '1975-03-22', '1975-03-22',
+#'     '1988-07-04', '1988-07-04', '1990-01-01', '1990-01-02',
+#'     '1985-06-15', '1985-06-16', '2000-12-01', '2000-12-02',
+#'     '1975-03-22', '1975-03-23', '1988-07-04', '1988-07-05'
+#'   ),
+#'   city = c(
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid',
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
+#'   ),
+#'   email = c(
+#'     'john@example.com', 'jon@example.com', 'jane@example.com',
+#'     'jane@example.com', 'bob@example.com', 'bobby@example.com',
+#'     'alice@example.com', 'alicia@example.com', 'tom@example.com',
+#'     'thomas@example.com', 'john@example.com', 'jon@example.com',
+#'     'jane@example.com', 'janet@example.com', 'bob@example.com',
+#'     'robert@example.com', 'alice@example.com', 'alison@example.com',
+#'     'tom@example.com', 'tomas@example.com'
+#'   )
 #' )
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
@@ -58,7 +68,7 @@
 #' clusters <- il_cluster(pairs)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_cluster <- function(pairs, threshold = NULL,
-                       method = c("connected", "best_link")) {
+                       method = c('connected', 'best_link')) {
   method <- match.arg(method)
 
   if (nrow(pairs) == 0L) {
@@ -76,23 +86,23 @@ il_cluster <- function(pairs, threshold = NULL,
     pairs <- pairs[which(pairs$match_probability >= threshold), , drop = FALSE]
   }
 
-  if (method == "best_link") {
+  if (method == 'best_link') {
     pairs <- best_link_filter(pairs)
   }
 
   # Connected components via igraph (1000x faster than R union-find)
-  rlang::check_installed("igraph", reason = "for clustering record pairs.")
   edges <- data.frame(
     from = as.character(pairs$unique_id_l),
-    to   = as.character(pairs$unique_id_r),
+    to = as.character(pairs$unique_id_r),
     stringsAsFactors = FALSE
   )
   g <- igraph::graph_from_data_frame(
-    edges, directed = FALSE,
+    edges,
+    directed = FALSE,
     vertices = data.frame(name = all_ids, stringsAsFactors = FALSE)
   )
   comp <- igraph::components(g)
-  cluster_map <- paste0("cluster_", comp$membership[all_ids])
+  cluster_map <- paste0('cluster_', comp$membership[all_ids])
 
   tibble::tibble(
     unique_id = all_ids,
@@ -103,10 +113,12 @@ il_cluster <- function(pairs, threshold = NULL,
 # Filter edges to keep only mutual best links
 # @noRd
 best_link_filter <- function(pairs) {
-  if (nrow(pairs) == 0L) return(pairs)
+  if (nrow(pairs) == 0L) {
+    return(pairs)
+  }
   id_l <- as.character(pairs$unique_id_l)
   id_r <- as.character(pairs$unique_id_r)
-  prob  <- pairs$match_probability
+  prob <- pairs$match_probability
 
   # For each node, find the index of its highest-probability edge
   all_nodes <- unique(c(id_l, id_r))
@@ -116,11 +128,11 @@ best_link_filter <- function(pairs) {
   for (i in seq_len(nrow(pairs))) {
     if (prob[i] > best_prob[id_l[i]]) {
       best_prob[id_l[i]] <- prob[i]
-      best_idx[id_l[i]]  <- i
+      best_idx[id_l[i]] <- i
     }
     if (prob[i] > best_prob[id_r[i]]) {
       best_prob[id_r[i]] <- prob[i]
-      best_idx[id_r[i]]  <- i
+      best_idx[id_r[i]] <- i
     }
   }
 

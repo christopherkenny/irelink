@@ -17,30 +17,40 @@
 #' @examples
 #' df <- data.frame(
 #'   unique_id = 1:20,
-#'   first_name = c("John", "Jon", "Jane", "Jane", "Bob",
-#'                   "Bobby", "Alice", "Alicia", "Tom", "Thomas",
-#'                   "John", "Jon", "Jane", "Janet", "Bob",
-#'                   "Robert", "Alice", "Alison", "Tom", "Tomas"),
-#'   surname = c("Smith", "Smith", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Brown", "White", "White",
-#'               "Smith", "Smyth", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Browne", "White", "White"),
-#'   dob = c("1990-01-01", "1990-01-01", "1985-06-15", "1985-06-15",
-#'           "2000-12-01", "2000-12-01", "1975-03-22", "1975-03-22",
-#'           "1988-07-04", "1988-07-04", "1990-01-01", "1990-01-02",
-#'           "1985-06-15", "1985-06-16", "2000-12-01", "2000-12-02",
-#'           "1975-03-22", "1975-03-23", "1988-07-04", "1988-07-05"),
-#'   city = c("London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid",
-#'            "London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid"),
-#'   email = c("john@example.com", "jon@example.com", "jane@example.com",
-#'             "jane@example.com", "bob@example.com", "bobby@example.com",
-#'             "alice@example.com", "alicia@example.com", "tom@example.com",
-#'             "thomas@example.com", "john@example.com", "jon@example.com",
-#'             "jane@example.com", "janet@example.com", "bob@example.com",
-#'             "robert@example.com", "alice@example.com", "alison@example.com",
-#'             "tom@example.com", "tomas@example.com")
+#'   first_name = c(
+#'     'John', 'Jon', 'Jane', 'Jane', 'Bob',
+#'     'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas',
+#'     'John', 'Jon', 'Jane', 'Janet', 'Bob',
+#'     'Robert', 'Alice', 'Alison', 'Tom', 'Tomas'
+#'   ),
+#'   surname = c(
+#'     'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Brown', 'White', 'White',
+#'     'Smith', 'Smyth', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Browne', 'White', 'White'
+#'   ),
+#'   dob = c(
+#'     '1990-01-01', '1990-01-01', '1985-06-15', '1985-06-15',
+#'     '2000-12-01', '2000-12-01', '1975-03-22', '1975-03-22',
+#'     '1988-07-04', '1988-07-04', '1990-01-01', '1990-01-02',
+#'     '1985-06-15', '1985-06-16', '2000-12-01', '2000-12-02',
+#'     '1975-03-22', '1975-03-23', '1988-07-04', '1988-07-05'
+#'   ),
+#'   city = c(
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid',
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
+#'   ),
+#'   email = c(
+#'     'john@example.com', 'jon@example.com', 'jane@example.com',
+#'     'jane@example.com', 'bob@example.com', 'bobby@example.com',
+#'     'alice@example.com', 'alicia@example.com', 'tom@example.com',
+#'     'thomas@example.com', 'john@example.com', 'jon@example.com',
+#'     'jane@example.com', 'janet@example.com', 'bob@example.com',
+#'     'robert@example.com', 'alice@example.com', 'alison@example.com',
+#'     'tom@example.com', 'tomas@example.com'
+#'   )
 #' )
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
@@ -58,14 +68,14 @@ il_estimate_prior <- function(model, ..., recall = 0.7) {
   rules <- list(...)
 
   if (length(rules) == 0L) {
-    cli::cli_abort("{.fn il_estimate_prior} requires at least one blocking rule.")
+    cli::cli_abort('{.fn il_estimate_prior} requires at least one blocking rule.')
   }
 
   con <- model$con
   tbl <- model$data$tbl_l
   n_total <- model$data$n_records_l
 
-  if (model$link_type == "dedupe") {
+  if (model$link_type == 'dedupe') {
     total_pairs <- n_total * (n_total - 1L) / 2L
   } else {
     n_r <- model$data$n_records_r %||% n_total
@@ -75,11 +85,12 @@ il_estimate_prior <- function(model, ..., recall = 0.7) {
   # Count pairs produced by each blocking rule
   n_blocked <- 0L
   for (rule in rules) {
-    if (!inherits(rule, "il_blocking_rule")) next
-    tbl_r <- if (model$link_type == "dedupe") tbl else (model$data$tbl_r %||% tbl)
+    if (!inherits(rule, 'il_blocking_rule')) next
+    tbl_r <- if (model$link_type == 'dedupe') tbl else (model$data$tbl_r %||% tbl)
     where <- build_blocking_condition(rule$columns)
     n_blocked <- n_blocked + count_blocked_pairs(
-      con, tbl, tbl_r, where, dedupe = (model$link_type == "dedupe")
+      con, tbl, tbl_r, where,
+      dedupe = (model$link_type == 'dedupe')
     )
   }
 

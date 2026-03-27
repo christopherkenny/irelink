@@ -20,30 +20,40 @@
 #' @examples
 #' df <- data.frame(
 #'   unique_id = 1:20,
-#'   first_name = c("John", "Jon", "Jane", "Jane", "Bob",
-#'                   "Bobby", "Alice", "Alicia", "Tom", "Thomas",
-#'                   "John", "Jon", "Jane", "Janet", "Bob",
-#'                   "Robert", "Alice", "Alison", "Tom", "Tomas"),
-#'   surname = c("Smith", "Smith", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Brown", "White", "White",
-#'               "Smith", "Smyth", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Browne", "White", "White"),
-#'   dob = c("1990-01-01", "1990-01-01", "1985-06-15", "1985-06-15",
-#'           "2000-12-01", "2000-12-01", "1975-03-22", "1975-03-22",
-#'           "1988-07-04", "1988-07-04", "1990-01-01", "1990-01-02",
-#'           "1985-06-15", "1985-06-16", "2000-12-01", "2000-12-02",
-#'           "1975-03-22", "1975-03-23", "1988-07-04", "1988-07-05"),
-#'   city = c("London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid",
-#'            "London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid"),
-#'   email = c("john@example.com", "jon@example.com", "jane@example.com",
-#'             "jane@example.com", "bob@example.com", "bobby@example.com",
-#'             "alice@example.com", "alicia@example.com", "tom@example.com",
-#'             "thomas@example.com", "john@example.com", "jon@example.com",
-#'             "jane@example.com", "janet@example.com", "bob@example.com",
-#'             "robert@example.com", "alice@example.com", "alison@example.com",
-#'             "tom@example.com", "tomas@example.com")
+#'   first_name = c(
+#'     'John', 'Jon', 'Jane', 'Jane', 'Bob',
+#'     'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas',
+#'     'John', 'Jon', 'Jane', 'Janet', 'Bob',
+#'     'Robert', 'Alice', 'Alison', 'Tom', 'Tomas'
+#'   ),
+#'   surname = c(
+#'     'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Brown', 'White', 'White',
+#'     'Smith', 'Smyth', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Browne', 'White', 'White'
+#'   ),
+#'   dob = c(
+#'     '1990-01-01', '1990-01-01', '1985-06-15', '1985-06-15',
+#'     '2000-12-01', '2000-12-01', '1975-03-22', '1975-03-22',
+#'     '1988-07-04', '1988-07-04', '1990-01-01', '1990-01-02',
+#'     '1985-06-15', '1985-06-16', '2000-12-01', '2000-12-02',
+#'     '1975-03-22', '1975-03-23', '1988-07-04', '1988-07-05'
+#'   ),
+#'   city = c(
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid',
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
+#'   ),
+#'   email = c(
+#'     'john@example.com', 'jon@example.com', 'jane@example.com',
+#'     'jane@example.com', 'bob@example.com', 'bobby@example.com',
+#'     'alice@example.com', 'alicia@example.com', 'tom@example.com',
+#'     'thomas@example.com', 'john@example.com', 'jon@example.com',
+#'     'jane@example.com', 'janet@example.com', 'bob@example.com',
+#'     'robert@example.com', 'alice@example.com', 'alison@example.com',
+#'     'tom@example.com', 'tomas@example.com'
+#'   )
 #' )
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
@@ -53,14 +63,14 @@
 #' model <- il_model(df, spec = spec, con = con)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_model <- function(.data, ..., spec, con,
-                     link_type = c("dedupe", "link", "link_and_dedupe")) {
+                     link_type = c('dedupe', 'link', 'link_and_dedupe')) {
   link_type <- match.arg(link_type)
   extra_dfs <- list(...)
 
   validate_il_spec(spec)
 
   if (nrow(.data) == 0L) {
-    cli::cli_abort("Cannot create a model from a zero-row data frame.")
+    cli::cli_abort('Cannot create a model from a zero-row data frame.')
   }
 
   # Convert factors to character
@@ -71,24 +81,24 @@ il_model <- function(.data, ..., spec, con,
   missing_cols <- setdiff(spec_cols, names(.data))
   if (length(missing_cols) > 0L) {
     cli::cli_abort(
-      "Column{?s} {.field {missing_cols}} referenced in the spec but not found in the data."
+      'Column{?s} {.field {missing_cols}} referenced in the spec but not found in the data.'
     )
   }
 
-  if (link_type == "link" && length(extra_dfs) == 0L) {
+  if (link_type == 'link' && length(extra_dfs) == 0L) {
     cli::cli_abort(
-      "{.arg link_type} is {.val link} but only one dataset was provided. Supply a second data frame."
+      '{.arg link_type} is {.val link} but only one dataset was provided. Supply a second data frame.'
     )
   }
 
   # Upload data to database
-  tbl_name_l <- "__il_data_l"
+  tbl_name_l <- '__il_data_l'
   DBI::dbWriteTable(con, tbl_name_l, .data, overwrite = TRUE)
 
   tbl_name_r <- NULL
   if (length(extra_dfs) > 0L) {
     extra_dfs[[1]] <- factor_to_char(extra_dfs[[1]])
-    tbl_name_r <- "__il_data_r"
+    tbl_name_r <- '__il_data_r'
     DBI::dbWriteTable(con, tbl_name_r, extra_dfs[[1]], overwrite = TRUE)
   }
 
@@ -124,30 +134,40 @@ il_model <- function(.data, ..., spec, con,
 #' @examples
 #' df <- data.frame(
 #'   unique_id = 1:20,
-#'   first_name = c("John", "Jon", "Jane", "Jane", "Bob",
-#'                   "Bobby", "Alice", "Alicia", "Tom", "Thomas",
-#'                   "John", "Jon", "Jane", "Janet", "Bob",
-#'                   "Robert", "Alice", "Alison", "Tom", "Tomas"),
-#'   surname = c("Smith", "Smith", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Brown", "White", "White",
-#'               "Smith", "Smyth", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Browne", "White", "White"),
-#'   dob = c("1990-01-01", "1990-01-01", "1985-06-15", "1985-06-15",
-#'           "2000-12-01", "2000-12-01", "1975-03-22", "1975-03-22",
-#'           "1988-07-04", "1988-07-04", "1990-01-01", "1990-01-02",
-#'           "1985-06-15", "1985-06-16", "2000-12-01", "2000-12-02",
-#'           "1975-03-22", "1975-03-23", "1988-07-04", "1988-07-05"),
-#'   city = c("London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid",
-#'            "London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid"),
-#'   email = c("john@example.com", "jon@example.com", "jane@example.com",
-#'             "jane@example.com", "bob@example.com", "bobby@example.com",
-#'             "alice@example.com", "alicia@example.com", "tom@example.com",
-#'             "thomas@example.com", "john@example.com", "jon@example.com",
-#'             "jane@example.com", "janet@example.com", "bob@example.com",
-#'             "robert@example.com", "alice@example.com", "alison@example.com",
-#'             "tom@example.com", "tomas@example.com")
+#'   first_name = c(
+#'     'John', 'Jon', 'Jane', 'Jane', 'Bob',
+#'     'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas',
+#'     'John', 'Jon', 'Jane', 'Janet', 'Bob',
+#'     'Robert', 'Alice', 'Alison', 'Tom', 'Tomas'
+#'   ),
+#'   surname = c(
+#'     'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Brown', 'White', 'White',
+#'     'Smith', 'Smyth', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Browne', 'White', 'White'
+#'   ),
+#'   dob = c(
+#'     '1990-01-01', '1990-01-01', '1985-06-15', '1985-06-15',
+#'     '2000-12-01', '2000-12-01', '1975-03-22', '1975-03-22',
+#'     '1988-07-04', '1988-07-04', '1990-01-01', '1990-01-02',
+#'     '1985-06-15', '1985-06-16', '2000-12-01', '2000-12-02',
+#'     '1975-03-22', '1975-03-23', '1988-07-04', '1988-07-05'
+#'   ),
+#'   city = c(
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid',
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
+#'   ),
+#'   email = c(
+#'     'john@example.com', 'jon@example.com', 'jane@example.com',
+#'     'jane@example.com', 'bob@example.com', 'bobby@example.com',
+#'     'alice@example.com', 'alicia@example.com', 'tom@example.com',
+#'     'thomas@example.com', 'john@example.com', 'jon@example.com',
+#'     'jane@example.com', 'janet@example.com', 'bob@example.com',
+#'     'robert@example.com', 'alice@example.com', 'alison@example.com',
+#'     'tom@example.com', 'tomas@example.com'
+#'   )
 #' )
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
@@ -157,20 +177,20 @@ il_model <- function(.data, ..., spec, con,
 #' print(model)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 print.il_model <- function(x, ...) {
-  status <- if (x$trained) "Trained" else "Untrained"
+  status <- if (x$trained) 'Trained' else 'Untrained'
   n_records <- x$data$n_records_l
   n_comparisons <- length(x$spec$comparisons)
   n_blocking <- length(x$spec$blocking_rules)
 
-  cat("irelink Model\n")
-  cat(sprintf("  Status: %s\n", status))
-  cat(sprintf("  Link type: %s\n", x$link_type))
-  cat(sprintf("  Records: %d\n", n_records))
+  cat('irelink Model\n')
+  cat(sprintf('  Status: %s\n', status))
+  cat(sprintf('  Link type: %s\n', x$link_type))
+  cat(sprintf('  Records: %d\n', n_records))
   if (!is.null(x$data$n_records_r)) {
-    cat(sprintf("  Records (right): %d\n", x$data$n_records_r))
+    cat(sprintf('  Records (right): %d\n', x$data$n_records_r))
   }
-  cat(sprintf("  Comparisons: %d\n", n_comparisons))
-  cat(sprintf("  Blocking rules: %d\n", n_blocking))
+  cat(sprintf('  Comparisons: %d\n', n_comparisons))
+  cat(sprintf('  Blocking rules: %d\n', n_blocking))
   invisible(x)
 }
 
@@ -189,30 +209,40 @@ print.il_model <- function(x, ...) {
 #' @examples
 #' df <- data.frame(
 #'   unique_id = 1:20,
-#'   first_name = c("John", "Jon", "Jane", "Jane", "Bob",
-#'                   "Bobby", "Alice", "Alicia", "Tom", "Thomas",
-#'                   "John", "Jon", "Jane", "Janet", "Bob",
-#'                   "Robert", "Alice", "Alison", "Tom", "Tomas"),
-#'   surname = c("Smith", "Smith", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Brown", "White", "White",
-#'               "Smith", "Smyth", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Browne", "White", "White"),
-#'   dob = c("1990-01-01", "1990-01-01", "1985-06-15", "1985-06-15",
-#'           "2000-12-01", "2000-12-01", "1975-03-22", "1975-03-22",
-#'           "1988-07-04", "1988-07-04", "1990-01-01", "1990-01-02",
-#'           "1985-06-15", "1985-06-16", "2000-12-01", "2000-12-02",
-#'           "1975-03-22", "1975-03-23", "1988-07-04", "1988-07-05"),
-#'   city = c("London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid",
-#'            "London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid"),
-#'   email = c("john@example.com", "jon@example.com", "jane@example.com",
-#'             "jane@example.com", "bob@example.com", "bobby@example.com",
-#'             "alice@example.com", "alicia@example.com", "tom@example.com",
-#'             "thomas@example.com", "john@example.com", "jon@example.com",
-#'             "jane@example.com", "janet@example.com", "bob@example.com",
-#'             "robert@example.com", "alice@example.com", "alison@example.com",
-#'             "tom@example.com", "tomas@example.com")
+#'   first_name = c(
+#'     'John', 'Jon', 'Jane', 'Jane', 'Bob',
+#'     'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas',
+#'     'John', 'Jon', 'Jane', 'Janet', 'Bob',
+#'     'Robert', 'Alice', 'Alison', 'Tom', 'Tomas'
+#'   ),
+#'   surname = c(
+#'     'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Brown', 'White', 'White',
+#'     'Smith', 'Smyth', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Browne', 'White', 'White'
+#'   ),
+#'   dob = c(
+#'     '1990-01-01', '1990-01-01', '1985-06-15', '1985-06-15',
+#'     '2000-12-01', '2000-12-01', '1975-03-22', '1975-03-22',
+#'     '1988-07-04', '1988-07-04', '1990-01-01', '1990-01-02',
+#'     '1985-06-15', '1985-06-16', '2000-12-01', '2000-12-02',
+#'     '1975-03-22', '1975-03-23', '1988-07-04', '1988-07-05'
+#'   ),
+#'   city = c(
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid',
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
+#'   ),
+#'   email = c(
+#'     'john@example.com', 'jon@example.com', 'jane@example.com',
+#'     'jane@example.com', 'bob@example.com', 'bobby@example.com',
+#'     'alice@example.com', 'alicia@example.com', 'tom@example.com',
+#'     'thomas@example.com', 'john@example.com', 'jon@example.com',
+#'     'jane@example.com', 'janet@example.com', 'bob@example.com',
+#'     'robert@example.com', 'alice@example.com', 'alison@example.com',
+#'     'tom@example.com', 'tomas@example.com'
+#'   )
 #' )
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
@@ -224,11 +254,11 @@ print.il_model <- function(x, ...) {
 summary.il_model <- function(object, ...) {
   print.il_model(object, ...)
   if (object$trained) {
-    cat("\n  Parameters:\n")
+    cat('\n  Parameters:\n')
     params <- object$params
     if (length(params) > 0L) {
       for (nm in names(params)) {
-        cat(sprintf("    %s: %s\n", nm, format(params[[nm]])))
+        cat(sprintf('    %s: %s\n', nm, format(params[[nm]])))
       }
     }
   }
@@ -247,5 +277,5 @@ summary.il_model <- function(object, ...) {
 #' @examples
 #' is_il_model(il_spec())
 is_il_model <- function(x) {
-  inherits(x, "il_model")
+  inherits(x, 'il_model')
 }

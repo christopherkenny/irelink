@@ -14,10 +14,10 @@
 #'
 #' @examples
 #' il_spec() |>
-#'   il_compare(score, cl_custom("l.score + r.score > 10"))
+#'   il_compare(score, cl_custom('l.score + r.score > 10'))
 cl_custom <- function(sql_expr, ...) {
   if (!is.character(sql_expr) || length(sql_expr) != 1L) {
-    cli::cli_abort("{.arg sql_expr} must be a single character string.")
+    cli::cli_abort('{.arg sql_expr} must be a single character string.')
   }
-  new_comparison_level("custom", sql_expr = sql_expr)
+  new_comparison_level('custom', sql_expr = sql_expr)
 }

@@ -14,6 +14,6 @@
 #' il_spec() |>
 #'   il_compare(tags, cl_array_intersect(2, 1))
 cl_array_intersect <- function(...) {
-  thresholds <- check_distance_thresholds(c(...), "cl_array_intersect")
-  new_comparison_level("array_intersect", thresholds = thresholds)
+  thresholds <- check_distance_thresholds(c(...), 'cl_array_intersect')
+  new_comparison_level('array_intersect', thresholds = thresholds)
 }

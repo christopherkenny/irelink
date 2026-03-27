@@ -16,30 +16,40 @@
 #' @examples
 #' df <- data.frame(
 #'   unique_id = 1:20,
-#'   first_name = c("John", "Jon", "Jane", "Jane", "Bob",
-#'                   "Bobby", "Alice", "Alicia", "Tom", "Thomas",
-#'                   "John", "Jon", "Jane", "Janet", "Bob",
-#'                   "Robert", "Alice", "Alison", "Tom", "Tomas"),
-#'   surname = c("Smith", "Smith", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Brown", "White", "White",
-#'               "Smith", "Smyth", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Browne", "White", "White"),
-#'   dob = c("1990-01-01", "1990-01-01", "1985-06-15", "1985-06-15",
-#'           "2000-12-01", "2000-12-01", "1975-03-22", "1975-03-22",
-#'           "1988-07-04", "1988-07-04", "1990-01-01", "1990-01-02",
-#'           "1985-06-15", "1985-06-16", "2000-12-01", "2000-12-02",
-#'           "1975-03-22", "1975-03-23", "1988-07-04", "1988-07-05"),
-#'   city = c("London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid",
-#'            "London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid"),
-#'   email = c("john@example.com", "jon@example.com", "jane@example.com",
-#'             "jane@example.com", "bob@example.com", "bobby@example.com",
-#'             "alice@example.com", "alicia@example.com", "tom@example.com",
-#'             "thomas@example.com", "john@example.com", "jon@example.com",
-#'             "jane@example.com", "janet@example.com", "bob@example.com",
-#'             "robert@example.com", "alice@example.com", "alison@example.com",
-#'             "tom@example.com", "tomas@example.com")
+#'   first_name = c(
+#'     'John', 'Jon', 'Jane', 'Jane', 'Bob',
+#'     'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas',
+#'     'John', 'Jon', 'Jane', 'Janet', 'Bob',
+#'     'Robert', 'Alice', 'Alison', 'Tom', 'Tomas'
+#'   ),
+#'   surname = c(
+#'     'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Brown', 'White', 'White',
+#'     'Smith', 'Smyth', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Browne', 'White', 'White'
+#'   ),
+#'   dob = c(
+#'     '1990-01-01', '1990-01-01', '1985-06-15', '1985-06-15',
+#'     '2000-12-01', '2000-12-01', '1975-03-22', '1975-03-22',
+#'     '1988-07-04', '1988-07-04', '1990-01-01', '1990-01-02',
+#'     '1985-06-15', '1985-06-16', '2000-12-01', '2000-12-02',
+#'     '1975-03-22', '1975-03-23', '1988-07-04', '1988-07-05'
+#'   ),
+#'   city = c(
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid',
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
+#'   ),
+#'   email = c(
+#'     'john@example.com', 'jon@example.com', 'jane@example.com',
+#'     'jane@example.com', 'bob@example.com', 'bobby@example.com',
+#'     'alice@example.com', 'alicia@example.com', 'tom@example.com',
+#'     'thomas@example.com', 'john@example.com', 'jon@example.com',
+#'     'jane@example.com', 'janet@example.com', 'bob@example.com',
+#'     'robert@example.com', 'alice@example.com', 'alison@example.com',
+#'     'tom@example.com', 'tomas@example.com'
+#'   )
 #' )
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
@@ -66,11 +76,11 @@ il_estimate_m_from_labels <- function(model, labels) {
 
   # Get data for labeled pairs
   data <- DBI::dbReadTable(con, tbl)
-  id_col <- "unique_id"
+  id_col <- 'unique_id'
 
   match_pairs <- labels[labels$is_match == TRUE, ]
   if (nrow(match_pairs) == 0L) {
-    cli::cli_abort("No matching pairs found in labels.")
+    cli::cli_abort('No matching pairs found in labels.')
   }
 
   # Build pairs data frame from labels
@@ -83,8 +93,8 @@ il_estimate_m_from_labels <- function(model, labels) {
     row_r <- data[data[[id_col]] == id_r, , drop = FALSE]
     if (nrow(row_l) > 0L && nrow(row_r) > 0L) {
       pair <- as.data.frame(c(
-        stats::setNames(as.list(row_l[1, ]), paste0("l_", names(row_l))),
-        stats::setNames(as.list(row_r[1, ]), paste0("r_", names(row_r)))
+        stats::setNames(as.list(row_l[1, ]), paste0('l_', names(row_l))),
+        stats::setNames(as.list(row_r[1, ]), paste0('r_', names(row_r)))
       ))
       pair_rows <- c(pair_rows, list(pair))
     }
@@ -102,14 +112,14 @@ il_estimate_m_from_labels <- function(model, labels) {
     params <- model$params$comparisons
     for (j in seq_along(comp_names)) {
       cn <- comp_names[j]
-      params$m[params$comparison == cn & params$level == "match"] <- m_match[j]
-      params$m[params$comparison == cn & params$level == "non_match"] <- m_nonmatch[j]
+      params$m[params$comparison == cn & params$level == 'match'] <- m_match[j]
+      params$m[params$comparison == cn & params$level == 'non_match'] <- m_nonmatch[j]
     }
     model$params$comparisons <- params
   } else {
     model$params$comparisons <- tibble::tibble(
       comparison = rep(comp_names, each = 2L),
-      level = rep(c("match", "non_match"), times = length(comp_names)),
+      level = rep(c('match', 'non_match'), times = length(comp_names)),
       m = as.numeric(rbind(m_match, m_nonmatch)),
       u = NA_real_
     )

@@ -10,46 +10,46 @@
 # Internal validator for unit helper inputs
 check_unit_input <- function(n, unit) {
   if (!is.numeric(n) || length(n) != 1L || is.na(n) || is.infinite(n) || is.nan(n)) {
-    cli::cli_abort("{.arg n} must be a single finite numeric value, not {.obj_type_friendly {n}}.")
+    cli::cli_abort('{.arg n} must be a single finite numeric value, not {.obj_type_friendly {n}}.')
   }
   if (n < 0) {
-    cli::cli_abort("{.arg n} must be non-negative for {.fn {unit}}.")
+    cli::cli_abort('{.arg n} must be non-negative for {.fn {unit}}.')
   }
   invisible(n)
 }
 
 #' @export
 print.il_days <- function(x, ...) {
-  cat(format_unit_helper(x), "\n")
+  cat(format_unit_helper(x), '\n')
   invisible(x)
 }
 
 #' @export
 print.il_months <- function(x, ...) {
-  cat(format_unit_helper(x), "\n")
+  cat(format_unit_helper(x), '\n')
   invisible(x)
 }
 
 #' @export
 print.il_years <- function(x, ...) {
-  cat(format_unit_helper(x), "\n")
+  cat(format_unit_helper(x), '\n')
   invisible(x)
 }
 
 #' @export
 print.il_km <- function(x, ...) {
-  cat(format_unit_helper(x), "\n")
+  cat(format_unit_helper(x), '\n')
   invisible(x)
 }
 
 #' @export
 print.il_mi <- function(x, ...) {
-  cat(format_unit_helper(x), "\n")
+  cat(format_unit_helper(x), '\n')
   invisible(x)
 }
 
 format_unit_helper <- function(x) {
-  paste0(x$value, " ", x$unit)
+  paste0(x$value, ' ', x$unit)
 }
 
 #' Extract Numeric Value from a Unit Helper or Bare Numeric
@@ -59,14 +59,16 @@ format_unit_helper <- function(x) {
 #' @return A single numeric value.
 #' @noRd
 extract_numeric <- function(x, expected_unit = NULL) {
-  if (is.numeric(x) && length(x) == 1L) return(x)
+  if (is.numeric(x) && length(x) == 1L) {
+    return(x)
+  }
   if (is.list(x) && !is.null(x$value) && !is.null(x$unit)) {
     if (!is.null(expected_unit) && x$unit != expected_unit) {
-      cli::cli_abort("Expected unit {.val {expected_unit}}, got {.val {x$unit}}.")
+      cli::cli_abort('Expected unit {.val {expected_unit}}, got {.val {x$unit}}.')
     }
     return(x$value)
   }
-  cli::cli_abort("Expected a numeric value or unit helper, not {.obj_type_friendly {x}}.")
+  cli::cli_abort('Expected a numeric value or unit helper, not {.obj_type_friendly {x}}.')
 }
 
 #' Create a Duration in Days
@@ -84,8 +86,8 @@ extract_numeric <- function(x, expected_unit = NULL) {
 #' il_spec() |>
 #'   il_compare(dob, cl_date_diff(days(30), days(365)))
 days <- function(n) {
-  check_unit_input(n, "days")
-  structure(list(value = n, unit = "days"), class = "il_days")
+  check_unit_input(n, 'days')
+  structure(list(value = n, unit = 'days'), class = 'il_days')
 }
 
 #' Create a Duration in Months
@@ -103,8 +105,8 @@ days <- function(n) {
 #' il_spec() |>
 #'   il_compare(dob, cl_date_diff(months(1), months(12)))
 months <- function(n) {
-  check_unit_input(n, "months")
-  structure(list(value = n, unit = "months"), class = "il_months")
+  check_unit_input(n, 'months')
+  structure(list(value = n, unit = 'months'), class = 'il_months')
 }
 
 #' Create a Duration in Years
@@ -121,8 +123,8 @@ months <- function(n) {
 #' il_spec() |>
 #'   il_compare(dob, cl_date_diff(years(1)))
 years <- function(n) {
-  check_unit_input(n, "years")
-  structure(list(value = n, unit = "years"), class = "il_years")
+  check_unit_input(n, 'years')
+  structure(list(value = n, unit = 'years'), class = 'il_years')
 }
 
 #' Create a Distance in Kilometres
@@ -140,8 +142,8 @@ years <- function(n) {
 #' il_spec() |>
 #'   il_compare(c(lat, lon), cl_distance_km(km(5), km(50)))
 km <- function(n) {
-  check_unit_input(n, "km")
-  structure(list(value = n, unit = "km"), class = "il_km")
+  check_unit_input(n, 'km')
+  structure(list(value = n, unit = 'km'), class = 'il_km')
 }
 
 #' Create a Distance in Miles
@@ -158,6 +160,6 @@ km <- function(n) {
 #' il_spec() |>
 #'   il_compare(c(lat, lon), cl_distance_km(mi(3), mi(30)))
 mi <- function(n) {
-  check_unit_input(n, "mi")
-  structure(list(value = n, unit = "mi"), class = "il_mi")
+  check_unit_input(n, 'mi')
+  structure(list(value = n, unit = 'mi'), class = 'il_mi')
 }

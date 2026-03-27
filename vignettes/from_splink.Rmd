@@ -123,7 +123,7 @@ In splink, blocking rules are created with `block_on()`.
 `irelink` uses the same function name.
 The difference is where they appear: splink passes them into `SettingsCreator`, while `irelink` adds them to a spec with `il_block_on()` or passes them directly to training functions.
 
-```r
+```{r}
 # irelink — blocking in the spec
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
@@ -173,7 +173,7 @@ clusters = linker.clustering.cluster_pairwise_predictions_at_threshold(
 
 **irelink (R):**
 
-```r
+```{r}
 library(irelink)
 
 df <- il_demo("fake_1000")
@@ -212,9 +212,11 @@ results = linker.inference.find_matches_to_new_records(
 
 **irelink (R):**
 
-```r
+```{r}
 new_df <- data.frame(
-  first_name = "Jhon", surname = "Smith", dob = "1990-01-15"
+  first_name = "Jhon",
+  surname = "Smith",
+  dob = "1990-01-15"
 )
 results <- il_find_matches(model, new_df, threshold = 0.5)
 ```

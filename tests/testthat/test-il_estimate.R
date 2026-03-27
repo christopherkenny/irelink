@@ -9,8 +9,8 @@
 make_test_model <- function(con) {
   df <- data.frame(
     unique_id = 1:6,
-    first_name = c("Amanda", "Amanda", "Robin", "Robyn", "David", "Eve"),
-    surname = c("Smith", "Jones", "Williams", "Green", "Pope", "Anderson")
+    first_name = c('Amanda', 'Amanda', 'Robin', 'Robyn', 'David', 'Eve'),
+    surname = c('Smith', 'Jones', 'Williams', 'Green', 'Pope', 'Anderson')
   )
 
   spec <- il_spec() |>
@@ -24,9 +24,9 @@ make_test_model <- function(con) {
 # --- il_estimate_u() ------------------------------------------------------
 # From: test_u_train.py::test_u_train
 
-test_that("il_estimate_u() returns an il_model with u parameters set", {
+test_that('il_estimate_u() returns an il_model with u parameters set', {
   skip_if_sprint_lt(7)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
@@ -34,15 +34,15 @@ test_that("il_estimate_u() returns an il_model with u parameters set", {
   model <- make_test_model(con) |>
     il_estimate_u(max_pairs = 1e6)
 
-  expect_s3_class(model, "il_model")
+  expect_s3_class(model, 'il_model')
   params <- il_parameters(model)
   # u values should be populated (not all NA)
   expect_false(all(is.na(params$u)))
 })
 
-test_that("il_estimate_u() produces reasonable u values", {
+test_that('il_estimate_u() produces reasonable u values', {
   skip_if_sprint_lt(7)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
@@ -60,9 +60,9 @@ test_that("il_estimate_u() produces reasonable u values", {
 # --- il_estimate_em() -----------------------------------------------------
 # From: test_expectation_maximisation.py, test_correctness_of_convergence.py
 
-test_that("il_estimate_em() returns an il_model with updated parameters", {
+test_that('il_estimate_em() returns an il_model with updated parameters', {
   skip_if_sprint_lt(7)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
@@ -71,12 +71,12 @@ test_that("il_estimate_em() returns an il_model with updated parameters", {
     il_estimate_u(max_pairs = 1e6) |>
     il_estimate_em(block_on(first_name))
 
-  expect_s3_class(model, "il_model")
+  expect_s3_class(model, 'il_model')
 })
 
-test_that("il_estimate_em() errors clearly on empty blocking results", {
+test_that('il_estimate_em() errors clearly on empty blocking results', {
   skip_if_sprint_lt(7)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
@@ -91,14 +91,14 @@ test_that("il_estimate_em() errors clearly on empty blocking results", {
   )
 })
 
-test_that("multiple il_estimate_em() calls refine, not reset, parameters", {
+test_that('multiple il_estimate_em() calls refine, not reset, parameters', {
   skip_if_sprint_lt(7)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo("fake_1000")
+  df <- il_demo('fake_1000')
   spec <- il_spec() |>
     il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
     il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -122,9 +122,9 @@ test_that("multiple il_estimate_em() calls refine, not reset, parameters", {
   expect_false(all(is.na(params_after_second$m)))
 })
 
-test_that("il_estimate_em() with fixed probabilities preserves them", {
+test_that('il_estimate_em() with fixed probabilities preserves them', {
   skip_if_sprint_lt(7)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   # From: test_fix_probabilities — fixed m/u values survive EM training
   # This test verifies the concept; exact API for fixing probabilities
@@ -133,7 +133,7 @@ test_that("il_estimate_em() with fixed probabilities preserves them", {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo("fake_1000")
+  df <- il_demo('fake_1000')
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>
@@ -153,9 +153,9 @@ test_that("il_estimate_em() with fixed probabilities preserves them", {
 # --- il_estimate_prior() --------------------------------------------------
 # From: test_estimate_prob_two_rr_match.py
 
-test_that("il_estimate_prior() returns a valid probability", {
+test_that('il_estimate_prior() returns a valid probability', {
   skip_if_sprint_lt(7)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
@@ -163,8 +163,8 @@ test_that("il_estimate_prior() returns a valid probability", {
   # From: test_prob_rr_match_dedupe — 6 records, 4 expected matches
   df <- data.frame(
     unique_id = 1:6,
-    first_name = c("John", "John", "Mary", "Mary", "Mary", "Jane"),
-    surname = c("Smith", "Smith", "Jones", "Jones", "Jones", "Taylor")
+    first_name = c('John', 'John', 'Mary', 'Mary', 'Mary', 'Jane'),
+    surname = c('Smith', 'Smith', 'Jones', 'Jones', 'Jones', 'Taylor')
   )
 
   spec <- il_spec() |>
@@ -176,21 +176,21 @@ test_that("il_estimate_prior() returns a valid probability", {
   model <- il_model(df, spec = spec, con = con) |>
     il_estimate_prior(block_on(first_name), block_on(surname), recall = 1.0)
 
-  expect_s3_class(model, "il_model")
+  expect_s3_class(model, 'il_model')
   # The estimated prior should be a probability in [0, 1]
 })
 
-test_that("il_estimate_prior() with higher recall gives higher prior", {
+test_that('il_estimate_prior() with higher recall gives higher prior', {
   skip_if_sprint_lt(7)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:6,
-    first_name = c("John", "John", "Mary", "Mary", "Mary", "Jane"),
-    surname = c("Smith", "Smith", "Jones", "Jones", "Jones", "Taylor")
+    first_name = c('John', 'John', 'Mary', 'Mary', 'Mary', 'Jane'),
+    surname = c('Smith', 'Smith', 'Jones', 'Jones', 'Jones', 'Taylor')
   )
 
   spec <- il_spec() |>
@@ -208,16 +208,16 @@ test_that("il_estimate_prior() with higher recall gives higher prior", {
     il_estimate_prior(block_on(first_name), recall = 0.9)
 
   # Both should be valid models
-  expect_s3_class(model_r10, "il_model")
-  expect_s3_class(model_r09, "il_model")
+  expect_s3_class(model_r10, 'il_model')
+  expect_s3_class(model_r09, 'il_model')
 })
 
 # --- il_estimate_m_from_labels() ------------------------------------------
 # From: test_m_train.py
 
-test_that("il_estimate_m_from_labels() computes m from pairwise labels", {
+test_that('il_estimate_m_from_labels() computes m from pairwise labels', {
   skip_if_sprint_lt(7)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
@@ -225,8 +225,8 @@ test_that("il_estimate_m_from_labels() computes m from pairwise labels", {
   # From: test_m_train — 5 records with clusters
   df <- data.frame(
     unique_id = 1:5,
-    first_name = c("Robin", "Robyn", "Robin", "James", "David"),
-    surname = rep("X", 5),
+    first_name = c('Robin', 'Robyn', 'Robin', 'James', 'David'),
+    surname = rep('X', 5),
     cluster = c(1, 1, 1, 2, 2)
   )
 
@@ -253,9 +253,9 @@ test_that("il_estimate_m_from_labels() computes m from pairwise labels", {
 # --- il_estimate_m_from_column() ------------------------------------------
 # From: test_m_train.py (method 1 — label column)
 
-test_that("il_estimate_m_from_column() computes m from a cluster column", {
+test_that('il_estimate_m_from_column() computes m from a cluster column', {
   skip_if_sprint_lt(7)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
@@ -263,8 +263,8 @@ test_that("il_estimate_m_from_column() computes m from a cluster column", {
   # From: test_m_train — estimate_m_from_label_column("cluster")
   df <- data.frame(
     unique_id = 1:5,
-    first_name = c("Robin", "Robyn", "Robin", "James", "David"),
-    surname = rep("X", 5),
+    first_name = c('Robin', 'Robyn', 'Robin', 'James', 'David'),
+    surname = rep('X', 5),
     cluster = c(1, 1, 1, 2, 2)
   )
 

@@ -21,24 +21,28 @@
 cl_date_diff <- function(...) {
   args <- list(...)
   if (length(args) == 0L) {
-    cli::cli_abort("{.fn cl_date_diff} requires at least one threshold.")
+    cli::cli_abort('{.fn cl_date_diff} requires at least one threshold.')
   }
-  valid_units <- c("days", "months", "years")
+  valid_units <- c('days', 'months', 'years')
   thresholds <- vapply(args, function(a) {
-    if (is.numeric(a) && length(a) == 1L) return(a)
+    if (is.numeric(a) && length(a) == 1L) {
+      return(a)
+    }
     if (is.list(a) && !is.null(a$unit)) {
       if (!a$unit %in% valid_units) {
         cli::cli_abort(
-          "{.fn cl_date_diff} accepts {.or {.val {valid_units}}} units, not {.val {a$unit}}."
+          '{.fn cl_date_diff} accepts {.or {.val {valid_units}}} units, not {.val {a$unit}}.'
         )
       }
       return(a$value)
     }
-    cli::cli_abort("Invalid threshold for {.fn cl_date_diff}.")
+    cli::cli_abort('Invalid threshold for {.fn cl_date_diff}.')
   }, numeric(1))
   units <- vapply(args, function(a) {
-    if (is.numeric(a) && length(a) == 1L) return("days")
+    if (is.numeric(a) && length(a) == 1L) {
+      return('days')
+    }
     a$unit
   }, character(1))
-  new_comparison_level("date_diff", thresholds = thresholds, units = units)
+  new_comparison_level('date_diff', thresholds = thresholds, units = units)
 }

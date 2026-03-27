@@ -20,6 +20,6 @@ typos, mirroring splink's demo data.
 }
 \examples{
 il_demo()
-df <- il_demo("fake_20")
+df <- il_demo('fake_20')
 head(df)
 }

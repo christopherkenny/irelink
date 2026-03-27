@@ -1,9 +1,9 @@
 # Sprint 10 — Evaluation: il_accuracy(), il_errors()
 # Translated from: test_accuracy.py
 
-test_that("il_accuracy() returns correct TP/FP/TN/FN at known thresholds", {
+test_that('il_accuracy() returns correct TP/FP/TN/FN at known thresholds', {
   skip_if_sprint_lt(10)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
@@ -12,8 +12,8 @@ test_that("il_accuracy() returns correct TP/FP/TN/FN at known thresholds", {
   # 6 records: cluster 1 (IDs 1,2,3), cluster 2 (ID 4), cluster 3 (IDs 5,6)
   df <- data.frame(
     unique_id = 1:6,
-    first_name = c("John", "John", "John", "Mary", "Jane", "Jane"),
-    surname = c("Smith", "Smith", "Smith", "Jones", "Taylor", "Taylor"),
+    first_name = c('John', 'John', 'John', 'Mary', 'Jane', 'Jane'),
+    surname = c('Smith', 'Smith', 'Smith', 'Jones', 'Taylor', 'Taylor'),
     cluster = c(1, 1, 1, 2, 3, 3)
   )
 
@@ -33,22 +33,22 @@ test_that("il_accuracy() returns correct TP/FP/TN/FN at known thresholds", {
   )
 
   acc <- il_accuracy(model, labels)
-  expect_s3_class(acc, "tbl_df")
+  expect_s3_class(acc, 'tbl_df')
   # Should have columns for thresholds and TP/FP/TN/FN
-  expect_true("threshold" %in% names(acc))
+  expect_true('threshold' %in% names(acc))
 })
 
-test_that("il_accuracy() TP/FP counts are internally consistent", {
+test_that('il_accuracy() TP/FP counts are internally consistent', {
   skip_if_sprint_lt(10)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
-    first_name = c("A", "A", "A", "B", "B"),
-    surname = rep("X", 5)
+    first_name = c('A', 'A', 'A', 'B', 'B'),
+    surname = rep('X', 5)
   )
 
   spec <- il_spec() |>
@@ -76,17 +76,17 @@ test_that("il_accuracy() TP/FP counts are internally consistent", {
 # --- il_errors() ----------------------------------------------------------
 # From: test_prediction_errors_from_labels_table
 
-test_that("il_errors() returns false positive and false negative pairs", {
+test_that('il_errors() returns false positive and false negative pairs', {
   skip_if_sprint_lt(10)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
-    first_name = c("John", "John", "John", "Mary", "Bob"),
-    surname = rep("Smith", 5)
+    first_name = c('John', 'John', 'John', 'Mary', 'Bob'),
+    surname = rep('Smith', 5)
   )
 
   spec <- il_spec() |>
@@ -104,5 +104,5 @@ test_that("il_errors() returns false positive and false negative pairs", {
   )
 
   errors <- il_errors(model, labels, threshold = 0.85)
-  expect_s3_class(errors, "tbl_df")
+  expect_s3_class(errors, 'tbl_df')
 })

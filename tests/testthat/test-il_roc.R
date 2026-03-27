@@ -2,14 +2,14 @@
 #            il_unlinkables()
 # Translated from: test_accuracy.py (roc tests)
 
-test_that("il_roc() returns a tibble with fpr and tpr in [0, 1]", {
+test_that('il_roc() returns a tibble with fpr and tpr in [0, 1]', {
   skip_if_sprint_lt(10)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo("fake_1000")
+  df <- il_demo('fake_1000')
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>
@@ -27,21 +27,21 @@ test_that("il_roc() returns a tibble with fpr and tpr in [0, 1]", {
   )
 
   roc <- il_roc(model, labels)
-  expect_s3_class(roc, "tbl_df")
-  expect_true("fpr" %in% names(roc))
-  expect_true("tpr" %in% names(roc))
+  expect_s3_class(roc, 'tbl_df')
+  expect_true('fpr' %in% names(roc))
+  expect_true('tpr' %in% names(roc))
   expect_true(all(roc$fpr >= 0 & roc$fpr <= 1))
   expect_true(all(roc$tpr >= 0 & roc$tpr <= 1))
 })
 
-test_that("il_precision_recall() returns tibble with precision and recall in [0, 1]", {
+test_that('il_precision_recall() returns tibble with precision and recall in [0, 1]', {
   skip_if_sprint_lt(10)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo("fake_1000")
+  df <- il_demo('fake_1000')
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>
@@ -58,21 +58,21 @@ test_that("il_precision_recall() returns tibble with precision and recall in [0,
   )
 
   pr <- il_precision_recall(model, labels)
-  expect_s3_class(pr, "tbl_df")
-  expect_true("precision" %in% names(pr))
-  expect_true("recall" %in% names(pr))
+  expect_s3_class(pr, 'tbl_df')
+  expect_true('precision' %in% names(pr))
+  expect_true('recall' %in% names(pr))
   expect_true(all(pr$precision >= 0 & pr$precision <= 1))
   expect_true(all(pr$recall >= 0 & pr$recall <= 1))
 })
 
-test_that("il_unlinkables() returns monotonically increasing proportions", {
+test_that('il_unlinkables() returns monotonically increasing proportions', {
   skip_if_sprint_lt(10)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo("fake_1000")
+  df <- il_demo('fake_1000')
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>
@@ -83,9 +83,9 @@ test_that("il_unlinkables() returns monotonically increasing proportions", {
     il_estimate_em(block_on(first_name))
 
   unl <- il_unlinkables(model)
-  expect_s3_class(unl, "tbl_df")
-  expect_true("threshold" %in% names(unl))
-  expect_true("pct_unlinkable" %in% names(unl))
+  expect_s3_class(unl, 'tbl_df')
+  expect_true('threshold' %in% names(unl))
+  expect_true('pct_unlinkable' %in% names(unl))
 
   # Proportion should increase monotonically with threshold
   if (nrow(unl) > 1) {

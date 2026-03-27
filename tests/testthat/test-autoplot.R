@@ -1,15 +1,15 @@
 # Sprint 10 — Visualization: autoplot.il_model(), autoplot.il_compared()
 # Translated from: test_charts.py
 
-test_that("autoplot(model) returns a ggplot object", {
+test_that('autoplot(model) returns a ggplot object', {
   skip_if_sprint_lt(10)
-  skip_if_not_installed("RSQLite")
-  skip_if_not_installed("ggplot2")
+  skip_if_not_installed('RSQLite')
+  skip_if_not_installed('ggplot2')
 
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo("fake_1000")
+  df <- il_demo('fake_1000')
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>
@@ -20,18 +20,18 @@ test_that("autoplot(model) returns a ggplot object", {
     il_estimate_em(block_on(first_name))
 
   p <- ggplot2::autoplot(model)
-  expect_s3_class(p, "ggplot")
+  expect_s3_class(p, 'ggplot')
 })
 
-test_that("autoplot(pairs) returns a ggplot object", {
+test_that('autoplot(pairs) returns a ggplot object', {
   skip_if_sprint_lt(10)
-  skip_if_not_installed("RSQLite")
-  skip_if_not_installed("ggplot2")
+  skip_if_not_installed('RSQLite')
+  skip_if_not_installed('ggplot2')
 
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo("fake_1000")
+  df <- il_demo('fake_1000')
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>
@@ -44,5 +44,5 @@ test_that("autoplot(pairs) returns a ggplot object", {
   pairs <- predict(model, threshold = 0.5)
 
   p <- ggplot2::autoplot(pairs)
-  expect_s3_class(p, "ggplot")
+  expect_s3_class(p, 'ggplot')
 })

@@ -5,9 +5,9 @@
 # --- il_compare_records() -------------------------------------------------
 # From: test_compare_two_records.py
 
-test_that("il_compare_records() scores a known pair", {
+test_that('il_compare_records() scores a known pair', {
   skip_if_sprint_lt(8)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
@@ -16,18 +16,18 @@ test_that("il_compare_records() scores a known pair", {
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact())
 
-  record_a <- list(first_name = "John", surname = "Smith")
-  record_b <- list(first_name = "John", surname = "Smyth")
+  record_a <- list(first_name = 'John', surname = 'Smith')
+  record_b <- list(first_name = 'John', surname = 'Smyth')
 
   result <- il_compare_records(record_a, record_b, spec = spec, con = con)
 
-  expect_s3_class(result, "tbl_df")
+  expect_s3_class(result, 'tbl_df')
   expect_true(nrow(result) == 1)
 })
 
-test_that("il_compare_records() shows exact match on identical records", {
+test_that('il_compare_records() shows exact match on identical records', {
   skip_if_sprint_lt(8)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
@@ -36,11 +36,11 @@ test_that("il_compare_records() shows exact match on identical records", {
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact())
 
-  record <- list(first_name = "Julia", surname = "Taylor")
+  record <- list(first_name = 'Julia', surname = 'Taylor')
 
   result <- il_compare_records(record, record, spec = spec, con = con)
   # Identical records should get gamma = highest level for all comparisons
-  gamma_cols <- grep("^gamma_", names(result), value = TRUE)
+  gamma_cols <- grep('^gamma_', names(result), value = TRUE)
   # For exact match, gamma should be the top level
   expect_true(all(result[, gamma_cols] > 0))
 })
@@ -48,14 +48,14 @@ test_that("il_compare_records() shows exact match on identical records", {
 # --- il_find_matches() ----------------------------------------------------
 # From: test_find_new_matches.py::test_matches_work
 
-test_that("il_find_matches() returns matches for a new record", {
+test_that('il_find_matches() returns matches for a new record', {
   skip_if_sprint_lt(8)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo("fake_1000")
+  df <- il_demo('fake_1000')
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>
@@ -67,27 +67,27 @@ test_that("il_find_matches() returns matches for a new record", {
 
   # From: test_find_new_matches — find matches for "Eliza Smith"
   new_record <- data.frame(
-    first_name = "Eliza",
-    surname = "Smith",
+    first_name = 'Eliza',
+    surname = 'Smith',
     stringsAsFactors = FALSE
   )
 
   # With very permissive threshold, should find all surname="Smith"
   matches <- il_find_matches(model, new_record, threshold = 0.01)
-  expect_s3_class(matches, "tbl_df")
+  expect_s3_class(matches, 'tbl_df')
   expect_true(nrow(matches) > 0)
 })
 
 # --- il_waterfall() -------------------------------------------------------
 
-test_that("il_waterfall() returns per-comparison weight contributions", {
+test_that('il_waterfall() returns per-comparison weight contributions', {
   skip_if_sprint_lt(8)
-  skip_if_not_installed("RSQLite")
+  skip_if_not_installed('RSQLite')
 
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo("fake_1000")
+  df <- il_demo('fake_1000')
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>
@@ -101,7 +101,7 @@ test_that("il_waterfall() returns per-comparison weight contributions", {
 
   if (nrow(pairs) > 0) {
     wf <- il_waterfall(pairs, which = 1L)
-    expect_s3_class(wf, "tbl_df")
+    expect_s3_class(wf, 'tbl_df')
     # Should have one row per comparison
     expect_true(nrow(wf) >= 2)
     # Contributions should sum to the total match weight

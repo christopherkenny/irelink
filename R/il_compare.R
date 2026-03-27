@@ -28,10 +28,10 @@
 #' spec <- il_spec() |>
 #'   il_compare(c(first_name, last_name), cl_jaro_winkler(0.9, 0.7))
 il_compare <- function(spec, col, method, ...) {
-  if (!inherits(spec, "il_spec")) {
+  if (!inherits(spec, 'il_spec')) {
     cli::cli_abort(
-      "{.arg spec} must be an {.cls il_spec} object, not {.obj_type_friendly {spec}}.",
-      class = "il_error_type"
+      '{.arg spec} must be an {.cls il_spec} object, not {.obj_type_friendly {spec}}.',
+      class = 'il_error_type'
     )
   }
   col_expr <- rlang::enquo(col)
@@ -50,11 +50,14 @@ extract_col_names <- function(quo) {
   if (rlang::is_symbol(expr)) {
     return(as.character(expr))
   }
-  if (rlang::is_call(expr, "c")) {
+  if (rlang::is_call(expr, 'c')) {
     args <- as.list(expr)[-1]
     return(vapply(args, function(a) {
-      if (rlang::is_symbol(a)) as.character(a)
-      else deparse(a)
+      if (rlang::is_symbol(a)) {
+        as.character(a)
+      } else {
+        deparse(a)
+      }
     }, character(1)))
   }
   # Tidyselect helpers (starts_with, everything, matches, etc.) —

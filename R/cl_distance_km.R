@@ -20,19 +20,25 @@
 cl_distance_km <- function(...) {
   args <- list(...)
   if (length(args) == 0L) {
-    cli::cli_abort("{.fn cl_distance_km} requires at least one threshold.")
+    cli::cli_abort('{.fn cl_distance_km} requires at least one threshold.')
   }
   mi_to_km <- 1.609344
   thresholds <- vapply(args, function(a) {
-    if (is.numeric(a) && length(a) == 1L) return(a)
+    if (is.numeric(a) && length(a) == 1L) {
+      return(a)
+    }
     if (is.list(a) && !is.null(a$unit)) {
-      if (a$unit == "km") return(a$value)
-      if (a$unit == "mi") return(a$value * mi_to_km)
+      if (a$unit == 'km') {
+        return(a$value)
+      }
+      if (a$unit == 'mi') {
+        return(a$value * mi_to_km)
+      }
       cli::cli_abort(
-        "{.fn cl_distance_km} accepts {.val km} or {.val mi} units, not {.val {a$unit}}."
+        '{.fn cl_distance_km} accepts {.val km} or {.val mi} units, not {.val {a$unit}}.'
       )
     }
-    cli::cli_abort("Invalid threshold for {.fn cl_distance_km}.")
+    cli::cli_abort('Invalid threshold for {.fn cl_distance_km}.')
   }, numeric(1))
-  new_comparison_level("distance_km", thresholds = thresholds)
+  new_comparison_level('distance_km', thresholds = thresholds)
 }

@@ -12,13 +12,13 @@
 #' @export
 #'
 #' @examples
-#' il_string_similarity("John", "Jon")
+#' il_string_similarity('John', 'Jon')
 il_string_similarity <- function(a, b) {
   if (!is.character(a) || !is.character(b)) {
-    cli::cli_abort("{.arg a} and {.arg b} must be character strings.")
+    cli::cli_abort('{.arg a} and {.arg b} must be character strings.')
   }
   if (length(a) != 1L || length(b) != 1L) {
-    cli::cli_abort("{.arg a} and {.arg b} must each be a single string.")
+    cli::cli_abort('{.arg a} and {.arg b} must each be a single string.')
   }
 
   if (is.na(a) || is.na(b)) {
@@ -31,11 +31,11 @@ il_string_similarity <- function(a, b) {
     ))
   }
 
-  jw <- 1 - stringdist::stringdist(a, b, method = "jw", p = 0.1)
-  j <- 1 - stringdist::stringdist(a, b, method = "jw", p = 0)
-  lv <- as.integer(stringdist::stringdist(a, b, method = "lv"))
-  jac <- 1 - stringdist::stringdist(a, b, method = "jaccard", q = 2)
-  cos <- 1 - stringdist::stringdist(a, b, method = "cosine", q = 2)
+  jw <- 1 - stringdist::stringdist(a, b, method = 'jw', p = 0.1)
+  j <- 1 - stringdist::stringdist(a, b, method = 'jw', p = 0)
+  lv <- as.integer(stringdist::stringdist(a, b, method = 'lv'))
+  jac <- 1 - stringdist::stringdist(a, b, method = 'jaccard', q = 2)
+  cos <- 1 - stringdist::stringdist(a, b, method = 'cosine', q = 2)
 
   tibble::tibble(
     jaro_winkler = jw,

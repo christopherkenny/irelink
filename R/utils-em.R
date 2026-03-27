@@ -25,14 +25,16 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
         ids = data.frame(
           l_unique_id = integer(0), r_unique_id = integer(0)
         ),
-        gamma_mat = matrix(0L, nrow = 0, ncol = length(comp_names),
-                           dimnames = list(NULL, comp_names))
+        gamma_mat = matrix(0L,
+          nrow = 0, ncol = length(comp_names),
+          dimnames = list(NULL, comp_names)
+        )
       ))
     }
-    ids <- result[, c("l_unique_id", "r_unique_id"), drop = FALSE]
-    gamma_cols <- paste0("gamma_", comp_names)
+    ids <- result[, c('l_unique_id', 'r_unique_id'), drop = FALSE]
+    gamma_cols <- paste0('gamma_', comp_names)
     gamma_mat <- as.matrix(result[, gamma_cols, drop = FALSE])
-    storage.mode(gamma_mat) <- "integer"
+    storage.mode(gamma_mat) <- 'integer'
     colnames(gamma_mat) <- comp_names
     return(list(ids = ids, gamma_mat = gamma_mat))
   }
@@ -48,12 +50,14 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
       ids = data.frame(
         l_unique_id = integer(0), r_unique_id = integer(0)
       ),
-      gamma_mat = matrix(0L, nrow = 0, ncol = length(comp_names),
-                         dimnames = list(NULL, comp_names))
+      gamma_mat = matrix(0L,
+        nrow = 0, ncol = length(comp_names),
+        dimnames = list(NULL, comp_names)
+      )
     ))
   }
   pairs <- do.call(rbind, all_pairs)
-  pair_key <- paste(pairs$l_unique_id, pairs$r_unique_id, sep = "||")
+  pair_key <- paste(pairs$l_unique_id, pairs$r_unique_id, sep = '||')
   pairs <- pairs[!duplicated(pair_key), , drop = FALSE]
   if (!is.null(limit) && nrow(pairs) > limit) {
     pairs <- pairs[seq_len(limit), , drop = FALSE]
@@ -82,20 +86,20 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
     tbl_l <- model$data$tbl_l
     tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
     dedupe <- is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l
-    dedupe_cond <- if (dedupe) "l.unique_id < r.unique_id" else "1=1"
+    dedupe_cond <- if (dedupe) 'l.unique_id < r.unique_id' else '1=1'
     max_pairs <- as.integer(max_pairs)
 
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)
-      glue::glue("{expr} AS gamma_{comp$columns}")
+      glue::glue('{expr} AS gamma_{comp$columns}')
     }, character(1))
-    gamma_select <- paste(gamma_exprs, collapse = ", ")
+    gamma_select <- paste(gamma_exprs, collapse = ', ')
 
     sql <- glue::glue(
-      "SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ",
-      "{gamma_select} ",
-      "FROM {tbl_l} l, {tbl_r} r ",
-      "WHERE {dedupe_cond} LIMIT {max_pairs}"
+      'SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ',
+      '{gamma_select} ',
+      'FROM {tbl_l} l, {tbl_r} r ',
+      'WHERE {dedupe_cond} LIMIT {max_pairs}'
     )
     result <- DBI::dbGetQuery(con, sql)
     if (nrow(result) == 0L) {
@@ -103,14 +107,16 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
         ids = data.frame(
           l_unique_id = integer(0), r_unique_id = integer(0)
         ),
-        gamma_mat = matrix(0L, nrow = 0, ncol = length(comp_names),
-                           dimnames = list(NULL, comp_names))
+        gamma_mat = matrix(0L,
+          nrow = 0, ncol = length(comp_names),
+          dimnames = list(NULL, comp_names)
+        )
       ))
     }
-    ids <- result[, c("l_unique_id", "r_unique_id"), drop = FALSE]
-    gamma_cols <- paste0("gamma_", comp_names)
+    ids <- result[, c('l_unique_id', 'r_unique_id'), drop = FALSE]
+    gamma_cols <- paste0('gamma_', comp_names)
     gamma_mat <- as.matrix(result[, gamma_cols, drop = FALSE])
-    storage.mode(gamma_mat) <- "integer"
+    storage.mode(gamma_mat) <- 'integer'
     colnames(gamma_mat) <- comp_names
     return(list(ids = ids, gamma_mat = gamma_mat))
   }
@@ -122,8 +128,10 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
       ids = data.frame(
         l_unique_id = integer(0), r_unique_id = integer(0)
       ),
-      gamma_mat = matrix(0L, nrow = 0, ncol = length(comp_names),
-                         dimnames = list(NULL, comp_names))
+      gamma_mat = matrix(0L,
+        nrow = 0, ncol = length(comp_names),
+        dimnames = list(NULL, comp_names)
+      )
     ))
   }
   ids <- data.frame(
@@ -145,36 +153,36 @@ compute_gamma <- function(val_l, val_r, comp_level) {
   n <- length(val_l)
   both_present <- !is.na(val_l) & !is.na(val_r)
 
-  if (method == "exact") {
+  if (method == 'exact') {
     return(ifelse(both_present & val_l == val_r, 1L, 0L))
   }
 
-  if (method %in% c("levenshtein", "damerau_levenshtein")) {
+  if (method %in% c('levenshtein', 'damerau_levenshtein')) {
     threshold <- comp_level$thresholds[1]
     dist <- rep(NA_real_, n)
     dist[both_present] <- stringdist::stringdist(
       as.character(val_l[both_present]),
       as.character(val_r[both_present]),
-      method = "lv"
+      method = 'lv'
     )
     return(ifelse(both_present & !is.na(dist) & dist <= threshold, 1L, 0L))
   }
 
-  if (method %in% c("jaro_winkler", "jaro")) {
+  if (method %in% c('jaro_winkler', 'jaro')) {
     threshold <- comp_level$thresholds[1]
-    p <- if (method == "jaro_winkler") 0.1 else 0
+    p <- if (method == 'jaro_winkler') 0.1 else 0
     score <- rep(NA_real_, n)
     score[both_present] <- 1 - stringdist::stringdist(
       as.character(val_l[both_present]),
       as.character(val_r[both_present]),
-      method = "jw", p = p
+      method = 'jw', p = p
     )
     return(ifelse(both_present & !is.na(score) & score >= threshold, 1L, 0L))
   }
 
-  if (method %in% c("jaccard", "cosine")) {
+  if (method %in% c('jaccard', 'cosine')) {
     threshold <- comp_level$thresholds[1]
-    sd_method <- if (method == "jaccard") "jaccard" else "cosine"
+    sd_method <- if (method == 'jaccard') 'jaccard' else 'cosine'
     score <- rep(NA_real_, n)
     score[both_present] <- 1 - stringdist::stringdist(
       as.character(val_l[both_present]),
@@ -184,12 +192,12 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     return(ifelse(both_present & !is.na(score) & score >= threshold, 1L, 0L))
   }
 
-  if (method %in% c("numeric_diff", "pct_diff")) {
+  if (method %in% c('numeric_diff', 'pct_diff')) {
     threshold <- comp_level$thresholds[1]
     num_l <- suppressWarnings(as.numeric(val_l))
     num_r <- suppressWarnings(as.numeric(val_r))
     bp <- !is.na(num_l) & !is.na(num_r)
-    if (method == "numeric_diff") {
+    if (method == 'numeric_diff') {
       diff <- abs(num_l - num_r)
     } else {
       denom <- pmax(abs(num_l), abs(num_r))
@@ -199,10 +207,15 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     return(ifelse(bp & !is.na(diff) & diff <= threshold, 1L, 0L))
   }
 
-  if (method == "date_diff") {
+  if (method == 'date_diff') {
     threshold_days <- comp_level$thresholds[1]
     unit <- comp_level$units[1]
-    mult <- switch(unit, "days" = 1, "months" = 30, "years" = 365, 1)
+    mult <- switch(unit,
+      'days' = 1,
+      'months' = 30,
+      'years' = 365,
+      1
+    )
     days_thresh <- threshold_days * mult
     date_l <- suppressWarnings(as.Date(val_l))
     date_r <- suppressWarnings(as.Date(val_r))
@@ -211,7 +224,7 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     return(ifelse(bp & !is.na(diff) & diff <= days_thresh, 1L, 0L))
   }
 
-  if (method == "levels") {
+  if (method == 'levels') {
     # Use the first non-null, non-else level for matching
     for (sublevel in comp_level$levels) {
       if (!isTRUE(sublevel$is_null_level) && !isTRUE(sublevel$is_else_level)) {
@@ -239,15 +252,15 @@ get_blocked_pairs <- function(model, blocking) {
   block_where <- build_blocking_condition(blocking$columns)
 
   if (is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l) {
-    dedup_cond <- "l.unique_id < r.unique_id"
+    dedup_cond <- 'l.unique_id < r.unique_id'
     sql <- glue::glue(
-      "SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ",
-      "WHERE {dedup_cond} AND {block_where}"
+      'SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ',
+      'WHERE {dedup_cond} AND {block_where}'
     )
   } else {
     sql <- glue::glue(
-      "SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ",
-      "WHERE {block_where}"
+      'SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ',
+      'WHERE {block_where}'
     )
   }
 
@@ -267,13 +280,13 @@ get_all_pairs <- function(model, max_pairs = 1e6) {
   max_pairs <- as.integer(max_pairs)
   if (is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l) {
     sql <- glue::glue(
-      "SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ",
-      "WHERE l.unique_id < r.unique_id LIMIT {max_pairs}"
+      'SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ',
+      'WHERE l.unique_id < r.unique_id LIMIT {max_pairs}'
     )
   } else {
     sql <- glue::glue(
-      "SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ",
-      "LIMIT {max_pairs}"
+      'SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ',
+      'LIMIT {max_pairs}'
     )
   }
 
@@ -294,8 +307,8 @@ compute_gamma_matrix <- function(pairs, comparisons) {
   for (j in seq_len(n_comp)) {
     comp <- comparisons[[j]]
     col <- comp$columns
-    val_l <- pairs[[paste0("l_", col)]]
-    val_r <- pairs[[paste0("r_", col)]]
+    val_l <- pairs[[paste0('l_', col)]]
+    val_r <- pairs[[paste0('r_', col)]]
     gamma_mat[, j] <- compute_gamma(val_l, val_r, comp$method)
   }
 

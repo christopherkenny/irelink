@@ -31,28 +31,28 @@ il_spec <- function() {
 #'   il_compare(first_name, cl_exact())
 #' print(spec)
 print.il_spec <- function(x, ...) {
-  cat("Linkage Specification\n")
+  cat('Linkage Specification\n')
 
   comps <- x$comparisons
   if (length(comps) == 0L) {
-    cat("  Comparisons: (none)\n")
+    cat('  Comparisons: (none)\n')
   } else {
-    cat(sprintf("  Comparisons (%d):\n", length(comps)))
+    cat(sprintf('  Comparisons (%d):\n', length(comps)))
     for (comp in comps) {
-      cols <- paste(comp$columns, collapse = ", ")
-      method <- comp$method$method %||% "custom"
-      cat(sprintf("    %s : %s\n", cols, method))
+      cols <- paste(comp$columns, collapse = ', ')
+      method <- comp$method$method %||% 'custom'
+      cat(sprintf('    %s : %s\n', cols, method))
     }
   }
 
   rules <- x$blocking_rules
   if (length(rules) == 0L) {
-    cat("  Blocking rules: (none)\n")
+    cat('  Blocking rules: (none)\n')
   } else {
-    cat(sprintf("  Blocking rules (%d, OR-ed):\n", length(rules)))
+    cat(sprintf('  Blocking rules (%d, OR-ed):\n', length(rules)))
     for (i in seq_along(rules)) {
-      cols <- paste(rules[[i]]$columns, collapse = ", ")
-      cat(sprintf("    %d. %s\n", i, cols))
+      cols <- paste(rules[[i]]$columns, collapse = ', ')
+      cat(sprintf('    %d. %s\n', i, cols))
     }
   }
 
@@ -71,5 +71,5 @@ print.il_spec <- function(x, ...) {
 #' @examples
 #' is_il_spec(il_spec())
 is_il_spec <- function(x) {
-  inherits(x, "il_spec")
+  inherits(x, 'il_spec')
 }

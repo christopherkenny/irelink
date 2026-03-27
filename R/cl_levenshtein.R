@@ -15,8 +15,8 @@
 #' il_spec() |>
 #'   il_compare(name, cl_levenshtein(1, 2))
 cl_levenshtein <- function(...) {
-  thresholds <- check_distance_thresholds(c(...), "cl_levenshtein")
-  new_comparison_level("levenshtein", thresholds = thresholds)
+  thresholds <- check_distance_thresholds(c(...), 'cl_levenshtein')
+  new_comparison_level('levenshtein', thresholds = thresholds)
 }
 
 #' Damerau-Levenshtein Edit-Distance Comparison
@@ -35,6 +35,6 @@ cl_levenshtein <- function(...) {
 #' il_spec() |>
 #'   il_compare(name, cl_damerau_levenshtein(1))
 cl_damerau_levenshtein <- function(...) {
-  thresholds <- check_distance_thresholds(c(...), "cl_damerau_levenshtein")
-  new_comparison_level("damerau_levenshtein", thresholds = thresholds)
+  thresholds <- check_distance_thresholds(c(...), 'cl_damerau_levenshtein')
+  new_comparison_level('damerau_levenshtein', thresholds = thresholds)
 }

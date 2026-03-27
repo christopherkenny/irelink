@@ -17,30 +17,40 @@
 #' @examples
 #' df <- data.frame(
 #'   unique_id = 1:20,
-#'   first_name = c("John", "Jon", "Jane", "Jane", "Bob",
-#'                   "Bobby", "Alice", "Alicia", "Tom", "Thomas",
-#'                   "John", "Jon", "Jane", "Janet", "Bob",
-#'                   "Robert", "Alice", "Alison", "Tom", "Tomas"),
-#'   surname = c("Smith", "Smith", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Brown", "White", "White",
-#'               "Smith", "Smyth", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Browne", "White", "White"),
-#'   dob = c("1990-01-01", "1990-01-01", "1985-06-15", "1985-06-15",
-#'           "2000-12-01", "2000-12-01", "1975-03-22", "1975-03-22",
-#'           "1988-07-04", "1988-07-04", "1990-01-01", "1990-01-02",
-#'           "1985-06-15", "1985-06-16", "2000-12-01", "2000-12-02",
-#'           "1975-03-22", "1975-03-23", "1988-07-04", "1988-07-05"),
-#'   city = c("London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid",
-#'            "London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid"),
-#'   email = c("john@example.com", "jon@example.com", "jane@example.com",
-#'             "jane@example.com", "bob@example.com", "bobby@example.com",
-#'             "alice@example.com", "alicia@example.com", "tom@example.com",
-#'             "thomas@example.com", "john@example.com", "jon@example.com",
-#'             "jane@example.com", "janet@example.com", "bob@example.com",
-#'             "robert@example.com", "alice@example.com", "alison@example.com",
-#'             "tom@example.com", "tomas@example.com")
+#'   first_name = c(
+#'     'John', 'Jon', 'Jane', 'Jane', 'Bob',
+#'     'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas',
+#'     'John', 'Jon', 'Jane', 'Janet', 'Bob',
+#'     'Robert', 'Alice', 'Alison', 'Tom', 'Tomas'
+#'   ),
+#'   surname = c(
+#'     'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Brown', 'White', 'White',
+#'     'Smith', 'Smyth', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Browne', 'White', 'White'
+#'   ),
+#'   dob = c(
+#'     '1990-01-01', '1990-01-01', '1985-06-15', '1985-06-15',
+#'     '2000-12-01', '2000-12-01', '1975-03-22', '1975-03-22',
+#'     '1988-07-04', '1988-07-04', '1990-01-01', '1990-01-02',
+#'     '1985-06-15', '1985-06-16', '2000-12-01', '2000-12-02',
+#'     '1975-03-22', '1975-03-23', '1988-07-04', '1988-07-05'
+#'   ),
+#'   city = c(
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid',
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
+#'   ),
+#'   email = c(
+#'     'john@example.com', 'jon@example.com', 'jane@example.com',
+#'     'jane@example.com', 'bob@example.com', 'bobby@example.com',
+#'     'alice@example.com', 'alicia@example.com', 'tom@example.com',
+#'     'thomas@example.com', 'john@example.com', 'jon@example.com',
+#'     'jane@example.com', 'janet@example.com', 'bob@example.com',
+#'     'robert@example.com', 'alice@example.com', 'alison@example.com',
+#'     'tom@example.com', 'tomas@example.com'
+#'   )
 #' )
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
@@ -53,8 +63,8 @@
 #' model <- il_estimate_u(model)
 #' model <- il_estimate_em(model, block_on(surname))
 #' new_df <- data.frame(
-#'   first_name = "Jhon", surname = "Smith",
-#'   dob = "1990-01-15", city = "London"
+#'   first_name = 'Jhon', surname = 'Smith',
+#'   dob = '1990-01-15', city = 'London'
 #' )
 #'
 #' il_find_matches(model, new_df, threshold = 0.5)
@@ -75,10 +85,10 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
 
   # Upload new records to a temporary table for SQL-side blocking
   new_records <- as.data.frame(new_records, stringsAsFactors = FALSE)
-  if (!("unique_id" %in% names(new_records))) {
-    new_records$unique_id <- paste0("new_", seq_len(nrow(new_records)))
+  if (!('unique_id' %in% names(new_records))) {
+    new_records$unique_id <- paste0('new_', seq_len(nrow(new_records)))
   }
-  tbl_new <- "__il_find_new"
+  tbl_new <- '__il_find_new'
   DBI::dbWriteTable(con, tbl_new, new_records, overwrite = TRUE)
   on.exit(DBI::dbRemoveTable(con, tbl_new, fail_if_missing = FALSE), add = TRUE)
 
@@ -88,29 +98,29 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     # SQL-first: compute gammas in database
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)
-      glue::glue("{expr} AS gamma_{comp$columns}")
+      glue::glue('{expr} AS gamma_{comp$columns}')
     }, character(1))
-    gamma_select <- paste(gamma_exprs, collapse = ", ")
+    gamma_select <- paste(gamma_exprs, collapse = ', ')
 
     if (length(blocking_rules) > 0L) {
       block_parts <- vapply(blocking_rules, function(br) {
-        cond <- build_blocking_condition(br$columns)
+        cond <- build_blocking_condition(br$columns, br$where)
         glue::glue(
-          "SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ",
-          "{gamma_select} ",
-          "FROM {tbl_new} l, {tbl_existing} r ",
-          "WHERE {cond}"
+          'SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ',
+          '{gamma_select} ',
+          'FROM {tbl_new} l, {tbl_existing} r ',
+          'WHERE {cond}'
         )
       }, character(1))
-      inner <- paste(block_parts, collapse = " UNION ")
+      inner <- paste(block_parts, collapse = ' UNION ')
     } else {
       inner <- glue::glue(
-        "SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ",
-        "{gamma_select} ",
-        "FROM {tbl_new} l, {tbl_existing} r"
+        'SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ',
+        '{gamma_select} ',
+        'FROM {tbl_new} l, {tbl_existing} r'
       )
     }
-    sql <- glue::glue("SELECT DISTINCT * FROM ({inner}) AS pairs")
+    sql <- glue::glue('SELECT DISTINCT * FROM ({inner}) AS pairs')
     result_raw <- DBI::dbGetQuery(con, sql)
 
     if (nrow(result_raw) == 0L) {
@@ -120,9 +130,9 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
       ))
     }
 
-    gamma_cols <- paste0("gamma_", comp_names)
+    gamma_cols <- paste0('gamma_', comp_names)
     gamma_mat <- as.matrix(result_raw[, gamma_cols, drop = FALSE])
-    storage.mode(gamma_mat) <- "integer"
+    storage.mode(gamma_mat) <- 'integer'
     colnames(gamma_mat) <- comp_names
 
     match_weight <- score_gamma_matrix(gamma_mat, mu)
@@ -137,25 +147,25 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
   } else {
     # Fallback: R-side gamma computation
     block_cols <- unique(unlist(lapply(blocking_rules, function(r) r$columns)))
-    needed_cols <- unique(c("unique_id", comp_cols, block_cols))
+    needed_cols <- unique(c('unique_id', comp_cols, block_cols))
     new_cols <- intersect(needed_cols, names(new_records))
-    sel_l <- paste(glue::glue("l.{new_cols} AS l_{new_cols}"), collapse = ", ")
-    sel_r <- paste(glue::glue("r.{needed_cols} AS r_{needed_cols}"), collapse = ", ")
+    sel_l <- paste(glue::glue('l.{new_cols} AS l_{new_cols}'), collapse = ', ')
+    sel_r <- paste(glue::glue('r.{needed_cols} AS r_{needed_cols}'), collapse = ', ')
 
     all_pair_frames <- list()
     if (length(blocking_rules) > 0L) {
       for (br in blocking_rules) {
-        block_where <- build_blocking_condition(br$columns)
+        block_where <- build_blocking_condition(br$columns, br$where)
         sql <- glue::glue(
-          "SELECT {sel_l}, {sel_r} FROM {tbl_new} l, {tbl_existing} r ",
-          "WHERE {block_where}"
+          'SELECT {sel_l}, {sel_r} FROM {tbl_new} l, {tbl_existing} r ',
+          'WHERE {block_where}'
         )
         bp <- DBI::dbGetQuery(con, sql)
         if (nrow(bp) > 0L) all_pair_frames <- c(all_pair_frames, list(bp))
       }
     } else {
       sql <- glue::glue(
-        "SELECT {sel_l}, {sel_r} FROM {tbl_new} l, {tbl_existing} r"
+        'SELECT {sel_l}, {sel_r} FROM {tbl_new} l, {tbl_existing} r'
       )
       bp <- DBI::dbGetQuery(con, sql)
       if (nrow(bp) > 0L) all_pair_frames <- list(bp)
@@ -169,7 +179,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     }
 
     pairs <- do.call(rbind, all_pair_frames)
-    pair_key <- paste(pairs$l_unique_id, pairs$r_unique_id, sep = "||")
+    pair_key <- paste(pairs$l_unique_id, pairs$r_unique_id, sep = '||')
     pairs <- pairs[!duplicated(pair_key), , drop = FALSE]
 
     gamma_mat <- compute_gamma_matrix(pairs, comparisons)

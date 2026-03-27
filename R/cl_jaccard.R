@@ -14,6 +14,6 @@
 #' il_spec() |>
 #'   il_compare(name, cl_jaccard(0.9))
 cl_jaccard <- function(...) {
-  thresholds <- check_similarity_thresholds(c(...), "cl_jaccard")
-  new_comparison_level("jaccard", thresholds = thresholds)
+  thresholds <- check_similarity_thresholds(c(...), 'cl_jaccard')
+  new_comparison_level('jaccard', thresholds = thresholds)
 }

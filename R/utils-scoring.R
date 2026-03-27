@@ -12,10 +12,10 @@ extract_mu_vectors <- function(params, comp_names) {
   m_match <- m_nonmatch <- u_match <- u_nonmatch <- numeric(n)
   for (j in seq_len(n)) {
     cn <- comp_names[j]
-    m_match[j]    <- params$m[params$comparison == cn & params$level == "match"]
-    m_nonmatch[j] <- params$m[params$comparison == cn & params$level == "non_match"]
-    u_match[j]    <- params$u[params$comparison == cn & params$level == "match"]
-    u_nonmatch[j] <- params$u[params$comparison == cn & params$level == "non_match"]
+    m_match[j] <- params$m[params$comparison == cn & params$level == 'match']
+    m_nonmatch[j] <- params$m[params$comparison == cn & params$level == 'non_match']
+    u_match[j] <- params$u[params$comparison == cn & params$level == 'match']
+    u_nonmatch[j] <- params$u[params$comparison == cn & params$level == 'non_match']
   }
   list(
     m_match = m_match, m_nonmatch = m_nonmatch,

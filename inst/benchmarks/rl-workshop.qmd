@@ -1,0 +1,183 @@
+---
+title: "irelink demo"
+format:
+  html:
+    embed-resources: true
+---
+
+This is a direct translation for demo purposes of [Eric Manning's rl-bootcamp splink demo](https://github.com/ericmanning/rl-bootcamp).
+
+```{r}
+# # Create demo data in a duckdb
+# library(irelink)
+# library(duckdb)
+# library(DBI)
+
+# df <- il_demo('fake_1000')
+
+# con <- dbConnect(duckdb(), '../../../rl-bootcamp/data/demo.db')
+
+# dbWriteTable(con, 'fake_data', df)
+
+# dbDisconnect(con, shutdown = TRUE)
+```
+
+```{r}
+library(duckdb)
+library(DBI)
+
+con <- dbConnect(duckdb(), '../../../rl-bootcamp/data/demo.db')
+
+dbGetQuery(con, 'select * from fake_data limit 5')
+```
+
+```{r}
+# library(duckdb)
+devtools::load_all()
+library(ggplot2)
+```
+
+```{r}
+spec <- il_spec() |>
+
+  # see https://moj-analytical-services.github.io/splink/api_docs/comparison_library.html
+
+  il_compare(first_name, cl_name()) |>
+  il_compare(surname, cl_name()) |>
+
+  il_compare(dob, cl_dob()) |>
+
+  il_compare(city, cl_exact(term_frequency = TRUE)) |>
+
+  il_compare(email, cl_email()) |>
+
+  il_block_on(first_name) |>
+  il_block_on(surname) |> # alternatively, you can write rules in their SQL form
+
+  # NOTE: .where accepted but not yet wired into SQL generation
+  il_block_on(
+    city,
+    .where = "substr(l.first_name, 1, 1) = substr(r.first_name, 1, 1)"
+  ) |>
+  il_block_on(
+    city,
+    .where = "substr(l.surname, 1, 1) = substr(r.surname, 1, 1)"
+  )
+
+# NOTE: no equivalents for retain_intermediate_calculation_columns or em_convergence
+```
+
+```{r}
+# (connection already established above)
+```
+
+```{r}
+il_profile(
+  dbGetQuery(con, 'select * exclude unique_id from fake_data'),
+  con = con
+)
+```
+
+```{r}
+il_count_pairs(
+  dbGetQuery(con, 'select * from fake_data'),
+  block_on(first_name),
+  block_on(surname),
+  block_on(city),
+  block_on(city),
+  con = con
+)
+```
+
+```{r}
+model <- il_model(
+  dbGetQuery(con, 'select * from fake_data'),
+  spec = spec,
+  con = con
+)
+```
+
+```{r}
+## Train lambda via rules that we think really yield matches
+
+# NOTE: block_on() supports exact equality only; levenshtein thresholds approximated
+deterministic_rules <- list(
+  block_on(first_name, dob), # l.first_name = r.first_name and levenshtein(r.dob, l.dob) <= 1
+  block_on(surname, dob), # l.surname = r.surname and levenshtein(r.dob, l.dob) <= 1
+  block_on(first_name, surname), # l.first_name = r.first_name and levenshtein(r.surname, l.surname) <= 2
+  block_on(email)
+)
+
+# recall: estimated % of true matches captured by this set of rules
+model <- do.call(
+  il_estimate_prior,
+  c(list(model), deterministic_rules, list(recall = 0.6))
+)
+```
+
+```{r}
+model <- il_estimate_u(model, max_pairs = 5e5)
+```
+
+```{r}
+training_blocking_rule <- 'l.first_name = r.first_name and l.surname = r.surname'
+
+model <- il_estimate_em(model, block_on(first_name, surname))
+```
+
+```{r}
+training_blocking_rule <- 'l.dob = r.dob'
+
+model <- il_estimate_em(model, block_on(dob))
+```
+
+```{r}
+autoplot(model)
+```
+
+```{r}
+il_weights(model)
+```
+
+```{r}
+il_training_history(model)
+```
+
+```{r}
+il_unlinkables(model)
+```
+
+```{r}
+il_save(model, 'demo_model.json', overwrite = TRUE)
+```
+
+```{r}
+## use higher value if output data is likely large
+predictions <- predict(model, threshold = 0.1)
+```
+
+```{r}
+head(predictions, 5)
+```
+
+```{r}
+clusters <- il_cluster(predictions, threshold = 0.85)
+
+head(clusters, 5)
+```
+
+```{r}
+cluster_count <- c()
+
+for (i in c(0.7, 0.75, 0.8, 0.85, 0.9, 0.95)) {
+  clusters <- il_cluster(predictions, threshold = i)
+  c <- length(unique(clusters$cluster_id))
+  cluster_count <- c(cluster_count, c)
+}
+
+cluster_count
+```
+
+```{r}
+dbDisconnect(con, shutdown = TRUE)
+```

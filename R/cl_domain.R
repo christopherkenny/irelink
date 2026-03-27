@@ -91,10 +91,10 @@ cl_forename_surname <- function(...) {
   cl_levels(
     cl_null(),
     cl_exact(),
-    cl_custom("l.{col_forename} = r.{col_surname} AND l.{col_surname} = r.{col_forename}"),
+    cl_custom('l.{col_forename} = r.{col_surname} AND l.{col_surname} = r.{col_forename}'),
     cl_jaro_winkler(0.92),
     cl_jaro_winkler(0.88),
-    cl_custom("l.{col_forename} = r.{col_forename}"),
+    cl_custom('l.{col_forename} = r.{col_forename}'),
     cl_else()
   )
 }
@@ -116,9 +116,9 @@ cl_postcode <- function(...) {
   cl_levels(
     cl_null(),
     cl_exact(),
-    cl_custom("SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 1) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 1)"),
-    cl_custom("SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 2) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 2)"),
-    cl_custom("SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 3) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 3)"),
+    cl_custom('SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 1) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 1)'),
+    cl_custom('SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 2) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 2)'),
+    cl_custom('SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 3) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 3)'),
     cl_else()
   )
 }

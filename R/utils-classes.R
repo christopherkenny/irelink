@@ -14,7 +14,7 @@
 new_il_spec <- function(comparisons = list(), blocking_rules = list()) {
   structure(
     list(comparisons = comparisons, blocking_rules = blocking_rules),
-    class = "il_spec"
+    class = 'il_spec'
   )
 }
 
@@ -28,12 +28,12 @@ new_il_spec <- function(comparisons = list(), blocking_rules = list()) {
 #' @return `x`, invisibly.
 #' @noRd
 validate_il_spec <- function(x) {
-  if (!inherits(x, "il_spec")) {
-    cli::cli_abort("{.arg spec} must be an {.cls il_spec} object.")
+  if (!inherits(x, 'il_spec')) {
+    cli::cli_abort('{.arg spec} must be an {.cls il_spec} object.')
   }
   if (!is.list(x) || is.null(x$comparisons) || is.null(x$blocking_rules)) {
     cli::cli_abort(
-      "{.cls il_spec} must contain {.field comparisons} and {.field blocking_rules}."
+      '{.cls il_spec} must contain {.field comparisons} and {.field blocking_rules}.'
     )
   }
   invisible(x)
@@ -54,7 +54,7 @@ validate_il_spec <- function(x) {
 #' @return An `il_model` object.
 #' @noRd
 new_il_model <- function(spec = new_il_spec(), data = list(), con = NULL,
-                         link_type = "dedupe", params = list(),
+                         link_type = 'dedupe', params = list(),
                          trained = FALSE) {
   structure(
     list(
@@ -65,7 +65,7 @@ new_il_model <- function(spec = new_il_spec(), data = list(), con = NULL,
       params = params,
       trained = trained
     ),
-    class = "il_model"
+    class = 'il_model'
   )
 }
 
@@ -79,8 +79,8 @@ new_il_model <- function(spec = new_il_spec(), data = list(), con = NULL,
 #' @return `x`, invisibly.
 #' @noRd
 validate_il_model <- function(x) {
-  if (!inherits(x, "il_model")) {
-    cli::cli_abort("{.arg model} must be an {.cls il_model} object.")
+  if (!inherits(x, 'il_model')) {
+    cli::cli_abort('{.arg model} must be an {.cls il_model} object.')
   }
   invisible(x)
 }
@@ -96,10 +96,10 @@ validate_il_model <- function(x) {
 #' @return An `il_compared` tibble.
 #' @noRd
 new_il_compared <- function(x = tibble::tibble(), model = NULL) {
-  if (!inherits(x, "tbl_df")) {
-    cli::cli_abort("{.arg x} must be a tibble.")
+  if (!inherits(x, 'tbl_df')) {
+    cli::cli_abort('{.arg x} must be a tibble.')
   }
-  structure(x, class = c("il_compared", class(x)), model = model)
+  structure(x, class = c('il_compared', class(x)), model = model)
 }
 
 #' Validate an il_compared Object
@@ -112,8 +112,8 @@ new_il_compared <- function(x = tibble::tibble(), model = NULL) {
 #' @return `x`, invisibly.
 #' @noRd
 validate_il_compared <- function(x) {
-  if (!inherits(x, "il_compared")) {
-    cli::cli_abort("{.arg pairs} must be an {.cls il_compared} object.")
+  if (!inherits(x, 'il_compared')) {
+    cli::cli_abort('{.arg pairs} must be an {.cls il_compared} object.')
   }
   invisible(x)
 }
@@ -134,8 +134,10 @@ validate_il_compared <- function(x) {
 new_comparison_level <- function(method, ..., is_null_level = FALSE,
                                  is_else_level = FALSE) {
   structure(
-    c(list(method = method), list(...),
-      list(is_null_level = is_null_level, is_else_level = is_else_level)),
-    class = "il_comparison_level"
+    c(
+      list(method = method), list(...),
+      list(is_null_level = is_null_level, is_else_level = is_else_level)
+    ),
+    class = 'il_comparison_level'
   )
 }

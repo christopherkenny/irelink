@@ -14,7 +14,7 @@
 #' @export
 #'
 #' @examples
-#' df <- il_demo("fake_20")
+#' df <- il_demo('fake_20')
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
@@ -38,38 +38,38 @@ il_estimate_m_from_column <- function(model, label_col) {
   # Verify label column exists using DBI-portable approach
   tbl_cols <- DBI::dbListFields(con, tbl)
   if (!col_name %in% tbl_cols) {
-    cli::cli_abort("Column {.field {col_name}} not found in the data.")
+    cli::cli_abort('Column {.field {col_name}} not found in the data.')
   }
 
   if (dialect_has_fuzzy_sql(dialect)) {
     # SQL-first: within-cluster self-join + gamma computation in SQL
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)
-      glue::glue("{expr} AS gamma_{comp$columns}")
+      glue::glue('{expr} AS gamma_{comp$columns}')
     }, character(1))
-    gamma_select <- paste(gamma_exprs, collapse = ", ")
+    gamma_select <- paste(gamma_exprs, collapse = ', ')
 
     sql <- glue::glue(
-      "SELECT {gamma_select} ",
-      "FROM {tbl} l, {tbl} r ",
-      "WHERE l.{col_name} IS NOT NULL AND l.{col_name} = r.{col_name} ",
-      "AND l.unique_id < r.unique_id"
+      'SELECT {gamma_select} ',
+      'FROM {tbl} l, {tbl} r ',
+      'WHERE l.{col_name} IS NOT NULL AND l.{col_name} = r.{col_name} ',
+      'AND l.unique_id < r.unique_id'
     )
     result <- DBI::dbGetQuery(con, sql)
 
     if (nrow(result) == 0L) {
-      cli::cli_abort("No within-cluster pairs found for column {.field {col_name}}.")
+      cli::cli_abort('No within-cluster pairs found for column {.field {col_name}}.')
     }
 
-    gamma_cols <- paste0("gamma_", comp_names)
+    gamma_cols <- paste0('gamma_', comp_names)
     gamma_mat <- as.matrix(result[, gamma_cols, drop = FALSE])
-    storage.mode(gamma_mat) <- "integer"
+    storage.mode(gamma_mat) <- 'integer'
     colnames(gamma_mat) <- comp_names
   } else {
     # Fallback: R-side pair generation
     data <- DBI::dbReadTable(con, tbl)
     if (!col_name %in% names(data)) {
-      cli::cli_abort("Column {.field {col_name}} not found in the data.")
+      cli::cli_abort('Column {.field {col_name}} not found in the data.')
     }
     labels <- data[[col_name]]
     unique_labels <- unique(labels[!is.na(labels)])
@@ -83,15 +83,15 @@ il_estimate_m_from_column <- function(model, label_col) {
         i <- combos[1, k]
         j <- combos[2, k]
         pair <- as.data.frame(c(
-          stats::setNames(as.list(data[i, ]), paste0("l_", names(data))),
-          stats::setNames(as.list(data[j, ]), paste0("r_", names(data)))
+          stats::setNames(as.list(data[i, ]), paste0('l_', names(data))),
+          stats::setNames(as.list(data[j, ]), paste0('r_', names(data)))
         ))
         pair_rows <- c(pair_rows, list(pair))
       }
     }
 
     if (length(pair_rows) == 0L) {
-      cli::cli_abort("No within-cluster pairs found for column {.field {col_name}}.")
+      cli::cli_abort('No within-cluster pairs found for column {.field {col_name}}.')
     }
 
     pairs <- do.call(rbind, pair_rows)
@@ -105,14 +105,14 @@ il_estimate_m_from_column <- function(model, label_col) {
     params <- model$params$comparisons
     for (j in seq_along(comp_names)) {
       cn <- comp_names[j]
-      params$m[params$comparison == cn & params$level == "match"] <- m_match[j]
-      params$m[params$comparison == cn & params$level == "non_match"] <- m_nonmatch[j]
+      params$m[params$comparison == cn & params$level == 'match'] <- m_match[j]
+      params$m[params$comparison == cn & params$level == 'non_match'] <- m_nonmatch[j]
     }
     model$params$comparisons <- params
   } else {
     model$params$comparisons <- tibble::tibble(
       comparison = rep(comp_names, each = 2L),
-      level = rep(c("match", "non_match"), times = length(comp_names)),
+      level = rep(c('match', 'non_match'), times = length(comp_names)),
       m = as.numeric(rbind(m_match, m_nonmatch)),
       u = NA_real_
     )

@@ -17,30 +17,40 @@
 #' @examples
 #' df <- data.frame(
 #'   unique_id = 1:20,
-#'   first_name = c("John", "Jon", "Jane", "Jane", "Bob",
-#'                   "Bobby", "Alice", "Alicia", "Tom", "Thomas",
-#'                   "John", "Jon", "Jane", "Janet", "Bob",
-#'                   "Robert", "Alice", "Alison", "Tom", "Tomas"),
-#'   surname = c("Smith", "Smith", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Brown", "White", "White",
-#'               "Smith", "Smyth", "Doe", "Doe", "Jones",
-#'               "Jones", "Brown", "Browne", "White", "White"),
-#'   dob = c("1990-01-01", "1990-01-01", "1985-06-15", "1985-06-15",
-#'           "2000-12-01", "2000-12-01", "1975-03-22", "1975-03-22",
-#'           "1988-07-04", "1988-07-04", "1990-01-01", "1990-01-02",
-#'           "1985-06-15", "1985-06-16", "2000-12-01", "2000-12-02",
-#'           "1975-03-22", "1975-03-23", "1988-07-04", "1988-07-05"),
-#'   city = c("London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid",
-#'            "London", "London", "Paris", "Paris", "Berlin",
-#'            "Berlin", "Rome", "Rome", "Madrid", "Madrid"),
-#'   email = c("john@example.com", "jon@example.com", "jane@example.com",
-#'             "jane@example.com", "bob@example.com", "bobby@example.com",
-#'             "alice@example.com", "alicia@example.com", "tom@example.com",
-#'             "thomas@example.com", "john@example.com", "jon@example.com",
-#'             "jane@example.com", "janet@example.com", "bob@example.com",
-#'             "robert@example.com", "alice@example.com", "alison@example.com",
-#'             "tom@example.com", "tomas@example.com")
+#'   first_name = c(
+#'     'John', 'Jon', 'Jane', 'Jane', 'Bob',
+#'     'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas',
+#'     'John', 'Jon', 'Jane', 'Janet', 'Bob',
+#'     'Robert', 'Alice', 'Alison', 'Tom', 'Tomas'
+#'   ),
+#'   surname = c(
+#'     'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Brown', 'White', 'White',
+#'     'Smith', 'Smyth', 'Doe', 'Doe', 'Jones',
+#'     'Jones', 'Brown', 'Browne', 'White', 'White'
+#'   ),
+#'   dob = c(
+#'     '1990-01-01', '1990-01-01', '1985-06-15', '1985-06-15',
+#'     '2000-12-01', '2000-12-01', '1975-03-22', '1975-03-22',
+#'     '1988-07-04', '1988-07-04', '1990-01-01', '1990-01-02',
+#'     '1985-06-15', '1985-06-16', '2000-12-01', '2000-12-02',
+#'     '1975-03-22', '1975-03-23', '1988-07-04', '1988-07-05'
+#'   ),
+#'   city = c(
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid',
+#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
+#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
+#'   ),
+#'   email = c(
+#'     'john@example.com', 'jon@example.com', 'jane@example.com',
+#'     'jane@example.com', 'bob@example.com', 'bobby@example.com',
+#'     'alice@example.com', 'alicia@example.com', 'tom@example.com',
+#'     'thomas@example.com', 'john@example.com', 'jon@example.com',
+#'     'jane@example.com', 'janet@example.com', 'bob@example.com',
+#'     'robert@example.com', 'alice@example.com', 'alison@example.com',
+#'     'tom@example.com', 'tomas@example.com'
+#'   )
 #' )
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' il_count_pairs(
@@ -51,7 +61,7 @@
 #' )
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_count_pairs <- function(.data, ..., con,
-                           link_type = c("dedupe", "link")) {
+                           link_type = c('dedupe', 'link')) {
   link_type <- match.arg(link_type)
   dots <- list(...)
 
@@ -59,19 +69,19 @@ il_count_pairs <- function(.data, ..., con,
   blocking_rules <- list()
   extra_dfs <- list()
   for (d in dots) {
-    if (inherits(d, "il_blocking_rule")) {
+    if (inherits(d, 'il_blocking_rule')) {
       blocking_rules <- c(blocking_rules, list(d))
     } else if (is.data.frame(d)) {
       extra_dfs <- c(extra_dfs, list(d))
     }
   }
 
-  tbl_l <- "__il_pairs_l"
+  tbl_l <- '__il_pairs_l'
   DBI::dbWriteTable(con, tbl_l, .data, overwrite = TRUE)
   on.exit(DBI::dbRemoveTable(con, tbl_l, fail_if_missing = FALSE), add = TRUE)
 
-  if (link_type == "link" && length(extra_dfs) > 0L) {
-    tbl_r <- "__il_pairs_r"
+  if (link_type == 'link' && length(extra_dfs) > 0L) {
+    tbl_r <- '__il_pairs_r'
     DBI::dbWriteTable(con, tbl_r, extra_dfs[[1]], overwrite = TRUE)
     on.exit(DBI::dbRemoveTable(con, tbl_r, fail_if_missing = FALSE), add = TRUE)
   } else {
@@ -80,22 +90,23 @@ il_count_pairs <- function(.data, ..., con,
 
   if (length(blocking_rules) == 0L) {
     # Cartesian count
-    if (link_type == "dedupe") {
+    if (link_type == 'dedupe') {
       n <- nrow(.data)
       n_pairs <- as.integer(n * (n - 1L) / 2L)
     } else {
       n_pairs <- as.integer(nrow(.data) * nrow(extra_dfs[[1]]))
     }
-    return(tibble::tibble(rule = "cartesian", n_pairs = n_pairs))
+    return(tibble::tibble(rule = 'cartesian', n_pairs = n_pairs))
   }
 
   results <- lapply(blocking_rules, function(rule) {
-    cols <- rule$columns
-    where <- build_blocking_condition(cols)
+    where <- build_blocking_condition(rule$columns, rule$where)
     n <- count_blocked_pairs(con, tbl_l, tbl_r, where,
-                             dedupe = (link_type == "dedupe"))
+      dedupe = (link_type == 'dedupe')
+    )
+    label <- if (length(rule$columns) > 0L) paste(rule$columns, collapse = ' & ') else rule$where
     tibble::tibble(
-      rule = paste(cols, collapse = " & "),
+      rule = label,
       n_pairs = as.integer(n)
     )
   })

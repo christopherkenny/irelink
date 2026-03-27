@@ -23,5 +23,5 @@ semantics.
 }
 \examples{
 il_spec() |>
-  il_compare(score, cl_custom("l.score + r.score > 10"))
+  il_compare(score, cl_custom('l.score + r.score > 10'))
 }
