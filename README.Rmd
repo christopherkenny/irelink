@@ -36,15 +36,18 @@ pak::pak('christopherkenny/irelink')
 
 ## Example
 
-A typical linkage workflow defines comparisons, trains a model, predicts matches, and clusters results:
+Start by loading a demo dataset and connecting to a SQL backend.
 
-```{r example}
+```{r load}
 library(irelink)
 
 df <- il_demo("fake_20")
 con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+```
 
-# Define how to compare records
+Define an `il_spec` with comparison functions and blocking rules, then train:
+
+```{r train}
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -52,17 +55,24 @@ spec <- il_spec() |>
   il_block_on(surname) |>
   il_block_on(first_name)
 
-# Build and train the model
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
+```
 
-# Predict and cluster
+Score candidate pairs above a match-probability threshold, then cluster into entities:
+
+```{r predict}
 pairs <- predict(model, threshold = 0.5)
-clusters <- il_cluster(pairs)
-head(clusters)
+pairs
 
-# Clean up
+clusters <- il_cluster(pairs)
+clusters
+```
+
+Finally, drop the temporary tables and close the connection:
+
+```{r cleanup}
 il_cleanup(model)
 DBI::dbDisconnect(con)
 ```
