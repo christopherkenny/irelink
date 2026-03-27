@@ -16,6 +16,7 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
   dialect <- detect_dialect(con)
   comparisons <- model$spec$comparisons
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  tf_cols <- tf_columns(comparisons)
 
   if (dialect_has_fuzzy_sql(dialect)) {
     sql <- build_gamma_query(model, blocking_rules, limit = limit)
@@ -28,7 +29,8 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
         gamma_mat = matrix(0L,
           nrow = 0, ncol = length(comp_names),
           dimnames = list(NULL, comp_names)
-        )
+        ),
+        tf_data = NULL
       ))
     }
     ids <- result[, c('l_unique_id', 'r_unique_id'), drop = FALSE]
@@ -36,7 +38,21 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
     gamma_mat <- as.matrix(result[, gamma_cols, drop = FALSE])
     storage.mode(gamma_mat) <- 'integer'
     colnames(gamma_mat) <- comp_names
-    return(list(ids = ids, gamma_mat = gamma_mat))
+
+    # Extract TF data if present
+    tf_data <- NULL
+    if (length(tf_cols) > 0L) {
+      tf_col_names <- c(
+        paste0('tf_', tf_cols, '_l'),
+        paste0('tf_', tf_cols, '_r')
+      )
+      present <- intersect(tf_col_names, names(result))
+      if (length(present) > 0L) {
+        tf_data <- result[, present, drop = FALSE]
+      }
+    }
+
+    return(list(ids = ids, gamma_mat = gamma_mat, tf_data = tf_data))
   }
 
   # Fallback: pull pairs, compute gammas in R
@@ -53,7 +69,8 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
       gamma_mat = matrix(0L,
         nrow = 0, ncol = length(comp_names),
         dimnames = list(NULL, comp_names)
-      )
+      ),
+      tf_data = NULL
     ))
   }
   pairs <- do.call(rbind, all_pairs)
@@ -67,7 +84,14 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
     r_unique_id = pairs$r_unique_id
   )
   gamma_mat <- compute_gamma_matrix(pairs, comparisons)
-  list(ids = ids, gamma_mat = gamma_mat)
+
+  # R-side TF lookup
+  tf_data <- NULL
+  if (length(tf_cols) > 0L) {
+    tf_data <- lookup_tf_r(model, pairs, tf_cols)
+  }
+
+  list(ids = ids, gamma_mat = gamma_mat, tf_data = tf_data)
 }
 
 #' Get random pairs with gammas (for u estimation)

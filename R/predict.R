@@ -99,6 +99,20 @@ predict.il_model <- function(object, threshold = 0.85,
   n_comp <- length(comparisons)
   mu <- extract_mu_vectors(params, comp_names)
   match_weight <- score_gamma_matrix(gamma_mat, mu)
+
+  # Apply term-frequency adjustments
+  tf_cols <- tf_columns(comparisons)
+  tf_adj_list <- NULL
+  if (length(tf_cols) > 0L && !is.null(result_data$tf_data)) {
+    tf_adj <- compute_tf_adjustment(
+      gamma_mat, result_data$tf_data, comparisons, mu
+    )
+    match_weight <- match_weight + tf_adj
+    tf_adj_list <- compute_tf_adjustment_matrix(
+      gamma_mat, result_data$tf_data, comparisons, mu
+    )
+  }
+
   match_probability <- weight_to_probability(match_weight, prior)
 
   result <- tibble::tibble(
@@ -109,6 +123,13 @@ predict.il_model <- function(object, threshold = 0.85,
   )
   for (j in seq_len(n_comp)) {
     result[[paste0('gamma_', comp_names[j])]] <- gamma_mat[, j]
+  }
+
+  # Store per-comparison TF adjustments for waterfall
+  if (!is.null(tf_adj_list)) {
+    for (col in names(tf_adj_list)) {
+      result[[paste0('tf_adj_', col)]] <- tf_adj_list[[col]]
+    }
   }
 
   result <- result[result$match_probability >= threshold, , drop = FALSE]

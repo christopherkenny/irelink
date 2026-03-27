@@ -154,6 +154,13 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL) {
   }, character(1))
   gamma_select <- paste(gamma_exprs, collapse = ', ')
 
+  # TF SELECT expressions (scalar subqueries against pre-computed TF tables)
+  tf_cols <- tf_columns(comparisons)
+  tf_select <- sql_tf_select_exprs(tf_cols)
+  if (!is.null(tf_select)) {
+    gamma_select <- paste(gamma_select, tf_select, sep = ', ')
+  }
+
   if (length(blocking_rules) > 0L) {
     block_parts <- vapply(blocking_rules, function(br) {
       cond <- build_blocking_condition(br$columns, br$where)

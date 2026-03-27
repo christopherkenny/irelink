@@ -102,6 +102,13 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
 
+    # TF SELECT expressions
+    tf_cols <- tf_columns(comparisons)
+    tf_select <- sql_tf_select_exprs(tf_cols)
+    if (!is.null(tf_select)) {
+      gamma_select <- paste(gamma_select, tf_select, sep = ', ')
+    }
+
     if (length(blocking_rules) > 0L) {
       block_parts <- vapply(blocking_rules, function(br) {
         cond <- build_blocking_condition(br$columns, br$where)
@@ -136,6 +143,21 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     colnames(gamma_mat) <- comp_names
 
     match_weight <- score_gamma_matrix(gamma_mat, mu)
+
+    # Apply TF adjustments
+    if (length(tf_cols) > 0L) {
+      tf_col_names <- c(
+        paste0('tf_', tf_cols, '_l'),
+        paste0('tf_', tf_cols, '_r')
+      )
+      present <- intersect(tf_col_names, names(result_raw))
+      if (length(present) > 0L) {
+        tf_data <- result_raw[, present, drop = FALSE]
+        tf_adj <- compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
+        match_weight <- match_weight + tf_adj
+      }
+    }
+
     match_probability <- weight_to_probability(match_weight, prior)
 
     result <- tibble::tibble(
@@ -184,6 +206,15 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
 
     gamma_mat <- compute_gamma_matrix(pairs, comparisons)
     match_weight <- score_gamma_matrix(gamma_mat, mu)
+
+    # Apply TF adjustments (R-side)
+    tf_cols <- tf_columns(comparisons)
+    if (length(tf_cols) > 0L) {
+      tf_data <- lookup_tf_r(model, pairs, tf_cols)
+      tf_adj <- compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
+      match_weight <- match_weight + tf_adj
+    }
+
     match_probability <- weight_to_probability(match_weight, prior)
 
     result <- tibble::tibble(

@@ -223,7 +223,8 @@ A dedicated function adds little value.
 
 **Why deferred:** In R, `DBI::dbWriteTable()` and
 `dplyr::copy_to()` handle table registration. Term-frequency tables
-will be computed internally by `cl_exact(term_frequency = TRUE)`.
+are computed internally by `cl_exact(term_frequency = TRUE)` at model
+creation time (see `compute_tf_tables()` in `utils-tf.R`).
 `il_cleanup()` (now stubbed) covers cache/table cleanup. The remaining
 register functions are Python-specific workflow steps that do not
 translate directly to idiomatic R.

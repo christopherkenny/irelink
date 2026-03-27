@@ -117,7 +117,8 @@ il_model <- function(.data, ..., spec, con,
     link_type = link_type,
     params = list(),
     trained = FALSE
-  )
+  ) |>
+    compute_tf_tables()
 }
 
 #' Print an irelink Model

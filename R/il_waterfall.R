@@ -80,7 +80,17 @@ il_waterfall <- function(pairs, which = 1L) {
   gamma <- vapply(comp_names, function(cn) {
     as.integer(row[[paste0('gamma_', cn)]])
   }, integer(1))
-  contributions <- per_comparison_contribution(gamma, mu)
+
+  # Collect per-comparison TF adjustments from stored columns
+  tf_adjs <- vapply(comp_names, function(cn) {
+    col_name <- paste0('tf_adj_', cn)
+    if (col_name %in% names(row)) as.numeric(row[[col_name]]) else 0
+  }, numeric(1))
+
+  has_tf <- any(tf_adjs != 0)
+  contributions <- per_comparison_contribution(
+    gamma, mu, if (has_tf) tf_adjs else NULL
+  )
 
   direction <- ifelse(contributions >= 0, 'positive', 'negative')
 

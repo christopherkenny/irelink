@@ -56,10 +56,17 @@ weight_to_probability <- function(match_weight, prior) {
 #'
 #' @param gamma Integer vector (one per comparison) for a single pair.
 #' @param mu A list from `extract_mu_vectors()`.
+#' @param tf_adjs Optional numeric vector of per-comparison TF adjustments
+#'   (same length as `gamma`). Added to the base contribution for comparisons
+#'   with term-frequency weighting.
 #' @return Numeric vector of contributions (one per comparison).
 #' @noRd
-per_comparison_contribution <- function(gamma, mu) {
+per_comparison_contribution <- function(gamma, mu, tf_adjs = NULL) {
   w1 <- log2(pmax(mu$m_match, 1e-10) / pmax(mu$u_match, 1e-10))
   w0 <- log2(pmax(mu$m_nonmatch, 1e-10) / pmax(mu$u_nonmatch, 1e-10))
-  ifelse(gamma == 1L, w1, w0)
+  contrib <- ifelse(gamma == 1L, w1, w0)
+  if (!is.null(tf_adjs)) {
+    contrib <- contrib + tf_adjs
+  }
+  contrib
 }
