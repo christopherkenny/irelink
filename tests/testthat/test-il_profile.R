@@ -5,8 +5,8 @@ test_that("il_profile() returns value counts for selected columns", {
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     id = 1:6,
@@ -22,8 +22,8 @@ test_that("il_profile() handles all-null columns gracefully", {
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     id = 1:3,
@@ -40,8 +40,8 @@ test_that("il_profile() works with multiple columns", {
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     id = 1:4,

@@ -57,6 +57,7 @@ Imports:
     tibble
 Suggests: 
     dplyr,
+    duckdb,
     ggplot2,
     igraph,
     jsonlite,

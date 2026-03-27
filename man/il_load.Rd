@@ -45,7 +45,7 @@ df <- data.frame(
             "robert@example.com", "alice@example.com", "alison@example.com",
             "tom@example.com", "tomas@example.com")
 )
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+con <- DBI::dbConnect(duckdb::duckdb())
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -59,5 +59,5 @@ tmp <- tempfile(fileext = ".json")
 il_save(model, tmp)
 
 loaded <- il_load(tmp)
-DBI::dbDisconnect(con)
+DBI::dbDisconnect(con, shutdown = TRUE)
 }

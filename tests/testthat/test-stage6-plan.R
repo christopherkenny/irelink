@@ -74,8 +74,8 @@ test_that("SQLite backend supports cl_exact comparisons end-to-end", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:6,
@@ -97,9 +97,21 @@ test_that("SQLite backend supports cl_exact comparisons end-to-end", {
   expect_true(all(pairs$match_probability >= 0 & pairs$match_probability <= 1))
 })
 
-test_that("DuckDB backend is skipped when unavailable", {
+test_that("DuckDB backend works end-to-end", {
   skip_if_not_installed("duckdb")
-  skip("DuckDB R sessions hang on this platform — deferred to CI")
+  df <- il_demo("fake_20")
+  con <- DBI::dbConnect(duckdb::duckdb())
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+  spec <- il_spec() |>
+    il_compare(first_name, cl_jaro_winkler(0.9)) |>
+    il_compare(surname, cl_exact()) |>
+    il_block_on(surname)
+  model <- il_model(df, spec = spec, con = con)
+  model <- il_estimate_u(model)
+  model <- il_estimate_em(model, block_on(surname))
+  pairs <- predict(model, threshold = 0.5)
+  expect_s3_class(pairs, "tbl_df")
+  expect_true(nrow(pairs) >= 0L)
 })
 
 test_that("PostgreSQL backend is skipped when unavailable", {
@@ -135,8 +147,8 @@ test_that("print.il_model() snapshot: untrained model", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
@@ -157,8 +169,8 @@ test_that("print.il_model() snapshot: trained model", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:6,
@@ -180,8 +192,8 @@ test_that("summary.il_model() snapshot: trained model", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:6,
@@ -217,8 +229,8 @@ test_that("il_estimate_em() on 1000 records completes without error", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>
@@ -238,8 +250,8 @@ test_that("predict() on 1000 records completes without error", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>

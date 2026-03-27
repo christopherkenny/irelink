@@ -5,8 +5,8 @@ test_that("il_deterministic_link() returns a tibble of exact-match pairs", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   # Create data with known exact duplicates
   df <- data.frame(
@@ -36,8 +36,8 @@ test_that("il_deterministic_link() does not require trained parameters", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:4,

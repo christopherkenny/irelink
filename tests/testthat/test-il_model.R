@@ -18,8 +18,8 @@ test_that("il_model() creates an il_model object", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
@@ -35,8 +35,8 @@ test_that("is_il_model() works correctly", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
@@ -54,8 +54,8 @@ test_that("il_model() validates columns against the data", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   # From: test_settings_validation.py — missing column produces clear error
   df <- data.frame(unique_id = 1:3, name = c("A", "B", "C"))
@@ -68,8 +68,8 @@ test_that("il_model() with link_type='link' requires two datasets", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:3,
@@ -86,8 +86,8 @@ test_that("il_model() with link_type='link' accepts two datasets", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df1 <- data.frame(
     unique_id = 1:3,
@@ -108,8 +108,8 @@ test_that("print.il_model() shows key info", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
@@ -128,8 +128,8 @@ test_that("summary.il_model() shows untrained status", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
@@ -147,8 +147,8 @@ test_that("il_model() handles zero-row data frame gracefully", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = integer(0),
@@ -164,8 +164,8 @@ test_that("il_model() with single-row dedupe produces zero pairs", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1L,
@@ -182,8 +182,8 @@ test_that("il_model() handles factor columns in data", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
@@ -203,8 +203,8 @@ test_that("il_cleanup() removes temporary tables", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,

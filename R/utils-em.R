@@ -1,5 +1,139 @@
 # Internal helpers for the EM algorithm and parameter estimation.
 
+#' Get pairs with pre-computed gamma columns
+#'
+#' For DuckDB: runs a single SQL query that computes gammas in-database.
+#' For SQLite: falls back to pulling pairs and computing gammas in R.
+#'
+#' @param model An il_model object.
+#' @param blocking_rules List of blocking rule objects.
+#' @param limit Optional integer pair limit.
+#' @return A list with `ids` (data.frame of l/r unique_id) and `gamma_mat`
+#'   (integer matrix of gamma values).
+#' @noRd
+get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
+  con <- model$con
+  dialect <- detect_dialect(con)
+  comparisons <- model$spec$comparisons
+  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+
+  if (dialect_has_fuzzy_sql(dialect)) {
+    sql <- build_gamma_query(model, blocking_rules, limit = limit)
+    result <- DBI::dbGetQuery(con, sql)
+    if (nrow(result) == 0L) {
+      return(list(
+        ids = data.frame(
+          l_unique_id = integer(0), r_unique_id = integer(0)
+        ),
+        gamma_mat = matrix(0L, nrow = 0, ncol = length(comp_names),
+                           dimnames = list(NULL, comp_names))
+      ))
+    }
+    ids <- result[, c("l_unique_id", "r_unique_id"), drop = FALSE]
+    gamma_cols <- paste0("gamma_", comp_names)
+    gamma_mat <- as.matrix(result[, gamma_cols, drop = FALSE])
+    storage.mode(gamma_mat) <- "integer"
+    colnames(gamma_mat) <- comp_names
+    return(list(ids = ids, gamma_mat = gamma_mat))
+  }
+
+  # Fallback: pull pairs, compute gammas in R
+  all_pairs <- list()
+  for (br in blocking_rules) {
+    bp <- get_blocked_pairs(model, br)
+    if (nrow(bp) > 0L) all_pairs <- c(all_pairs, list(bp))
+  }
+  if (length(all_pairs) == 0L) {
+    return(list(
+      ids = data.frame(
+        l_unique_id = integer(0), r_unique_id = integer(0)
+      ),
+      gamma_mat = matrix(0L, nrow = 0, ncol = length(comp_names),
+                         dimnames = list(NULL, comp_names))
+    ))
+  }
+  pairs <- do.call(rbind, all_pairs)
+  pair_key <- paste(pairs$l_unique_id, pairs$r_unique_id, sep = "||")
+  pairs <- pairs[!duplicated(pair_key), , drop = FALSE]
+  if (!is.null(limit) && nrow(pairs) > limit) {
+    pairs <- pairs[seq_len(limit), , drop = FALSE]
+  }
+  ids <- data.frame(
+    l_unique_id = pairs$l_unique_id,
+    r_unique_id = pairs$r_unique_id
+  )
+  gamma_mat <- compute_gamma_matrix(pairs, comparisons)
+  list(ids = ids, gamma_mat = gamma_mat)
+}
+
+#' Get random pairs with gammas (for u estimation)
+#'
+#' @param model An il_model object.
+#' @param max_pairs Maximum pairs to sample.
+#' @return Same structure as get_pairs_with_gammas().
+#' @noRd
+get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
+  con <- model$con
+  dialect <- detect_dialect(con)
+  comparisons <- model$spec$comparisons
+  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+
+  if (dialect_has_fuzzy_sql(dialect)) {
+    tbl_l <- model$data$tbl_l
+    tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
+    dedupe <- is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l
+    dedupe_cond <- if (dedupe) "l.unique_id < r.unique_id" else "1=1"
+    max_pairs <- as.integer(max_pairs)
+
+    gamma_exprs <- vapply(comparisons, function(comp) {
+      expr <- sql_gamma_case(comp, dialect)
+      glue::glue("{expr} AS gamma_{comp$columns}")
+    }, character(1))
+    gamma_select <- paste(gamma_exprs, collapse = ", ")
+
+    sql <- glue::glue(
+      "SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ",
+      "{gamma_select} ",
+      "FROM {tbl_l} l, {tbl_r} r ",
+      "WHERE {dedupe_cond} LIMIT {max_pairs}"
+    )
+    result <- DBI::dbGetQuery(con, sql)
+    if (nrow(result) == 0L) {
+      return(list(
+        ids = data.frame(
+          l_unique_id = integer(0), r_unique_id = integer(0)
+        ),
+        gamma_mat = matrix(0L, nrow = 0, ncol = length(comp_names),
+                           dimnames = list(NULL, comp_names))
+      ))
+    }
+    ids <- result[, c("l_unique_id", "r_unique_id"), drop = FALSE]
+    gamma_cols <- paste0("gamma_", comp_names)
+    gamma_mat <- as.matrix(result[, gamma_cols, drop = FALSE])
+    storage.mode(gamma_mat) <- "integer"
+    colnames(gamma_mat) <- comp_names
+    return(list(ids = ids, gamma_mat = gamma_mat))
+  }
+
+  # Fallback: R-side
+  pairs <- get_all_pairs(model, max_pairs = max_pairs)
+  if (nrow(pairs) == 0L) {
+    return(list(
+      ids = data.frame(
+        l_unique_id = integer(0), r_unique_id = integer(0)
+      ),
+      gamma_mat = matrix(0L, nrow = 0, ncol = length(comp_names),
+                         dimnames = list(NULL, comp_names))
+    ))
+  }
+  ids <- data.frame(
+    l_unique_id = pairs$l_unique_id,
+    r_unique_id = pairs$r_unique_id
+  )
+  gamma_mat <- compute_gamma_matrix(pairs, comparisons)
+  list(ids = ids, gamma_mat = gamma_mat)
+}
+
 #' Compute binary comparison level (gamma) for a pair of values
 #' @param val_l Left record values (vector).
 #' @param val_r Right record values (vector).
@@ -105,7 +239,7 @@ get_blocked_pairs <- function(model, blocking) {
   block_where <- build_blocking_condition(blocking$columns)
 
   if (is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l) {
-    dedup_cond <- "l.rowid < r.rowid"
+    dedup_cond <- "l.unique_id < r.unique_id"
     sql <- glue::glue(
       "SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ",
       "WHERE {dedup_cond} AND {block_where}"
@@ -134,7 +268,7 @@ get_all_pairs <- function(model, max_pairs = 1e6) {
   if (is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l) {
     sql <- glue::glue(
       "SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ",
-      "WHERE l.rowid < r.rowid LIMIT {max_pairs}"
+      "WHERE l.unique_id < r.unique_id LIMIT {max_pairs}"
     )
   } else {
     sql <- glue::glue(

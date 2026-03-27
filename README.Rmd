@@ -42,7 +42,7 @@ Start by loading a demo dataset and connecting to a SQL backend.
 library(irelink)
 
 df <- il_demo("fake_20")
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+con <- DBI::dbConnect(duckdb::duckdb())
 ```
 
 Define an `il_spec` with comparison functions and blocking rules, then train:
@@ -74,5 +74,5 @@ Finally, drop the temporary tables and close the connection:
 
 ```{r cleanup}
 il_cleanup(model)
-DBI::dbDisconnect(con)
+DBI::dbDisconnect(con, shutdown = TRUE)
 ```

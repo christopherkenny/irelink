@@ -48,7 +48,7 @@ df <- data.frame(
             "robert@example.com", "alice@example.com", "alison@example.com",
             "tom@example.com", "tomas@example.com")
 )
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+con <- DBI::dbConnect(duckdb::duckdb())
 il_completeness(df, con = con)
-DBI::dbDisconnect(con)
+DBI::dbDisconnect(con, shutdown = TRUE)
 }

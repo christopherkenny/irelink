@@ -28,8 +28,8 @@ test_that("il_estimate_u() returns an il_model with u parameters set", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   model <- make_test_model(con) |>
     il_estimate_u(max_pairs = 1e6)
@@ -44,8 +44,8 @@ test_that("il_estimate_u() produces reasonable u values", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   # From: test_u_train.py — 6 records, 15 pairs
   # Exact match on first_name: Amanda-Amanda = 1 pair → u ≈ 1/15
@@ -64,8 +64,8 @@ test_that("il_estimate_em() returns an il_model with updated parameters", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   model <- make_test_model(con) |>
     il_estimate_u(max_pairs = 1e6) |>
@@ -78,8 +78,8 @@ test_that("il_estimate_em() errors clearly on empty blocking results", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   # From: test_clear_error_when_empty_block
   # block on surname where no two records share a surname
@@ -95,8 +95,8 @@ test_that("multiple il_estimate_em() calls refine, not reset, parameters", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>
@@ -130,8 +130,8 @@ test_that("il_estimate_em() with fixed probabilities preserves them", {
   # This test verifies the concept; exact API for fixing probabilities
 
   # will be determined during implementation
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>
@@ -157,8 +157,8 @@ test_that("il_estimate_prior() returns a valid probability", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   # From: test_prob_rr_match_dedupe — 6 records, 4 expected matches
   df <- data.frame(
@@ -184,8 +184,8 @@ test_that("il_estimate_prior() with higher recall gives higher prior", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:6,
@@ -219,8 +219,8 @@ test_that("il_estimate_m_from_labels() computes m from pairwise labels", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   # From: test_m_train — 5 records with clusters
   df <- data.frame(
@@ -257,8 +257,8 @@ test_that("il_estimate_m_from_column() computes m from a cluster column", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   # From: test_m_train — estimate_m_from_label_column("cluster")
   df <- data.frame(

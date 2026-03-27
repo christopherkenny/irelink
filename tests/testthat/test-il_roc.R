@@ -6,8 +6,8 @@ test_that("il_roc() returns a tibble with fpr and tpr in [0, 1]", {
   skip_if_sprint_lt(10)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>
@@ -38,8 +38,8 @@ test_that("il_precision_recall() returns tibble with precision and recall in [0,
   skip_if_sprint_lt(10)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>
@@ -69,8 +69,8 @@ test_that("il_unlinkables() returns monotonically increasing proportions", {
   skip_if_sprint_lt(10)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>

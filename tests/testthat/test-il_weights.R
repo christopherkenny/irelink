@@ -7,8 +7,8 @@ test_that("il_weights() returns a tibble with expected columns", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>
@@ -32,8 +32,8 @@ test_that("il_weights() has one row per comparison level", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>
@@ -56,8 +56,8 @@ test_that("il_parameters() returns a tibble with m and u in [0, 1]", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>
@@ -83,8 +83,8 @@ test_that("il_training_history() returns convergence data", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>

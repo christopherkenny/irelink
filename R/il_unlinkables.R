@@ -38,7 +38,7 @@
 #'             "robert@example.com", "alice@example.com", "alison@example.com",
 #'             "tom@example.com", "tomas@example.com")
 #' )
-#' con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+#' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -50,7 +50,7 @@
 #' model <- il_estimate_em(model, block_on(surname))
 #'
 #' il_unlinkables(model)
-#' DBI::dbDisconnect(con)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
 il_unlinkables <- function(model) {
   validate_il_model(model)
   all_pairs <- predict(model, threshold = 0.0)

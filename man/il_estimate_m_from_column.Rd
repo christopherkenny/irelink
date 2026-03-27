@@ -24,7 +24,7 @@ separate table of pairwise labels.
 }
 \examples{
 df <- il_demo("fake_20")
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+con <- DBI::dbConnect(duckdb::duckdb())
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_compare(surname, cl_exact()) |>
@@ -34,5 +34,5 @@ model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 
 model <- il_estimate_m_from_column(model, city)
-DBI::dbDisconnect(con)
+DBI::dbDisconnect(con, shutdown = TRUE)
 }

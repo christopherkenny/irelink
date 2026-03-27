@@ -42,7 +42,7 @@
 #'             "robert@example.com", "alice@example.com", "alison@example.com",
 #'             "tom@example.com", "tomas@example.com")
 #' )
-#' con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+#' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -58,11 +58,12 @@
 #' )
 #'
 #' il_find_matches(model, new_df, threshold = 0.5)
-#' DBI::dbDisconnect(con)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
 il_find_matches <- function(model, new_records, threshold = 0.85) {
   validate_il_model(model)
 
   con <- model$con
+  dialect <- detect_dialect(con)
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
   prior <- model$params$prior %||% 0.05
@@ -83,65 +84,112 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
 
   tbl_existing <- model$data$tbl_l
 
-  # Only select columns that both tables share AND that are needed
-  block_cols <- unique(unlist(lapply(blocking_rules, function(r) r$columns)))
-  needed_cols <- unique(c("unique_id", comp_cols, block_cols))
-  new_cols <- intersect(needed_cols, names(new_records))
-  sel_l <- paste(glue::glue("l.{new_cols} AS l_{new_cols}"), collapse = ", ")
-  sel_r <- paste(glue::glue("r.{needed_cols} AS r_{needed_cols}"), collapse = ", ")
+  if (dialect_has_fuzzy_sql(dialect)) {
+    # SQL-first: compute gammas in database
+    gamma_exprs <- vapply(comparisons, function(comp) {
+      expr <- sql_gamma_case(comp, dialect)
+      glue::glue("{expr} AS gamma_{comp$columns}")
+    }, character(1))
+    gamma_select <- paste(gamma_exprs, collapse = ", ")
 
-  # Collect candidate pairs via SQL joins for each blocking rule
-  all_pair_frames <- list()
-  if (length(blocking_rules) > 0L) {
-    for (br in blocking_rules) {
-      block_where <- build_blocking_condition(br$columns)
+    if (length(blocking_rules) > 0L) {
+      block_parts <- vapply(blocking_rules, function(br) {
+        cond <- build_blocking_condition(br$columns)
+        glue::glue(
+          "SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ",
+          "{gamma_select} ",
+          "FROM {tbl_new} l, {tbl_existing} r ",
+          "WHERE {cond}"
+        )
+      }, character(1))
+      inner <- paste(block_parts, collapse = " UNION ")
+    } else {
+      inner <- glue::glue(
+        "SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ",
+        "{gamma_select} ",
+        "FROM {tbl_new} l, {tbl_existing} r"
+      )
+    }
+    sql <- glue::glue("SELECT DISTINCT * FROM ({inner}) AS pairs")
+    result_raw <- DBI::dbGetQuery(con, sql)
+
+    if (nrow(result_raw) == 0L) {
+      return(tibble::tibble(
+        unique_id_l = character(0), unique_id_r = character(0),
+        match_weight = numeric(0), match_probability = numeric(0)
+      ))
+    }
+
+    gamma_cols <- paste0("gamma_", comp_names)
+    gamma_mat <- as.matrix(result_raw[, gamma_cols, drop = FALSE])
+    storage.mode(gamma_mat) <- "integer"
+    colnames(gamma_mat) <- comp_names
+
+    match_weight <- score_gamma_matrix(gamma_mat, mu)
+    match_probability <- weight_to_probability(match_weight, prior)
+
+    result <- tibble::tibble(
+      unique_id_l = result_raw$l_unique_id,
+      unique_id_r = result_raw$r_unique_id,
+      match_weight = match_weight,
+      match_probability = match_probability
+    )
+  } else {
+    # Fallback: R-side gamma computation
+    block_cols <- unique(unlist(lapply(blocking_rules, function(r) r$columns)))
+    needed_cols <- unique(c("unique_id", comp_cols, block_cols))
+    new_cols <- intersect(needed_cols, names(new_records))
+    sel_l <- paste(glue::glue("l.{new_cols} AS l_{new_cols}"), collapse = ", ")
+    sel_r <- paste(glue::glue("r.{needed_cols} AS r_{needed_cols}"), collapse = ", ")
+
+    all_pair_frames <- list()
+    if (length(blocking_rules) > 0L) {
+      for (br in blocking_rules) {
+        block_where <- build_blocking_condition(br$columns)
+        sql <- glue::glue(
+          "SELECT {sel_l}, {sel_r} FROM {tbl_new} l, {tbl_existing} r ",
+          "WHERE {block_where}"
+        )
+        bp <- DBI::dbGetQuery(con, sql)
+        if (nrow(bp) > 0L) all_pair_frames <- c(all_pair_frames, list(bp))
+      }
+    } else {
       sql <- glue::glue(
-        "SELECT {sel_l}, {sel_r} FROM {tbl_new} l, {tbl_existing} r ",
-        "WHERE {block_where}"
+        "SELECT {sel_l}, {sel_r} FROM {tbl_new} l, {tbl_existing} r"
       )
       bp <- DBI::dbGetQuery(con, sql)
-      if (nrow(bp) > 0L) all_pair_frames <- c(all_pair_frames, list(bp))
+      if (nrow(bp) > 0L) all_pair_frames <- list(bp)
     }
-  } else {
-    sql <- glue::glue(
-      "SELECT {sel_l}, {sel_r} FROM {tbl_new} l, {tbl_existing} r"
+
+    if (length(all_pair_frames) == 0L) {
+      return(tibble::tibble(
+        unique_id_l = character(0), unique_id_r = character(0),
+        match_weight = numeric(0), match_probability = numeric(0)
+      ))
+    }
+
+    pairs <- do.call(rbind, all_pair_frames)
+    pair_key <- paste(pairs$l_unique_id, pairs$r_unique_id, sep = "||")
+    pairs <- pairs[!duplicated(pair_key), , drop = FALSE]
+
+    gamma_mat <- compute_gamma_matrix(pairs, comparisons)
+    match_weight <- score_gamma_matrix(gamma_mat, mu)
+    match_probability <- weight_to_probability(match_weight, prior)
+
+    result <- tibble::tibble(
+      unique_id_l = pairs$l_unique_id,
+      unique_id_r = pairs$r_unique_id,
+      match_weight = match_weight,
+      match_probability = match_probability
     )
-    bp <- DBI::dbGetQuery(con, sql)
-    if (nrow(bp) > 0L) all_pair_frames <- list(bp)
   }
 
-  if (length(all_pair_frames) == 0L) {
-    return(tibble::tibble(
-      unique_id_l = character(0),
-      unique_id_r = character(0),
-      match_weight = numeric(0),
-      match_probability = numeric(0)
-    ))
-  }
-
-  pairs <- do.call(rbind, all_pair_frames)
-  pair_key <- paste(pairs$l_unique_id, pairs$r_unique_id, sep = "||")
-  pairs <- pairs[!duplicated(pair_key), , drop = FALSE]
-
-  # Score all pairs in one batch
-  gamma_mat <- compute_gamma_matrix(pairs, comparisons)
-  match_weight <- score_gamma_matrix(gamma_mat, mu)
-  match_probability <- weight_to_probability(match_weight, prior)
-
-  result <- tibble::tibble(
-    unique_id_l = pairs$l_unique_id,
-    unique_id_r = pairs$r_unique_id,
-    match_weight = match_weight,
-    match_probability = match_probability
-  )
   result <- result[result$match_probability >= threshold, , drop = FALSE]
 
   if (nrow(result) == 0L) {
     return(tibble::tibble(
-      unique_id_l = character(0),
-      unique_id_r = character(0),
-      match_weight = numeric(0),
-      match_probability = numeric(0)
+      unique_id_l = character(0), unique_id_r = character(0),
+      match_weight = numeric(0), match_probability = numeric(0)
     ))
   }
 

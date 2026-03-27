@@ -5,8 +5,8 @@ test_that("il_accuracy() returns correct TP/FP/TN/FN at known thresholds", {
   skip_if_sprint_lt(10)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   # From: test_truth_space_table_from_labels_column_dedupe_only
   # 6 records: cluster 1 (IDs 1,2,3), cluster 2 (ID 4), cluster 3 (IDs 5,6)
@@ -42,8 +42,8 @@ test_that("il_accuracy() TP/FP counts are internally consistent", {
   skip_if_sprint_lt(10)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
@@ -80,8 +80,8 @@ test_that("il_errors() returns false positive and false negative pairs", {
   skip_if_sprint_lt(10)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,

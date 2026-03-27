@@ -69,7 +69,7 @@ Here we use an in-memory SQLite database:
 
 ```{r model}
 df <- il_demo("fake_20")
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+con <- DBI::dbConnect(duckdb::duckdb())
 
 model <- il_model(df, spec = spec, con = con)
 model
@@ -163,5 +163,5 @@ When you are done, release the database resources:
 
 ```{r cleanup}
 il_cleanup(model)
-DBI::dbDisconnect(con)
+DBI::dbDisconnect(con, shutdown = TRUE)
 ```

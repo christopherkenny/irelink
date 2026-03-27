@@ -9,8 +9,8 @@ test_that("il_compare_records() scores a known pair", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
@@ -29,8 +29,8 @@ test_that("il_compare_records() shows exact match on identical records", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
@@ -52,8 +52,8 @@ test_that("il_find_matches() returns matches for a new record", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>
@@ -84,8 +84,8 @@ test_that("il_waterfall() returns per-comparison weight contributions", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>

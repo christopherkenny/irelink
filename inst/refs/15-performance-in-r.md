@@ -407,10 +407,90 @@ string comparisons — all via existing C/C++ code under the hood.
 
 ---
 
-## Benchmark Scripts
+## Stage 7b — SQL-First Rewrite (DuckDB)
 
-All benchmark scripts are in `inst/benchmarks/`:
-- `benchmark.R` — End-to-end pipeline timing at multiple scales
-- `profile.R` — Stage-by-stage breakdown for n = 1,000
-- `profile2.R` — igraph comparison, matrix-vs-loop scoring, find_matches
-- `cluster_scale.R` — Union-find scaling from 1K to 100K edges
+### Architecture Change
+
+The original pipeline pulled all record pairs into R and computed string
+similarity (jaro-winkler, levenshtein, etc.) R-side via `stringdist`.
+This was the dominant bottleneck at scale — R had to process every pair.
+
+The SQL-first rewrite pushes gamma (comparison) computation into DuckDB
+using its native string similarity functions:
+
+- `jaro_winkler_similarity()` — built-in C++ in DuckDB
+- `jaro_similarity()` — built-in C++ in DuckDB
+- `levenshtein()` / `damerau_levenshtein()` — built-in C++ in DuckDB
+- Exact, numeric_diff, date_diff — standard SQL
+
+**Key new functions in `utils-sql.R`:**
+
+- `detect_dialect(con)` — returns `"duckdb"`, `"sqlite"`, etc.
+- `dialect_has_fuzzy_sql(dialect)` — TRUE for DuckDB/PostgreSQL
+- `sql_gamma_case(comp, dialect)` — binary 0/1 CASE expression per comparison
+- `build_gamma_query(model, blocking_rules)` — full SQL query with
+  blocking UNION + gamma SELECT
+
+**Key new functions in `utils-em.R`:**
+
+- `get_pairs_with_gammas(model, blocking_rules)` — SQL-first for DuckDB,
+  R-side fallback for SQLite
+- `get_random_pairs_with_gammas(model, max_pairs)` — same pattern for
+  U estimation
+
+### Files Modified
+
+| File | Change |
+|------|--------|
+| `R/utils-sql.R` | Added `detect_dialect`, `sql_gamma_case`, `build_gamma_query` |
+| `R/utils-em.R` | Added `get_pairs_with_gammas`, `get_random_pairs_with_gammas` |
+| `R/predict.R` | Uses `get_pairs_with_gammas()` instead of loop + compute_gamma |
+| `R/il_estimate_em.R` | Uses `get_pairs_with_gammas()` |
+| `R/il_estimate_u.R` | Uses `get_random_pairs_with_gammas()` |
+| `R/il_find_matches.R` | SQL-first gamma path for DuckDB, R fallback for SQLite |
+| `R/il_deterministic_link.R` | Exact-match filter pushed into SQL WHERE clause |
+| `R/il_estimate_m_from_column.R` | SQL self-join replaces R-side combn() loops |
+| All examples | Switched from `RSQLite::SQLite()` to `duckdb::duckdb()` |
+| All tests | Use `test_con()` / `test_discon()` helpers (DuckDB default) |
+| `DESCRIPTION` | Added `duckdb` to Suggests |
+
+### Benchmark: Before vs After SQL-First Rewrite
+
+| Records | Before (DuckDB, R-side gamma) | After (SQL-first gamma) | Speedup |
+|--------:|------------------------------:|------------------------:|--------:|
+| 1,000 | 1.6 s | 1.4 s | 1.1× |
+| 5,000 | 20.8 s | 19.5 s | 1.1× |
+| 10,000 | 113 s | 61.4 s | **1.8×** |
+| 20,000 | est. 7+ min | 162 s | est. 2.5×+ |
+
+The speedup grows with dataset size because the pair explosion within
+blocking rules is the bottleneck, and DuckDB's native C++ string
+functions are significantly faster than R-side stringdist for large
+pair sets.
+
+### Combined Speedup (Stage 7a + 7b)
+
+| Records | Original SQLite (R-side) | Final DuckDB (SQL-first) | Total Speedup |
+|--------:|-------------------------:|-------------------------:|--------------:|
+| 1,000 | 2.9 s | 1.4 s | **2.1×** |
+| 5,000 | 31.6 s | 19.5 s | **1.6×** |
+| 10,000 | 157 s | 61.4 s | **2.6×** |
+
+### Test Results
+
+- 456 tests pass, 0 failures
+- Test suite: 68.6 s (down from 157 s — 2.3× faster)
+- devtools::check(): 0 errors, 0 warnings, 0 notes
+- Check time: 3m 28s (under 3:30 target)
+
+### Remaining Scaling Concerns
+
+The benchmark uses only 10 distinct surnames and 10 first names, so
+blocking rules produce very large blocks (~n/10 records each).
+With real data having more diverse blocking keys, the pair counts would
+be dramatically smaller and performance much better.
+
+For truly large datasets (100K+), further optimisations would include:
+- Pushing the full scoring formula into SQL (avoid pulling gamma matrix)
+- Using DuckDB's parallel execution for the cross-join
+- Adding ORDER BY RANDOM() LIMIT for U estimation sampling

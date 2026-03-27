@@ -145,8 +145,8 @@ test_that("il_completeness() with all-NA column reports 0%", {
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(id = 1:3, x = c(NA, NA, NA))
   result <- il_completeness(df, con = con)
@@ -158,8 +158,8 @@ test_that("il_completeness() with single-column data frame works", {
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(id = 1:5)
   result <- il_completeness(df, con = con)
@@ -171,8 +171,8 @@ test_that("il_completeness() with two tables returns rows for both", {
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df1 <- data.frame(a = c(1, NA), b = c("x", "y"))
   df2 <- data.frame(a = c(NA, NA, 3), c = c("p", "q", "r"))
@@ -187,8 +187,8 @@ test_that("il_count_pairs() with blocking on all-unique column returns zero pair
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
@@ -202,8 +202,8 @@ test_that("il_count_pairs() with single-row data returns zero pairs in dedupe", 
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(unique_id = 1L, name = "A")
   result <- il_count_pairs(df, con = con)
@@ -216,8 +216,8 @@ test_that("il_model() with missing columns errors with informative class", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(unique_id = 1:3, name = c("A", "B", "C"))
   spec <- il_spec() |> il_compare(nonexistent, cl_exact())
@@ -228,8 +228,8 @@ test_that("il_model() stores data dimensions correctly", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:10,
@@ -247,8 +247,8 @@ test_that("print.il_model() returns model invisibly", {
   skip_if_sprint_lt(6)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
@@ -267,8 +267,8 @@ test_that("predict() at threshold = 1.0 returns zero or few pairs", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
@@ -292,8 +292,8 @@ test_that("predict() output is sorted or at least deterministic", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:6,
@@ -310,8 +310,11 @@ test_that("predict() output is sorted or at least deterministic", {
   p1 <- predict(model, threshold = 0.0)
   p2 <- predict(model, threshold = 0.0)
   expect_equal(nrow(p1), nrow(p2))
-  expect_equal(p1$unique_id_l, p2$unique_id_l)
-  expect_equal(p1$unique_id_r, p2$unique_id_r)
+  # Sort both by the same key before comparing (row order is backend-dependent)
+  o1 <- order(p1$unique_id_l, p1$unique_id_r)
+  o2 <- order(p2$unique_id_l, p2$unique_id_r)
+  expect_equal(p1$unique_id_l[o1], p2$unique_id_l[o2])
+  expect_equal(p1$unique_id_r[o1], p2$unique_id_r[o2])
 })
 
 # ── il_compared dplyr verb coverage (Sprint 8) ───────────────────────────
@@ -346,8 +349,8 @@ test_that("il_find_matches() returns zero rows when no blocking match", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
@@ -373,8 +376,8 @@ test_that("il_waterfall() has step, contribution, and direction columns", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:6,
@@ -516,8 +519,8 @@ test_that("il_accuracy() with all-positive labels has zero FP", {
   skip_if_sprint_lt(10)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:4,
@@ -549,8 +552,8 @@ test_that("il_errors() type column distinguishes FP from FN", {
   skip_if_sprint_lt(10)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
@@ -582,8 +585,8 @@ test_that("il_save() and il_load() preserve spec structure", {
   skip_if_not_installed("RSQLite")
   skip_if_not_installed("jsonlite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
@@ -629,8 +632,8 @@ test_that("autoplot.il_model() dispatches correctly via ggplot2::autoplot()", {
   skip_if_not_installed("RSQLite")
   skip_if_not_installed("ggplot2")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:5,
@@ -656,8 +659,8 @@ test_that("il_deterministic_link() works in a pipe with spec", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:4,
@@ -680,8 +683,8 @@ test_that("il_estimate_em() tolerates NA values in non-blocking columns", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:6,
@@ -709,8 +712,8 @@ test_that("predict() handles NA in comparison columns without error", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:6,
@@ -737,8 +740,8 @@ test_that("il_weights() has comparison, level, and weight columns", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:6,
@@ -763,8 +766,8 @@ test_that("il_parameters() returns m and u for every comparison × level", {
   skip_if_sprint_lt(7)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:6,

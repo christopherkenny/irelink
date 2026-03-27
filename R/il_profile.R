@@ -40,9 +40,9 @@
 #'             "robert@example.com", "alice@example.com", "alison@example.com",
 #'             "tom@example.com", "tomas@example.com")
 #' )
-#' con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+#' con <- DBI::dbConnect(duckdb::duckdb())
 #' il_profile(df, first_name, surname, con = con)
-#' DBI::dbDisconnect(con)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
 il_profile <- function(.data, ..., con) {
   col_exprs <- rlang::enquos(...)
   col_names <- vapply(col_exprs, function(q) {

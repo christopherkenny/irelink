@@ -44,14 +44,14 @@
 #'             "robert@example.com", "alice@example.com", "alison@example.com",
 #'             "tom@example.com", "tomas@example.com")
 #' )
-#' con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+#' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_block_on(first_name, surname, dob)
 #'
 #' exact_matches <- il_deterministic_link(df, spec = spec, con = con)
-#' DBI::dbDisconnect(con)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
 il_deterministic_link <- function(.data, ..., spec, con,
                                   link_type = c("dedupe", "link",
                                                 "link_and_dedupe")) {
@@ -66,9 +66,6 @@ il_deterministic_link <- function(.data, ..., spec, con,
   DBI::dbWriteTable(con, tbl_name, .data, overwrite = TRUE)
   on.exit(try(DBI::dbRemoveTable(con, tbl_name), silent = TRUE))
 
-  cols <- names(.data)
-  sel <- build_select_aliases(cols)
-
   if (length(blocking_rules) > 0L) {
     block_sqls <- vapply(blocking_rules, function(br) {
       paste0("(", build_blocking_condition(br$columns), ")")
@@ -78,25 +75,23 @@ il_deterministic_link <- function(.data, ..., spec, con,
     block_where <- "1 = 1"
   }
 
+  # Push exact-match filter for all comparison columns into SQL
+  exact_conds <- vapply(comparisons, function(comp) {
+    col <- comp$columns
+    glue::glue("l.{col} IS NOT NULL AND r.{col} IS NOT NULL AND l.{col} = r.{col}")
+  }, character(1))
+  exact_where <- paste(exact_conds, collapse = " AND ")
+
   sql <- glue::glue(
-    "SELECT {sel$left}, {sel$right} FROM {tbl_name} l, {tbl_name} r ",
-    "WHERE l.rowid < r.rowid AND {block_where}"
+    "SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id ",
+    "FROM {tbl_name} l, {tbl_name} r ",
+    "WHERE l.unique_id < r.unique_id AND ({block_where}) AND {exact_where}"
   )
   pairs <- DBI::dbGetQuery(con, sql)
 
   if (nrow(pairs) == 0L) {
     return(tibble::tibble(unique_id_l = integer(0), unique_id_r = integer(0)))
   }
-
-  # Keep only pairs where ALL comparison columns match exactly
-  keep <- rep(TRUE, nrow(pairs))
-  for (comp in comparisons) {
-    col <- comp$columns
-    val_l <- pairs[[paste0("l_", col)]]
-    val_r <- pairs[[paste0("r_", col)]]
-    keep <- keep & !is.na(val_l) & !is.na(val_r) & val_l == val_r
-  }
-  pairs <- pairs[keep, , drop = FALSE]
 
   tibble::tibble(
     unique_id_l = pairs$l_unique_id,

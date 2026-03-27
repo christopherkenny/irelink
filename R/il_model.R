@@ -45,13 +45,13 @@
 #'             "robert@example.com", "alice@example.com", "alison@example.com",
 #'             "tom@example.com", "tomas@example.com")
 #' )
-#' con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+#' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_block_on(surname)
 #'
 #' model <- il_model(df, spec = spec, con = con)
-#' DBI::dbDisconnect(con)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
 il_model <- function(.data, ..., spec, con,
                      link_type = c("dedupe", "link", "link_and_dedupe")) {
   link_type <- match.arg(link_type)
@@ -149,13 +149,13 @@ il_model <- function(.data, ..., spec, con,
 #'             "robert@example.com", "alice@example.com", "alison@example.com",
 #'             "tom@example.com", "tomas@example.com")
 #' )
-#' con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+#' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_block_on(surname)
 #' model <- il_model(df, spec = spec, con = con)
 #' print(model)
-#' DBI::dbDisconnect(con)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
 print.il_model <- function(x, ...) {
   status <- if (x$trained) "Trained" else "Untrained"
   n_records <- x$data$n_records_l
@@ -214,13 +214,13 @@ print.il_model <- function(x, ...) {
 #'             "robert@example.com", "alice@example.com", "alison@example.com",
 #'             "tom@example.com", "tomas@example.com")
 #' )
-#' con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+#' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_block_on(surname)
 #' model <- il_model(df, spec = spec, con = con)
 #' summary(model)
-#' DBI::dbDisconnect(con)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
 summary.il_model <- function(object, ...) {
   print.il_model(object, ...)
   if (object$trained) {

@@ -23,8 +23,8 @@ test_that("predict() returns an il_compared tibble", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   model <- make_trained_model(con)
   pairs <- predict(model)
@@ -37,8 +37,8 @@ test_that("predict() output has required columns", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   model <- make_trained_model(con)
   pairs <- predict(model)
@@ -53,8 +53,8 @@ test_that("predict() threshold filters out low-probability pairs", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   model <- make_trained_model(con)
 
@@ -71,8 +71,8 @@ test_that("predict() includes gamma columns for each comparison", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   model <- make_trained_model(con)
   pairs <- predict(model)
@@ -86,8 +86,8 @@ test_that("predict() match probabilities are in [0, 1]", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   model <- make_trained_model(con)
   pairs <- predict(model)
@@ -101,8 +101,8 @@ test_that("predict() finds known planted duplicates in demo data", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   model <- make_trained_model(con)
   pairs <- predict(model, threshold = 0.5)
@@ -123,8 +123,8 @@ test_that("il_compared supports dplyr verbs", {
   skip_if_not_installed("RSQLite")
   skip_if_not_installed("dplyr")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   model <- make_trained_model(con)
   pairs <- predict(model, threshold = 0.0)
@@ -146,8 +146,8 @@ test_that("il_compared prints like a tibble", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   model <- make_trained_model(con)
   pairs <- predict(model, threshold = 0.5)

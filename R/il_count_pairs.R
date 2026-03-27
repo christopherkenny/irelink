@@ -42,14 +42,14 @@
 #'             "robert@example.com", "alice@example.com", "alison@example.com",
 #'             "tom@example.com", "tomas@example.com")
 #' )
-#' con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+#' con <- DBI::dbConnect(duckdb::duckdb())
 #' il_count_pairs(
 #'   df,
 #'   block_on(surname),
 #'   block_on(first_name),
 #'   con = con
 #' )
-#' DBI::dbDisconnect(con)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
 il_count_pairs <- function(.data, ..., con,
                            link_type = c("dedupe", "link")) {
   link_type <- match.arg(link_type)

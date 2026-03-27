@@ -8,8 +8,8 @@ test_that("full pipe chain: spec → model → predict works end-to-end", {
   skip_if_sprint_lt(8)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
 
@@ -36,8 +36,8 @@ test_that("full pipe chain through clustering assigns cluster IDs", {
   skip_if_sprint_lt(9)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
 
@@ -62,8 +62,8 @@ test_that("il_weights() data can be used directly with ggplot2", {
   skip_if_not_installed("RSQLite")
   skip_if_not_installed("ggplot2")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
 

@@ -41,7 +41,7 @@
 #'             "robert@example.com", "alice@example.com", "alison@example.com",
 #'             "tom@example.com", "tomas@example.com")
 #' )
-#' con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+#' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -57,7 +57,7 @@
 #' )
 #'
 #' model <- il_estimate_m_from_labels(model, labels)
-#' DBI::dbDisconnect(con)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
 il_estimate_m_from_labels <- function(model, labels) {
   validate_il_model(model)
   con <- model$con

@@ -43,7 +43,7 @@
 #'             "robert@example.com", "alice@example.com", "alison@example.com",
 #'             "tom@example.com", "tomas@example.com")
 #' )
-#' con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+#' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -54,7 +54,7 @@
 #' record_b <- df[2, ]
 #'
 #' il_compare_records(record_a, record_b, spec = spec, con = con)
-#' DBI::dbDisconnect(con)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
 il_compare_records <- function(record_a, record_b, spec, con) {
   validate_il_spec(spec)
   comparisons <- spec$comparisons

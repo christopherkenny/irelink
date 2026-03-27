@@ -5,8 +5,8 @@ test_that("il_completeness() returns a tibble with one row per column", {
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     id = 1:5,
@@ -25,8 +25,8 @@ test_that("il_completeness() computes correct non-null percentages", {
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     id = 1:4,
@@ -47,8 +47,8 @@ test_that("il_completeness() handles a fully-complete dataset", {
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(id = 1:10, name = letters[1:10])
   result <- il_completeness(df, con = con)

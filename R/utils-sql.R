@@ -1,6 +1,180 @@
 # Internal SQL generation functions for comparison levels, blocking rules,
 # and join conditions. Not exported.
 
+#' Detect the SQL dialect from a DBI connection
+#' @param con A DBI connection object.
+#' @return A character string: "duckdb", "sqlite", or "generic".
+#' @noRd
+detect_dialect <- function(con) {
+  cls <- tolower(paste(class(con), collapse = " "))
+  if (grepl("duckdb", cls)) return("duckdb")
+  if (grepl("sqlite", cls)) return("sqlite")
+  if (grepl("postgres", cls)) return("postgres")
+  "generic"
+}
+
+#' Can this dialect compute fuzzy string comparisons in SQL?
+#' @noRd
+dialect_has_fuzzy_sql <- function(dialect) {
+  dialect %in% c("duckdb", "postgres")
+}
+
+#' Generate a binary gamma CASE expression (0/1) for one comparison
+#'
+#' Used to push gamma computation into SQL for backends that support
+#' string similarity functions (DuckDB, PostgreSQL).
+#'
+#' @param comp A comparison entry from the spec (with $columns, $method).
+#' @param dialect SQL dialect string.
+#' @return A SQL expression that evaluates to 0 or 1.
+#' @noRd
+sql_gamma_case <- function(comp, dialect) {
+  col <- comp$columns
+  level <- comp$method
+  method <- level$method
+  thresholds <- level$thresholds
+
+  null_guard <- glue::glue(
+    "l.{col} IS NOT NULL AND r.{col} IS NOT NULL"
+  )
+
+  if (method == "exact") {
+    return(glue::glue(
+      "CASE WHEN {null_guard} AND l.{col} = r.{col} THEN 1 ELSE 0 END"
+    ))
+  }
+
+  if (method == "jaro_winkler") {
+    t <- thresholds[1]
+    return(glue::glue(
+      "CASE WHEN {null_guard} AND jaro_winkler_similarity(l.{col}, r.{col}) >= {t} THEN 1 ELSE 0 END"
+    ))
+  }
+
+  if (method == "jaro") {
+    t <- thresholds[1]
+    return(glue::glue(
+      "CASE WHEN {null_guard} AND jaro_similarity(l.{col}, r.{col}) >= {t} THEN 1 ELSE 0 END"
+    ))
+  }
+
+  if (method == "levenshtein") {
+    t <- thresholds[1]
+    return(glue::glue(
+      "CASE WHEN {null_guard} AND levenshtein(l.{col}, r.{col}) <= {t} THEN 1 ELSE 0 END"
+    ))
+  }
+
+  if (method == "damerau_levenshtein") {
+    t <- thresholds[1]
+    return(glue::glue(
+      "CASE WHEN {null_guard} AND damerau_levenshtein(l.{col}, r.{col}) <= {t} THEN 1 ELSE 0 END"
+    ))
+  }
+
+  if (method == "numeric_diff") {
+    t <- thresholds[1]
+    return(glue::glue(
+      "CASE WHEN {null_guard} AND ABS(CAST(l.{col} AS DOUBLE) - CAST(r.{col} AS DOUBLE)) <= {t} THEN 1 ELSE 0 END"
+    ))
+  }
+
+  if (method == "pct_diff") {
+    t <- thresholds[1]
+    return(glue::glue(
+      "CASE WHEN {null_guard} AND ABS(CAST(l.{col} AS DOUBLE) - CAST(r.{col} AS DOUBLE)) / ",
+      "NULLIF(GREATEST(ABS(CAST(l.{col} AS DOUBLE)), ABS(CAST(r.{col} AS DOUBLE))), 0) <= {t} THEN 1 ELSE 0 END"
+    ))
+  }
+
+  if (method == "date_diff") {
+    t <- thresholds[1]
+    unit <- level$units[1]
+    mult <- switch(unit, "days" = 1, "months" = 30, "years" = 365, 1)
+    days_val <- t * mult
+    if (dialect == "duckdb") {
+      return(glue::glue(
+        "CASE WHEN {null_guard} AND ABS(CAST(l.{col} AS DATE) - CAST(r.{col} AS DATE)) <= {days_val} THEN 1 ELSE 0 END"
+      ))
+    }
+    return(glue::glue(
+      "CASE WHEN {null_guard} AND ABS(JULIANDAY(l.{col}) - JULIANDAY(r.{col})) <= {days_val} THEN 1 ELSE 0 END"
+    ))
+  }
+
+  if (method == "levels") {
+    for (sublevel in level$levels) {
+      if (!isTRUE(sublevel$is_null_level) && !isTRUE(sublevel$is_else_level)) {
+        inner_comp <- list(columns = col, method = sublevel)
+        return(sql_gamma_case(inner_comp, dialect))
+      }
+    }
+  }
+
+  # Fallback: exact match
+  glue::glue(
+    "CASE WHEN {null_guard} AND l.{col} = r.{col} THEN 1 ELSE 0 END"
+  )
+}
+
+#' Build a SQL query that returns pairs with gamma columns computed in SQL
+#'
+#' Combines blocking rules via UNION, deduplicates, and computes binary
+#' gamma values for each comparison using SQL functions.
+#'
+#' @param model An il_model object.
+#' @param blocking_rules List of blocking rule objects.
+#' @param limit Optional integer limit on pairs.
+#' @return A SQL query string.
+#' @noRd
+build_gamma_query <- function(model, blocking_rules, limit = NULL) {
+  con <- model$con
+  dialect <- detect_dialect(con)
+  tbl_l <- model$data$tbl_l
+  tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
+  comparisons <- model$spec$comparisons
+  dedupe <- is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l
+  dedupe_cond <- if (dedupe) "l.unique_id < r.unique_id" else "1=1"
+
+  # Gamma SELECT expressions
+  gamma_exprs <- vapply(comparisons, function(comp) {
+    expr <- sql_gamma_case(comp, dialect)
+    glue::glue("{expr} AS gamma_{comp$columns}")
+  }, character(1))
+  gamma_select <- paste(gamma_exprs, collapse = ", ")
+
+  if (length(blocking_rules) > 0L) {
+    block_parts <- vapply(blocking_rules, function(br) {
+      cond <- build_blocking_condition(br$columns)
+      glue::glue(
+        "SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ",
+        "{gamma_select} ",
+        "FROM {tbl_l} l, {tbl_r} r ",
+        "WHERE {dedupe_cond} AND {cond}"
+      )
+    }, character(1))
+    inner <- paste(block_parts, collapse = " UNION ")
+  } else {
+    inner <- glue::glue(
+      "SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ",
+      "{gamma_select} ",
+      "FROM {tbl_l} l, {tbl_r} r ",
+      "WHERE {dedupe_cond}"
+    )
+  }
+
+  # Wrap in DISTINCT to deduplicate across blocking rules
+  sql <- glue::glue(
+    "SELECT DISTINCT * FROM ({inner}) AS pairs"
+  )
+
+  if (!is.null(limit)) {
+    sql <- glue::glue("{sql} LIMIT {as.integer(limit)}")
+  }
+
+  sql
+}
+
 #' Generate SQL for a comparison level
 #' @param level An il_comparison_level object.
 #' @param col Column name.
@@ -197,14 +371,14 @@ build_blocking_condition <- function(columns) {
 #' @param tbl_l Left table name.
 #' @param tbl_r Right table name (same as tbl_l for dedupe).
 #' @param where A SQL WHERE fragment for blocking.
-#' @param dedupe Logical; if TRUE, add `l.rowid < r.rowid`.
+#' @param dedupe Logical; if TRUE, add `l.unique_id < r.unique_id`.
 #' @return Integer count of pairs.
 #' @noRd
 count_blocked_pairs <- function(con, tbl_l, tbl_r, where, dedupe = TRUE) {
   if (dedupe) {
     sql <- glue::glue(
       "SELECT COUNT(*) AS n FROM {tbl_l} l, {tbl_r} r ",
-      "WHERE l.rowid < r.rowid AND {where}"
+      "WHERE l.unique_id < r.unique_id AND {where}"
     )
   } else {
     sql <- glue::glue(

@@ -5,8 +5,8 @@ test_that("il_count_pairs() returns accurate pair count for dedupe", {
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   # 4 records: John Smith, Mary Jones, Jane Taylor, John Brown
   df <- data.frame(
@@ -25,8 +25,8 @@ test_that("il_count_pairs() with blocking reduces pair count", {
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   # From: test_analyse_blocking.py — 4 rows, block_on("first_name")
   # Two Johns: only 1 pair blocked
@@ -47,8 +47,8 @@ test_that("il_count_pairs() cartesian dedupe is n*(n-1)/2", {
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   # From: test_total_comparison_count.py
   # 5 records → 5*4/2 = 10 pairs
@@ -65,8 +65,8 @@ test_that("il_count_pairs() for link_type='link' computes cross-product", {
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   # From: test_total_comparison_count.py::test_calculate_cartesian_link_only
   # 2 records * 3 records = 6 pairs
@@ -81,8 +81,8 @@ test_that("il_count_pairs() with multiple blocking rules reports each", {
   skip_if_sprint_lt(5)
   skip_if_not_installed("RSQLite")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- data.frame(
     unique_id = 1:4,

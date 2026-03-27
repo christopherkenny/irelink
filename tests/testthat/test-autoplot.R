@@ -6,8 +6,8 @@ test_that("autoplot(model) returns a ggplot object", {
   skip_if_not_installed("RSQLite")
   skip_if_not_installed("ggplot2")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>
@@ -28,8 +28,8 @@ test_that("autoplot(pairs) returns a ggplot object", {
   skip_if_not_installed("RSQLite")
   skip_if_not_installed("ggplot2")
 
-  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  withr::defer(DBI::dbDisconnect(con))
+  con <- test_con()
+  withr::defer(test_discon(con))
 
   df <- il_demo("fake_1000")
   spec <- il_spec() |>

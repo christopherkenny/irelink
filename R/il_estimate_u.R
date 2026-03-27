@@ -40,7 +40,7 @@
 #'             "robert@example.com", "alice@example.com", "alison@example.com",
 #'             "tom@example.com", "tomas@example.com")
 #' )
-#' con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+#' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -50,20 +50,18 @@
 #' model <- il_model(df, spec = spec, con = con)
 #'
 #' model <- il_estimate_u(model)
-#' DBI::dbDisconnect(con)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
 il_estimate_u <- function(model, max_pairs = 1e6) {
   validate_il_model(model)
-  pairs <- get_all_pairs(model, max_pairs = max_pairs)
-  comparisons <- model$spec$comparisons
+  result <- get_random_pairs_with_gammas(model, max_pairs = max_pairs)
+  gamma_mat <- result$gamma_mat
 
-  if (nrow(pairs) == 0L) {
+  if (nrow(gamma_mat) == 0L) {
     cli::cli_abort("No pairs available for u estimation.")
   }
 
-  gamma_mat <- compute_gamma_matrix(pairs, comparisons)
-
   # u = fraction of random pairs that agree at each level
-  n_pairs <- nrow(pairs)
+  n_pairs <- nrow(gamma_mat)
   u_match <- colMeans(gamma_mat)
   u_nonmatch <- 1 - u_match
 
