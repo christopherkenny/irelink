@@ -1,0 +1,91 @@
+# Accuracy Metrics Across Thresholds
+
+Computes precision, recall, F1, and counts of true positives, false
+positives, and false negatives at a range of match-probability
+thresholds. Requires labelled pairs.
+
+## Usage
+
+``` r
+il_accuracy(model, labels)
+```
+
+## Arguments
+
+- model:
+
+  A trained `il_model` object.
+
+- labels:
+
+  A data frame of labelled pairs with a logical or integer match
+  indicator.
+
+## Value
+
+A tibble with one row per threshold, containing columns `threshold`,
+`precision`, `recall`, `f1`, `tp`, `fp`, and `fn`.
+
+## Examples
+
+``` r
+df <- data.frame(
+  unique_id = 1:20,
+  first_name = c("John", "Jon", "Jane", "Jane", "Bob",
+                  "Bobby", "Alice", "Alicia", "Tom", "Thomas",
+                  "John", "Jon", "Jane", "Janet", "Bob",
+                  "Robert", "Alice", "Alison", "Tom", "Tomas"),
+  surname = c("Smith", "Smith", "Doe", "Doe", "Jones",
+              "Jones", "Brown", "Brown", "White", "White",
+              "Smith", "Smyth", "Doe", "Doe", "Jones",
+              "Jones", "Brown", "Browne", "White", "White"),
+  dob = c("1990-01-01", "1990-01-01", "1985-06-15", "1985-06-15",
+          "2000-12-01", "2000-12-01", "1975-03-22", "1975-03-22",
+          "1988-07-04", "1988-07-04", "1990-01-01", "1990-01-02",
+          "1985-06-15", "1985-06-16", "2000-12-01", "2000-12-02",
+          "1975-03-22", "1975-03-23", "1988-07-04", "1988-07-05"),
+  city = c("London", "London", "Paris", "Paris", "Berlin",
+           "Berlin", "Rome", "Rome", "Madrid", "Madrid",
+           "London", "London", "Paris", "Paris", "Berlin",
+           "Berlin", "Rome", "Rome", "Madrid", "Madrid"),
+  email = c("john@example.com", "jon@example.com", "jane@example.com",
+            "jane@example.com", "bob@example.com", "bobby@example.com",
+            "alice@example.com", "alicia@example.com", "tom@example.com",
+            "thomas@example.com", "john@example.com", "jon@example.com",
+            "jane@example.com", "janet@example.com", "bob@example.com",
+            "robert@example.com", "alice@example.com", "alison@example.com",
+            "tom@example.com", "tomas@example.com")
+)
+con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+spec <- il_spec() |>
+  il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
+  il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
+  il_compare(dob, cl_exact()) |>
+  il_block_on(surname) |>
+  il_block_on(first_name)
+model <- il_model(df, spec = spec, con = con)
+model <- il_estimate_u(model)
+model <- il_estimate_em(model, block_on(surname))
+labels <- data.frame(
+  unique_id_l = c(1L, 1L),
+  unique_id_r = c(11L, 2L),
+  is_match = c(1L, 0L)
+)
+
+il_accuracy(model, labels = labels)
+#> # A tibble: 21 × 8
+#>    threshold    tp    fp    fn    tn precision recall    f1
+#>        <dbl> <int> <int> <int> <int>     <dbl>  <dbl> <dbl>
+#>  1      0        1     1     0     0       0.5      1 0.667
+#>  2      0.05     1     1     0     0       0.5      1 0.667
+#>  3      0.1      1     1     0     0       0.5      1 0.667
+#>  4      0.15     1     1     0     0       0.5      1 0.667
+#>  5      0.2      1     1     0     0       0.5      1 0.667
+#>  6      0.25     1     1     0     0       0.5      1 0.667
+#>  7      0.3      1     1     0     0       0.5      1 0.667
+#>  8      0.35     1     1     0     0       0.5      1 0.667
+#>  9      0.4      1     1     0     0       0.5      1 0.667
+#> 10      0.45     1     1     0     0       0.5      1 0.667
+#> # ℹ 11 more rows
+DBI::dbDisconnect(con)
+```
