@@ -37,13 +37,88 @@
 
     <div class="section level2">
 <h2 class="pkg-version" data-toc-text="0.0.0.9000" id="irelink-0009000">irelink 0.0.0.9000<a class="anchor" aria-label="anchor" href="#irelink-0009000"></a></h2>
-<ul><li>Initial development version translating splink to R.</li>
-<li>Core pipeline: <code><a href="../reference/il_spec.html">il_spec()</a></code>, <code><a href="../reference/il_model.html">il_model()</a></code>, <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>, <code><a href="../reference/il_cluster.html">il_cluster()</a></code>.</li>
-<li>Comparison levels: exact, fuzzy string, numeric, date, and geographic.</li>
-<li>EM-based parameter estimation and deterministic linkage.</li>
-<li>SQL backends via DBI (RSQLite, DuckDB, PostgreSQL).</li>
+<p>Initial development release, translating Python’s <a href="https://github.com/moj-analytical-services/splink" class="external-link">splink</a> probabilistic record linkage engine into idiomatic R.</p>
+<div class="section level3">
+<h3 id="core-pipeline-0-0-0-9000">Core pipeline<a class="anchor" aria-label="anchor" href="#core-pipeline-0-0-0-9000"></a></h3>
+<ul><li>
+<code><a href="../reference/il_spec.html">il_spec()</a></code>, <code><a href="../reference/il_compare.html">il_compare()</a></code>, and <code><a href="../reference/il_block_on.html">il_block_on()</a></code> define the linkage model declaratively: which fields to compare, how to compare them, and which blocking rules to apply.</li>
+<li>
+<code><a href="../reference/il_model.html">il_model()</a></code> binds a spec to data and a DBI connection.</li>
+<li>
+<code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> scores all candidate pairs above a match-probability threshold.</li>
+<li>
+<code><a href="../reference/il_cluster.html">il_cluster()</a></code> resolves scored pairs into entity clusters via connected components (using igraph) or single-best-link.</li>
 </ul></div>
-  </main></div>
+<div class="section level3">
+<h3 id="comparison-library-0-0-0-9000">Comparison library<a class="anchor" aria-label="anchor" href="#comparison-library-0-0-0-9000"></a></h3>
+<ul><li>
+<code><a href="../reference/cl_exact.html">cl_exact()</a></code> for exact matches.</li>
+<li>
+<code><a href="../reference/cl_jaro_winkler.html">cl_jaro_winkler()</a></code> and <code><a href="../reference/cl_levenshtein.html">cl_levenshtein()</a></code> for fuzzy strings.</li>
+<li>
+<code><a href="../reference/cl_date_diff.html">cl_date_diff()</a></code> for temporal proximity.</li>
+<li>
+<code><a href="../reference/cl_numeric_diff.html">cl_numeric_diff()</a></code> for numerical distance.</li>
+<li>
+<code><a href="../reference/cl_distance_km.html">cl_distance_km()</a></code> for geographic coordinates.</li>
+<li>
+<code><a href="../reference/cl_cosine.html">cl_cosine()</a></code>, <code><a href="../reference/cl_jaccard.html">cl_jaccard()</a></code>, and <code><a href="../reference/cl_array_intersect.html">cl_array_intersect()</a></code> for set-valued fields.</li>
+<li>
+<code>cl_domain()</code> for email domains; <code><a href="../reference/cl_levels.html">cl_levels()</a></code> for categorical variables.</li>
+<li>
+<code><a href="../reference/cl_custom.html">cl_custom()</a></code> for arbitrary SQL expressions.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="training-0-0-0-9000">Training<a class="anchor" aria-label="anchor" href="#training-0-0-0-9000"></a></h3>
+<ul><li>
+<code><a href="../reference/il_estimate_u.html">il_estimate_u()</a></code> estimates non-match probabilities by sampling random pairs across all blocking rules.</li>
+<li>
+<code><a href="../reference/il_estimate_em.html">il_estimate_em()</a></code> runs the Fellegi-Sunter EM algorithm to learn match probabilities without labelled data. Multiple passes with different blocking rules iteratively refine the parameters.</li>
+<li>
+<code><a href="../reference/il_estimate_prior.html">il_estimate_prior()</a></code> sets the prior match probability.</li>
+<li>
+<code><a href="../reference/il_estimate_m_from_labels.html">il_estimate_m_from_labels()</a></code> and <code><a href="../reference/il_estimate_m_from_column.html">il_estimate_m_from_column()</a></code> initialise parameters from ground-truth labels when available.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="diagnostics-and-evaluation-0-0-0-9000">Diagnostics and evaluation<a class="anchor" aria-label="anchor" href="#diagnostics-and-evaluation-0-0-0-9000"></a></h3>
+<ul><li>
+<code><a href="../reference/il_parameters.html">il_parameters()</a></code> and <code><a href="../reference/il_weights.html">il_weights()</a></code> expose the learned m/u parameters.</li>
+<li>
+<code><a href="../reference/il_waterfall.html">il_waterfall()</a></code> decomposes a pair’s match weight into per-comparison contributions.</li>
+<li>
+<code><a href="../reference/il_training_history.html">il_training_history()</a></code> tracks parameter convergence across EM iterations.</li>
+<li>
+<code><a href="../reference/il_completeness.html">il_completeness()</a></code> and <code><a href="../reference/il_profile.html">il_profile()</a></code> summarise data quality.</li>
+<li>
+<code><a href="../reference/il_unlinkables.html">il_unlinkables()</a></code> identifies records that cannot be linked under any blocking rule.</li>
+<li>
+<code><a href="../reference/il_accuracy.html">il_accuracy()</a></code>, <code><a href="../reference/il_precision_recall.html">il_precision_recall()</a></code>, and <code><a href="../reference/il_roc.html">il_roc()</a></code> evaluate performance against labelled data.</li>
+<li>
+<code><a href="../reference/il_errors.html">il_errors()</a></code> surfaces false positives and false negatives.</li>
+<li>
+<code><a href="../reference/il_graph_metrics.html">il_graph_metrics()</a></code> summarises cluster-level statistics.</li>
+<li>
+<code>autoplot()</code> methods produce ggplot2 charts from model inspection outputs.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="sql-backends-and-persistence-0-0-0-9000">SQL backends and persistence<a class="anchor" aria-label="anchor" href="#sql-backends-and-persistence-0-0-0-9000"></a></h3>
+<ul><li>All computation runs inside a DBI-compatible database: DuckDB (recommended), SQLite, or PostgreSQL.</li>
+<li>
+<code><a href="../reference/il_deterministic_link.html">il_deterministic_link()</a></code> performs exact-match linking without training.</li>
+<li>
+<code><a href="../reference/il_save.html">il_save()</a></code> serialises a trained model to JSON for later reuse.</li>
+<li>
+<code><a href="../reference/il_cleanup.html">il_cleanup()</a></code> removes temporary tables from the database.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="performance-0-0-0-9000">Performance<a class="anchor" aria-label="anchor" href="#performance-0-0-0-9000"></a></h3>
+<ul><li>Gamma (comparison level) computation is pushed into DuckDB using its native C++ string similarity functions, so only compact IDs and integer gamma columns cross the R-SQL boundary.</li>
+<li>SQLite is retained as a fallback with R-side gamma computation via <code>stringdist</code>.</li>
+<li>End-to-end benchmarks against the original SQLite baseline: 1,000 records in 1.4 s (2.1× faster), 5,000 records in 19.5 s (1.6×), 10,000 records in 61.4 s (2.6×). Speedup grows with dataset size.</li>
+</ul></div>
+</div>
+  </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
+    </nav></aside></div>
 
 
     <footer><div class="pkgdown-footer-left">

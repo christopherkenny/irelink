@@ -55,7 +55,7 @@ df <- data.frame(
             "robert@example.com", "alice@example.com", "alison@example.com",
             "tom@example.com", "tomas@example.com")
 )
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+con <- DBI::dbConnect(duckdb::duckdb())
 il_completeness(df, con = con)
 #> # A tibble: 6 × 5
 #>   table   column     n_total n_non_null pct_non_null
@@ -66,5 +66,5 @@ il_completeness(df, con = con)
 #> 4 table_1 dob             20         20          100
 #> 5 table_1 city            20         20          100
 #> 6 table_1 email           20         20          100
-DBI::dbDisconnect(con)
+DBI::dbDisconnect(con, shutdown = TRUE)
 ```

@@ -54,7 +54,7 @@ df <- data.frame(
             "robert@example.com", "alice@example.com", "alison@example.com",
             "tom@example.com", "tomas@example.com")
 )
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+con <- DBI::dbConnect(duckdb::duckdb())
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -75,5 +75,5 @@ il_weights(model)
 #> 4 surname    non_match 0.0328 0.858   -4.71
 #> 5 dob        match     0.821  0.0789   3.38
 #> 6 dob        non_match 0.179  0.921   -2.36
-DBI::dbDisconnect(con)
+DBI::dbDisconnect(con, shutdown = TRUE)
 ```

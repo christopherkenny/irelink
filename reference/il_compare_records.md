@@ -63,7 +63,7 @@ df <- data.frame(
             "robert@example.com", "alice@example.com", "alison@example.com",
             "tom@example.com", "tomas@example.com")
 )
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+con <- DBI::dbConnect(duckdb::duckdb())
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -78,5 +78,5 @@ il_compare_records(record_a, record_b, spec = spec, con = con)
 #>   gamma_first_name gamma_surname gamma_dob
 #>              <int>         <int>     <int>
 #> 1                1             1         1
-DBI::dbDisconnect(con)
+DBI::dbDisconnect(con, shutdown = TRUE)
 ```

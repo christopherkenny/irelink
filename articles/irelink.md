@@ -89,7 +89,7 @@ database:
 
 ``` r
 df <- il_demo("fake_20")
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+con <- DBI::dbConnect(duckdb::duckdb())
 
 model <- il_model(df, spec = spec, con = con)
 model
@@ -146,11 +146,11 @@ head(pairs)
 #>   unique_id_l unique_id_r match_weight match_probability gamma_first_name
 #>         <int>       <int>        <dbl>             <dbl>            <int>
 #> 1           1           2         9.20             0.969                1
-#> 2           1          11         9.20             0.969                1
-#> 3           2          11         9.20             0.969                1
+#> 2           4          13         9.20             0.969                1
+#> 3           9          19         9.20             0.969                1
 #> 4           3           4         9.20             0.969                1
-#> 5           3          13         9.20             0.969                1
-#> 6           4          13         9.20             0.969                1
+#> 5           5           6         9.20             0.969                1
+#> 6           1          11         9.20             0.969                1
 #> # ℹ 2 more variables: gamma_surname <int>, gamma_dob <int>
 ```
 
@@ -171,11 +171,11 @@ head(clusters)
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
 #> 1 1         cluster_1 
-#> 2 2         cluster_1 
-#> 3 3         cluster_2 
-#> 4 4         cluster_2 
-#> 5 5         cluster_3 
-#> 6 6         cluster_3
+#> 2 4         cluster_2 
+#> 3 9         cluster_3 
+#> 4 3         cluster_2 
+#> 5 5         cluster_4 
+#> 6 2         cluster_1
 ```
 
 Each record is assigned a `cluster_id`. Records sharing the same cluster
@@ -232,5 +232,5 @@ When you are done, release the database resources:
 
 ``` r
 il_cleanup(model)
-DBI::dbDisconnect(con)
+DBI::dbDisconnect(con, shutdown = TRUE)
 ```

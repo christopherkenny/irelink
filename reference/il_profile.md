@@ -59,30 +59,30 @@ df <- data.frame(
             "robert@example.com", "alice@example.com", "alison@example.com",
             "tom@example.com", "tomas@example.com")
 )
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+con <- DBI::dbConnect(duckdb::duckdb())
 il_profile(df, first_name, surname, con = con)
 #> # A tibble: 20 × 3
 #>    column     value      n
-#>    <chr>      <chr>  <int>
+#>    <chr>      <chr>  <dbl>
 #>  1 first_name Jane       3
-#>  2 first_name Tom        2
-#>  3 first_name Jon        2
-#>  4 first_name John       2
-#>  5 first_name Bob        2
-#>  6 first_name Alice      2
-#>  7 first_name Tomas      1
-#>  8 first_name Thomas     1
-#>  9 first_name Robert     1
+#>  2 first_name John       2
+#>  3 first_name Alice      2
+#>  4 first_name Tom        2
+#>  5 first_name Jon        2
+#>  6 first_name Bob        2
+#>  7 first_name Bobby      1
+#>  8 first_name Alicia     1
+#>  9 first_name Thomas     1
 #> 10 first_name Janet      1
-#> 11 first_name Bobby      1
+#> 11 first_name Robert     1
 #> 12 first_name Alison     1
-#> 13 first_name Alicia     1
+#> 13 first_name Tomas      1
 #> 14 surname    White      4
-#> 15 surname    Jones      4
-#> 16 surname    Doe        4
+#> 15 surname    Doe        4
+#> 16 surname    Jones      4
 #> 17 surname    Smith      3
 #> 18 surname    Brown      3
 #> 19 surname    Smyth      1
 #> 20 surname    Browne     1
-DBI::dbDisconnect(con)
+DBI::dbDisconnect(con, shutdown = TRUE)
 ```

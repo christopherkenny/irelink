@@ -152,7 +152,7 @@ attaches the specification. Any DBI-compatible connection works. Here we
 use an in-memory SQLite database:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_demo.html">il_demo</a></span><span class="op">(</span><span class="st">"fake_20"</span><span class="op">)</span></span>
-<span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">RSQLite</span><span class="fu">::</span><span class="fu"><a href="https://rsqlite.r-dbi.org/reference/SQLite.html" class="external-link">SQLite</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">":memory:"</span><span class="op">)</span></span>
+<span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_model.html">il_model</a></span><span class="op">(</span><span class="va">df</span>, spec <span class="op">=</span> <span class="va">spec</span>, con <span class="op">=</span> <span class="va">con</span><span class="op">)</span></span>
 <span><span class="va">model</span></span>
@@ -201,11 +201,11 @@ above a match-weight threshold:</p>
 <span><span class="co">#&gt;   unique_id_l unique_id_r match_weight match_probability gamma_first_name</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           1           2         9.20             0.969                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           1          11         9.20             0.969                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           2          11         9.20             0.969                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           4          13         9.20             0.969                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           9          19         9.20             0.969                1</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           3           4         9.20             0.969                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           3          13         9.20             0.969                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           4          13         9.20             0.969                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           5           6         9.20             0.969                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           1          11         9.20             0.969                1</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: gamma_surname &lt;int&gt;, gamma_dob &lt;int&gt;</span></span></span></code></pre></div>
 <p>Each row is a candidate pair with columns for the left and right
 record identifiers, the per-comparison gamma values, and the overall
@@ -223,11 +223,11 @@ clusters using connected-components analysis:</p>
 <span><span class="co">#&gt;   unique_id cluster_id</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 1         cluster_1 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 2         cluster_1 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 3         cluster_2 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 4         cluster_2 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 5         cluster_3 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 6         cluster_3</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 4         cluster_2 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 9         cluster_3 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 3         cluster_2 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 5         cluster_4 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 2         cluster_1</span></span></code></pre></div>
 <p>Each record is assigned a <code>cluster_id</code>. Records sharing
 the same cluster are considered to be the same entity.</p>
 </div>
@@ -347,7 +347,7 @@ negatives</li>
 <p>When you are done, release the database resources:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
-<span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

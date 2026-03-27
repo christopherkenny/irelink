@@ -460,7 +460,7 @@ functions.</p>
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://christophertkenny.com/irelink/">irelink</a></span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_demo.html">il_demo</a></span><span class="op">(</span><span class="st">"fake_1000"</span><span class="op">)</span></span>
-<span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">RSQLite</span><span class="fu">::</span><span class="fu"><a href="https://rsqlite.r-dbi.org/reference/SQLite.html" class="external-link">SQLite</a></span><span class="op">(</span><span class="op">)</span>, <span class="st">":memory:"</span><span class="op">)</span></span>
+<span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">first_name</span>, <span class="fu"><a href="../reference/cl_jaro_winkler.html">cl_jaro_winkler</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="fl">0.7</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -477,7 +477,7 @@ functions.</p>
 <span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">pairs</span><span class="op">)</span></span>
 <span></span>
 <span><span class="fu"><a href="../reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
-<span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span><span class="op">)</span></span></code></pre></div>
+<span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="example-finding-matches-against-new-records">Example: finding matches against new records<a class="anchor" aria-label="anchor" href="#example-finding-matches-against-new-records"></a>

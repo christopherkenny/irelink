@@ -56,7 +56,7 @@ df <- data.frame(
             "robert@example.com", "alice@example.com", "alison@example.com",
             "tom@example.com", "tomas@example.com")
 )
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+con <- DBI::dbConnect(duckdb::duckdb())
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_block_on(surname)
@@ -68,5 +68,5 @@ summary(model)
 #>   Records: 20
 #>   Comparisons: 1
 #>   Blocking rules: 1
-DBI::dbDisconnect(con)
+DBI::dbDisconnect(con, shutdown = TRUE)
 ```

@@ -65,7 +65,7 @@ df <- data.frame(
             "robert@example.com", "alice@example.com", "alison@example.com",
             "tom@example.com", "tomas@example.com")
 )
-con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+con <- DBI::dbConnect(duckdb::duckdb())
 il_count_pairs(
   df,
   block_on(surname),
@@ -77,5 +77,5 @@ il_count_pairs(
 #>   <chr>        <int>
 #> 1 surname         24
 #> 2 first_name       8
-DBI::dbDisconnect(con)
+DBI::dbDisconnect(con, shutdown = TRUE)
 ```
