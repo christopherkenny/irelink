@@ -28,7 +28,7 @@ A single-row tibble with columns `jaro`, `jaro_winkler`, `levenshtein`,
 ## Examples
 
 ``` r
-il_string_similarity("John", "Jon")
+il_string_similarity('John', 'Jon')
 #> # A tibble: 1 × 5
 #>   jaro_winkler  jaro levenshtein jaccard cosine
 #>          <dbl> <dbl>       <int>   <dbl>  <dbl>

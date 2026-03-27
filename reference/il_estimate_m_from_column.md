@@ -30,7 +30,7 @@ An updated `il_model` with estimated m parameters.
 ## Examples
 
 ``` r
-df <- il_demo("fake_20")
+df <- il_demo('fake_20')
 con <- DBI::dbConnect(duckdb::duckdb())
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>

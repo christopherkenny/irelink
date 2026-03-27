@@ -30,7 +30,7 @@ A comparison-level object for use in
 
 ``` r
 il_spec() |>
-  il_compare(score, cl_custom("l.score + r.score > 10"))
+  il_compare(score, cl_custom('l.score + r.score > 10'))
 #> Linkage Specification
 #>   Comparisons (1):
 #>     score : custom

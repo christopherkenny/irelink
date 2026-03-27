@@ -8,7 +8,7 @@ updates the model cumulatively.
 ## Usage
 
 ``` r
-il_estimate_em(model, blocking, ...)
+il_estimate_em(model, blocking, convergence = 1e-05, ...)
 ```
 
 ## Arguments
@@ -22,10 +22,14 @@ il_estimate_em(model, blocking, ...)
   A blocking rule created by
   [`block_on()`](http://christophertkenny.com/irelink/reference/block_on.md).
 
+- convergence:
+
+  A numeric convergence tolerance. The EM loop stops when the largest
+  change in any m parameter is below this value. Defaults to `1e-5`.
+
 - ...:
 
-  Reserved for future options (e.g., convergence tolerance, maximum
-  iterations).
+  Reserved for future options.
 
 ## Value
 
@@ -36,30 +40,40 @@ An updated `il_model` with trained m and u parameters.
 ``` r
 df <- data.frame(
   unique_id = 1:20,
-  first_name = c("John", "Jon", "Jane", "Jane", "Bob",
-                  "Bobby", "Alice", "Alicia", "Tom", "Thomas",
-                  "John", "Jon", "Jane", "Janet", "Bob",
-                  "Robert", "Alice", "Alison", "Tom", "Tomas"),
-  surname = c("Smith", "Smith", "Doe", "Doe", "Jones",
-              "Jones", "Brown", "Brown", "White", "White",
-              "Smith", "Smyth", "Doe", "Doe", "Jones",
-              "Jones", "Brown", "Browne", "White", "White"),
-  dob = c("1990-01-01", "1990-01-01", "1985-06-15", "1985-06-15",
-          "2000-12-01", "2000-12-01", "1975-03-22", "1975-03-22",
-          "1988-07-04", "1988-07-04", "1990-01-01", "1990-01-02",
-          "1985-06-15", "1985-06-16", "2000-12-01", "2000-12-02",
-          "1975-03-22", "1975-03-23", "1988-07-04", "1988-07-05"),
-  city = c("London", "London", "Paris", "Paris", "Berlin",
-           "Berlin", "Rome", "Rome", "Madrid", "Madrid",
-           "London", "London", "Paris", "Paris", "Berlin",
-           "Berlin", "Rome", "Rome", "Madrid", "Madrid"),
-  email = c("john@example.com", "jon@example.com", "jane@example.com",
-            "jane@example.com", "bob@example.com", "bobby@example.com",
-            "alice@example.com", "alicia@example.com", "tom@example.com",
-            "thomas@example.com", "john@example.com", "jon@example.com",
-            "jane@example.com", "janet@example.com", "bob@example.com",
-            "robert@example.com", "alice@example.com", "alison@example.com",
-            "tom@example.com", "tomas@example.com")
+  first_name = c(
+    'John', 'Jon', 'Jane', 'Jane', 'Bob',
+    'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas',
+    'John', 'Jon', 'Jane', 'Janet', 'Bob',
+    'Robert', 'Alice', 'Alison', 'Tom', 'Tomas'
+  ),
+  surname = c(
+    'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
+    'Jones', 'Brown', 'Brown', 'White', 'White',
+    'Smith', 'Smyth', 'Doe', 'Doe', 'Jones',
+    'Jones', 'Brown', 'Browne', 'White', 'White'
+  ),
+  dob = c(
+    '1990-01-01', '1990-01-01', '1985-06-15', '1985-06-15',
+    '2000-12-01', '2000-12-01', '1975-03-22', '1975-03-22',
+    '1988-07-04', '1988-07-04', '1990-01-01', '1990-01-02',
+    '1985-06-15', '1985-06-16', '2000-12-01', '2000-12-02',
+    '1975-03-22', '1975-03-23', '1988-07-04', '1988-07-05'
+  ),
+  city = c(
+    'London', 'London', 'Paris', 'Paris', 'Berlin',
+    'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid',
+    'London', 'London', 'Paris', 'Paris', 'Berlin',
+    'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
+  ),
+  email = c(
+    'john@example.com', 'jon@example.com', 'jane@example.com',
+    'jane@example.com', 'bob@example.com', 'bobby@example.com',
+    'alice@example.com', 'alicia@example.com', 'tom@example.com',
+    'thomas@example.com', 'john@example.com', 'jon@example.com',
+    'jane@example.com', 'janet@example.com', 'bob@example.com',
+    'robert@example.com', 'alice@example.com', 'alison@example.com',
+    'tom@example.com', 'tomas@example.com'
+  )
 )
 con <- DBI::dbConnect(duckdb::duckdb())
 spec <- il_spec() |>

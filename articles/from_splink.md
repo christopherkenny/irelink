@@ -212,7 +212,9 @@ results = linker.inference.find_matches_to_new_records(
 
 ``` r
 new_df <- data.frame(
-  first_name = "Jhon", surname = "Smith", dob = "1990-01-15"
+  first_name = "Jhon",
+  surname = "Smith",
+  dob = "1990-01-15"
 )
 results <- il_find_matches(model, new_df, threshold = 0.5)
 ```

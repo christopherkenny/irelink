@@ -25,7 +25,7 @@ A tibble of demo records.
 ``` r
 il_demo()
 #> [1] "fake_1000"       "fake_1000_links" "fake_20"        
-df <- il_demo("fake_20")
+df <- il_demo('fake_20')
 head(df)
 #> # A tibble: 6 × 6
 #>   unique_id first_name surname dob        city   email            
