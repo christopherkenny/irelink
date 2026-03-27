@@ -68,17 +68,53 @@
 il_compare_records <- function(record_a, record_b, spec, con) {
   validate_il_spec(spec)
   comparisons <- spec$comparisons
+  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
 
   a <- as.data.frame(record_a, stringsAsFactors = FALSE)
   b <- as.data.frame(record_b, stringsAsFactors = FALSE)
 
+  dialect <- detect_dialect(con)
+
+  if (dialect_has_fuzzy_sql(dialect)) {
+    # SQL-first: upload the two records and compute gammas in-database
+    tbl_tmp <- '__il_compare_records'
+    tmp_df <- rbind(
+      cbind(a[1, , drop = FALSE], data.frame(unique_id = 1L)),
+      cbind(b[1, , drop = FALSE], data.frame(unique_id = 2L))
+    )
+    DBI::dbWriteTable(con, tbl_tmp, tmp_df, overwrite = TRUE)
+    on.exit(
+      DBI::dbRemoveTable(con, tbl_tmp, fail_if_missing = FALSE),
+      add = TRUE
+    )
+
+    gamma_exprs <- vapply(comparisons, function(comp) {
+      expr <- sql_gamma_case(comp, dialect)
+      glue::glue('{expr} AS gamma_{comp$columns}')
+    }, character(1))
+    gamma_select <- paste(gamma_exprs, collapse = ', ')
+
+    sql <- glue::glue(
+      'SELECT {gamma_select} ',
+      'FROM {tbl_tmp} l, {tbl_tmp} r ',
+      'WHERE l.unique_id = 1 AND r.unique_id = 2'
+    )
+    row <- DBI::dbGetQuery(con, sql)
+
+    result <- tibble::tibble(.rows = 1L)
+    for (j in seq_along(comp_names)) {
+      result[[paste0('gamma_', comp_names[j])]] <- as.integer(row[[paste0('gamma_', comp_names[j])]])
+    }
+    return(result)
+  }
+
+  # Fallback: R-side computation for backends without fuzzy SQL
   pair <- as.data.frame(c(
     stats::setNames(as.list(a[1, , drop = FALSE]), paste0('l_', names(a))),
     stats::setNames(as.list(b[1, , drop = FALSE]), paste0('r_', names(b)))
   ))
 
   gamma_mat <- compute_gamma_matrix(pair, comparisons)
-  comp_names <- colnames(gamma_mat)
 
   result <- tibble::tibble(.rows = 1L)
   for (j in seq_along(comp_names)) {

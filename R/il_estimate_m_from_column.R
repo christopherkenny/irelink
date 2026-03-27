@@ -66,35 +66,23 @@ il_estimate_m_from_column <- function(model, label_col) {
     storage.mode(gamma_mat) <- 'integer'
     colnames(gamma_mat) <- comp_names
   } else {
-    # Fallback: R-side pair generation
-    data <- DBI::dbReadTable(con, tbl)
-    if (!col_name %in% names(data)) {
-      cli::cli_abort('Column {.field {col_name}} not found in the data.')
-    }
-    labels <- data[[col_name]]
-    unique_labels <- unique(labels[!is.na(labels)])
+    # Fallback: pair generation via SQL self-join (works on all backends)
+    cols_needed <- unique(c('unique_id', col_name,
+      vapply(comparisons, function(c) c$columns, character(1))))
+    sel <- build_select_aliases(cols_needed)
 
-    pair_rows <- list()
-    for (lab in unique_labels) {
-      cluster_rows <- which(labels == lab)
-      if (length(cluster_rows) < 2L) next
-      combos <- utils::combn(cluster_rows, 2)
-      for (k in seq_len(ncol(combos))) {
-        i <- combos[1, k]
-        j <- combos[2, k]
-        pair <- as.data.frame(c(
-          stats::setNames(as.list(data[i, ]), paste0('l_', names(data))),
-          stats::setNames(as.list(data[j, ]), paste0('r_', names(data)))
-        ))
-        pair_rows <- c(pair_rows, list(pair))
-      }
-    }
+    sql <- glue::glue(
+      'SELECT {sel$left}, {sel$right} ',
+      'FROM {tbl} l, {tbl} r ',
+      'WHERE l.{col_name} IS NOT NULL AND l.{col_name} = r.{col_name} ',
+      'AND l.unique_id < r.unique_id'
+    )
+    pairs <- DBI::dbGetQuery(con, sql)
 
-    if (length(pair_rows) == 0L) {
+    if (nrow(pairs) == 0L) {
       cli::cli_abort('No within-cluster pairs found for column {.field {col_name}}.')
     }
 
-    pairs <- do.call(rbind, pair_rows)
     gamma_mat <- compute_gamma_matrix(pairs, comparisons)
   }
 

@@ -355,6 +355,22 @@ No phonetic blocking (Soundex, Metaphone). Splink doesn't have it either out of 
 No batched/incremental retraining API.
 
 
-#
+# Performance Again
 
-explain use of stringdist == bad and get rid of places where we do large computations outside of duckdb/the sql engine
+## Things done in R that should be in backend
+
+Here are a few major things I need you to look at.
+
+First, why do we use stringdist in R?
+Shouldn't we be pushing all of those types of computation straight at the duckdb or other sql backend?
+It would seem a huge portion of timing during tests is from materializing data that can stay within the SQL.
+
+Further, for EM calculations and the gamma, why are we pulling that into R?
+That should, again, happen in SQL.
+Look to what splink (../splink) does for things like that.
+
+The canary in the coalmine here is that a `con` was created for DBI and then nothing happens with it.
+Scan for any other instances of where that occurs.
+
+Fix these two issues and anything similar that you identify.
+Write your findings to `inst/refs/17-shove-into-sql.md`.
