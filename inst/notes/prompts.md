@@ -304,3 +304,22 @@ Awesome. I have done 3 things:
 Finally, check that the readme.Rmd is up to date and add info if necessary, but keep the document clean.
 
 Check that it still builds cleanly with devtools::check() and that this is only moderately slower. (Try to keep the full check to under 3:15 with the vignettes.)
+
+For readability, any time you write to markdown, please make sure that each sentence has its own line and that there are not new linebreaks in the middle of sentences.
+
+# Speed
+
+Let's get a rough idea of speed.
+Can you look at this blog post <https://www.robinlinacre.com/fast_deduplication/> and run the same thing for our codebase?
+Don't rerun any of the other systems, just get use this to eyeball how we are doing.
+
+If we're behind, identify what we might need to fix.
+
+## follow up
+
+Write these updates to `inst/refs/16-performance.md`.
+
+Also review the description: it looks like we have some packages as "suggests" but use them unconditionally.
+That needs to be fixed by upgrading them to imports.
+
+Then, can you run the blog post examples and see how we do now that you patched duckdb?
