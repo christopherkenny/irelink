@@ -88,6 +88,12 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
   if (!('unique_id' %in% names(new_records))) {
     new_records$unique_id <- paste0('new_', seq_len(nrow(new_records)))
   }
+  # Add NULL columns for any comparison/blocking columns missing from new_records
+  all_needed <- unique(c(comp_cols,
+    unlist(lapply(blocking_rules, function(r) r$columns))))
+  for (col in setdiff(all_needed, names(new_records))) {
+    new_records[[col]] <- NA_character_
+  }
   tbl_new <- '__il_find_new'
   DBI::dbWriteTable(con, tbl_new, new_records, overwrite = TRUE)
   on.exit(DBI::dbRemoveTable(con, tbl_new, fail_if_missing = FALSE), add = TRUE)
@@ -171,8 +177,11 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     block_cols <- unique(unlist(lapply(blocking_rules, function(r) r$columns)))
     needed_cols <- unique(c('unique_id', comp_cols, block_cols))
     new_cols <- intersect(needed_cols, names(new_records))
+    # Select only columns that exist in both new_records (l) and existing (r)
+    existing_cols <- model$data$columns
+    r_cols <- intersect(needed_cols, existing_cols)
     sel_l <- paste(glue::glue('l.{new_cols} AS l_{new_cols}'), collapse = ', ')
-    sel_r <- paste(glue::glue('r.{needed_cols} AS r_{needed_cols}'), collapse = ', ')
+    sel_r <- paste(glue::glue('r.{r_cols} AS r_{r_cols}'), collapse = ', ')
 
     all_pair_frames <- list()
     if (length(blocking_rules) > 0L) {

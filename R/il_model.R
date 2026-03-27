@@ -85,9 +85,9 @@ il_model <- function(.data, ..., spec, con,
     )
   }
 
-  if (link_type == 'link' && length(extra_dfs) == 0L) {
+  if (link_type %in% c('link', 'link_and_dedupe') && length(extra_dfs) == 0L) {
     cli::cli_abort(
-      '{.arg link_type} is {.val link} but only one dataset was provided. Supply a second data frame.'
+      '{.arg link_type} is {.val {link_type}} but only one dataset was provided. Supply a second data frame.'
     )
   }
 

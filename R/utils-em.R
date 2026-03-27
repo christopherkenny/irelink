@@ -109,8 +109,8 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
   if (dialect_has_fuzzy_sql(dialect)) {
     tbl_l <- model$data$tbl_l
     tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
-    dedupe <- is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l
-    dedupe_cond <- if (dedupe) 'l.unique_id < r.unique_id' else '1=1'
+    link_type <- model$link_type %||% 'dedupe'
+    has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
     max_pairs <- as.integer(max_pairs)
 
     gamma_exprs <- vapply(comparisons, function(comp) {
@@ -119,11 +119,19 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
 
+    table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
+    parts <- vapply(table_pairs, function(tp) {
+      glue::glue(
+        'SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ',
+        '{gamma_select} ',
+        'FROM {tp$from_l} l, {tp$from_r} r ',
+        'WHERE {tp$join_cond}'
+      )
+    }, character(1))
+    inner <- paste(parts, collapse = ' UNION ')
+
     sql <- glue::glue(
-      'SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ',
-      '{gamma_select} ',
-      'FROM {tbl_l} l, {tbl_r} r ',
-      'WHERE {dedupe_cond} LIMIT {max_pairs}'
+      'SELECT DISTINCT * FROM ({inner}) AS pairs LIMIT {max_pairs}'
     )
     result <- DBI::dbGetQuery(con, sql)
     if (nrow(result) == 0L) {
@@ -270,23 +278,21 @@ get_blocked_pairs <- function(model, blocking) {
   con <- model$con
   tbl_l <- model$data$tbl_l
   tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
+  link_type <- model$link_type %||% 'dedupe'
+  has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
 
   cols <- model$data$columns
   sel <- build_select_aliases(cols)
   block_where <- build_blocking_condition(blocking$columns)
 
-  if (is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l) {
-    dedup_cond <- 'l.unique_id < r.unique_id'
-    sql <- glue::glue(
-      'SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ',
-      'WHERE {dedup_cond} AND {block_where}'
+  table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
+  parts <- vapply(table_pairs, function(tp) {
+    glue::glue(
+      'SELECT {sel$left}, {sel$right} FROM {tp$from_l} l, {tp$from_r} r ',
+      'WHERE {tp$join_cond} AND {block_where}'
     )
-  } else {
-    sql <- glue::glue(
-      'SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ',
-      'WHERE {block_where}'
-    )
-  }
+  }, character(1))
+  sql <- paste(parts, collapse = ' UNION ')
 
   DBI::dbGetQuery(con, sql)
 }
@@ -297,22 +303,22 @@ get_all_pairs <- function(model, max_pairs = 1e6) {
   con <- model$con
   tbl_l <- model$data$tbl_l
   tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
+  link_type <- model$link_type %||% 'dedupe'
+  has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
 
   cols <- model$data$columns
   sel <- build_select_aliases(cols)
 
   max_pairs <- as.integer(max_pairs)
-  if (is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l) {
-    sql <- glue::glue(
-      'SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ',
-      'WHERE l.unique_id < r.unique_id LIMIT {max_pairs}'
+  table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
+  parts <- vapply(table_pairs, function(tp) {
+    glue::glue(
+      'SELECT {sel$left}, {sel$right} FROM {tp$from_l} l, {tp$from_r} r ',
+      'WHERE {tp$join_cond}'
     )
-  } else {
-    sql <- glue::glue(
-      'SELECT {sel$left}, {sel$right} FROM {tbl_l} l, {tbl_r} r ',
-      'LIMIT {max_pairs}'
-    )
-  }
+  }, character(1))
+  sql <- paste(parts, collapse = ' UNION ')
+  sql <- glue::glue('{sql} LIMIT {max_pairs}')
 
   DBI::dbGetQuery(con, sql)
 }

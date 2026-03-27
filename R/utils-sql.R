@@ -144,8 +144,8 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL) {
   tbl_l <- model$data$tbl_l
   tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
   comparisons <- model$spec$comparisons
-  dedupe <- is.null(model$data$tbl_r) || model$data$tbl_r == tbl_l
-  dedupe_cond <- if (dedupe) 'l.unique_id < r.unique_id' else '1=1'
+  link_type <- model$link_type %||% 'dedupe'
+  has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
 
   # Gamma SELECT expressions
   gamma_exprs <- vapply(comparisons, function(comp) {
@@ -161,27 +161,38 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL) {
     gamma_select <- paste(gamma_select, tf_select, sep = ', ')
   }
 
-  if (length(blocking_rules) > 0L) {
-    block_parts <- vapply(blocking_rules, function(br) {
-      cond <- build_blocking_condition(br$columns, br$where)
-      glue::glue(
-        'SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ',
-        '{gamma_select} ',
-        'FROM {tbl_l} l, {tbl_r} r ',
-        'WHERE {dedupe_cond} AND {cond}'
-      )
-    }, character(1))
-    inner <- paste(block_parts, collapse = ' UNION ')
-  } else {
-    inner <- glue::glue(
-      'SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ',
-      '{gamma_select} ',
-      'FROM {tbl_l} l, {tbl_r} r ',
-      'WHERE {dedupe_cond}'
-    )
+  select_prefix <- glue::glue(
+    'SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ',
+    '{gamma_select} '
+  )
+
+  # Build per-table-pair queries: which (left_tbl, right_tbl, condition) combos?
+  table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
+
+  all_parts <- character(0)
+  for (tp in table_pairs) {
+    if (length(blocking_rules) > 0L) {
+      parts <- vapply(blocking_rules, function(br) {
+        cond <- build_blocking_condition(br$columns, br$where)
+        glue::glue(
+          '{select_prefix}',
+          'FROM {tp$from_l} l, {tp$from_r} r ',
+          'WHERE {tp$join_cond} AND {cond}'
+        )
+      }, character(1))
+      all_parts <- c(all_parts, parts)
+    } else {
+      all_parts <- c(all_parts, glue::glue(
+        '{select_prefix}',
+        'FROM {tp$from_l} l, {tp$from_r} r ',
+        'WHERE {tp$join_cond}'
+      ))
+    }
   }
 
-  # Wrap in DISTINCT to deduplicate across blocking rules
+  inner <- paste(all_parts, collapse = ' UNION ')
+
+  # Wrap in DISTINCT to deduplicate across blocking rules and table combos
   sql <- glue::glue(
     'SELECT DISTINCT * FROM ({inner}) AS pairs'
   )
@@ -191,6 +202,45 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL) {
   }
 
   sql
+}
+
+#' Build the list of (from_l, from_r, join_cond) table-pair combos
+#'
+#' For dedupe: one combo (tbl × tbl with id inequality).
+#' For link: one combo (tbl_l × tbl_r, no dedup guard needed).
+#' For link_and_dedupe: three combos (cross + within-left + within-right).
+#'
+#' @param tbl_l Left table name.
+#' @param tbl_r Right table name.
+#' @param link_type One of "dedupe", "link", or "link_and_dedupe".
+#' @param has_two_tables Logical; TRUE when tbl_l and tbl_r differ.
+#' @return A list of lists, each with `from_l`, `from_r`, `join_cond`.
+#' @noRd
+build_table_pairs <- function(tbl_l, tbl_r, link_type, has_two_tables) {
+  if (!has_two_tables || link_type == 'dedupe') {
+    # Single table dedupe
+    return(list(list(
+      from_l = tbl_l, from_r = tbl_l,
+      join_cond = 'l.unique_id < r.unique_id'
+    )))
+  }
+
+  if (link_type == 'link') {
+    # Cross-table only, no dedup guard needed (different tables)
+    return(list(list(
+      from_l = tbl_l, from_r = tbl_r,
+      join_cond = '1=1'
+    )))
+  }
+
+  # link_and_dedupe: cross-table + within each table
+  list(
+    list(from_l = tbl_l, from_r = tbl_r, join_cond = '1=1'),
+    list(from_l = tbl_l, from_r = tbl_l,
+         join_cond = 'l.unique_id < r.unique_id'),
+    list(from_l = tbl_r, from_r = tbl_r,
+         join_cond = 'l.unique_id < r.unique_id')
+  )
 }
 
 #' Generate SQL for a comparison level
