@@ -46,7 +46,7 @@
 #'             "robert@example.com", "alice@example.com", "alison@example.com",
 #'             "tom@example.com", "tomas@example.com")
 #' )
-#' con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+#' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -58,7 +58,7 @@
 #' model <- il_estimate_em(model, block_on(surname))
 #'
 #' pairs <- predict(model, threshold = 0.5)
-#' DBI::dbDisconnect(con)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
 predict.il_model <- function(object, threshold = 0.85,
                              type = c("pairs", "weights"), ...) {
   type <- match.arg(type)
@@ -72,16 +72,13 @@ predict.il_model <- function(object, threshold = 0.85,
   params <- object$params$comparisons
   prior <- object$params$prior %||% 0.05
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
-
-  # Collect blocked pairs from all blocking rules
   blocking_rules <- object$spec$blocking_rules
-  all_pairs <- list()
-  for (br in blocking_rules) {
-    bp <- get_blocked_pairs(object, br)
-    if (nrow(bp) > 0L) all_pairs <- c(all_pairs, list(bp))
-  }
 
-  if (length(all_pairs) == 0L) {
+  result_data <- get_pairs_with_gammas(object, blocking_rules)
+  gamma_mat <- result_data$gamma_mat
+  ids <- result_data$ids
+
+  if (nrow(gamma_mat) == 0L) {
     empty <- tibble::tibble(
       unique_id_l = integer(0), unique_id_r = integer(0),
       match_weight = numeric(0), match_probability = numeric(0)
@@ -89,20 +86,14 @@ predict.il_model <- function(object, threshold = 0.85,
     return(new_il_compared(empty, model = object))
   }
 
-  pairs <- do.call(rbind, all_pairs)
-  pair_key <- paste(pairs$l_unique_id, pairs$r_unique_id, sep = "||")
-  pairs <- pairs[!duplicated(pair_key), , drop = FALSE]
-
-  gamma_mat <- compute_gamma_matrix(pairs, comparisons)
   n_comp <- length(comparisons)
-
   mu <- extract_mu_vectors(params, comp_names)
   match_weight <- score_gamma_matrix(gamma_mat, mu)
   match_probability <- weight_to_probability(match_weight, prior)
 
   result <- tibble::tibble(
-    unique_id_l = pairs$l_unique_id,
-    unique_id_r = pairs$r_unique_id,
+    unique_id_l = ids$l_unique_id,
+    unique_id_r = ids$r_unique_id,
     match_weight = match_weight,
     match_probability = match_probability
   )
