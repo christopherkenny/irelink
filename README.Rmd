@@ -21,7 +21,7 @@ knitr::opts_chunk$set(
 `irelink` brings fast, scalable probabilistic record linkage to R.
 It implements the Fellegi-Sunter model to identify and link duplicate or related records across datasets that lack a shared unique identifier.
 Model parameters are estimated via unsupervised Expectation-Maximisation, so no labelled training data is required.
-A rich library of comparison functions — from exact matching through Jaro-Winkler, Levenshtein, date differences, and geographic distance — lets you tailor the linkage model to your data.
+Comparison functions cover exact matching, Jaro-Winkler, Levenshtein, date differences, and geographic distance, letting you tailor the model to your data.
 Multiple SQL backends are supported through DBI, so the same code runs on SQLite, DuckDB, or PostgreSQL.
 
 `irelink` is a translation of the Python [splink](https://github.com/moj-analytical-services/splink) library into idiomatic R.
@@ -34,20 +34,26 @@ You can install the development version of `irelink` like so:
 pak::pak('christopherkenny/irelink')
 ```
 
-## Example
+## Deduplication
 
-Start by loading a demo dataset and connecting to a SQL backend.
+Find duplicate records within a single dataset.
+`il_demo()` loads a built-in synthetic dataset for experimentation.
+`irelink` pushes data into a SQL database for efficient pair generation, so you need a DBI connection.
+Here we use an in-memory DuckDB instance.
 
-```{r load}
+```{r dedup-load}
 library(irelink)
 
-df <- il_demo("fake_20")
+df <- il_demo('fake_20')
 con <- DBI::dbConnect(duckdb::duckdb())
 ```
 
-Define an `il_spec` with comparison functions and blocking rules, then train:
+An `il_spec` describes the linkage model: which fields to compare, how to compare them, and which blocking rules to apply.
+Blocking rules restrict which record pairs are generated.
+Only pairs that share a surname or first name are scored, keeping computation manageable.
+`il_estimate_u()` estimates parameters for non-matching pairs via random sampling, and `il_estimate_em()` refines the match-weight parameters using Expectation-Maximisation.
 
-```{r train}
+```{r dedup-train}
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -60,19 +66,65 @@ model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
 ```
 
-Score candidate pairs above a match-probability threshold, then cluster into entities:
+`predict()` scores all candidate pairs and returns those above the threshold.
+`il_cluster()` groups the matched pairs into deduplicated entities.
 
-```{r predict}
+```{r dedup-predict}
 pairs <- predict(model, threshold = 0.5)
-pairs
-
 clusters <- il_cluster(pairs)
 clusters
 ```
 
-Finally, drop the temporary tables and close the connection:
+`il_cleanup()` drops the temporary tables that `irelink` wrote to the database.
+Always call it when you're done to avoid leaving stale tables in your connection.
 
-```{r cleanup}
+```{r dedup-cleanup}
+il_cleanup(model)
+DBI::dbDisconnect(con, shutdown = TRUE)
+```
+
+## Linking
+
+Link records across two separate datasets, finding which rows in one table correspond to rows in the other.
+`il_demo('fake_1000_links')` returns a list with `df_a` and `df_b`, two halves of the same synthetic population.
+Each record in one dataset has a counterpart in the other.
+
+```{r link-load}
+dfs <- il_demo('fake_1000_links')
+con <- DBI::dbConnect(duckdb::duckdb())
+```
+
+The spec is the same as for deduplication.
+Pass both data frames to `il_model()` and set `link_type = "link"` to tell the model to score only cross-dataset pairs, not pairs within the same dataset.
+
+```{r link-train}
+spec <- il_spec() |>
+  il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
+  il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
+  il_compare(dob, cl_exact()) |>
+  il_block_on(surname)
+
+model <- il_model(
+  dfs$df_a,
+  dfs$df_b,
+  spec = spec,
+  con = con,
+  link_type = 'link'
+)
+model <- il_estimate_u(model)
+model <- il_estimate_em(model, block_on(surname))
+```
+
+Each row in the result is a candidate match between a record in `df_a` and a record in `df_b`, scored by match probability.
+
+```{r link-predict}
+pairs <- predict(model, threshold = 0.5)
+pairs
+```
+
+As in the prior example, `il_cleanup()` drops the temporary tables that `irelink` wrote to the database.
+
+```{r link-cleanup}
 il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

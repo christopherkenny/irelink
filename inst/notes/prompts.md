@@ -323,3 +323,33 @@ Also review the description: it looks like we have some packages as "suggests" b
 That needs to be fixed by upgrading them to imports.
 
 Then, can you run the blog post examples and see how we do now that you patched duckdb?
+
+# Missing features
+
+I had another Claude look at this and it found some issues.
+
+Most important:
+
+term_frequency is not implemented -- it silently does nothing.
+
+The term_frequency = TRUE flag is accepted by cl_exact() and stored on the comparison level object (there's even a test that checks lev$term_frequency == TRUE), but it is never read anywhere downstream. Neither utils-sql.R, utils-scoring.R, nor predict.R reference term_frequency at all.
+
+The inst/refs/07-features-for-later.md file explicitly deferred it: "Term-frequency tables will be computed internally by cl_exact(term_frequency = TRUE)" -- meaning the intent was there but it was never built.
+
+The risk: The benchmark at inst/benchmarks/rl-workshop.qmd uses cl_exact(term_frequency = TRUE) on city, which will produce the same result as cl_exact() with no flag. If someone benchmarks against splink using TF weighting enabled, the results will quietly differ.
+
+## follow up
+
+Things to verify before asking for feedback:
+
+link_and_dedupe mode -- the from_splink vignette lists it as supported, but the explore found it may be incomplete. Worth checking whether il_model() actually handles it correctly end-to-end.
+
+il_find_matches() -- the README doesn't cover it, but the from_splink vignette maps it. Worth a quick smoke test to make sure it runs correctly with a trained model.
+
+The fake_1000_links demo dataset -- the two halves are just a random split of the same 1000-record pool rather than a true held-out linked dataset. This means the "linking" demo doesn't actually demonstrate cross-dataset linkage in a meaningful way. Splink's demo data has genuine cross-dataset pairs. This could confuse someone benchmarking against splink.
+
+What's genuinely missing vs splink:
+
+No equivalent to splink's linker.visualisations.* charts -- only autoplot() for match weights. Splink's waterfall chart, parameter estimate comparisons, and unlinkables chart are popular; if those aren't rendered as interactive HTML, that's a notable gap.
+No phonetic blocking (Soundex, Metaphone). Splink doesn't have it either out of the box, but it's a common ask.
+No batched/incremental retraining API.
