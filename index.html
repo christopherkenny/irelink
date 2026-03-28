@@ -37,7 +37,9 @@
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="articles/from_splink.html">Translating from Splink</a></li>
+<li><a class="dropdown-item" href="articles/deduplication.html">Deduplication with Evaluation</a></li>
+    <li><a class="dropdown-item" href="articles/from_splink.html">Translating from Splink</a></li>
+    <li><a class="dropdown-item" href="articles/record-linkage.html">Record Linkage Across Datasets</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
@@ -73,7 +75,7 @@
 <div class="section level2">
 <h2 id="deduplication">Deduplication<a class="anchor" aria-label="anchor" href="#deduplication"></a>
 </h2>
-<p>Find duplicate records within a single dataset. <code><a href="reference/il_demo.html">il_demo()</a></code> loads a built-in synthetic dataset for experimentation. <code>irelink</code> pushes data into a SQL database for efficient pair generation, so you need a DBI connection. Here we use an in-memory DuckDB instance.</p>
+<p>Find duplicate records within a single dataset. The bundled <code>fake_20</code> dataset provides a small example for experimentation. <code>irelink</code> pushes data into a SQL database for efficient pair generation, so you need a DBI connection. Here we use an in-memory DuckDB instance.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://christophertkenny.com/irelink/">irelink</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -82,7 +84,7 @@
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;     months</span></span>
 <span></span>
-<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_demo.html">il_demo</a></span><span class="op">(</span><span class="st">'fake_20'</span><span class="op">)</span></span>
+<span><span class="va">df</span> <span class="op">&lt;-</span> <span class="va">fake_20</span></span>
 <span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>An <code>il_spec</code> describes the linkage model: which fields to compare, how to compare them, and which blocking rules to apply. Blocking rules restrict which record pairs are generated. Only pairs that share a surname or first name are scored, keeping computation manageable. <code><a href="reference/il_estimate_u.html">il_estimate_u()</a></code> estimates parameters for non-matching pairs via random sampling, and <code><a href="reference/il_estimate_em.html">il_estimate_em()</a></code> refines the match-weight parameters using Expectation-Maximisation.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -104,17 +106,17 @@
 <span><span class="co">#&gt; # A tibble: 13 × 2</span></span>
 <span><span class="co">#&gt;    unique_id cluster_id</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;     &lt;chr&gt;     </span></span>
-<span><span class="co">#&gt;  1 9         cluster_1 </span></span>
+<span><span class="co">#&gt;  1 5         cluster_1 </span></span>
 <span><span class="co">#&gt;  2 3         cluster_2 </span></span>
-<span><span class="co">#&gt;  3 5         cluster_3 </span></span>
-<span><span class="co">#&gt;  4 4         cluster_2 </span></span>
+<span><span class="co">#&gt;  3 4         cluster_2 </span></span>
+<span><span class="co">#&gt;  4 9         cluster_3 </span></span>
 <span><span class="co">#&gt;  5 2         cluster_4 </span></span>
 <span><span class="co">#&gt;  6 7         cluster_5 </span></span>
 <span><span class="co">#&gt;  7 1         cluster_4 </span></span>
-<span><span class="co">#&gt;  8 6         cluster_3 </span></span>
-<span><span class="co">#&gt;  9 19        cluster_1 </span></span>
+<span><span class="co">#&gt;  8 6         cluster_1 </span></span>
+<span><span class="co">#&gt;  9 15        cluster_1 </span></span>
 <span><span class="co">#&gt; 10 13        cluster_2 </span></span>
-<span><span class="co">#&gt; 11 15        cluster_3 </span></span>
+<span><span class="co">#&gt; 11 19        cluster_3 </span></span>
 <span><span class="co">#&gt; 12 11        cluster_4 </span></span>
 <span><span class="co">#&gt; 13 17        cluster_5</span></span></code></pre></div>
 <p><code><a href="reference/il_cleanup.html">il_cleanup()</a></code> drops the temporary tables that <code>irelink</code> wrote to the database. Always call it when you’re done to avoid leaving stale tables in your connection.</p>
@@ -125,24 +127,27 @@
 <div class="section level2">
 <h2 id="linking">Linking<a class="anchor" aria-label="anchor" href="#linking"></a>
 </h2>
-<p>Link records across two separate datasets, finding which rows in one table correspond to rows in the other. <code>il_demo('fake_1000_links')</code> returns a list with <code>df_a</code> and <code>df_b</code>, two halves of the same synthetic population. Each record in one dataset has a counterpart in the other.</p>
+<p>Link records across two separate datasets, finding which rows in one table correspond to rows in the other. The FEBRL benchmark datasets provide a classic record-linkage scenario: <code>febrl4a</code> contains 5,000 original records and <code>febrl4b</code> contains one duplicate per original with realistic data-quality errors.</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">dfs</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_demo.html">il_demo</a></span><span class="op">(</span><span class="st">'fake_1000_links'</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="co"># Use a small slice for this quick demo; see vignette("record-linkage") for the full workflow</span></span>
+<span><span class="va">df_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">febrl4a</span>, <span class="fl">200</span><span class="op">)</span></span>
+<span><span class="va">df_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">febrl4b</span>, <span class="fl">200</span><span class="op">)</span></span>
+<span></span>
 <span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p>The spec is the same as for deduplication. Pass both data frames to <code><a href="reference/il_model.html">il_model()</a></code> and set <code>link_type = "link"</code> to tell the model to score only cross-dataset pairs, not pairs within the same dataset.</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">first_name</span>, <span class="fu"><a href="reference/cl_jaro_winkler.html">cl_jaro_winkler</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="fl">0.7</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">given_name</span>, <span class="fu"><a href="reference/cl_jaro_winkler.html">cl_jaro_winkler</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="fl">0.7</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">surname</span>, <span class="fu"><a href="reference/cl_jaro_winkler.html">cl_jaro_winkler</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="fl">0.7</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
-<span>  <span class="fu"><a href="reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">dob</span>, <span class="fu"><a href="reference/cl_exact.html">cl_exact</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
+<span>  <span class="fu"><a href="reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">date_of_birth</span>, <span class="fu"><a href="reference/cl_exact.html">cl_exact</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="reference/il_block_on.html">il_block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_model.html">il_model</a></span><span class="op">(</span></span>
-<span>  <span class="va">dfs</span><span class="op">$</span><span class="va">df_a</span>,</span>
-<span>  <span class="va">dfs</span><span class="op">$</span><span class="va">df_b</span>,</span>
+<span>  <span class="va">df_a</span>,</span>
+<span>  <span class="va">df_b</span>,</span>
 <span>  spec <span class="op">=</span> <span class="va">spec</span>,</span>
 <span>  con <span class="op">=</span> <span class="va">con</span>,</span>
-<span>  link_type <span class="op">=</span> <span class="st">'link'</span></span>
+<span>  link_type <span class="op">=</span> <span class="st">"link"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_estimate_u.html">il_estimate_u</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -150,21 +155,21 @@
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span><span class="va">pairs</span></span>
-<span><span class="co">#&gt; # A tibble: 7,934 × 7</span></span>
-<span><span class="co">#&gt;    unique_id_l unique_id_r match_weight match_probability gamma_first_name</span></span>
+<span><span class="co">#&gt; # A tibble: 104 × 7</span></span>
+<span><span class="co">#&gt;    unique_id_l unique_id_r match_weight match_probability gamma_given_name</span></span>
 <span><span class="co">#&gt;  *       &lt;int&gt;       &lt;int&gt;        &lt;dbl&gt;             &lt;dbl&gt;            &lt;int&gt;</span></span>
-<span><span class="co">#&gt;  1          46         982         4.80             0.595                0</span></span>
-<span><span class="co">#&gt;  2          59         978         4.80             0.595                0</span></span>
-<span><span class="co">#&gt;  3          66         982         4.80             0.595                0</span></span>
-<span><span class="co">#&gt;  4          71         925         4.80             0.595                0</span></span>
-<span><span class="co">#&gt;  5          78         980         4.80             0.595                0</span></span>
-<span><span class="co">#&gt;  6          88         866         4.80             0.595                0</span></span>
-<span><span class="co">#&gt;  7          90         996         4.80             0.595                0</span></span>
-<span><span class="co">#&gt;  8         105         992         4.80             0.595                0</span></span>
-<span><span class="co">#&gt;  9         119         994         4.80             0.595                0</span></span>
-<span><span class="co">#&gt; 10         133         901         4.80             0.595                0</span></span>
-<span><span class="co">#&gt; # ℹ 7,924 more rows</span></span>
-<span><span class="co">#&gt; # ℹ 2 more variables: gamma_surname &lt;int&gt;, gamma_dob &lt;int&gt;</span></span></code></pre></div>
+<span><span class="co">#&gt;  1          81         198         7.84             0.923                0</span></span>
+<span><span class="co">#&gt;  2          98          94         7.84             0.923                0</span></span>
+<span><span class="co">#&gt;  3         165          59        16.1              1.000                0</span></span>
+<span><span class="co">#&gt;  4         179         162         7.84             0.923                0</span></span>
+<span><span class="co">#&gt;  5         152          51         7.84             0.923                0</span></span>
+<span><span class="co">#&gt;  6           3          24         7.84             0.923                0</span></span>
+<span><span class="co">#&gt;  7          42          24         7.84             0.923                0</span></span>
+<span><span class="co">#&gt;  8          42         179         7.84             0.923                0</span></span>
+<span><span class="co">#&gt;  9          59         145         7.84             0.923                0</span></span>
+<span><span class="co">#&gt; 10          70         152         7.84             0.923                0</span></span>
+<span><span class="co">#&gt; # ℹ 94 more rows</span></span>
+<span><span class="co">#&gt; # ℹ 2 more variables: gamma_surname &lt;int&gt;, gamma_date_of_birth &lt;int&gt;</span></span></code></pre></div>
 <p>As in the prior example, <code><a href="reference/il_cleanup.html">il_cleanup()</a></code> drops the temporary tables that <code>irelink</code> wrote to the database.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>

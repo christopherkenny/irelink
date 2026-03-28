@@ -19,7 +19,9 @@
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/from_splink.html">Translating from Splink</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/deduplication.html">Deduplication with Evaluation</a></li>
+    <li><a class="dropdown-item" href="../articles/from_splink.html">Translating from Splink</a></li>
+    <li><a class="dropdown-item" href="../articles/record-linkage.html">Record Linkage Across Datasets</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -496,6 +498,34 @@
 
         </dt>
         <dd>Compute Graph Metrics for Clusters</dd>
+
+        <dt>
+
+          <code><a href="autoplot.il_accuracy.html">autoplot(<i>&lt;il_accuracy&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot Accuracy Metrics Across Thresholds</dd>
+
+        <dt>
+
+          <code><a href="autoplot.il_roc.html">autoplot(<i>&lt;il_roc&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot ROC Curve</dd>
+
+        <dt>
+
+          <code><a href="autoplot.il_precision_recall.html">autoplot(<i>&lt;il_precision_recall&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot Precision–Recall Curve</dd>
+
+        <dt>
+
+          <code><a href="autoplot.il_unlinkables.html">autoplot(<i>&lt;il_unlinkables&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot Unlinkables Curve</dd>
       </dl></div><div class="section level2">
       <h2 id="data-profiling">Data Profiling<a class="anchor" aria-label="anchor" href="#data-profiling"></a></h2>
 
@@ -512,6 +542,13 @@
 
         </dt>
         <dd>Column Completeness Across Datasets</dd>
+
+        <dt>
+
+          <code><a href="autoplot.il_completeness.html">autoplot(<i>&lt;il_completeness&gt;</i>)</a></code>
+
+        </dt>
+        <dd>Plot Column Completeness</dd>
 
         <dt>
 
@@ -570,13 +607,50 @@
 
         </dt>
         <dd>Remove Temporary Tables from Database</dd>
+      </dl></div><div class="section level2">
+      <h2 id="datasets">Datasets<a class="anchor" aria-label="anchor" href="#datasets"></a></h2>
+
+      <div class="section-desc"><p>Bundled benchmark datasets from the splink ecosystem.</p></div>
+
+      <dl></dl></div><div class="section level2">
+
+
+
+
+      <dl><dt>
+
+          <code><a href="fake_20.html">fake_20</a></code>
+
+        </dt>
+        <dd>Fake 20 — Minimal Deduplication Example</dd>
 
         <dt>
 
-          <code><a href="il_demo.html">il_demo()</a></code>
+          <code><a href="fake_1000.html">fake_1000</a></code>
 
         </dt>
-        <dd>Load a Demo Dataset</dd>
+        <dd>Splink Fake 1000 — Deduplication Benchmark</dd>
+
+        <dt>
+
+          <code><a href="fake_1000_labels.html">fake_1000_labels</a></code>
+
+        </dt>
+        <dd>Splink Fake 1000 — Clerical Pairwise Labels</dd>
+
+        <dt>
+
+          <code><a href="febrl4a.html">febrl4a</a></code>
+
+        </dt>
+        <dd>FEBRL 4a — Record Linkage Original Records</dd>
+
+        <dt>
+
+          <code><a href="febrl4b.html">febrl4b</a></code>
+
+        </dt>
+        <dd>FEBRL 4b — Record Linkage Duplicate Records</dd>
       </dl></div><div class="section level2">
       <h2 id="unit-helpers">Unit Helpers<a class="anchor" aria-label="anchor" href="#unit-helpers"></a></h2>
 

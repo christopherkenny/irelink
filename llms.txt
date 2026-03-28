@@ -24,9 +24,8 @@ pak::pak('christopherkenny/irelink')
 
 ## Deduplication
 
-Find duplicate records within a single dataset.
-[`il_demo()`](http://christophertkenny.com/irelink/reference/il_demo.md)
-loads a built-in synthetic dataset for experimentation. `irelink` pushes
+Find duplicate records within a single dataset. The bundled `fake_20`
+dataset provides a small example for experimentation. `irelink` pushes
 data into a SQL database for efficient pair generation, so you need a
 DBI connection. Here we use an in-memory DuckDB instance.
 
@@ -38,7 +37,7 @@ library(irelink)
 #> 
 #>     months
 
-df <- il_demo('fake_20')
+df <- fake_20
 con <- DBI::dbConnect(duckdb::duckdb())
 ```
 
@@ -76,17 +75,17 @@ clusters
 #> # A tibble: 13 × 2
 #>    unique_id cluster_id
 #>    <chr>     <chr>     
-#>  1 9         cluster_1 
+#>  1 5         cluster_1 
 #>  2 3         cluster_2 
-#>  3 5         cluster_3 
-#>  4 4         cluster_2 
+#>  3 4         cluster_2 
+#>  4 9         cluster_3 
 #>  5 2         cluster_4 
 #>  6 7         cluster_5 
 #>  7 1         cluster_4 
-#>  8 6         cluster_3 
-#>  9 19        cluster_1 
+#>  8 6         cluster_1 
+#>  9 15        cluster_1 
 #> 10 13        cluster_2 
-#> 11 15        cluster_3 
+#> 11 19        cluster_3 
 #> 12 11        cluster_4 
 #> 13 17        cluster_5
 ```
@@ -104,12 +103,16 @@ DBI::dbDisconnect(con, shutdown = TRUE)
 ## Linking
 
 Link records across two separate datasets, finding which rows in one
-table correspond to rows in the other. `il_demo('fake_1000_links')`
-returns a list with `df_a` and `df_b`, two halves of the same synthetic
-population. Each record in one dataset has a counterpart in the other.
+table correspond to rows in the other. The FEBRL benchmark datasets
+provide a classic record-linkage scenario: `febrl4a` contains 5,000
+original records and `febrl4b` contains one duplicate per original with
+realistic data-quality errors.
 
 ``` r
-dfs <- il_demo('fake_1000_links')
+# Use a small slice for this quick demo; see vignette("record-linkage") for the full workflow
+df_a <- head(febrl4a, 200)
+df_b <- head(febrl4b, 200)
+
 con <- DBI::dbConnect(duckdb::duckdb())
 ```
 
@@ -120,17 +123,17 @@ cross-dataset pairs, not pairs within the same dataset.
 
 ``` r
 spec <- il_spec() |>
-  il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
+  il_compare(given_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
-  il_compare(dob, cl_exact()) |>
+  il_compare(date_of_birth, cl_exact()) |>
   il_block_on(surname)
 
 model <- il_model(
-  dfs$df_a,
-  dfs$df_b,
+  df_a,
+  df_b,
   spec = spec,
   con = con,
-  link_type = 'link'
+  link_type = "link"
 )
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
@@ -142,21 +145,21 @@ and a record in `df_b`, scored by match probability.
 ``` r
 pairs <- predict(model, threshold = 0.5)
 pairs
-#> # A tibble: 7,934 × 7
-#>    unique_id_l unique_id_r match_weight match_probability gamma_first_name
+#> # A tibble: 104 × 7
+#>    unique_id_l unique_id_r match_weight match_probability gamma_given_name
 #>  *       <int>       <int>        <dbl>             <dbl>            <int>
-#>  1          46         982         4.80             0.595                0
-#>  2          59         978         4.80             0.595                0
-#>  3          66         982         4.80             0.595                0
-#>  4          71         925         4.80             0.595                0
-#>  5          78         980         4.80             0.595                0
-#>  6          88         866         4.80             0.595                0
-#>  7          90         996         4.80             0.595                0
-#>  8         105         992         4.80             0.595                0
-#>  9         119         994         4.80             0.595                0
-#> 10         133         901         4.80             0.595                0
-#> # ℹ 7,924 more rows
-#> # ℹ 2 more variables: gamma_surname <int>, gamma_dob <int>
+#>  1          81         198         7.84             0.923                0
+#>  2          98          94         7.84             0.923                0
+#>  3         165          59        16.1              1.000                0
+#>  4         179         162         7.84             0.923                0
+#>  5         152          51         7.84             0.923                0
+#>  6           3          24         7.84             0.923                0
+#>  7          42          24         7.84             0.923                0
+#>  8          42         179         7.84             0.923                0
+#>  9          59         145         7.84             0.923                0
+#> 10          70         152         7.84             0.923                0
+#> # ℹ 94 more rows
+#> # ℹ 2 more variables: gamma_surname <int>, gamma_date_of_birth <int>
 ```
 
 As in the prior example,
@@ -319,6 +322,14 @@ Assess model quality against labelled data.
   : Compute Unlinkable Records
 - [`il_graph_metrics()`](http://christophertkenny.com/irelink/reference/il_graph_metrics.md)
   : Compute Graph Metrics for Clusters
+- [`autoplot(`*`<il_accuracy>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_accuracy.md)
+  : Plot Accuracy Metrics Across Thresholds
+- [`autoplot(`*`<il_roc>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_roc.md)
+  : Plot ROC Curve
+- [`autoplot(`*`<il_precision_recall>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_precision_recall.md)
+  : Plot Precision–Recall Curve
+- [`autoplot(`*`<il_unlinkables>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_unlinkables.md)
+  : Plot Unlinkables Curve
 
 ## Data Profiling
 
@@ -326,6 +337,8 @@ Explore and summarise input data before linkage.
 
 - [`il_completeness()`](http://christophertkenny.com/irelink/reference/il_completeness.md)
   : Column Completeness Across Datasets
+- [`autoplot(`*`<il_completeness>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_completeness.md)
+  : Plot Column Completeness
 - [`il_count_pairs()`](http://christophertkenny.com/irelink/reference/il_count_pairs.md)
   : Count Candidate Pairs Under Blocking Rules
 - [`il_largest_blocks()`](http://christophertkenny.com/irelink/reference/il_largest_blocks.md)
@@ -345,8 +358,21 @@ Save, load, and manage linkage models and resources.
   : Attach a Saved Model to Fresh Data
 - [`il_cleanup()`](http://christophertkenny.com/irelink/reference/il_cleanup.md)
   : Remove Temporary Tables from Database
-- [`il_demo()`](http://christophertkenny.com/irelink/reference/il_demo.md)
-  : Load a Demo Dataset
+
+## Datasets
+
+Bundled benchmark datasets from the splink ecosystem.
+
+- [`fake_20`](http://christophertkenny.com/irelink/reference/fake_20.md)
+  : Fake 20 — Minimal Deduplication Example
+- [`fake_1000`](http://christophertkenny.com/irelink/reference/fake_1000.md)
+  : Splink Fake 1000 — Deduplication Benchmark
+- [`fake_1000_labels`](http://christophertkenny.com/irelink/reference/fake_1000_labels.md)
+  : Splink Fake 1000 — Clerical Pairwise Labels
+- [`febrl4a`](http://christophertkenny.com/irelink/reference/febrl4a.md)
+  : FEBRL 4a — Record Linkage Original Records
+- [`febrl4b`](http://christophertkenny.com/irelink/reference/febrl4b.md)
+  : FEBRL 4b — Record Linkage Duplicate Records
 
 ## Unit Helpers
 
@@ -367,7 +393,11 @@ Lightweight constructors for physical and temporal units.
 
 ### All vignettes
 
+- [Deduplication with
+  Evaluation](http://christophertkenny.com/irelink/articles/deduplication.md):
 - [Translating from
   Splink](http://christophertkenny.com/irelink/articles/from_splink.md):
 - [Getting
   Started](http://christophertkenny.com/irelink/articles/irelink.md):
+- [Record Linkage Across
+  Datasets](http://christophertkenny.com/irelink/articles/record-linkage.md):

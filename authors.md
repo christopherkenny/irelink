@@ -23,7 +23,7 @@
 - **Ross Kennedy**. Copyright holder.  
   Author of splink
 
-- **Ministry of Justice**. Copyright holder.  
+- **UK Ministry of Justice**. Copyright holder.  
   Copyright holder of splink
 
 ## Citation

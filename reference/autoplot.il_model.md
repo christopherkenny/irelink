@@ -1,8 +1,11 @@
 # Quick Match-Weights Plot for a Model
 
-Produces a ready-made match-weights chart from a trained model. This is
-a convenience wrapper; for full control, extract data with
+Produces a ready-made chart from a trained model. By default draws the
+match-weights bar chart; set `type = "parameters"` for an m / u
+probability comparison. For full control, extract data with
 [`il_weights()`](http://christophertkenny.com/irelink/reference/il_weights.md)
+or
+[`il_parameters()`](http://christophertkenny.com/irelink/reference/il_parameters.md)
 and build a custom
 [`ggplot2::ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html).
 
@@ -10,7 +13,7 @@ and build a custom
 
 ``` r
 # S3 method for class 'il_model'
-autoplot(object, ...)
+autoplot(object, type = c("weights", "parameters"), ...)
 ```
 
 ## Arguments
@@ -18,6 +21,12 @@ autoplot(object, ...)
 - object:
 
   A trained `il_model` object.
+
+- type:
+
+  One of `"weights"` (default) or `"parameters"`. `"weights"` shows
+  log-2 Bayes factors per comparison level. `"parameters"` shows m and u
+  probabilities side by side.
 
 - ...:
 

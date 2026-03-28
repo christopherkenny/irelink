@@ -22,7 +22,7 @@ serve the same role and can be passed directly to
 
 | Step                | splink (Python)                                                           | irelink (R)                                          |
 |---------------------|---------------------------------------------------------------------------|------------------------------------------------------|
-| Load data           | `splink_datasets.fake_1000`                                               | `il_demo("fake_1000")`                               |
+| Load data           | `splink_datasets.fake_1000`                                               | `fake_1000`                                          |
 | Choose backend      | `DuckDBAPI()`                                                             | `DBI::dbConnect(RSQLite::SQLite(), ...)`             |
 | Define settings     | `SettingsCreator(...)`                                                    | `il_spec() \|> il_compare(...) \|> il_block_on(...)` |
 | Create model        | `Linker(df, settings, db_api)`                                            | `il_model(df, spec = spec, con = con)`               |
@@ -174,7 +174,7 @@ clusters = linker.clustering.cluster_pairwise_predictions_at_threshold(
 ``` r
 library(irelink)
 
-df <- il_demo("fake_1000")
+df <- fake_1000
 con <- DBI::dbConnect(duckdb::duckdb())
 
 spec <- il_spec() |>

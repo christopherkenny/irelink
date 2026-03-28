@@ -84,11 +84,11 @@ a pair is compared if it satisfies any rule.
 
 [`il_model()`](http://christophertkenny.com/irelink/reference/il_model.md)
 uploads the data to a SQL backend and attaches the specification. Any
-DBI-compatible connection works. Here we use an in-memory SQLite
+DBI-compatible connection works. Here we use an in-memory DuckDB
 database:
 
 ``` r
-df <- il_demo("fake_20")
+df <- fake_20
 con <- DBI::dbConnect(duckdb::duckdb())
 
 model <- il_model(df, spec = spec, con = con)
@@ -145,12 +145,12 @@ head(pairs)
 #> # A tibble: 6 × 7
 #>   unique_id_l unique_id_r match_weight match_probability gamma_first_name
 #>         <int>       <int>        <dbl>             <dbl>            <int>
-#> 1           3          13         9.20             0.969                1
-#> 2           1           2         9.20             0.969                1
-#> 3           4          13         9.20             0.969                1
-#> 4           9          19         9.20             0.969                1
-#> 5           3           4         9.20             0.969                1
-#> 6           5           6         9.20             0.969                1
+#> 1           1           2         9.20             0.969                1
+#> 2           4          13         9.20             0.969                1
+#> 3           9          19         9.20             0.969                1
+#> 4           3           4         9.20             0.969                1
+#> 5           5           6         9.20             0.969                1
+#> 6           1          11         9.20             0.969                1
 #> # ℹ 2 more variables: gamma_surname <int>, gamma_dob <int>
 ```
 
@@ -170,12 +170,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 3         cluster_1 
-#> 2 1         cluster_2 
-#> 3 4         cluster_1 
-#> 4 9         cluster_3 
+#> 1 1         cluster_1 
+#> 2 4         cluster_2 
+#> 3 9         cluster_3 
+#> 4 3         cluster_2 
 #> 5 5         cluster_4 
-#> 6 2         cluster_2
+#> 6 2         cluster_1
 ```
 
 Each record is assigned a `cluster_id`. Records sharing the same cluster

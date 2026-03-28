@@ -35,4 +35,5 @@ Other contributors:
 
 - Ross Kennedy (Author of splink) \[copyright holder\]
 
-- Ministry of Justice (Copyright holder of splink) \[copyright holder\]
+- UK Ministry of Justice (Copyright holder of splink) \[copyright
+  holder\]

@@ -88,8 +88,8 @@ probabilistic record linkage engine into idiomatic R.
   surfaces false positives and false negatives.
 - [`il_graph_metrics()`](http://christophertkenny.com/irelink/reference/il_graph_metrics.md)
   summarises cluster-level statistics.
-- `autoplot()` methods produce ggplot2 charts from model inspection
-  outputs.
+- [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
+  methods produce ggplot2 charts from model inspection outputs.
 
 ### SQL backends and persistence
 

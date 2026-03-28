@@ -149,6 +149,14 @@ Assess model quality against labelled data.
   : Compute Unlinkable Records
 - [`il_graph_metrics()`](http://christophertkenny.com/irelink/reference/il_graph_metrics.md)
   : Compute Graph Metrics for Clusters
+- [`autoplot(`*`<il_accuracy>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_accuracy.md)
+  : Plot Accuracy Metrics Across Thresholds
+- [`autoplot(`*`<il_roc>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_roc.md)
+  : Plot ROC Curve
+- [`autoplot(`*`<il_precision_recall>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_precision_recall.md)
+  : Plot Precision–Recall Curve
+- [`autoplot(`*`<il_unlinkables>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_unlinkables.md)
+  : Plot Unlinkables Curve
 
 ## Data Profiling
 
@@ -156,6 +164,8 @@ Explore and summarise input data before linkage.
 
 - [`il_completeness()`](http://christophertkenny.com/irelink/reference/il_completeness.md)
   : Column Completeness Across Datasets
+- [`autoplot(`*`<il_completeness>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_completeness.md)
+  : Plot Column Completeness
 - [`il_count_pairs()`](http://christophertkenny.com/irelink/reference/il_count_pairs.md)
   : Count Candidate Pairs Under Blocking Rules
 - [`il_largest_blocks()`](http://christophertkenny.com/irelink/reference/il_largest_blocks.md)
@@ -175,8 +185,21 @@ Save, load, and manage linkage models and resources.
   : Attach a Saved Model to Fresh Data
 - [`il_cleanup()`](http://christophertkenny.com/irelink/reference/il_cleanup.md)
   : Remove Temporary Tables from Database
-- [`il_demo()`](http://christophertkenny.com/irelink/reference/il_demo.md)
-  : Load a Demo Dataset
+
+## Datasets
+
+Bundled benchmark datasets from the splink ecosystem.
+
+- [`fake_20`](http://christophertkenny.com/irelink/reference/fake_20.md)
+  : Fake 20 — Minimal Deduplication Example
+- [`fake_1000`](http://christophertkenny.com/irelink/reference/fake_1000.md)
+  : Splink Fake 1000 — Deduplication Benchmark
+- [`fake_1000_labels`](http://christophertkenny.com/irelink/reference/fake_1000_labels.md)
+  : Splink Fake 1000 — Clerical Pairwise Labels
+- [`febrl4a`](http://christophertkenny.com/irelink/reference/febrl4a.md)
+  : FEBRL 4a — Record Linkage Original Records
+- [`febrl4b`](http://christophertkenny.com/irelink/reference/febrl4b.md)
+  : FEBRL 4b — Record Linkage Duplicate Records
 
 ## Unit Helpers
 

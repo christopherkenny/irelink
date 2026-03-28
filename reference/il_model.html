@@ -25,7 +25,9 @@ reference."><meta property="og:image" content="http://christophertkenny.com/irel
 <li class="active nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/from_splink.html">Translating from Splink</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/deduplication.html">Deduplication with Evaluation</a></li>
+    <li><a class="dropdown-item" href="../articles/from_splink.html">Translating from Splink</a></li>
+    <li><a class="dropdown-item" href="../articles/record-linkage.html">Record Linkage Across Datasets</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -65,7 +67,8 @@ reference.</p>
 
 
 <dl><dt id="arg--data">.data<a class="anchor" aria-label="anchor" href="#arg--data"></a></dt>
-<dd><p>A data frame or tibble. The first (or only) input dataset.</p></dd>
+<dd><p>A data frame or tibble. The first (or only) input dataset.
+If no <code>unique_id</code> column is present, one is generated automatically.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
@@ -94,49 +97,12 @@ and <code><a href="il_block_on.html">il_block_on()</a></code>.</p></dd>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>  unique_id <span class="op">=</span> <span class="fl">1</span><span class="op">:</span><span class="fl">20</span>,</span></span>
-<span class="r-in"><span>  first_name <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="st">'John'</span>, <span class="st">'Jon'</span>, <span class="st">'Jane'</span>, <span class="st">'Jane'</span>, <span class="st">'Bob'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'Bobby'</span>, <span class="st">'Alice'</span>, <span class="st">'Alicia'</span>, <span class="st">'Tom'</span>, <span class="st">'Thomas'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'John'</span>, <span class="st">'Jon'</span>, <span class="st">'Jane'</span>, <span class="st">'Janet'</span>, <span class="st">'Bob'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'Robert'</span>, <span class="st">'Alice'</span>, <span class="st">'Alison'</span>, <span class="st">'Tom'</span>, <span class="st">'Tomas'</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span>,</span></span>
-<span class="r-in"><span>  surname <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="st">'Smith'</span>, <span class="st">'Smith'</span>, <span class="st">'Doe'</span>, <span class="st">'Doe'</span>, <span class="st">'Jones'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'Jones'</span>, <span class="st">'Brown'</span>, <span class="st">'Brown'</span>, <span class="st">'White'</span>, <span class="st">'White'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'Smith'</span>, <span class="st">'Smyth'</span>, <span class="st">'Doe'</span>, <span class="st">'Doe'</span>, <span class="st">'Jones'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'Jones'</span>, <span class="st">'Brown'</span>, <span class="st">'Browne'</span>, <span class="st">'White'</span>, <span class="st">'White'</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span>,</span></span>
-<span class="r-in"><span>  dob <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="st">'1990-01-01'</span>, <span class="st">'1990-01-01'</span>, <span class="st">'1985-06-15'</span>, <span class="st">'1985-06-15'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'2000-12-01'</span>, <span class="st">'2000-12-01'</span>, <span class="st">'1975-03-22'</span>, <span class="st">'1975-03-22'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'1988-07-04'</span>, <span class="st">'1988-07-04'</span>, <span class="st">'1990-01-01'</span>, <span class="st">'1990-01-02'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'1985-06-15'</span>, <span class="st">'1985-06-16'</span>, <span class="st">'2000-12-01'</span>, <span class="st">'2000-12-02'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'1975-03-22'</span>, <span class="st">'1975-03-23'</span>, <span class="st">'1988-07-04'</span>, <span class="st">'1988-07-05'</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span>,</span></span>
-<span class="r-in"><span>  city <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="st">'London'</span>, <span class="st">'London'</span>, <span class="st">'Paris'</span>, <span class="st">'Paris'</span>, <span class="st">'Berlin'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'Berlin'</span>, <span class="st">'Rome'</span>, <span class="st">'Rome'</span>, <span class="st">'Madrid'</span>, <span class="st">'Madrid'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'London'</span>, <span class="st">'London'</span>, <span class="st">'Paris'</span>, <span class="st">'Paris'</span>, <span class="st">'Berlin'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'Berlin'</span>, <span class="st">'Rome'</span>, <span class="st">'Rome'</span>, <span class="st">'Madrid'</span>, <span class="st">'Madrid'</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span>,</span></span>
-<span class="r-in"><span>  email <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span></span></span>
-<span class="r-in"><span>    <span class="st">'john@example.com'</span>, <span class="st">'jon@example.com'</span>, <span class="st">'jane@example.com'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'jane@example.com'</span>, <span class="st">'bob@example.com'</span>, <span class="st">'bobby@example.com'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'alice@example.com'</span>, <span class="st">'alicia@example.com'</span>, <span class="st">'tom@example.com'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'thomas@example.com'</span>, <span class="st">'john@example.com'</span>, <span class="st">'jon@example.com'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'jane@example.com'</span>, <span class="st">'janet@example.com'</span>, <span class="st">'bob@example.com'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'robert@example.com'</span>, <span class="st">'alice@example.com'</span>, <span class="st">'alison@example.com'</span>,</span></span>
-<span class="r-in"><span>    <span class="st">'tom@example.com'</span>, <span class="st">'tomas@example.com'</span></span></span>
-<span class="r-in"><span>  <span class="op">)</span></span></span>
-<span class="r-in"><span><span class="op">)</span></span></span>
-<span class="r-in"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">first_name</span>, <span class="fu"><a href="cl_jaro_winkler.html">cl_jaro_winkler</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="fl">0.7</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="il_block_on.html">il_block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">il_model</span><span class="op">(</span><span class="va">df</span>, spec <span class="op">=</span> <span class="va">spec</span>, con <span class="op">=</span> <span class="va">con</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu">il_model</span><span class="op">(</span><span class="va">fake_20</span>, spec <span class="op">=</span> <span class="va">spec</span>, con <span class="op">=</span> <span class="va">con</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>

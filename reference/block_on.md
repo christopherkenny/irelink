@@ -50,7 +50,7 @@ block_on(first_name, surname)
 #> [1] "il_blocking_rule"
 
 # Fuzzy SQL conditions
-block_on(first_name, .where = "levenshtein(l.dob, r.dob) <= 1")
+block_on(first_name, .where = 'levenshtein(l.dob, r.dob) <= 1')
 #> $columns
 #>              
 #> "first_name" 
