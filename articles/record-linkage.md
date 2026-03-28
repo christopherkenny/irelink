@@ -171,13 +171,13 @@ il_weights(model)
 #> # A tibble: 8 × 5
 #>   comparison    level     m_prob  u_prob weight
 #>   <chr>         <chr>      <dbl>   <dbl>  <dbl>
-#> 1 given_name    match     0.604  0.00268   7.82
-#> 2 given_name    non_match 0.396  0.997    -1.33
-#> 3 surname       match     0.686  0.00325   7.72
-#> 4 surname       non_match 0.314  0.997    -1.66
-#> 5 date_of_birth match     0.923  0.00015  12.6 
-#> 6 date_of_birth non_match 0.0773 1.000    -3.69
-#> 7 postcode      match     0.869  0.00099   9.78
+#> 1 given_name    match     0.603  0.0032    7.56
+#> 2 given_name    non_match 0.397  0.997    -1.33
+#> 3 surname       match     0.687  0.00303   7.83
+#> 4 surname       non_match 0.313  0.997    -1.67
+#> 5 date_of_birth match     0.925  0.00014  12.7 
+#> 6 date_of_birth non_match 0.0751 1.000    -3.73
+#> 7 postcode      match     0.869  0.00108   9.65
 #> 8 postcode      non_match 0.131  0.999    -2.93
 ```
 
@@ -203,12 +203,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 24        cluster_1 
-#> 2 185       cluster_2 
-#> 3 219       cluster_3 
-#> 4 236       cluster_4 
-#> 5 240       cluster_5 
-#> 6 299       cluster_6
+#> 1 43        cluster_1 
+#> 2 51        cluster_2 
+#> 3 209       cluster_3 
+#> 4 243       cluster_4 
+#> 5 314       cluster_5 
+#> 6 319       cluster_6
 ```
 
 ## Evaluate against ground truth
