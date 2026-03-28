@@ -2,6 +2,10 @@ url: http://christophertkenny.com/irelink/
 template:
   bootstrap: 5
 
+home:
+  sidebar:
+    structure: [links, license, citation, authors]
+
 reference:
   - title: "Linkage Specification"
     desc: "Define the comparisons and blocking rules that drive the model."
@@ -126,4 +130,3 @@ reference:
       - years
       - km
       - mi
-
