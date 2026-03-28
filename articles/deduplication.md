@@ -183,36 +183,36 @@ summary(model)
 #>     comparisons: # A tibble: 10 × 4
 #>      comparisons:    comparison level          m       u
 #>      comparisons:    <chr>      <chr>      <dbl>   <dbl>
-#>      comparisons:  1 first_name match     0.408  0.00657
-#>      comparisons:  2 first_name non_match 0.592  0.993  
-#>      comparisons:  3 surname    match     0.472  0.00902
-#>      comparisons:  4 surname    non_match 0.528  0.991  
+#>      comparisons:  1 first_name match     0.409  0.00668
+#>      comparisons:  2 first_name non_match 0.591  0.993  
+#>      comparisons:  3 surname    match     0.473  0.00927
+#>      comparisons:  4 surname    non_match 0.527  0.991  
 #>      comparisons:  5 dob        match     0.99   0.00856
 #>      comparisons:  6 dob        non_match 0.0100 0.991  
-#>      comparisons:  7 city       match     0.567  0.0753 
-#>      comparisons:  8 city       non_match 0.433  0.925  
-#>      comparisons:  9 email      match     0.646  0.00761
-#>      comparisons: 10 email      non_match 0.354  0.992  
-#>     history: 1                , 1                , 1                , 1                , 1                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.689051453711433, 0.702118735655665, 0.575538831338967, 0.63489012692642 
-#>      history: 2                , 2                , 2                , 2                , 2                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.60260599748597 , 0.613197219895613, 0.503777374534803, 0.537361672545146
-#>      history: 3                , 3                , 3                , 3                , 3                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.570217871033046, 0.579602496356788, 0.493947793175027, 0.507240434577147
-#>      history: 4                , 4                , 4                , 4                , 4                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.558106566411642, 0.567171977634352, 0.490763208873557, 0.496365910239126
-#>      history: 5                , 5                , 5                , 5                , 5                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.553581638535472, 0.56254021344923 , 0.489448670309911, 0.492317834453596
-#>      history: 6                , 6                , 6                , 6                , 6                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.551883547060304, 0.560803118272525, 0.488916339527038, 0.490799077606472
-#>      history: 7                , 7                , 7                , 7                , 7                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.551244347209636, 0.5601493431239  , 0.488708038780623, 0.490227337265931
-#>      history: 8                , 8                , 8                , 8                , 8                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.551003370294822, 0.559902882651446, 0.488628120704665, 0.490011777036992
-#>      history: 9                , 9                , 9                , 9                , 9                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.55091246070301 , 0.5598099056089  , 0.488597744643816, 0.489930452878842
-#>      history: 10               , 10               , 10               , 10               , 10               , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.55087815484537 , 0.559774819713062, 0.488586246423971, 0.489899763656127
-#>      history: 11               , 11               , 11               , 11               , 11               , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.550865207598578, 0.559761578090838, 0.488581901528791, 0.489888181260917
-#>      history: 12               , 12               , 12               , 12               , 12               , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.550860320999462, 0.559756580389254, 0.488580260855457, 0.489883809775316
-#>      history: 1                , 1                , 1                , 1                , 1                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.618503890921601, 0.611341229314538, 0.99             , 0.579848898771919, 0.659006928165866
-#>      history: 2                , 2                , 2                , 2                , 2                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.426234473057252, 0.491137923664342, 0.99             , 0.563800060948339, 0.662925057183104
-#>      history: 3                , 3                , 3                , 3                , 3                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.409845348609391, 0.474630956677771, 0.99             , 0.565769348641529, 0.649978328061053
-#>      history: 4                , 4                , 4                , 4                , 4                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.407931497813713, 0.472388327205912, 0.99             , 0.566772929716708, 0.647059383781167
-#>      history: 5                , 5                , 5                , 5                , 5                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.407633821072473, 0.472028553040464, 0.99             , 0.566985859055401, 0.646529918779534
-#>      history: 6                , 6                , 6                , 6                , 6                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.407583437470853, 0.471967470910739, 0.99             , 0.567025075191849, 0.646437377590322
-#>      history: 7                , 7                , 7                , 7                , 7                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.407574741521453, 0.471956933748104, 0.99             , 0.567032013806054, 0.646421305367976
-#>      history: 8                , 8                , 8                , 8                , 8                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.407573234184949, 0.471955108103936, 0.99             , 0.567033225796025, 0.646418516389244
+#>      comparisons:  7 city       match     0.566  0.0799 
+#>      comparisons:  8 city       non_match 0.434  0.920  
+#>      comparisons:  9 email      match     0.648  0.00775
+#>      comparisons: 10 email      non_match 0.352  0.992  
+#>     history: 1                , 1                , 1                , 1                , 1                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.689653444070602, 0.703130512612038, 0.575291114963411, 0.635646698880405
+#>      history: 2                , 2                , 2                , 2                , 2                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.604479738262956, 0.615497157411074, 0.503022799678266, 0.539218789196453
+#>      history: 3                , 3                , 3                , 3                , 3                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.572909116201695, 0.582598548517699, 0.492963694683585, 0.50974638812811 
+#>      history: 4                , 4                , 4                , 4                , 4                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.561139056765571, 0.570484164215739, 0.489817858981007, 0.49916246159631 
+#>      history: 5                , 5                , 5                , 5                , 5                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.55675177698429 , 0.565983450052563, 0.488553230239698, 0.495233831428245
+#>      history: 6                , 6                , 6                , 6                , 6                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.555109288480115, 0.564299830656824, 0.488047530516869, 0.49376361087985 
+#>      history: 7                , 7                , 7                , 7                , 7                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.554492583723049, 0.563667814864399, 0.487850956191963, 0.493211563793151
+#>      history: 8                , 8                , 8                , 8                , 8                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.554260694905721, 0.563430183107356, 0.487775857629538, 0.493003974900432
+#>      history: 9                , 9                , 9                , 9                , 9                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.554173445948091, 0.563340774939044, 0.487747407980194, 0.492925866235003
+#>      history: 10               , 10               , 10               , 10               , 10               , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.554140609428317, 0.563307125973184, 0.487736670585553, 0.492896469230367
+#>      history: 11               , 11               , 11               , 11               , 11               , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.55412824991966 , 0.563294460684918, 0.48773262448763 , 0.492885404260752
+#>      history: 12               , 12               , 12               , 12               , 12               , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.99             , 0.554123597659043, 0.563289693327861, 0.487731100805425, 0.492881239267208
+#>      history: 1                , 1                , 1                , 1                , 1                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.622788528944557, 0.613661340437705, 0.99             , 0.577229294981624, 0.658668936959251
+#>      history: 2                , 2                , 2                , 2                , 2                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.427658737017372, 0.492569371136768, 0.99             , 0.56297734068816 , 0.664538660765567
+#>      history: 3                , 3                , 3                , 3                , 3                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.411042987441873, 0.47593909362666 , 0.99             , 0.564779506738811, 0.651870546514186
+#>      history: 4                , 4                , 4                , 4                , 4                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.409127483592217, 0.473700002163839, 0.99             , 0.56575382741096 , 0.648976330652383
+#>      history: 5                , 5                , 5                , 5                , 5                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.408831363523171, 0.473342257931148, 0.99             , 0.565962314401455, 0.648449239131998
+#>      history: 6                , 6                , 6                , 6                , 6                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.408781307703476, 0.473281571463063, 0.99             , 0.566000841372611, 0.648356955883454
+#>      history: 7                , 7                , 7                , 7                , 7                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.408772666015239, 0.473271099202326, 0.99             , 0.566007670246864, 0.648340911680653
+#>      history: 8                , 8                , 8                , 8                , 8                , first_name       , surname          , dob              , city             , email            , match            , match            , match            , match            , match            , 0.408771167059821, 0.473269283575286, 0.99             , 0.566008864502292, 0.648338125133198
 ```
 
 The match weights chart shows the discriminative power of each
@@ -266,12 +266,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 0         cluster_1 
-#> 2 35        cluster_2 
-#> 3 38        cluster_3 
-#> 4 41        cluster_3 
-#> 5 52        cluster_4 
-#> 6 53        cluster_4
+#> 1 33        cluster_1 
+#> 2 39        cluster_2 
+#> 3 44        cluster_3 
+#> 4 45        cluster_3 
+#> 5 46        cluster_3 
+#> 6 51        cluster_4
 ```
 
 ## Evaluate against ground truth
@@ -351,12 +351,12 @@ head(errors)
 #> # A tibble: 6 × 6
 #>   unique_id_l unique_id_r match_weight match_probability true_label error_type  
 #>         <int>       <int>        <dbl>             <dbl> <lgl>      <chr>       
-#> 1           0           1         7.74            0.613  TRUE       false_negat…
-#> 2           0           2         7.74            0.613  TRUE       false_negat…
-#> 3           0           3         9.32            0.826  TRUE       false_negat…
-#> 4           1           3         2.45            0.0390 TRUE       false_negat…
-#> 5           2           3         2.45            0.0390 TRUE       false_negat…
-#> 6           4           6        10.5             0.916  FALSE      false_posit…
+#> 1           0           1         7.60            0.591  TRUE       false_negat…
+#> 2           0           2         7.60            0.591  TRUE       false_negat…
+#> 3           0           3         9.30            0.824  TRUE       false_negat…
+#> 4           1           3         2.40            0.0377 TRUE       false_negat…
+#> 5           2           3         2.40            0.0377 TRUE       false_negat…
+#> 6           4           6        10.5             0.915  FALSE      false_posit…
 ```
 
 ### Unlinkables
