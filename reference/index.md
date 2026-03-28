@@ -158,6 +158,8 @@ Explore and summarise input data before linkage.
   : Column Completeness Across Datasets
 - [`il_count_pairs()`](http://christophertkenny.com/irelink/reference/il_count_pairs.md)
   : Count Candidate Pairs Under Blocking Rules
+- [`il_largest_blocks()`](http://christophertkenny.com/irelink/reference/il_largest_blocks.md)
+  : Identify the Largest Blocking Bins
 - [`il_profile()`](http://christophertkenny.com/irelink/reference/il_profile.md)
   : Profile Column Value Distributions
 
@@ -169,6 +171,8 @@ Save, load, and manage linkage models and resources.
   : Save a model to disk
 - [`il_load()`](http://christophertkenny.com/irelink/reference/il_load.md)
   : Load a Saved Model
+- [`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md)
+  : Attach a Saved Model to Fresh Data
 - [`il_cleanup()`](http://christophertkenny.com/irelink/reference/il_cleanup.md)
   : Remove Temporary Tables from Database
 - [`il_demo()`](http://christophertkenny.com/irelink/reference/il_demo.md)

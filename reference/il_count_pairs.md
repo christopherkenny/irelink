@@ -82,10 +82,10 @@ il_count_pairs(
   block_on(first_name),
   con = con
 )
-#> # A tibble: 2 × 2
-#>   rule       n_pairs
-#>   <chr>        <int>
-#> 1 surname         24
-#> 2 first_name       8
+#> # A tibble: 2 × 4
+#>   rule       n_pairs cumulative_pairs pct_of_cartesian
+#>   <chr>        <int>            <int>            <dbl>
+#> 1 surname         24               24             12.6
+#> 2 first_name       8               25             13.2
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

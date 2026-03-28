@@ -7,7 +7,7 @@ before defining comparison rules.
 ## Usage
 
 ``` r
-il_profile(.data, ..., con)
+il_profile(.data, ..., con, top_n = NULL, bottom_n = NULL)
 ```
 
 ## Arguments
@@ -24,6 +24,16 @@ il_profile(.data, ..., con)
 - con:
 
   A DBI connection object used for computation.
+
+- top_n:
+
+  Integer. Number of most-frequent values to return per column. Defaults
+  to `NULL` (return all values).
+
+- bottom_n:
+
+  Integer. Number of least-frequent values to return per column.
+  Defaults to `NULL` (return all values).
 
 ## Value
 
@@ -70,29 +80,19 @@ df <- data.frame(
   )
 )
 con <- DBI::dbConnect(duckdb::duckdb())
-il_profile(df, first_name, surname, con = con)
-#> # A tibble: 20 × 3
-#>    column     value      n
-#>    <chr>      <chr>  <dbl>
-#>  1 first_name Jane       3
-#>  2 first_name Jon        2
-#>  3 first_name Bob        2
-#>  4 first_name John       2
-#>  5 first_name Alice      2
-#>  6 first_name Tom        2
-#>  7 first_name Alison     1
-#>  8 first_name Tomas      1
-#>  9 first_name Bobby      1
-#> 10 first_name Alicia     1
-#> 11 first_name Thomas     1
-#> 12 first_name Janet      1
-#> 13 first_name Robert     1
-#> 14 surname    Doe        4
-#> 15 surname    Jones      4
-#> 16 surname    White      4
-#> 17 surname    Smith      3
-#> 18 surname    Brown      3
-#> 19 surname    Browne     1
-#> 20 surname    Smyth      1
+il_profile(df, first_name, surname, con = con, top_n = 5)
+#> # A tibble: 10 × 3
+#>    column     value     n
+#>    <chr>      <chr> <dbl>
+#>  1 first_name Jane      3
+#>  2 first_name Jon       2
+#>  3 first_name Bob       2
+#>  4 first_name John      2
+#>  5 first_name Alice     2
+#>  6 surname    White     4
+#>  7 surname    Doe       4
+#>  8 surname    Jones     4
+#>  9 surname    Smith     3
+#> 10 surname    Brown     3
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

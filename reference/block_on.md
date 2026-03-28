@@ -14,7 +14,7 @@ training.
 ## Usage
 
 ``` r
-block_on(...)
+block_on(..., .where = NULL)
 ```
 
 ## Arguments
@@ -23,6 +23,13 @@ block_on(...)
 
   Unquoted column names. Columns are AND-ed within a single `block_on()`
   call.
+
+- .where:
+
+  An optional raw SQL string for non-equality blocking conditions (e.g.,
+  `"levenshtein(l.dob, r.dob) <= 1"`). When supplied alongside column
+  names, the column equalities and the SQL condition are AND-ed
+  together.
 
 ## Value
 
@@ -35,6 +42,21 @@ block_on(first_name, surname)
 #> $columns
 #>                           
 #> "first_name"    "surname" 
+#> 
+#> $where
+#> NULL
+#> 
+#> attr(,"class")
+#> [1] "il_blocking_rule"
+
+# Fuzzy SQL conditions
+block_on(first_name, .where = "levenshtein(l.dob, r.dob) <= 1")
+#> $columns
+#>              
+#> "first_name" 
+#> 
+#> $where
+#> [1] "levenshtein(l.dob, r.dob) <= 1"
 #> 
 #> attr(,"class")
 #> [1] "il_blocking_rule"
