@@ -4,7 +4,7 @@
 \alias{il_profile}
 \title{Profile Column Value Distributions}
 \usage{
-il_profile(.data, ..., con)
+il_profile(.data, ..., con, top_n = NULL, bottom_n = NULL)
 }
 \arguments{
 \item{.data}{A data frame or tibble to profile.}
@@ -13,6 +13,12 @@ il_profile(.data, ..., con)
 profile. If empty, all columns are profiled.}
 
 \item{con}{A DBI connection object used for computation.}
+
+\item{top_n}{Integer. Number of most-frequent values to return per
+column. Defaults to \code{NULL} (return all values).}
+
+\item{bottom_n}{Integer. Number of least-frequent values to return per
+column. Defaults to \code{NULL} (return all values).}
 }
 \value{
 A tibble of per-column summary statistics.
@@ -61,6 +67,6 @@ df <- data.frame(
   )
 )
 con <- DBI::dbConnect(duckdb::duckdb())
-il_profile(df, first_name, surname, con = con)
+il_profile(df, first_name, surname, con = con, top_n = 5)
 DBI::dbDisconnect(con, shutdown = TRUE)
 }

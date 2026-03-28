@@ -307,7 +307,7 @@ Check that it still builds cleanly with devtools::check() and that this is only 
 
 For readability, any time you write to markdown, please make sure that each sentence has its own line and that there are not new linebreaks in the middle of sentences.
 
-# Speed
+# Speed (Opus 4.6 high)
 
 Let's get a rough idea of speed.
 Can you look at this blog post <https://www.robinlinacre.com/fast_deduplication/> and run the same thing for our codebase?
@@ -315,7 +315,7 @@ Don't rerun any of the other systems, just get use this to eyeball how we are do
 
 If we're behind, identify what we might need to fix.
 
-## follow up
+## follow up (Opus 4.6 high)
 
 Write these updates to `inst/refs/16-performance.md`.
 
@@ -324,7 +324,7 @@ That needs to be fixed by upgrading them to imports.
 
 Then, can you run the blog post examples and see how we do now that you patched duckdb?
 
-# Missing features
+# Missing features (Opus 4.6 high)
 
 I had another Claude look at this and it found some issues.
 
@@ -338,7 +338,7 @@ The inst/refs/07-features-for-later.md file explicitly deferred it: "Term-freque
 
 The risk: The benchmark at inst/benchmarks/rl-workshop.qmd uses cl_exact(term_frequency = TRUE) on city, which will produce the same result as cl_exact() with no flag. If someone benchmarks against splink using TF weighting enabled, the results will quietly differ.
 
-## follow up
+## follow up (Opus 4.6 high)
 
 Things to verify before asking for feedback:
 
@@ -357,7 +357,7 @@ No batched/incremental retraining API.
 
 # Performance Again
 
-## Things done in R that should be in backend
+## Things done in R that should be in backend (Opus 4.6 high)
 
 Here are a few major things I need you to look at.
 
@@ -374,3 +374,36 @@ Scan for any other instances of where that occurs.
 
 Fix these two issues and anything similar that you identify.
 Write your findings to `inst/refs/17-shove-into-sql.md`.
+
+# Features
+
+## Things to make sure we can do (Opus 4.6 high)
+
+Please review the codebase as I have made a few changes.
+Check the last few commits and see what they do.
+Then, figure out why the `devtools::check()` does not pass.
+
+Once we have a clean starting place, let's look to ensure that we have strong feature compatibility.
+
+First, look at `inst/benchmarks/rl-workshop.qmd`.
+It is a translation from my officemate's demo, at `C:/Users/chris/Documents/GitHub/rl-bootcamp/scripts/demo.ipynb`.
+Identify all missing features from that translation and write them to `inst/refs/18-feature-parity.md`.
+
+Secpond, replicate this process for each file in `../splink/docs/demos/tutorials`.
+Write a translation in `inst/benchmarks/` with a clear name.
+Ideally make notes if a feature is missing and implement it as close as possible.
+Make sure the code runs if possible.
+Then, identify all missing features and write them to `inst/refs/18-feature-parity.md`.
+
+Once you have identified all of the gaps, implement the changes.
+I do not want you to consider (1) interactive graphics, (2) obscure pythonic features, or (3) compiled documents to be missing features that need to be implemented, but you should note them in the doc.
+
+## Improving the basics (Opus 4.6 high)
+
+Based on your looking at splink are there 1-2 reasonable sized datasets that we could include in the package to do real benchmarking and comparison? This could allow us to include some vignettes that better  help users get through major tasks with realistic data examples?
+
+Further, are there any plotting lessons  or summary()-type lessons that we should implement here based on the tutorials? Think through these, implement the data and any new features you see from working through the tutorials.
+
+Then, write two vignettes which use the new data and (if possible) the new plots or diagnostic summaries.
+
+Write an update to `inst/refs/19-tutorial-lessons.md`.

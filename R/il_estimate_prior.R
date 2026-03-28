@@ -87,7 +87,7 @@ il_estimate_prior <- function(model, ..., recall = 0.7) {
   for (rule in rules) {
     if (!inherits(rule, 'il_blocking_rule')) next
     tbl_r <- if (model$link_type == 'dedupe') tbl else (model$data$tbl_r %||% tbl)
-    where <- build_blocking_condition(rule$columns)
+    where <- build_blocking_condition(rule$columns, rule$where)
     n_blocked <- n_blocked + count_blocked_pairs(
       con, tbl, tbl_r, where,
       dedupe = (model$link_type == 'dedupe')

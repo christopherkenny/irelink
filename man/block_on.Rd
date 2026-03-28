@@ -4,11 +4,16 @@
 \alias{block_on}
 \title{Create a Training-Time Blocking Rule}
 \usage{
-block_on(...)
+block_on(..., .where = NULL)
 }
 \arguments{
 \item{...}{Unquoted column names. Columns are AND-ed within a single
 \code{block_on()} call.}
+
+\item{.where}{An optional raw SQL string for non-equality blocking
+conditions (e.g., \code{"levenshtein(l.dob, r.dob) <= 1"}). When
+supplied alongside column names, the column equalities and the SQL
+condition are AND-ed together.}
 }
 \value{
 A blocking-rule object for use in training verbs.
@@ -22,4 +27,7 @@ how to partition pairs during training.
 }
 \examples{
 block_on(first_name, surname)
+
+# Fuzzy SQL conditions
+block_on(first_name, .where = "levenshtein(l.dob, r.dob) <= 1")
 }

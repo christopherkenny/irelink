@@ -99,17 +99,54 @@ il_count_pairs <- function(.data, ..., con,
     return(tibble::tibble(rule = 'cartesian', n_pairs = n_pairs))
   }
 
+  # Compute cartesian for percentage calculation
+  if (link_type == 'dedupe') {
+    n <- nrow(.data)
+    cartesian <- as.numeric(n * (n - 1L) / 2L)
+  } else if (length(extra_dfs) > 0L) {
+    cartesian <- as.numeric(nrow(.data) * nrow(extra_dfs[[1]]))
+  } else {
+    cartesian <- as.numeric(nrow(.data)^2)
+  }
+
   results <- lapply(blocking_rules, function(rule) {
     where <- build_blocking_condition(rule$columns, rule$where)
     n <- count_blocked_pairs(con, tbl_l, tbl_r, where,
       dedupe = (link_type == 'dedupe')
     )
-    label <- if (length(rule$columns) > 0L) paste(rule$columns, collapse = ' & ') else rule$where
+    label <- if (length(rule$columns) > 0L) {
+      parts <- paste(rule$columns, collapse = ' & ')
+      if (!is.null(rule$where)) paste0(parts, ' + SQL') else parts
+    } else {
+      rule$where
+    }
     tibble::tibble(
       rule = label,
       n_pairs = as.integer(n)
     )
   })
 
-  do.call(rbind, results)
+  out <- do.call(rbind, results)
+
+  # Compute cumulative unique pairs via SQL UNION
+  cum_parts <- character(0)
+  cum_pairs <- integer(length(blocking_rules))
+  for (i in seq_along(blocking_rules)) {
+    rule <- blocking_rules[[i]]
+    where <- build_blocking_condition(rule$columns, rule$where)
+    dedup_cond <- if (link_type == 'dedupe') 'l.unique_id < r.unique_id AND ' else ''
+    cum_parts <- c(cum_parts, glue::glue(
+      'SELECT l.unique_id AS lid, r.unique_id AS rid ',
+      'FROM {tbl_l} l, {tbl_r} r ',
+      'WHERE {dedup_cond}{where}'
+    ))
+    union_sql <- paste(cum_parts, collapse = ' UNION ')
+    count_sql <- glue::glue('SELECT COUNT(*) AS n FROM ({union_sql}) AS __cum')
+    cum_pairs[i] <- as.integer(DBI::dbGetQuery(con, count_sql)$n[1])
+  }
+
+  out$cumulative_pairs <- cum_pairs
+  out$pct_of_cartesian <- round(cum_pairs / cartesian * 100, 4)
+
+  out
 }

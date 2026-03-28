@@ -58,16 +58,23 @@ il_block_on <- function(spec, ..., .where = NULL) {
 #'
 #' @param ... Unquoted column names. Columns are AND-ed within a single
 #'   `block_on()` call.
+#' @param .where An optional raw SQL string for non-equality blocking
+#'   conditions (e.g., `"levenshtein(l.dob, r.dob) <= 1"`). When
+#'   supplied alongside column names, the column equalities and the SQL
+#'   condition are AND-ed together.
 #'
 #' @return A blocking-rule object for use in training verbs.
 #' @export
 #'
 #' @examples
 #' block_on(first_name, surname)
-block_on <- function(...) {
+#'
+#' # Fuzzy SQL conditions
+#' block_on(first_name, .where = "levenshtein(l.dob, r.dob) <= 1")
+block_on <- function(..., .where = NULL) {
   col_exprs <- rlang::enquos(...)
-  if (length(col_exprs) == 0L) {
-    cli::cli_abort('{.fn block_on} requires at least one column.')
+  if (length(col_exprs) == 0L && is.null(.where)) {
+    cli::cli_abort('{.fn block_on} requires at least one column or a {.arg .where} condition.')
   }
   columns <- vapply(col_exprs, function(q) {
     expr <- rlang::quo_get_expr(q)
@@ -78,7 +85,7 @@ block_on <- function(...) {
     }
   }, character(1))
   structure(
-    list(columns = columns),
+    list(columns = columns, where = .where),
     class = 'il_blocking_rule'
   )
 }

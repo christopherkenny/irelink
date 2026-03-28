@@ -8,6 +8,10 @@
 #' @param ... <[`tidy-select`][dplyr::dplyr_tidy_select]> Columns to
 #'   profile. If empty, all columns are profiled.
 #' @param con A DBI connection object used for computation.
+#' @param top_n Integer. Number of most-frequent values to return per
+#'   column. Defaults to `NULL` (return all values).
+#' @param bottom_n Integer. Number of least-frequent values to return per
+#'   column. Defaults to `NULL` (return all values).
 #'
 #' @return A tibble of per-column summary statistics.
 #' @export
@@ -51,9 +55,9 @@
 #'   )
 #' )
 #' con <- DBI::dbConnect(duckdb::duckdb())
-#' il_profile(df, first_name, surname, con = con)
+#' il_profile(df, first_name, surname, con = con, top_n = 5)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_profile <- function(.data, ..., con) {
+il_profile <- function(.data, ..., con, top_n = NULL, bottom_n = NULL) {
   col_exprs <- rlang::enquos(...)
   col_names <- vapply(col_exprs, function(q) {
     as.character(rlang::quo_get_expr(q))
@@ -76,7 +80,15 @@ il_profile <- function(.data, ..., con) {
     )
     res <- DBI::dbGetQuery(con, sql)
     res$column <- col_nm
-    tibble::as_tibble(res[, c('column', 'value', 'n')])
+    out <- tibble::as_tibble(res[, c('column', 'value', 'n')])
+
+    if (!is.null(top_n) || !is.null(bottom_n)) {
+      top <- if (!is.null(top_n)) utils::head(out, top_n) else NULL
+      bot <- if (!is.null(bottom_n)) utils::tail(out, bottom_n) else NULL
+      out <- unique(rbind(top, bot))
+    }
+
+    out
   })
 
   do.call(rbind, results)

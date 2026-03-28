@@ -78,9 +78,11 @@ il_compare_records <- function(record_a, record_b, spec, con) {
   if (dialect_has_fuzzy_sql(dialect)) {
     # SQL-first: upload the two records and compute gammas in-database
     tbl_tmp <- '__il_compare_records'
+    a_clean <- a[1, setdiff(names(a), 'unique_id'), drop = FALSE]
+    b_clean <- b[1, setdiff(names(b), 'unique_id'), drop = FALSE]
     tmp_df <- rbind(
-      cbind(a[1, , drop = FALSE], data.frame(unique_id = 1L)),
-      cbind(b[1, , drop = FALSE], data.frame(unique_id = 2L))
+      cbind(a_clean, data.frame(unique_id = 1L)),
+      cbind(b_clean, data.frame(unique_id = 2L))
     )
     DBI::dbWriteTable(con, tbl_tmp, tmp_df, overwrite = TRUE)
     on.exit(

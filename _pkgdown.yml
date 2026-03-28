@@ -93,6 +93,7 @@ reference:
     contents:
       - il_completeness
       - il_count_pairs
+      - il_largest_blocks
       - il_profile
 
   - title: "Persistence and Utilities"
@@ -100,6 +101,7 @@ reference:
     contents:
       - il_save
       - il_load
+      - il_attach
       - il_cleanup
       - il_demo
 
