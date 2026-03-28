@@ -1,20 +1,21 @@
 # Profile Column Value Distributions
 
 Computes summary statistics and value-frequency distributions for
-selected columns of a data frame. Useful for understanding data quality
-before defining comparison rules.
+selected columns of a dataset. Useful for understanding data quality
+before defining comparison rules. Accepts data frames, dbplyr lazy table
+references, or character table names.
 
 ## Usage
 
 ``` r
-il_profile(.data, ..., con, top_n = NULL, bottom_n = NULL)
+il_profile(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL)
 ```
 
 ## Arguments
 
 - .data:
 
-  A data frame or tibble to profile.
+  A data frame, dbplyr `tbl_lazy`, or character table name.
 
 - ...:
 
@@ -23,7 +24,7 @@ il_profile(.data, ..., con, top_n = NULL, bottom_n = NULL)
 
 - con:
 
-  A DBI connection object used for computation.
+  A DBI connection object. Optional when `.data` is a `tbl_lazy`.
 
 - top_n:
 
@@ -85,10 +86,10 @@ il_profile(df, first_name, surname, con = con, top_n = 5)
 #>    column     value     n
 #>    <chr>      <chr> <dbl>
 #>  1 first_name Jane      3
-#>  2 first_name John      2
-#>  3 first_name Alice     2
-#>  4 first_name Tom       2
-#>  5 first_name Jon       2
+#>  2 first_name Jon       2
+#>  3 first_name Bob       2
+#>  4 first_name John      2
+#>  5 first_name Alice     2
 #>  6 surname    White     4
 #>  7 surname    Doe       4
 #>  8 surname    Jones     4

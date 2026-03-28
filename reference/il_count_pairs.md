@@ -7,24 +7,25 @@ before training — too many pairs is slow; too few misses matches.
 ## Usage
 
 ``` r
-il_count_pairs(.data, ..., con, link_type = c("dedupe", "link"))
+il_count_pairs(.data, ..., con = NULL, link_type = c("dedupe", "link"))
 ```
 
 ## Arguments
 
 - .data:
 
-  A data frame or tibble (first or only dataset).
+  A data frame, dbplyr `tbl_lazy`, or character table name (first or
+  only dataset).
 
 - ...:
 
   Blocking rules created by
   [`block_on()`](http://christophertkenny.com/irelink/reference/block_on.md),
-  and optionally additional data frames for linkage.
+  and optionally additional datasets for linkage.
 
 - con:
 
-  A DBI connection object used for computation.
+  A DBI connection object. Optional when `.data` is a `tbl_lazy`.
 
 - link_type:
 

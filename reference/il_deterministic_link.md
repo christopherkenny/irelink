@@ -12,7 +12,7 @@ il_deterministic_link(
   .data,
   ...,
   spec,
-  con,
+  con = NULL,
   link_type = c("dedupe", "link", "link_and_dedupe")
 )
 ```
@@ -21,11 +21,12 @@ il_deterministic_link(
 
 - .data:
 
-  A data frame or tibble (first or only dataset).
+  A data frame, dbplyr `tbl_lazy`, or character table name (first or
+  only dataset).
 
 - ...:
 
-  Additional data frames for multi-table linkage.
+  Additional datasets for multi-table linkage.
 
 - spec:
 
@@ -34,7 +35,7 @@ il_deterministic_link(
 
 - con:
 
-  A DBI connection object.
+  A DBI connection object. Optional when `.data` is a `tbl_lazy`.
 
 - link_type:
 

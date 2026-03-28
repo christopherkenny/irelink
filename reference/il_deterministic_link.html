@@ -57,7 +57,7 @@ all blocking columns are returned directly.</p>
 <span>  <span class="va">.data</span>,</span>
 <span>  <span class="va">...</span>,</span>
 <span>  <span class="va">spec</span>,</span>
-<span>  <span class="va">con</span>,</span>
+<span>  con <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  link_type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"dedupe"</span>, <span class="st">"link"</span>, <span class="st">"link_and_dedupe"</span><span class="op">)</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -67,11 +67,12 @@ all blocking columns are returned directly.</p>
 
 
 <dl><dt id="arg--data">.data<a class="anchor" aria-label="anchor" href="#arg--data"></a></dt>
-<dd><p>A data frame or tibble (first or only dataset).</p></dd>
+<dd><p>A data frame, dbplyr <code>tbl_lazy</code>, or character table name
+(first or only dataset).</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Additional data frames for multi-table linkage.</p></dd>
+<dd><p>Additional datasets for multi-table linkage.</p></dd>
 
 
 <dt id="arg-spec">spec<a class="anchor" aria-label="anchor" href="#arg-spec"></a></dt>
@@ -80,7 +81,8 @@ all blocking columns are returned directly.</p>
 
 
 <dt id="arg-con">con<a class="anchor" aria-label="anchor" href="#arg-con"></a></dt>
-<dd><p>A DBI connection object.</p></dd>
+<dd><p>A DBI connection object. Optional when <code>.data</code> is a
+<code>tbl_lazy</code>.</p></dd>
 
 
 <dt id="arg-link-type">link_type<a class="anchor" aria-label="anchor" href="#arg-link-type"></a></dt>

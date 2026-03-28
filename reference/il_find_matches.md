@@ -18,8 +18,8 @@ il_find_matches(model, new_records, threshold = 0.85)
 
 - new_records:
 
-  A data frame of new records to match against the model's existing
-  data.
+  A data frame, dbplyr `tbl_lazy`, or character table name of new
+  records to match against the model's existing data.
 
 - threshold:
 

@@ -7,7 +7,7 @@ or debugging.
 ## Usage
 
 ``` r
-il_compare_records(record_a, record_b, spec, con)
+il_compare_records(record_a, record_b, spec, con = NULL)
 ```
 
 ## Arguments
@@ -26,7 +26,8 @@ il_compare_records(record_a, record_b, spec, con)
 
 - con:
 
-  A DBI connection object.
+  A DBI connection object. If `NULL` (default), a temporary DuckDB
+  connection is created and closed on exit.
 
 ## Value
 

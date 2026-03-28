@@ -1,9 +1,9 @@
 # Create a Linkage Model
 
-Binds one or more data frames to a specification and a database
-connection, producing an untrained model. This is analogous to how
-[`dplyr::tbl()`](https://dplyr.tidyverse.org/reference/tbl.html) binds a
-connection to a table name and returns a lazy reference.
+Binds one or more datasets to a specification and a database connection,
+producing an untrained model. Accepts in-memory data frames, dbplyr lazy
+table references, or character table names for data that already lives
+in a database.
 
 ## Usage
 
@@ -12,7 +12,7 @@ il_model(
   .data,
   ...,
   spec,
-  con,
+  con = NULL,
   link_type = c("dedupe", "link", "link_and_dedupe")
 )
 ```
@@ -21,12 +21,13 @@ il_model(
 
 - .data:
 
-  A data frame or tibble. The first (or only) input dataset. If no
-  `unique_id` column is present, one is generated automatically.
+  A data frame, tibble, dbplyr `tbl_lazy`, or character table name. The
+  first (or only) input dataset. If no `unique_id` column is present,
+  one is generated automatically.
 
 - ...:
 
-  Additional data frames for multi-table linkage.
+  Additional datasets for multi-table linkage (same types as `.data`).
 
 - spec:
 
@@ -39,7 +40,8 @@ il_model(
 - con:
 
   A DBI connection object (e.g., from
-  `DBI::dbConnect(duckdb::duckdb())`).
+  `DBI::dbConnect(duckdb::duckdb())`). Optional when `.data` is a
+  `tbl_lazy` — the connection is extracted from the table reference.
 
 - link_type:
 
@@ -48,6 +50,14 @@ il_model(
 ## Value
 
 An untrained `il_model` object, ready for training verbs.
+
+## Details
+
+When `.data` is a `tbl_lazy` (from
+[`dplyr::tbl()`](https://dplyr.tidyverse.org/reference/tbl.html)), the
+connection is extracted automatically and data stays in-database with
+zero copying. A `unique_id` column is injected via a SQL view if not
+already present.
 
 ## Examples
 
@@ -58,5 +68,10 @@ spec <- il_spec() |>
   il_block_on(surname)
 
 model <- il_model(fake_20, spec = spec, con = con)
+
+# Database-backed: pass a dbplyr reference directly
+DBI::dbWriteTable(con, 'my_data', fake_20, overwrite = TRUE)
+tbl_ref <- dplyr::tbl(con, 'my_data')
+model2 <- il_model(tbl_ref, spec = spec)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

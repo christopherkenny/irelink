@@ -1,24 +1,26 @@
 # Column Completeness Across Datasets
 
 Computes the percentage of non-null values for each column across one or
-more data frames. Returns a tidy tibble suitable for plotting with
+more datasets. Returns a tidy tibble suitable for plotting with
 [`ggplot2::geom_col()`](https://ggplot2.tidyverse.org/reference/geom_bar.html).
 
 ## Usage
 
 ``` r
-il_completeness(..., con)
+il_completeness(..., con = NULL)
 ```
 
 ## Arguments
 
 - ...:
 
-  One or more data frames or tibbles to profile.
+  One or more data frames, dbplyr `tbl_lazy` references, or character
+  table names to profile.
 
 - con:
 
-  A DBI connection object used for computation.
+  A DBI connection object. Optional when all inputs are `tbl_lazy`
+  references.
 
 ## Value
 

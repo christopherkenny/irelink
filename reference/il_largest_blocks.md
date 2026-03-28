@@ -7,14 +7,21 @@ single dominant key can create a quadratic explosion of pairs.
 ## Usage
 
 ``` r
-il_largest_blocks(.data, rule, n = 5L, con, link_type = c("dedupe", "link"))
+il_largest_blocks(
+  .data,
+  rule,
+  n = 5L,
+  con = NULL,
+  link_type = c("dedupe", "link")
+)
 ```
 
 ## Arguments
 
 - .data:
 
-  A data frame or tibble (first or only dataset).
+  A data frame, dbplyr `tbl_lazy`, or character table name (first or
+  only dataset).
 
 - rule:
 
@@ -27,7 +34,7 @@ il_largest_blocks(.data, rule, n = 5L, con, link_type = c("dedupe", "link"))
 
 - con:
 
-  A DBI connection object.
+  A DBI connection object. Optional when `.data` is a `tbl_lazy`.
 
 - link_type:
 
