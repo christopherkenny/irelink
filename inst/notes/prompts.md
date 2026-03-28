@@ -409,7 +409,7 @@ Then, write two vignettes which use the new data and (if possible) the new plots
 Write an update to `inst/refs/19-tutorial-lessons.md`.
 
 
-## Follow up
+## Follow up (Opus 4.6 high)
 
 So these changes look like they're in the right direction but, it doesn't seem like you listened to what I asked for.
 
@@ -424,7 +424,7 @@ Perhaps make a random vector once now  and use that to index entries or somethin
 
 Finally, update the vignettes to reflect these changes.
 
-## Follow up
+## Follow up (Opus 4.6 high)
 
 Again, moving in the right direction, but some of these things follow bad patterns.
 
@@ -461,7 +461,7 @@ That creates very bad code to read in a demo!
 Finally, you seem to have stopped following the conventions in CLAUDE.md.
 Properly format code as you go using `styler.quote::style_pkg()`?
 
-## Tests
+## Tests (Opus 4.6 high)
 
 Now, let's do a targeted pass on the check.
 One of the big things I see is that the tests have ballooned and that doesn't represent better testing.
@@ -474,3 +474,20 @@ Scrutinize every single test and ask if it is testing a feature of the package o
 Be critical and delete tests that do not need to be there.
 
 The sprints for testing purposes should also be entirely eliminated.
+
+## Update notes (Opus 4.6 high)
+
+Can you write a summary of files 15--20 as `stage-08-notes.md`. This should be described as the polishing stage." Include references and format the file similar to the stage 7 notes.
+
+## igraph + components (Opus 4.6 high)
+
+One of the big remaining things that I see to do in this package is that we have to pull a lot of data out to run the igraph-related clustering.
+
+Review `inst/refs/17-shove-into-sql.md` and `inst/refs/20-connections.md` that describe some related steps in this package.
+
+Then, look at ../splink, which we are a derivative of, and identify how it handles this within the SQL engine, where possible.
+Note any things that we can learn from their approach.
+
+Then, develop a plan so that we can minimize the amount of data that we pull out and optimize the amount of processing in SQL for our clustering steps.
+
+While doing this, consider how this impacts future extensibility and keep careful notes on what you find an change in `inst/refs/21-clusters.md`.
