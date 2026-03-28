@@ -9,7 +9,8 @@
 #' @param record_b A named list or single-row data frame representing the
 #'   second record.
 #' @param spec An `il_spec` object describing the comparisons to perform.
-#' @param con A DBI connection object.
+#' @param con A DBI connection object. If `NULL` (default), a temporary
+#'   DuckDB connection is created and closed on exit.
 #'
 #' @return A single-row tibble with match weight, match probability, and
 #'   per-comparison gamma values.
@@ -65,13 +66,20 @@
 #'
 #' il_compare_records(record_a, record_b, spec = spec, con = con)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_compare_records <- function(record_a, record_b, spec, con) {
+il_compare_records <- function(record_a, record_b, spec, con = NULL) {
   validate_il_spec(spec)
   comparisons <- spec$comparisons
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
 
   a <- as.data.frame(record_a, stringsAsFactors = FALSE)
   b <- as.data.frame(record_b, stringsAsFactors = FALSE)
+
+  own_con <- is.null(con)
+  if (own_con) {
+    rlang::check_installed('duckdb', reason = 'for default connection')
+    con <- DBI::dbConnect(duckdb::duckdb())
+    on.exit(DBI::dbDisconnect(con, shutdown = TRUE), add = TRUE)
+  }
 
   dialect <- detect_dialect(con)
 
@@ -84,11 +92,8 @@ il_compare_records <- function(record_a, record_b, spec, con) {
       cbind(a_clean, data.frame(unique_id = 1L)),
       cbind(b_clean, data.frame(unique_id = 2L))
     )
-    DBI::dbWriteTable(con, tbl_tmp, tmp_df, overwrite = TRUE)
-    on.exit(
-      DBI::dbRemoveTable(con, tbl_tmp, fail_if_missing = FALSE),
-      add = TRUE
-    )
+    DBI::dbWriteTable(con, tbl_tmp, as.data.frame(tmp_df), overwrite = TRUE)
+    on.exit(drop_registered(con, tbl_tmp), add = TRUE)
 
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)

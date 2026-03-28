@@ -4,7 +4,7 @@
 \alias{il_compare_records}
 \title{Compare Two Individual Records}
 \usage{
-il_compare_records(record_a, record_b, spec, con)
+il_compare_records(record_a, record_b, spec, con = NULL)
 }
 \arguments{
 \item{record_a}{A named list or single-row data frame representing the
@@ -15,7 +15,8 @@ second record.}
 
 \item{spec}{An \code{il_spec} object describing the comparisons to perform.}
 
-\item{con}{A DBI connection object.}
+\item{con}{A DBI connection object. If \code{NULL} (default), a temporary
+DuckDB connection is created and closed on exit.}
 }
 \value{
 A single-row tibble with match weight, match probability, and

@@ -4,12 +4,14 @@
 \alias{il_completeness}
 \title{Column Completeness Across Datasets}
 \usage{
-il_completeness(..., con)
+il_completeness(..., con = NULL)
 }
 \arguments{
-\item{...}{One or more data frames or tibbles to profile.}
+\item{...}{One or more data frames, dbplyr \code{tbl_lazy} references, or
+character table names to profile.}
 
-\item{con}{A DBI connection object used for computation.}
+\item{con}{A DBI connection object. Optional when all inputs are
+\code{tbl_lazy} references.}
 }
 \value{
 A tibble with columns \code{table}, \code{column}, \code{n_total},
@@ -17,7 +19,7 @@ A tibble with columns \code{table}, \code{column}, \code{n_total},
 }
 \description{
 Computes the percentage of non-null values for each column across one
-or more data frames. Returns a tidy tibble suitable for plotting with
+or more datasets. Returns a tidy tibble suitable for plotting with
 \code{\link[ggplot2:geom_bar]{ggplot2::geom_col()}}.
 }
 \examples{

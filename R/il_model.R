@@ -1,17 +1,25 @@
 #' Create a Linkage Model
 #'
-#' Binds one or more data frames to a specification and a database
-#' connection, producing an untrained model. This is analogous to how
-#' [dplyr::tbl()] binds a connection to a table name and returns a lazy
-#' reference.
+#' Binds one or more datasets to a specification and a database
+#' connection, producing an untrained model. Accepts in-memory data
+#' frames, dbplyr lazy table references, or character table names for
+#' data that already lives in a database.
 #'
-#' @param .data A data frame or tibble. The first (or only) input dataset.
-#'   If no `unique_id` column is present, one is generated automatically.
-#' @param ... Additional data frames for multi-table linkage.
+#' When `.data` is a `tbl_lazy` (from [dplyr::tbl()]), the connection
+#' is extracted automatically and data stays in-database with zero
+#' copying. A `unique_id` column is injected via a SQL view if not
+#' already present.
+#'
+#' @param .data A data frame, tibble, dbplyr `tbl_lazy`, or character
+#'   table name. The first (or only) input dataset. If no `unique_id`
+#'   column is present, one is generated automatically.
+#' @param ... Additional datasets for multi-table linkage (same types
+#'   as `.data`).
 #' @param spec An `il_spec` object built with [il_spec()], [il_compare()],
 #'   and [il_block_on()].
 #' @param con A DBI connection object (e.g., from
-#'   `DBI::dbConnect(duckdb::duckdb())`).
+#'   `DBI::dbConnect(duckdb::duckdb())`). Optional when `.data` is a
+#'   `tbl_lazy` — the connection is extracted from the table reference.
 #' @param link_type One of `"dedupe"` (default), `"link"`, or
 #'   `"link_and_dedupe"`.
 #'
@@ -25,63 +33,53 @@
 #'   il_block_on(surname)
 #'
 #' model <- il_model(fake_20, spec = spec, con = con)
+#'
+#' # Database-backed: pass a dbplyr reference directly
+#' DBI::dbWriteTable(con, 'my_data', fake_20, overwrite = TRUE)
+#' tbl_ref <- dplyr::tbl(con, 'my_data')
+#' model2 <- il_model(tbl_ref, spec = spec)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_model <- function(.data, ..., spec, con,
+il_model <- function(.data, ..., spec, con = NULL,
                      link_type = c('dedupe', 'link', 'link_and_dedupe')) {
   link_type <- match.arg(link_type)
-  extra_dfs <- list(...)
+  extra_inputs <- list(...)
 
   validate_il_spec(spec)
 
-  if (nrow(.data) == 0L) {
-    cli::cli_abort('Cannot create a model from a zero-row data frame.')
-  }
-
-  # Convert factors to character
-  .data <- factor_to_char(.data)
-
-  # Auto-generate unique_id if not present
-  if (!('unique_id' %in% names(.data))) {
-    .data$unique_id <- seq_len(nrow(.data))
-  }
+  # Register primary data (normalizes all input types)
+  reg_l <- register_data(.data, con = con, tbl_name = '__il_data_l')
+  con <- reg_l$con
 
   # Validate columns referenced in spec exist in data
   spec_cols <- get_spec_columns(spec)
-  missing_cols <- setdiff(spec_cols, names(.data))
+  missing_cols <- setdiff(spec_cols, reg_l$columns)
   if (length(missing_cols) > 0L) {
     cli::cli_abort(
       'Column{?s} {.field {missing_cols}} referenced in the spec but not found in the data.'
     )
   }
 
-  if (link_type %in% c('link', 'link_and_dedupe') && length(extra_dfs) == 0L) {
+  if (link_type %in% c('link', 'link_and_dedupe') && length(extra_inputs) == 0L) {
     cli::cli_abort(
       '{.arg link_type} is {.val {link_type}} but only one dataset was provided. Supply a second data frame.'
     )
   }
 
-  # Upload data to database (coerce to data.frame for DBI dispatch)
-  .data <- as.data.frame(.data)
-  tbl_name_l <- '__il_data_l'
-  DBI::dbWriteTable(con, tbl_name_l, .data, overwrite = TRUE)
-
+  # Register right-side data if present
   tbl_name_r <- NULL
-  if (length(extra_dfs) > 0L) {
-    extra_dfs[[1]] <- factor_to_char(extra_dfs[[1]])
-    if (!('unique_id' %in% names(extra_dfs[[1]]))) {
-      extra_dfs[[1]]$unique_id <- seq_len(nrow(extra_dfs[[1]]))
-    }
-    extra_dfs[[1]] <- as.data.frame(extra_dfs[[1]])
-    tbl_name_r <- '__il_data_r'
-    DBI::dbWriteTable(con, tbl_name_r, extra_dfs[[1]], overwrite = TRUE)
+  n_records_r <- NULL
+  if (length(extra_inputs) > 0L) {
+    reg_r <- register_data(extra_inputs[[1]], con = con, tbl_name = '__il_data_r')
+    tbl_name_r <- reg_r$tbl_name
+    n_records_r <- reg_r$n_records
   }
 
   data_info <- list(
-    n_records_l = nrow(.data),
-    n_records_r = if (!is.null(tbl_name_r)) nrow(extra_dfs[[1]]) else NULL,
-    tbl_l = tbl_name_l,
+    n_records_l = reg_l$n_records,
+    n_records_r = n_records_r,
+    tbl_l = reg_l$tbl_name,
     tbl_r = tbl_name_r,
-    columns = names(.data)
+    columns = reg_l$columns
   )
 
   new_il_model(
@@ -99,7 +97,8 @@ il_model <- function(.data, ..., spec, con,
 #'
 #' Takes a loaded (or existing) `il_model` and binds it to new data and a
 #' fresh database connection, producing a model ready for [predict()] or
-#' further training.
+#' further training. Accepts in-memory data frames, dbplyr lazy table
+#' references, or character table names.
 #'
 #' This is the key function for the production workflow:
 #' train once with [il_model()] → save with [il_save()] → later, load
@@ -111,10 +110,11 @@ il_model <- function(.data, ..., spec, con,
 #' parameters as a warm start.
 #'
 #' @param model An `il_model` object, typically from [il_load()].
-#' @param .data A data frame or tibble. The first (or only) input dataset.
-#' @param ... Additional data frames for multi-table linkage.
-#' @param con A DBI connection object (e.g., from
-#'   `DBI::dbConnect(duckdb::duckdb())`).
+#' @param .data A data frame, tibble, dbplyr `tbl_lazy`, or character
+#'   table name. The first (or only) input dataset.
+#' @param ... Additional datasets for multi-table linkage.
+#' @param con A DBI connection object. Optional when `.data` is a
+#'   `tbl_lazy` — the connection is extracted from the table reference.
 #' @param link_type Optionally override the model's link type. If `NULL`
 #'   (default), uses the link type stored in the model.
 #'
@@ -131,62 +131,47 @@ il_model <- function(.data, ..., spec, con,
 #' pairs <- predict(model)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 #' }
-il_attach <- function(model, .data, ..., con, link_type = NULL) {
+il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
   validate_il_model(model)
-
-  if (nrow(.data) == 0L) {
-    cli::cli_abort('Cannot attach a zero-row data frame.')
-  }
 
   link_type <- link_type %||% model$link_type %||% 'dedupe'
   link_type <- match.arg(link_type, c('dedupe', 'link', 'link_and_dedupe'))
-  extra_dfs <- list(...)
+  extra_inputs <- list(...)
 
-  # Convert factors to character
-  .data <- factor_to_char(.data)
-
-  # Auto-generate unique_id if not present
-  if (!('unique_id' %in% names(.data))) {
-    .data$unique_id <- seq_len(nrow(.data))
-  }
+  # Register primary data
+  reg_l <- register_data(.data, con = con, tbl_name = '__il_data_l')
+  con <- reg_l$con
 
   # Validate columns
   spec_cols <- get_spec_columns(model$spec)
-  missing_cols <- setdiff(spec_cols, names(.data))
+  missing_cols <- setdiff(spec_cols, reg_l$columns)
   if (length(missing_cols) > 0L) {
     cli::cli_abort(
       'Column{?s} {.field {missing_cols}} referenced in the model spec but not found in the data.'
     )
   }
 
-  if (link_type %in% c('link', 'link_and_dedupe') && length(extra_dfs) == 0L) {
+  if (link_type %in% c('link', 'link_and_dedupe') && length(extra_inputs) == 0L) {
     cli::cli_abort(
       '{.arg link_type} is {.val {link_type}} but only one dataset was provided. Supply a second data frame.'
     )
   }
 
-  # Upload data to database (coerce to data.frame for DBI dispatch)
-  .data <- as.data.frame(.data)
-  tbl_name_l <- '__il_data_l'
-  DBI::dbWriteTable(con, tbl_name_l, .data, overwrite = TRUE)
-
+  # Register right-side data if present
   tbl_name_r <- NULL
-  if (length(extra_dfs) > 0L) {
-    extra_dfs[[1]] <- factor_to_char(extra_dfs[[1]])
-    if (!('unique_id' %in% names(extra_dfs[[1]]))) {
-      extra_dfs[[1]]$unique_id <- seq_len(nrow(extra_dfs[[1]]))
-    }
-    extra_dfs[[1]] <- as.data.frame(extra_dfs[[1]])
-    tbl_name_r <- '__il_data_r'
-    DBI::dbWriteTable(con, tbl_name_r, extra_dfs[[1]], overwrite = TRUE)
+  n_records_r <- NULL
+  if (length(extra_inputs) > 0L) {
+    reg_r <- register_data(extra_inputs[[1]], con = con, tbl_name = '__il_data_r')
+    tbl_name_r <- reg_r$tbl_name
+    n_records_r <- reg_r$n_records
   }
 
   data_info <- list(
-    n_records_l = nrow(.data),
-    n_records_r = if (!is.null(tbl_name_r)) nrow(extra_dfs[[1]]) else NULL,
-    tbl_l = tbl_name_l,
+    n_records_l = reg_l$n_records,
+    n_records_r = n_records_r,
+    tbl_l = reg_l$tbl_name,
     tbl_r = tbl_name_r,
-    columns = names(.data)
+    columns = reg_l$columns
   )
 
   model$data <- data_info

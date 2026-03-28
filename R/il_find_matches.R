@@ -5,8 +5,8 @@
 #' arrive after the model has been trained.
 #'
 #' @param model A trained `il_model` object.
-#' @param new_records A data frame of new records to match against the
-#'   model's existing data.
+#' @param new_records A data frame, dbplyr `tbl_lazy`, or character table
+#'   name of new records to match against the model's existing data.
 #' @param threshold A numeric value between 0 and 1. Only matches at or
 #'   above this probability are returned. Defaults to `0.85`.
 #'
@@ -84,21 +84,22 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
   mu <- extract_mu_vectors(params, comp_names)
 
   # Upload new records to a temporary table for SQL-side blocking
-  new_records <- as.data.frame(new_records, stringsAsFactors = FALSE)
-  if (!('unique_id' %in% names(new_records))) {
-    new_records$unique_id <- paste0('new_', seq_len(nrow(new_records)))
-  }
-  # Add NULL columns for any comparison/blocking columns missing from new_records
+  # Pad missing comparison/blocking columns with NA before registering
   all_needed <- unique(c(
     comp_cols,
     unlist(lapply(blocking_rules, function(r) r$columns))
   ))
-  for (col in setdiff(all_needed, names(new_records))) {
-    new_records[[col]] <- NA_character_
+  if (is.data.frame(new_records)) {
+    for (col in setdiff(all_needed, names(new_records))) {
+      new_records[[col]] <- NA_character_
+    }
   }
   tbl_new <- '__il_find_new'
-  DBI::dbWriteTable(con, tbl_new, new_records, overwrite = TRUE)
-  on.exit(DBI::dbRemoveTable(con, tbl_new, fail_if_missing = FALSE), add = TRUE)
+  reg <- register_data(new_records,
+    con = con, tbl_name = tbl_new,
+    add_unique_id = TRUE
+  )
+  on.exit(drop_registered(con, tbl_new), add = TRUE)
 
   tbl_existing <- model$data$tbl_l
 

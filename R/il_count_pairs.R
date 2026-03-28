@@ -4,10 +4,12 @@
 #' performing full comparisons. Useful for tuning blocking strategies
 #' before training — too many pairs is slow; too few misses matches.
 #'
-#' @param .data A data frame or tibble (first or only dataset).
+#' @param .data A data frame, dbplyr `tbl_lazy`, or character table name
+#'   (first or only dataset).
 #' @param ... Blocking rules created by [block_on()], and optionally
-#'   additional data frames for linkage.
-#' @param con A DBI connection object used for computation.
+#'   additional datasets for linkage.
+#' @param con A DBI connection object. Optional when `.data` is a
+#'   `tbl_lazy`.
 #' @param link_type One of `"dedupe"` (default) or `"link"`.
 #'
 #' @return A tibble with columns `rule`, `pairs_generated`,
@@ -60,53 +62,61 @@
 #'   con = con
 #' )
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_count_pairs <- function(.data, ..., con,
+il_count_pairs <- function(.data, ..., con = NULL,
                            link_type = c('dedupe', 'link')) {
   link_type <- match.arg(link_type)
   dots <- list(...)
 
-  # Separate blocking rules from extra data frames
+  # Separate blocking rules from extra datasets
   blocking_rules <- list()
-  extra_dfs <- list()
+  extra_inputs <- list()
   for (d in dots) {
     if (inherits(d, 'il_blocking_rule')) {
       blocking_rules <- c(blocking_rules, list(d))
-    } else if (is.data.frame(d)) {
-      extra_dfs <- c(extra_dfs, list(d))
+    } else {
+      extra_inputs <- c(extra_inputs, list(d))
     }
   }
 
   tbl_l <- '__il_pairs_l'
-  DBI::dbWriteTable(con, tbl_l, .data, overwrite = TRUE)
-  on.exit(DBI::dbRemoveTable(con, tbl_l, fail_if_missing = FALSE), add = TRUE)
+  reg_l <- register_data(.data,
+    con = con, tbl_name = tbl_l,
+    add_unique_id = TRUE
+  )
+  con <- reg_l$con
+  on.exit(drop_registered(con, tbl_l), add = TRUE)
 
-  if (link_type == 'link' && length(extra_dfs) > 0L) {
+  if (link_type == 'link' && length(extra_inputs) > 0L) {
     tbl_r <- '__il_pairs_r'
-    DBI::dbWriteTable(con, tbl_r, extra_dfs[[1]], overwrite = TRUE)
-    on.exit(DBI::dbRemoveTable(con, tbl_r, fail_if_missing = FALSE), add = TRUE)
+    reg_r <- register_data(extra_inputs[[1]],
+      con = con, tbl_name = tbl_r,
+      add_unique_id = TRUE
+    )
+    on.exit(drop_registered(con, tbl_r), add = TRUE)
   } else {
     tbl_r <- tbl_l
   }
 
+  n_l <- reg_l$n_records
+
   if (length(blocking_rules) == 0L) {
-    # Cartesian count
     if (link_type == 'dedupe') {
-      n <- nrow(.data)
-      n_pairs <- as.integer(n * (n - 1L) / 2L)
+      n_pairs <- as.integer(n_l * (n_l - 1L) / 2L)
     } else {
-      n_pairs <- as.integer(nrow(.data) * nrow(extra_dfs[[1]]))
+      n_r <- if (exists('reg_r')) reg_r$n_records else n_l
+      n_pairs <- as.integer(n_l * n_r)
     }
     return(tibble::tibble(rule = 'cartesian', n_pairs = n_pairs))
   }
 
   # Compute cartesian for percentage calculation
   if (link_type == 'dedupe') {
-    n <- nrow(.data)
-    cartesian <- as.numeric(n * (n - 1L) / 2L)
-  } else if (length(extra_dfs) > 0L) {
-    cartesian <- as.numeric(nrow(.data) * nrow(extra_dfs[[1]]))
+    cartesian <- as.numeric(n_l * (n_l - 1L) / 2L)
+  } else if (length(extra_inputs) > 0L) {
+    n_r <- if (exists('reg_r')) reg_r$n_records else n_l
+    cartesian <- as.numeric(n_l * n_r)
   } else {
-    cartesian <- as.numeric(nrow(.data)^2)
+    cartesian <- as.numeric(n_l^2)
   }
 
   results <- lapply(blocking_rules, function(rule) {

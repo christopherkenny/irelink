@@ -8,19 +8,21 @@ il_deterministic_link(
   .data,
   ...,
   spec,
-  con,
+  con = NULL,
   link_type = c("dedupe", "link", "link_and_dedupe")
 )
 }
 \arguments{
-\item{.data}{A data frame or tibble (first or only dataset).}
+\item{.data}{A data frame, dbplyr \code{tbl_lazy}, or character table name
+(first or only dataset).}
 
-\item{...}{Additional data frames for multi-table linkage.}
+\item{...}{Additional datasets for multi-table linkage.}
 
 \item{spec}{An \code{il_spec} object with blocking rules defined via
 \code{\link[=il_block_on]{il_block_on()}}.}
 
-\item{con}{A DBI connection object.}
+\item{con}{A DBI connection object. Optional when \code{.data} is a
+\code{tbl_lazy}.}
 
 \item{link_type}{One of \code{"dedupe"} (default), \code{"link"}, or
 \code{"link_and_dedupe"}.}

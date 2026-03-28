@@ -4,15 +4,17 @@
 \alias{il_count_pairs}
 \title{Count Candidate Pairs Under Blocking Rules}
 \usage{
-il_count_pairs(.data, ..., con, link_type = c("dedupe", "link"))
+il_count_pairs(.data, ..., con = NULL, link_type = c("dedupe", "link"))
 }
 \arguments{
-\item{.data}{A data frame or tibble (first or only dataset).}
+\item{.data}{A data frame, dbplyr \code{tbl_lazy}, or character table name
+(first or only dataset).}
 
 \item{...}{Blocking rules created by \code{\link[=block_on]{block_on()}}, and optionally
-additional data frames for linkage.}
+additional datasets for linkage.}
 
-\item{con}{A DBI connection object used for computation.}
+\item{con}{A DBI connection object. Optional when \code{.data} is a
+\code{tbl_lazy}.}
 
 \item{link_type}{One of \code{"dedupe"} (default) or \code{"link"}.}
 }

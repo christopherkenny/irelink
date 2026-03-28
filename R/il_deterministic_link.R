@@ -5,11 +5,13 @@
 #' common first step before probabilistic linkage — pairs that match on
 #' all blocking columns are returned directly.
 #'
-#' @param .data A data frame or tibble (first or only dataset).
-#' @param ... Additional data frames for multi-table linkage.
+#' @param .data A data frame, dbplyr `tbl_lazy`, or character table name
+#'   (first or only dataset).
+#' @param ... Additional datasets for multi-table linkage.
 #' @param spec An `il_spec` object with blocking rules defined via
 #'   [il_block_on()].
-#' @param con A DBI connection object.
+#' @param con A DBI connection object. Optional when `.data` is a
+#'   `tbl_lazy`.
 #' @param link_type One of `"dedupe"` (default), `"link"`, or
 #'   `"link_and_dedupe"`.
 #'
@@ -62,7 +64,7 @@
 #'
 #' exact_matches <- il_deterministic_link(df, spec = spec, con = con)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_deterministic_link <- function(.data, ..., spec, con,
+il_deterministic_link <- function(.data, ..., spec, con = NULL,
                                   link_type = c(
                                     'dedupe', 'link',
                                     'link_and_dedupe'
@@ -70,13 +72,13 @@ il_deterministic_link <- function(.data, ..., spec, con,
   link_type <- match.arg(link_type)
   validate_il_spec(spec)
 
-  .data <- factor_to_char(.data)
   comparisons <- spec$comparisons
   blocking_rules <- spec$blocking_rules
 
   tbl_name <- '__il_det_data'
-  DBI::dbWriteTable(con, tbl_name, .data, overwrite = TRUE)
-  on.exit(try(DBI::dbRemoveTable(con, tbl_name), silent = TRUE))
+  reg <- register_data(.data, con = con, tbl_name = tbl_name)
+  con <- reg$con
+  on.exit(drop_registered(con, tbl_name), add = TRUE)
 
   if (length(blocking_rules) > 0L) {
     block_sqls <- vapply(blocking_rules, function(br) {

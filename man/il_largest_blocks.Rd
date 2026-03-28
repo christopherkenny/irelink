@@ -4,16 +4,24 @@
 \alias{il_largest_blocks}
 \title{Identify the Largest Blocking Bins}
 \usage{
-il_largest_blocks(.data, rule, n = 5L, con, link_type = c("dedupe", "link"))
+il_largest_blocks(
+  .data,
+  rule,
+  n = 5L,
+  con = NULL,
+  link_type = c("dedupe", "link")
+)
 }
 \arguments{
-\item{.data}{A data frame or tibble (first or only dataset).}
+\item{.data}{A data frame, dbplyr \code{tbl_lazy}, or character table name
+(first or only dataset).}
 
 \item{rule}{A blocking rule created by \code{\link[=block_on]{block_on()}}.}
 
 \item{n}{Integer. Number of largest bins to return. Defaults to \code{5}.}
 
-\item{con}{A DBI connection object.}
+\item{con}{A DBI connection object. Optional when \code{.data} is a
+\code{tbl_lazy}.}
 
 \item{link_type}{One of \code{"dedupe"} (default) or \code{"link"}.}
 }

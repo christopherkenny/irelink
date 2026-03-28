@@ -70,7 +70,7 @@ il_cleanup <- function(model) {
   tables <- DBI::dbListTables(con)
   il_tables <- tables[grepl('^__il_', tables)]
   for (tbl in il_tables) {
-    DBI::dbRemoveTable(con, tbl, fail_if_missing = FALSE)
+    drop_registered(con, tbl)
   }
   invisible(model)
 }

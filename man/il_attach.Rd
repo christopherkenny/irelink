@@ -4,17 +4,18 @@
 \alias{il_attach}
 \title{Attach a Saved Model to Fresh Data}
 \usage{
-il_attach(model, .data, ..., con, link_type = NULL)
+il_attach(model, .data, ..., con = NULL, link_type = NULL)
 }
 \arguments{
 \item{model}{An \code{il_model} object, typically from \code{\link[=il_load]{il_load()}}.}
 
-\item{.data}{A data frame or tibble. The first (or only) input dataset.}
+\item{.data}{A data frame, tibble, dbplyr \code{tbl_lazy}, or character
+table name. The first (or only) input dataset.}
 
-\item{...}{Additional data frames for multi-table linkage.}
+\item{...}{Additional datasets for multi-table linkage.}
 
-\item{con}{A DBI connection object (e.g., from
-\code{DBI::dbConnect(duckdb::duckdb())}).}
+\item{con}{A DBI connection object. Optional when \code{.data} is a
+\code{tbl_lazy} — the connection is extracted from the table reference.}
 
 \item{link_type}{Optionally override the model's link type. If \code{NULL}
 (default), uses the link type stored in the model.}
@@ -26,7 +27,8 @@ for \code{\link[=predict]{predict()}}, \code{\link[=il_find_matches]{il_find_mat
 \description{
 Takes a loaded (or existing) \code{il_model} and binds it to new data and a
 fresh database connection, producing a model ready for \code{\link[=predict]{predict()}} or
-further training.
+further training. Accepts in-memory data frames, dbplyr lazy table
+references, or character table names.
 }
 \details{
 This is the key function for the production workflow:

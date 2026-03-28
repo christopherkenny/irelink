@@ -8,21 +8,24 @@ il_model(
   .data,
   ...,
   spec,
-  con,
+  con = NULL,
   link_type = c("dedupe", "link", "link_and_dedupe")
 )
 }
 \arguments{
-\item{.data}{A data frame or tibble. The first (or only) input dataset.
-If no \code{unique_id} column is present, one is generated automatically.}
+\item{.data}{A data frame, tibble, dbplyr \code{tbl_lazy}, or character
+table name. The first (or only) input dataset. If no \code{unique_id}
+column is present, one is generated automatically.}
 
-\item{...}{Additional data frames for multi-table linkage.}
+\item{...}{Additional datasets for multi-table linkage (same types
+as \code{.data}).}
 
 \item{spec}{An \code{il_spec} object built with \code{\link[=il_spec]{il_spec()}}, \code{\link[=il_compare]{il_compare()}},
 and \code{\link[=il_block_on]{il_block_on()}}.}
 
 \item{con}{A DBI connection object (e.g., from
-\code{DBI::dbConnect(duckdb::duckdb())}).}
+\code{DBI::dbConnect(duckdb::duckdb())}). Optional when \code{.data} is a
+\code{tbl_lazy} — the connection is extracted from the table reference.}
 
 \item{link_type}{One of \code{"dedupe"} (default), \code{"link"}, or
 \code{"link_and_dedupe"}.}
@@ -31,10 +34,16 @@ and \code{\link[=il_block_on]{il_block_on()}}.}
 An untrained \code{il_model} object, ready for training verbs.
 }
 \description{
-Binds one or more data frames to a specification and a database
-connection, producing an untrained model. This is analogous to how
-\code{\link[dplyr:tbl]{dplyr::tbl()}} binds a connection to a table name and returns a lazy
-reference.
+Binds one or more datasets to a specification and a database
+connection, producing an untrained model. Accepts in-memory data
+frames, dbplyr lazy table references, or character table names for
+data that already lives in a database.
+}
+\details{
+When \code{.data} is a \code{tbl_lazy} (from \code{\link[dplyr:tbl]{dplyr::tbl()}}), the connection
+is extracted automatically and data stays in-database with zero
+copying. A \code{unique_id} column is injected via a SQL view if not
+already present.
 }
 \examples{
 con <- DBI::dbConnect(duckdb::duckdb())
@@ -43,5 +52,10 @@ spec <- il_spec() |>
   il_block_on(surname)
 
 model <- il_model(fake_20, spec = spec, con = con)
+
+# Database-backed: pass a dbplyr reference directly
+DBI::dbWriteTable(con, 'my_data', fake_20, overwrite = TRUE)
+tbl_ref <- dplyr::tbl(con, 'my_data')
+model2 <- il_model(tbl_ref, spec = spec)
 DBI::dbDisconnect(con, shutdown = TRUE)
 }

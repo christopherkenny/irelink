@@ -53,11 +53,8 @@ score_labeled_pairs <- function(model, labels) {
       uid_r = id_r,
       stringsAsFactors = FALSE
     )
-    DBI::dbWriteTable(con, lbl_tbl, lbl_df, overwrite = TRUE)
-    on.exit(
-      DBI::dbRemoveTable(con, lbl_tbl, fail_if_missing = FALSE),
-      add = TRUE
-    )
+    DBI::dbWriteTable(con, lbl_tbl, as.data.frame(lbl_df), overwrite = TRUE)
+    on.exit(drop_registered(con, lbl_tbl), add = TRUE)
 
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)

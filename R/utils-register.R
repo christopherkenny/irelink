@@ -1,0 +1,181 @@
+# Internal helper for normalizing data input to a database table reference.
+# Supports data.frames, tbl_lazy (dbplyr), and character table name strings.
+
+#' Normalize data input to a database table reference
+#'
+#' Accepts a data.frame, a dbplyr `tbl_lazy`, or a character table name
+#' and returns a standardized list describing the data's location in the
+#' database. For data.frames, uploads via `dbWriteTable`. For database
+#' references, creates a VIEW to inject `unique_id` if missing.
+#'
+#' @param data A data.frame, `tbl_lazy`, or character table name.
+#' @param con A DBI connection (optional when `data` is `tbl_lazy`).
+#' @param tbl_name Internal table/view name to create.
+#' @param add_unique_id Logical; if TRUE, injects a `unique_id` column
+#'   when one is not already present.
+#' @return A list with `tbl_name`, `con`, `n_records`, `columns`, and
+#'   `needs_cleanup` (logical).
+#' @noRd
+register_data <- function(data, con = NULL, tbl_name = '__il_data',
+                          add_unique_id = TRUE) {
+  # ---- tbl_lazy (dbplyr lazy table reference) ----
+  if (inherits(data, 'tbl_lazy')) {
+    rlang::check_installed('dbplyr', reason = 'to use database table references.')
+    remote_con <- dbplyr::remote_con(data)
+    con <- con %||% remote_con
+    cols <- colnames(data)
+
+    # Count records in-database
+    n_records <- count_tbl_lazy(data, con)
+
+    if (n_records == 0L) {
+      cli::cli_abort('Cannot register a zero-row table.')
+    }
+
+    # Determine the source SQL
+    remote_nm <- dbplyr::remote_name(data)
+    source_sql <- if (!is.null(remote_nm)) {
+      glue::glue('SELECT * FROM {remote_nm}')
+    } else {
+      dbplyr::remote_query(data)
+    }
+
+    # Create a view, adding unique_id if needed
+    # Drop any existing table/view first to avoid type conflicts
+    drop_registered(con, tbl_name)
+    has_uid <- 'unique_id' %in% cols
+    if (has_uid) {
+      view_sql <- glue::glue(
+        'CREATE OR REPLACE VIEW {tbl_name} AS {source_sql}'
+      )
+    } else if (add_unique_id) {
+      view_sql <- glue::glue(
+        'CREATE OR REPLACE VIEW {tbl_name} AS ',
+        'SELECT *, ROW_NUMBER() OVER () AS unique_id FROM ({source_sql}) AS __src'
+      )
+      cols <- c(cols, 'unique_id')
+    } else {
+      view_sql <- glue::glue(
+        'CREATE OR REPLACE VIEW {tbl_name} AS {source_sql}'
+      )
+    }
+    DBI::dbExecute(con, view_sql)
+
+    return(list(
+      tbl_name = tbl_name,
+      con = con,
+      n_records = n_records,
+      columns = cols,
+      needs_cleanup = TRUE
+    ))
+  }
+
+  # ---- character string (existing table name) ----
+  if (is.character(data) && length(data) == 1L) {
+    if (is.null(con)) {
+      cli::cli_abort(
+        'A DBI connection ({.arg con}) is required when {.arg data} is a table name.'
+      )
+    }
+
+    cols <- DBI::dbListFields(con, data)
+    n_records <- as.integer(
+      DBI::dbGetQuery(con, glue::glue('SELECT COUNT(*) AS n FROM {data}'))$n[1]
+    )
+
+    if (n_records == 0L) {
+      cli::cli_abort('Cannot register a zero-row table.')
+    }
+
+    has_uid <- 'unique_id' %in% cols
+    # Drop any existing table/view first to avoid type conflicts
+    drop_registered(con, tbl_name)
+    if (has_uid) {
+      view_sql <- glue::glue(
+        'CREATE OR REPLACE VIEW {tbl_name} AS SELECT * FROM {data}'
+      )
+    } else if (add_unique_id) {
+      view_sql <- glue::glue(
+        'CREATE OR REPLACE VIEW {tbl_name} AS ',
+        'SELECT *, ROW_NUMBER() OVER () AS unique_id FROM {data}'
+      )
+      cols <- c(cols, 'unique_id')
+    } else {
+      view_sql <- glue::glue(
+        'CREATE OR REPLACE VIEW {tbl_name} AS SELECT * FROM {data}'
+      )
+    }
+    DBI::dbExecute(con, view_sql)
+
+    return(list(
+      tbl_name = tbl_name,
+      con = con,
+      n_records = n_records,
+      columns = cols,
+      needs_cleanup = TRUE
+    ))
+  }
+
+  # ---- data.frame / tibble (in-memory) ----
+  if (is.data.frame(data)) {
+    if (is.null(con)) {
+      cli::cli_abort(
+        'A DBI connection ({.arg con}) is required when {.arg data} is a data frame.'
+      )
+    }
+
+    if (nrow(data) == 0L) {
+      cli::cli_abort('Cannot register a zero-row data frame.')
+    }
+
+    data <- factor_to_char(data)
+    if (add_unique_id && !('unique_id' %in% names(data))) {
+      data$unique_id <- seq_len(nrow(data))
+    }
+    data <- as.data.frame(data)
+    DBI::dbWriteTable(con, tbl_name, data, overwrite = TRUE)
+
+    return(list(
+      tbl_name = tbl_name,
+      con = con,
+      n_records = nrow(data),
+      columns = names(data),
+      needs_cleanup = TRUE
+    ))
+  }
+
+  cli::cli_abort(
+    '{.arg data} must be a data frame, a {.cls tbl_lazy} reference, or a table name string.'
+  )
+}
+
+#' Count rows in a tbl_lazy without collecting
+#' @param tbl A tbl_lazy object.
+#' @param con A DBI connection.
+#' @return Integer row count.
+#' @noRd
+count_tbl_lazy <- function(tbl, con) {
+  remote_nm <- dbplyr::remote_name(tbl)
+  if (!is.null(remote_nm)) {
+    sql <- glue::glue('SELECT COUNT(*) AS n FROM {remote_nm}')
+  } else {
+    inner <- dbplyr::remote_query(tbl)
+    sql <- glue::glue('SELECT COUNT(*) AS n FROM ({inner}) AS __cnt')
+  }
+  as.integer(DBI::dbGetQuery(con, sql)$n[1])
+}
+
+#' Drop a view or table created by register_data
+#' @param con A DBI connection.
+#' @param tbl_name The name of the view/table to drop.
+#' @noRd
+drop_registered <- function(con, tbl_name) {
+  tryCatch(
+    DBI::dbExecute(con, glue::glue('DROP VIEW IF EXISTS {tbl_name}')),
+    error = function(e) NULL
+  )
+  tryCatch(
+    DBI::dbRemoveTable(con, tbl_name, fail_if_missing = FALSE),
+    error = function(e) NULL
+  )
+}

@@ -1,13 +1,15 @@
 #' Profile Column Value Distributions
 #'
 #' Computes summary statistics and value-frequency distributions for
-#' selected columns of a data frame. Useful for understanding data quality
-#' before defining comparison rules.
+#' selected columns of a dataset. Useful for understanding data quality
+#' before defining comparison rules. Accepts data frames, dbplyr lazy
+#' table references, or character table names.
 #'
-#' @param .data A data frame or tibble to profile.
+#' @param .data A data frame, dbplyr `tbl_lazy`, or character table name.
 #' @param ... <[`tidy-select`][dplyr::dplyr_tidy_select]> Columns to
 #'   profile. If empty, all columns are profiled.
-#' @param con A DBI connection object used for computation.
+#' @param con A DBI connection object. Optional when `.data` is a
+#'   `tbl_lazy`.
 #' @param top_n Integer. Number of most-frequent values to return per
 #'   column. Defaults to `NULL` (return all values).
 #' @param bottom_n Integer. Number of least-frequent values to return per
@@ -57,19 +59,23 @@
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' il_profile(df, first_name, surname, con = con, top_n = 5)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_profile <- function(.data, ..., con, top_n = NULL, bottom_n = NULL) {
+il_profile <- function(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL) {
   col_exprs <- rlang::enquos(...)
   col_names <- vapply(col_exprs, function(q) {
     as.character(rlang::quo_get_expr(q))
   }, character(1))
 
-  if (length(col_names) == 0L) {
-    col_names <- names(.data)
-  }
-
   tbl_name <- '__il_profile_tmp'
-  DBI::dbWriteTable(con, tbl_name, .data, overwrite = TRUE)
-  on.exit(DBI::dbRemoveTable(con, tbl_name, fail_if_missing = FALSE), add = TRUE)
+  reg <- register_data(.data,
+    con = con, tbl_name = tbl_name,
+    add_unique_id = FALSE
+  )
+  con <- reg$con
+  on.exit(drop_registered(con, tbl_name), add = TRUE)
+
+  if (length(col_names) == 0L) {
+    col_names <- reg$columns
+  }
 
   results <- lapply(col_names, function(col_nm) {
     quoted_col <- DBI::dbQuoteIdentifier(con, col_nm)

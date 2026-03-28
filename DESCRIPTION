@@ -58,6 +58,7 @@ Imports:
     stringdist,
     tibble
 Suggests:
+    dbplyr,
     dplyr,
     duckdb,
     ggplot2,

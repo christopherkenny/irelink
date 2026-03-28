@@ -1,11 +1,13 @@
 #' Column Completeness Across Datasets
 #'
 #' Computes the percentage of non-null values for each column across one
-#' or more data frames. Returns a tidy tibble suitable for plotting with
+#' or more datasets. Returns a tidy tibble suitable for plotting with
 #' [ggplot2::geom_col()].
 #'
-#' @param ... One or more data frames or tibbles to profile.
-#' @param con A DBI connection object used for computation.
+#' @param ... One or more data frames, dbplyr `tbl_lazy` references, or
+#'   character table names to profile.
+#' @param con A DBI connection object. Optional when all inputs are
+#'   `tbl_lazy` references.
 #'
 #' @return A tibble with columns `table`, `column`, `n_total`,
 #'   `n_non_null`, and `pct_non_null`.
@@ -52,18 +54,21 @@
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' il_completeness(df, con = con)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_completeness <- function(..., con) {
-  dfs <- list(...)
+il_completeness <- function(..., con = NULL) {
+  inputs <- list(...)
   results <- list()
 
-  for (i in seq_along(dfs)) {
-    df <- dfs[[i]]
+  for (i in seq_along(inputs)) {
     tbl_name <- paste0('__il_completeness_', i)
-    DBI::dbWriteTable(con, tbl_name, df, overwrite = TRUE)
-    on.exit(DBI::dbRemoveTable(con, tbl_name, fail_if_missing = FALSE), add = TRUE)
+    reg <- register_data(inputs[[i]],
+      con = con, tbl_name = tbl_name,
+      add_unique_id = FALSE
+    )
+    con <- reg$con
+    on.exit(drop_registered(con, tbl_name), add = TRUE)
 
-    n_total <- nrow(df)
-    col_names <- names(df)
+    n_total <- reg$n_records
+    col_names <- reg$columns
 
     rows <- lapply(col_names, function(col_nm) {
       quoted_col <- DBI::dbQuoteIdentifier(con, col_nm)

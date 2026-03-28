@@ -4,15 +4,16 @@
 \alias{il_profile}
 \title{Profile Column Value Distributions}
 \usage{
-il_profile(.data, ..., con, top_n = NULL, bottom_n = NULL)
+il_profile(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL)
 }
 \arguments{
-\item{.data}{A data frame or tibble to profile.}
+\item{.data}{A data frame, dbplyr \code{tbl_lazy}, or character table name.}
 
 \item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Columns to
 profile. If empty, all columns are profiled.}
 
-\item{con}{A DBI connection object used for computation.}
+\item{con}{A DBI connection object. Optional when \code{.data} is a
+\code{tbl_lazy}.}
 
 \item{top_n}{Integer. Number of most-frequent values to return per
 column. Defaults to \code{NULL} (return all values).}
@@ -25,8 +26,9 @@ A tibble of per-column summary statistics.
 }
 \description{
 Computes summary statistics and value-frequency distributions for
-selected columns of a data frame. Useful for understanding data quality
-before defining comparison rules.
+selected columns of a dataset. Useful for understanding data quality
+before defining comparison rules. Accepts data frames, dbplyr lazy
+table references, or character table names.
 }
 \examples{
 df <- data.frame(
