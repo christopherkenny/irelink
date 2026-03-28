@@ -460,3 +460,17 @@ That creates very bad code to read in a demo!
 
 Finally, you seem to have stopped following the conventions in CLAUDE.md.
 Properly format code as you go using `styler.quote::style_pkg()`?
+
+## Tests
+
+Now, let's do a targeted pass on the check.
+One of the big things I see is that the tests have ballooned and that doesn't represent better testing.
+There are many tests that test NOTHING about the package.
+Remove things that test features of R rather than the package.
+
+For example, tests that a dataframe that is saved has the right number of columns
+That adds time, but absolutely nothing else.
+Scrutinize every single test and ask if it is testing a feature of the package or is just a test with no purpose.
+Be critical and delete tests that do not need to be there.
+
+The sprints for testing purposes should also be entirely eliminated.
