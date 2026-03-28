@@ -145,12 +145,12 @@ head(pairs)
 #> # A tibble: 6 × 7
 #>   unique_id_l unique_id_r match_weight match_probability gamma_first_name
 #>         <int>       <int>        <dbl>             <dbl>            <int>
-#> 1           3          13         9.20             0.969                1
-#> 2           1           2         9.20             0.969                1
-#> 3           4          13         9.20             0.969                1
-#> 4           9          19         9.20             0.969                1
-#> 5           3           4         9.20             0.969                1
-#> 6           5           6         9.20             0.969                1
+#> 1           1          11         9.20             0.969                1
+#> 2           2          11         9.20             0.969                1
+#> 3           7          17         9.20             0.969                1
+#> 4           5          15         9.20             0.969                1
+#> 5           6          15         9.20             0.969                1
+#> 6           1           2         9.20             0.969                1
 #> # ℹ 2 more variables: gamma_surname <int>, gamma_dob <int>
 ```
 
@@ -170,12 +170,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 3         cluster_1 
-#> 2 1         cluster_2 
-#> 3 4         cluster_1 
-#> 4 9         cluster_3 
-#> 5 5         cluster_4 
-#> 6 2         cluster_2
+#> 1 1         cluster_1 
+#> 2 2         cluster_1 
+#> 3 7         cluster_2 
+#> 4 5         cluster_3 
+#> 5 6         cluster_3 
+#> 6 4         cluster_4
 ```
 
 Each record is assigned a `cluster_id`. Records sharing the same cluster
