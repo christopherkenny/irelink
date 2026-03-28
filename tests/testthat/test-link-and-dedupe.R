@@ -7,15 +7,15 @@ make_lad_data <- function() {
   df_a <- data.frame(
     unique_id = 1:4,
     first_name = c('John', 'John', 'Alice', 'Bob'),
-    surname    = c('Smith', 'Smith', 'Brown', 'Jones'),
-    city       = c('London', 'London', 'Paris', 'Berlin'),
+    surname = c('Smith', 'Smith', 'Brown', 'Jones'),
+    city = c('London', 'London', 'Paris', 'Berlin'),
     stringsAsFactors = FALSE
   )
   df_b <- data.frame(
     unique_id = 5:8,
     first_name = c('John', 'Alice', 'Alice', 'Tom'),
-    surname    = c('Smith', 'Brown', 'Brown', 'White'),
-    city       = c('London', 'Paris', 'Paris', 'Madrid'),
+    surname = c('Smith', 'Brown', 'Brown', 'White'),
+    city = c('London', 'Paris', 'Paris', 'Madrid'),
     stringsAsFactors = FALSE
   )
   list(a = df_a, b = df_b)
@@ -56,8 +56,10 @@ test_that('link_and_dedupe model creates successfully with two datasets', {
   d <- make_lad_data()
   spec <- make_lad_spec()
 
-  model <- il_model(d$a, d$b, spec = spec, con = con,
-                    link_type = 'link_and_dedupe')
+  model <- il_model(d$a, d$b,
+    spec = spec, con = con,
+    link_type = 'link_and_dedupe'
+  )
   expect_s3_class(model, 'il_model')
   expect_equal(model$link_type, 'link_and_dedupe')
 })
@@ -113,8 +115,10 @@ test_that('link_and_dedupe get_all_pairs returns within-table pairs', {
   d <- make_lad_data()
   spec <- make_lad_spec()
 
-  model <- il_model(d$a, d$b, spec = spec, con = con,
-                    link_type = 'link_and_dedupe')
+  model <- il_model(d$a, d$b,
+    spec = spec, con = con,
+    link_type = 'link_and_dedupe'
+  )
 
   pairs <- get_all_pairs(model)
 
@@ -141,8 +145,10 @@ test_that('link_and_dedupe get_blocked_pairs returns within-table pairs', {
   d <- make_lad_data()
   spec <- make_lad_spec()
 
-  model <- il_model(d$a, d$b, spec = spec, con = con,
-                    link_type = 'link_and_dedupe')
+  model <- il_model(d$a, d$b,
+    spec = spec, con = con,
+    link_type = 'link_and_dedupe'
+  )
 
   blocking <- model$spec$blocking_rules[[1]]
   pairs <- get_blocked_pairs(model, blocking)
@@ -168,8 +174,10 @@ test_that('link_and_dedupe end-to-end: train and predict', {
   d <- make_lad_data()
   spec <- make_lad_spec()
 
-  model <- il_model(d$a, d$b, spec = spec, con = con,
-                    link_type = 'link_and_dedupe') |>
+  model <- il_model(d$a, d$b,
+    spec = spec, con = con,
+    link_type = 'link_and_dedupe'
+  ) |>
     il_estimate_u(max_pairs = 1e5) |>
     il_estimate_em(block_on(city))
 
@@ -198,8 +206,10 @@ test_that('link mode only produces cross-table pairs', {
   d <- make_lad_data()
   spec <- make_lad_spec()
 
-  model <- il_model(d$a, d$b, spec = spec, con = con,
-                    link_type = 'link')
+  model <- il_model(d$a, d$b,
+    spec = spec, con = con,
+    link_type = 'link'
+  )
 
   pairs <- get_all_pairs(model)
 
@@ -218,13 +228,19 @@ test_that('il_find_matches handles new_records with fewer columns', {
   withr::defer(test_discon(con))
 
   df <- data.frame(
-    unique_id  = 1:10,
-    first_name = c('John', 'Jon', 'Jane', 'Jane', 'Bob',
-                   'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas'),
-    surname    = c('Smith', 'Smith', 'Doe', 'Doe', 'Jones',
-                   'Jones', 'Brown', 'Brown', 'White', 'White'),
-    city       = c('London', 'London', 'Paris', 'Paris', 'Berlin',
-                   'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'),
+    unique_id = 1:10,
+    first_name = c(
+      'John', 'Jon', 'Jane', 'Jane', 'Bob',
+      'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas'
+    ),
+    surname = c(
+      'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
+      'Jones', 'Brown', 'Brown', 'White', 'White'
+    ),
+    city = c(
+      'London', 'London', 'Paris', 'Paris', 'Berlin',
+      'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
+    ),
     stringsAsFactors = FALSE
   )
   spec <- il_spec() |>
@@ -239,9 +255,9 @@ test_that('il_find_matches handles new_records with fewer columns', {
 
   # New records missing the 'city' column
   new <- data.frame(
-    unique_id  = 101:102,
+    unique_id = 101:102,
     first_name = c('John', 'Alice'),
-    surname    = c('Smith', 'Brown'),
+    surname = c('Smith', 'Brown'),
     stringsAsFactors = FALSE
   )
 

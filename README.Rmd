@@ -37,14 +37,14 @@ pak::pak('christopherkenny/irelink')
 ## Deduplication
 
 Find duplicate records within a single dataset.
-`il_demo()` loads a built-in synthetic dataset for experimentation.
+The bundled `fake_20` dataset provides a small example for experimentation.
 `irelink` pushes data into a SQL database for efficient pair generation, so you need a DBI connection.
 Here we use an in-memory DuckDB instance.
 
 ```{r dedup-load}
 library(irelink)
 
-df <- il_demo('fake_20')
+df <- fake_20
 con <- DBI::dbConnect(duckdb::duckdb())
 ```
 
@@ -86,11 +86,13 @@ DBI::dbDisconnect(con, shutdown = TRUE)
 ## Linking
 
 Link records across two separate datasets, finding which rows in one table correspond to rows in the other.
-`il_demo('fake_1000_links')` returns a list with `df_a` and `df_b`, two halves of the same synthetic population.
-Each record in one dataset has a counterpart in the other.
+The FEBRL benchmark datasets provide a classic record-linkage scenario: `febrl4a` contains 5,000 original records and `febrl4b` contains one duplicate per original with realistic data-quality errors.
 
 ```{r link-load}
-dfs <- il_demo('fake_1000_links')
+# Use a small slice for this quick demo; see vignette("record-linkage") for the full workflow
+df_a <- head(febrl4a, 200)
+df_b <- head(febrl4b, 200)
+
 con <- DBI::dbConnect(duckdb::duckdb())
 ```
 
@@ -99,17 +101,17 @@ Pass both data frames to `il_model()` and set `link_type = "link"` to tell the m
 
 ```{r link-train}
 spec <- il_spec() |>
-  il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
+  il_compare(given_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
-  il_compare(dob, cl_exact()) |>
+  il_compare(date_of_birth, cl_exact()) |>
   il_block_on(surname)
 
 model <- il_model(
-  dfs$df_a,
-  dfs$df_b,
+  df_a,
+  df_b,
   spec = spec,
   con = con,
-  link_type = 'link'
+  link_type = "link"
 )
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))

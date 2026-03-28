@@ -4,7 +4,7 @@
 
 # Helper to build a trained model for prediction tests
 make_trained_model <- function(con) {
-  df <- il_demo('fake_1000')
+  df <- fake_1000
   spec <- il_spec() |>
     il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
     il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>

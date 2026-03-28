@@ -1,0 +1,240 @@
+---
+title: "Deduplication with Evaluation"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Deduplication with Evaluation}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+This vignette walks through a complete deduplication workflow on the
+`fake_1000` dataset, including model training, prediction, clustering,
+and evaluation against ground-truth labels.
+The dataset is the primary demo data from the Python
+[splink](https://github.com/moj-analytical-services/splink) library.
+It contains 1,000 records representing 181 unique people, each
+with varying numbers of duplicate entries corrupted with typos, missing
+values, and other realistic data-quality issues.
+
+## Setup
+
+```{r setup}
+library(irelink)
+library(ggplot2)
+```
+
+## Explore the data
+
+```{r load-data}
+df <- fake_1000
+head(df)
+```
+
+The `cluster` column is the ground truth: records sharing the same
+cluster value refer to the same person.
+There are `r length(unique(df$cluster))` unique entities across
+`r nrow(df)` records.
+Note that missing values appear as `NA`, reflecting real-world
+data-quality challenges.
+
+Before building a model, profile the data to understand its completeness
+and value distributions:
+
+```{r completeness}
+con <- DBI::dbConnect(duckdb::duckdb())
+comp <- il_completeness(df, con = con)
+comp
+```
+
+```{r completeness-plot, fig.width = 6, fig.height = 3}
+autoplot(comp)
+```
+
+Check column value distributions to inform blocking and comparison
+choices:
+
+```{r profile}
+il_profile(df[, c("first_name", "surname", "city")], con = con, top_n = 5)
+```
+
+## Define the specification
+
+Choose comparisons and blocking rules.
+Names use Jaro-Winkler similarity, dates of birth use the `cl_dob()`
+helper, and city uses exact matching with term-frequency adjustments:
+
+```{r spec}
+spec <- il_spec() |>
+  il_compare(first_name, cl_name()) |>
+  il_compare(surname, cl_name()) |>
+  il_compare(dob, cl_dob()) |>
+  il_compare(city, cl_exact(term_frequency = TRUE)) |>
+  il_compare(email, cl_email()) |>
+  il_block_on(first_name) |>
+  il_block_on(surname) |>
+  il_block_on(city)
+
+spec
+```
+
+Estimate how many pairs each blocking rule generates:
+
+```{r count-pairs}
+il_count_pairs(
+  df,
+  block_on(first_name),
+  block_on(surname),
+  block_on(city),
+  con = con
+)
+```
+
+## Train the model
+
+```{r model}
+model <- il_model(df, spec = spec, con = con)
+```
+
+Estimate the prior match probability using deterministic rules:
+
+```{r prior}
+model <- il_estimate_prior(
+  model,
+  block_on(first_name, surname),
+  block_on(email),
+  recall = 0.6
+)
+```
+
+Estimate u-probabilities from random pairs and m-probabilities via EM:
+
+```{r train}
+model <- il_estimate_u(model, max_pairs = 1e5)
+model <- il_estimate_em(model, block_on(first_name))
+model <- il_estimate_em(model, block_on(dob))
+```
+
+## Inspect the trained model
+
+```{r summary}
+summary(model)
+```
+
+The match weights chart shows the discriminative power of each
+comparison:
+
+```{r weights-plot, fig.width = 6, fig.height = 3.5}
+autoplot(model)
+```
+
+The parameter chart shows the raw m and u probabilities:
+
+```{r params-plot, fig.width = 7, fig.height = 4}
+autoplot(model, type = "parameters")
+```
+
+## Predict and cluster
+
+Score all candidate pairs and apply a probability threshold:
+
+```{r predict}
+predictions <- predict(model, threshold = 0.5)
+nrow(predictions)
+```
+
+View the match-weight distribution:
+
+```{r histogram, fig.width = 6, fig.height = 3}
+autoplot(predictions)
+```
+
+Inspect how individual pairs are scored with a waterfall chart:
+
+```{r waterfall, fig.width = 6, fig.height = 3}
+autoplot(predictions, which = 1)
+```
+
+Resolve pairwise links into entity clusters:
+
+```{r cluster}
+clusters <- il_cluster(predictions, threshold = 0.85)
+head(clusters)
+```
+
+## Evaluate against ground truth
+
+The `cluster` column in the original data provides ground-truth entity
+labels.
+Convert these to pairwise labels for evaluation:
+
+```{r labels}
+# Use the bundled clerical labels from splink
+labels_raw <- fake_1000_labels
+
+# Rename to match irelink's evaluation convention
+labels <- data.frame(
+  unique_id_l = labels_raw$unique_id_l,
+  unique_id_r = labels_raw$unique_id_r,
+  is_match = as.integer(labels_raw$clerical_match_score)
+)
+
+nrow(labels)
+sum(labels$is_match)
+```
+
+### Accuracy metrics
+
+```{r accuracy}
+acc <- il_accuracy(model, labels = labels)
+acc
+```
+
+```{r accuracy-plot, fig.width = 6, fig.height = 3.5}
+autoplot(acc)
+```
+
+### ROC curve
+
+```{r roc, fig.width = 5, fig.height = 4}
+roc <- il_roc(model, labels = labels)
+autoplot(roc)
+```
+
+### Precision–recall curve
+
+```{r pr, fig.width = 5, fig.height = 4}
+pr <- il_precision_recall(model, labels = labels)
+autoplot(pr)
+```
+
+### Error inspection
+
+Examine false positives and false negatives at a specific threshold:
+
+```{r errors}
+errors <- il_errors(model, labels = labels, threshold = 0.85)
+head(errors)
+```
+
+### Unlinkables
+
+How many records cannot be linked at each threshold?
+
+```{r unlinkables, fig.width = 6, fig.height = 3}
+unlink <- il_unlinkables(model)
+autoplot(unlink)
+```
+
+## Cleanup
+
+```{r cleanup}
+il_cleanup(model)
+DBI::dbDisconnect(con, shutdown = TRUE)
+```

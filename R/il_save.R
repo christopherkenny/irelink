@@ -123,9 +123,13 @@ il_save <- function(model, path, overwrite = FALSE) {
     )
   )
 
-  jsonlite::write_json(data_out, path,
-    auto_unbox = TRUE, pretty = TRUE,
-    null = 'null', digits = NA
+  jsonlite::write_json(
+    data_out,
+    path,
+    auto_unbox = TRUE,
+    pretty = TRUE,
+    null = 'null',
+    digits = NA
   )
   invisible(model)
 }
@@ -229,7 +233,10 @@ il_load <- function(path) {
     structure(br_data, class = 'il_blocking_rule')
   })
 
-  spec <- new_il_spec(comparisons = comparisons, blocking_rules = blocking_rules)
+  spec <- new_il_spec(
+    comparisons = comparisons,
+    blocking_rules = blocking_rules
+  )
 
   # Reconstruct params
   params <- raw$params

@@ -3,9 +3,8 @@
 # for each stage.
 
 devtools::load_all()
-
-# --- Synthetic data -----------------------------------------------------------
 set.seed(42)
+
 make_fake_data <- function(n) {
   first_names <- c("John", "Jane", "Alice", "Bob", "Carol",
                     "David", "Eve", "Frank", "Grace", "Hank")
@@ -25,13 +24,8 @@ make_fake_data <- function(n) {
   )
 }
 
-# --- Run benchmarks at several scales ----------------------------------------
-run_benchmark <- function(n, label) {
-  cat(sprintf("\n=== Benchmark: %s (n = %d) ===\n", label, n))
+run_benchmark <- function(n) {
   df <- make_fake_data(n)
-  timings <- list()
-
-  # Spec
   spec <- il_spec() |>
     il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
     il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -40,63 +34,24 @@ run_benchmark <- function(n, label) {
     il_block_on(surname) |>
     il_block_on(first_name)
 
-  # 1. Data upload / model creation
-  timings$model_creation <- system.time({
-    con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-    model <- il_model(df, spec = spec, con = con)
-  })["elapsed"]
+  con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+  on.exit(DBI::dbDisconnect(con))
 
-  # 2. U estimation
-  timings$u_estimation <- system.time({
-    model <- il_estimate_u(model, max_pairs = min(n * (n - 1) / 2, 1e6))
-  })["elapsed"]
+  t_model   <- system.time(model <- il_model(df, spec = spec, con = con))["elapsed"]
+  t_u       <- system.time(model <- il_estimate_u(model, max_pairs = min(n * (n - 1) / 2, 1e6)))["elapsed"]
+  t_em      <- system.time(model <- il_estimate_em(model, block_on(surname)))["elapsed"]
+  t_predict <- system.time(pairs <- predict(model, threshold = 0.5))["elapsed"]
+  t_cluster <- if (nrow(pairs) > 0) system.time(il_cluster(pairs))["elapsed"] else 0
 
-  # 3. EM training
-  timings$em_training <- system.time({
-    model <- il_estimate_em(model, block_on(surname))
-  })["elapsed"]
-
-  # 4. Prediction
-  timings$prediction <- system.time({
-    pairs <- predict(model, threshold = 0.5)
-  })["elapsed"]
-
-  # 5. Clustering
-  if (nrow(pairs) > 0) {
-    timings$clustering <- system.time({
-      clusters <- il_cluster(pairs)
-    })["elapsed"]
-  } else {
-    timings$clustering <- 0
-  }
-
-  # Total
-  timings$total <- sum(unlist(timings))
-
-  DBI::dbDisconnect(con)
-
-  cat(sprintf("  Model creation:  %6.3f s\n", timings$model_creation))
-  cat(sprintf("  U estimation:    %6.3f s\n", timings$u_estimation))
-  cat(sprintf("  EM training:     %6.3f s\n", timings$em_training))
-  cat(sprintf("  Prediction:      %6.3f s\n", timings$prediction))
-  cat(sprintf("  Clustering:      %6.3f s\n", timings$clustering))
-  cat(sprintf("  TOTAL:           %6.3f s\n", timings$total))
-  cat(sprintf("  Pairs predicted: %d\n", nrow(pairs)))
-
-  invisible(timings)
+  tibble::tibble(
+    n       = n,
+    model   = t_model,
+    u_est   = t_u,
+    em      = t_em,
+    predict = t_predict,
+    cluster = t_cluster,
+    total   = t_model + t_u + t_em + t_predict + t_cluster
+  )
 }
 
-results <- list()
-for (n in c(200, 500, 1000, 2000)) {
-  results[[as.character(n)]] <- run_benchmark(n, paste0("n=", n))
-}
-
-cat("\n\n=== Summary table ===\n")
-cat(sprintf("%-8s %-12s %-12s %-12s %-12s %-12s %-12s\n",
-            "N", "Model", "U-est", "EM", "Predict", "Cluster", "Total"))
-for (nm in names(results)) {
-  r <- results[[nm]]
-  cat(sprintf("%-8s %10.3f s %10.3f s %10.3f s %10.3f s %10.3f s %10.3f s\n",
-              nm, r$model_creation, r$u_estimation, r$em_training,
-              r$prediction, r$clustering, r$total))
-}
+lapply(c(200, 500, 1000, 2000), run_benchmark) |> dplyr::bind_rows()

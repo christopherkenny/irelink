@@ -26,11 +26,12 @@ tf_columns <- function(comparisons) {
 #' @return The model, with `model$data$tf_tables` populated.
 #' @noRd
 compute_tf_tables <- function(model) {
-
   comparisons <- model$spec$comparisons
   tf_cols <- tf_columns(comparisons)
 
-  if (length(tf_cols) == 0L) return(model)
+  if (length(tf_cols) == 0L) {
+    return(model)
+  }
 
   con <- model$con
   tbl_l <- model$data$tbl_l
@@ -82,7 +83,9 @@ compute_tf_tables <- function(model) {
 #' @return A SQL fragment for the SELECT clause, or NULL if no TF columns.
 #' @noRd
 sql_tf_select_exprs <- function(tf_cols) {
-  if (length(tf_cols) == 0L) return(NULL)
+  if (length(tf_cols) == 0L) {
+    return(NULL)
+  }
   exprs <- character(0)
   for (col in tf_cols) {
     tf_tbl <- paste0('__il_tf_', col)
@@ -114,7 +117,9 @@ sql_tf_select_exprs <- function(tf_cols) {
 #' @noRd
 compute_tf_adjustment <- function(gamma_mat, tf_data, comparisons, mu) {
   n_pairs <- nrow(gamma_mat)
-  if (n_pairs == 0L) return(numeric(0))
+  if (n_pairs == 0L) {
+    return(numeric(0))
+  }
 
   adjustment <- numeric(n_pairs)
 
@@ -157,7 +162,9 @@ compute_tf_adjustment <- function(gamma_mat, tf_data, comparisons, mu) {
 #' @noRd
 compute_tf_adjustment_matrix <- function(gamma_mat, tf_data, comparisons, mu) {
   tf_cols <- tf_columns(comparisons)
-  if (length(tf_cols) == 0L) return(NULL)
+  if (length(tf_cols) == 0L) {
+    return(NULL)
+  }
 
   n_pairs <- nrow(gamma_mat)
   adj_list <- list()

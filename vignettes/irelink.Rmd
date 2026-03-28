@@ -65,10 +65,10 @@ Multiple blocking rules are combined with OR logic, so a pair is compared if it 
 
 `il_model()` uploads the data to a SQL backend and attaches the specification.
 Any DBI-compatible connection works.
-Here we use an in-memory SQLite database:
+Here we use an in-memory DuckDB database:
 
 ```{r model}
-df <- il_demo("fake_20")
+df <- fake_20
 con <- DBI::dbConnect(duckdb::duckdb())
 
 model <- il_model(df, spec = spec, con = con)

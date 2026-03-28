@@ -29,5 +29,5 @@ how to partition pairs during training.
 block_on(first_name, surname)
 
 # Fuzzy SQL conditions
-block_on(first_name, .where = "levenshtein(l.dob, r.dob) <= 1")
+block_on(first_name, .where = 'levenshtein(l.dob, r.dob) <= 1')
 }

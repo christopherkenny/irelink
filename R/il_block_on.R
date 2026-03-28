@@ -70,7 +70,7 @@ il_block_on <- function(spec, ..., .where = NULL) {
 #' block_on(first_name, surname)
 #'
 #' # Fuzzy SQL conditions
-#' block_on(first_name, .where = "levenshtein(l.dob, r.dob) <= 1")
+#' block_on(first_name, .where = 'levenshtein(l.dob, r.dob) <= 1')
 block_on <- function(..., .where = NULL) {
   col_exprs <- rlang::enquos(...)
   if (length(col_exprs) == 0L && is.null(.where)) {

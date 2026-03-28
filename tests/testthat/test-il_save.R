@@ -8,7 +8,7 @@ test_that('il_save() and il_load() round-trip preserves model parameters', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo('fake_1000')
+  df <- fake_1000
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>

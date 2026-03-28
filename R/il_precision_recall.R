@@ -73,5 +73,6 @@ il_precision_recall <- function(model, labels) {
     threshold = acc$threshold,
     precision = acc$precision,
     recall = acc$recall
-  )
+  ) |>
+    add_class('il_precision_recall')
 }

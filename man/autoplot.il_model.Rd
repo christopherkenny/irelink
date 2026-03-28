@@ -4,10 +4,14 @@
 \alias{autoplot.il_model}
 \title{Quick Match-Weights Plot for a Model}
 \usage{
-\method{autoplot}{il_model}(object, ...)
+\method{autoplot}{il_model}(object, type = c("weights", "parameters"), ...)
 }
 \arguments{
 \item{object}{A trained \code{il_model} object.}
+
+\item{type}{One of \code{"weights"} (default) or \code{"parameters"}.
+\code{"weights"} shows log-2 Bayes factors per comparison level.
+\code{"parameters"} shows m and u probabilities side by side.}
 
 \item{...}{Additional arguments (currently unused).}
 }
@@ -15,7 +19,9 @@
 A \code{ggplot} object.
 }
 \description{
-Produces a ready-made match-weights chart from a trained model. This
-is a convenience wrapper; for full control, extract data with
-\code{\link[=il_weights]{il_weights()}} and build a custom \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}}.
+Produces a ready-made chart from a trained model. By default draws
+the match-weights bar chart; set \code{type = "parameters"} for an m / u
+probability comparison. For full control, extract data with
+\code{\link[=il_weights]{il_weights()}} or \code{\link[=il_parameters]{il_parameters()}} and build a custom
+\code{\link[ggplot2:ggplot]{ggplot2::ggplot()}}.
 }

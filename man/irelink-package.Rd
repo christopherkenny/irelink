@@ -28,7 +28,7 @@ Other contributors:
   \item Tom Hepworth (Author of splink) [copyright holder]
   \item Andy Bond (Author of splink) [copyright holder]
   \item Ross Kennedy (Author of splink) [copyright holder]
-  \item Ministry of Justice (Copyright holder of splink) [copyright holder]
+  \item UK Ministry of Justice (Copyright holder of splink) [copyright holder]
 }
 
 }

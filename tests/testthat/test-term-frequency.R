@@ -50,7 +50,7 @@ test_that('TF table has correct frequencies', {
 
   expect_equal(nrow(tf), 3)
   expect_equal(tf$city, c('Birmingham', 'London', 'Truro'))
-  expect_equal(tf$tf_city, c(8/50, 40/50, 2/50), tolerance = 1e-10)
+  expect_equal(tf$tf_city, c(8 / 50, 40 / 50, 2 / 50), tolerance = 1e-10)
 })
 
 test_that('tf_columns() identifies TF-enabled comparisons', {
@@ -85,8 +85,10 @@ test_that('compute_tf_adjustment() produces correct adjustments', {
     list(columns = 'city', method = cl_exact(term_frequency = TRUE))
   )
 
-  gamma_mat <- matrix(c(1L, 1L, 0L), ncol = 1,
-                      dimnames = list(NULL, 'city'))
+  gamma_mat <- matrix(c(1L, 1L, 0L),
+    ncol = 1,
+    dimnames = list(NULL, 'city')
+  )
 
   tf_data <- data.frame(
     tf_city_l = c(0.80, 0.04, 0.80),
@@ -118,10 +120,12 @@ test_that('TF adjustment is zero when term_frequency is FALSE', {
   skip_if_sprint_lt(10)
 
   comparisons <- list(
-    list(columns = 'city', method = cl_exact())  # No TF
+    list(columns = 'city', method = cl_exact()) # No TF
   )
-  gamma_mat <- matrix(c(1L, 1L), ncol = 1,
-                      dimnames = list(NULL, 'city'))
+  gamma_mat <- matrix(c(1L, 1L),
+    ncol = 1,
+    dimnames = list(NULL, 'city')
+  )
   tf_data <- data.frame(tf_city_l = c(0.5, 0.5), tf_city_r = c(0.5, 0.5))
   mu <- list(m_match = 0.9, m_nonmatch = 0.1, u_match = 0.1, u_nonmatch = 0.9)
 

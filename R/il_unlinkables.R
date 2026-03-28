@@ -78,5 +78,6 @@ il_unlinkables <- function(model) {
     tibble::tibble(threshold = t, pct_unlinkable = pct)
   })
 
-  do.call(rbind, results)
+  do.call(rbind, results) |>
+    add_class('il_unlinkables')
 }

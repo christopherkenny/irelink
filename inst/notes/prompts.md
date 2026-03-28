@@ -407,3 +407,56 @@ Further, are there any plotting lessons  or summary()-type lessons that we shoul
 Then, write two vignettes which use the new data and (if possible) the new plots or diagnostic summaries.
 
 Write an update to `inst/refs/19-tutorial-lessons.md`.
+
+
+## Follow up
+
+So these changes look like they're in the right direction but, it doesn't seem like you listened to what I asked for.
+
+Look at the datasets in `../splink/tests/datasets/` and choose 1-2 to include in this package.
+We are a derivative of splink and should include some of the same data to ensure comparability.
+Create a `data.R` file that documents and exports the chosen datasets using `usethis::use_data()`, with documentation that explicitly references splink as the source.
+
+Also, `set.seed()` must never appear in package code.
+Never!
+Perhaps make a random vector once now  and use that to index entries or something, if you really need random stuff for `il_demo()`.
+`set.seed()` is only appropriate in vignettes and the README.
+
+Finally, update the vignettes to reflect these changes.
+
+## Follow up
+
+Again, moving in the right direction, but some of these things follow bad patterns.
+
+First, there's no reason for `il_demo()` anymore, since we have real demo data.
+The one thing to do is to write the fake 20 line dataset with the other ones in `data-raw/`.
+I don't know why you were making them in a random directory, so I moved it there and .Rbuildignored the folder.
+
+Looking at the changes, it looks like there must be a regression, since you added:
+
+```{r}
+# irelink requires a unique_id column
+df_a$unique_id <- seq_len(nrow(df_a))
+df_b$unique_id <- seq_len(nrow(df_b))
+```
+
+That's silly, why would it require a user to make a unique_id column.
+You can't rely on this!
+This is package code and user datasets will come in all shapes, sizes, and column names.
+
+The original readme example was cleaner with:
+
+```
+  il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
+  il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
+  il_compare(dob, cl_exact()) |>
+```
+
+suburb and "given" name seem like fake columns.
+Are there better columns to use, like the first name or dob?
+
+Avoid using cat so much in the vignettes.
+That creates very bad code to read in a demo!
+
+Finally, you seem to have stopped following the conventions in CLAUDE.md.
+Properly format code as you go using `styler.quote::style_pkg()`?

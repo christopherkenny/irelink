@@ -1,20 +1,18 @@
 # Tutorial 07 — Evaluation
 # Translation of splink docs/demos/tutorials/07_Evaluation.ipynb
-# -----------------------------------------------------------------------
 # Covers: error analysis, accuracy metrics, precision/recall,
 #         ROC curves, threshold selection, unlinkables
 #
 # NOTE: splink's fake_1000 includes a ground-truth 'cluster' column and
-# a separate labels dataset (splink_dataset_labels.fake_1000_labels).
-# irelink's il_demo("fake_1000") does not include ground-truth labels,
-# so this tutorial demonstrates evaluation with manually created labels.
+# a separate labels dataset (fake_1000_labels).
+# irelink bundles both as lazy-loaded datasets.
 
 library(irelink)
 library(duckdb)
 library(DBI)
 library(ggplot2)
 
-df <- il_demo("fake_1000")
+df <- fake_1000
 con <- dbConnect(duckdb())
 
 # Build model with broad blocking for evaluation recall
@@ -35,11 +33,9 @@ model <- il_estimate_em(model, block_on(dob))
 
 # Generate predictions at a low threshold for evaluation
 predictions <- predict(model, threshold = 0.01)
-cat("predictions:", nrow(predictions), "\n")
 
 # Create synthetic labels for demonstration
 # In practice, these come from manual review or known entity IDs
-# (splink: splink_dataset_labels.fake_1000_labels)
 if (nrow(predictions) > 0) {
   n_labels <- min(nrow(predictions), 30)
   labels <- predictions[seq_len(n_labels), c("unique_id_l", "unique_id_r")]
@@ -48,25 +44,20 @@ if (nrow(predictions) > 0) {
     predictions$match_probability[seq_len(n_labels)] > 0.5
   )
 
-  # Error analysis (splink: prediction_errors_from_labels_table) -----------
-  errors <- il_errors(model, labels = labels, threshold = 0.85)
-  cat("errors:", nrow(errors), "\n")
+  # Error analysis (splink: prediction_errors_from_labels_table)
+  il_errors(model, labels = labels, threshold = 0.85)
 
-  # Accuracy table (splink: accuracy_analysis, output_type="table") --------
-  accuracy <- il_accuracy(model, labels = labels)
-  cat("accuracy thresholds:", nrow(accuracy), "\n")
+  # Accuracy table (splink: accuracy_analysis, output_type="table")
+  il_accuracy(model, labels = labels)
 
-  # Precision-recall (splink: accuracy_analysis, threshold_selection) ------
-  pr <- il_precision_recall(model, labels = labels)
-  cat("precision_recall:", nrow(pr), "\n")
+  # Precision-recall (splink: accuracy_analysis, threshold_selection)
+  il_precision_recall(model, labels = labels)
 
-  # ROC curve (splink: accuracy_analysis, output_type="roc") ---------------
-  roc <- il_roc(model, labels = labels)
-  cat("roc points:", nrow(roc), "\n")
+  # ROC curve (splink: accuracy_analysis, output_type="roc")
+  il_roc(model, labels = labels)
 }
 
-# Unlinkables (splink: unlinkables_chart) -----------------------------------
-unlink_tbl <- il_unlinkables(model)
-cat("unlinkables:", nrow(unlink_tbl), "\n")
+# Unlinkables (splink: unlinkables_chart)
+il_unlinkables(model)
 
 dbDisconnect(con, shutdown = TRUE)

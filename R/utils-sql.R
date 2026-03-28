@@ -236,10 +236,14 @@ build_table_pairs <- function(tbl_l, tbl_r, link_type, has_two_tables) {
   # link_and_dedupe: cross-table + within each table
   list(
     list(from_l = tbl_l, from_r = tbl_r, join_cond = '1=1'),
-    list(from_l = tbl_l, from_r = tbl_l,
-         join_cond = 'l.unique_id < r.unique_id'),
-    list(from_l = tbl_r, from_r = tbl_r,
-         join_cond = 'l.unique_id < r.unique_id')
+    list(
+      from_l = tbl_l, from_r = tbl_l,
+      join_cond = 'l.unique_id < r.unique_id'
+    ),
+    list(
+      from_l = tbl_r, from_r = tbl_r,
+      join_cond = 'l.unique_id < r.unique_id'
+    )
   )
 }
 

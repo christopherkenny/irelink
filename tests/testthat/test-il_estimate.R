@@ -98,7 +98,7 @@ test_that('multiple il_estimate_em() calls refine, not reset, parameters', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo('fake_1000')
+  df <- fake_1000
   spec <- il_spec() |>
     il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
     il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -133,7 +133,7 @@ test_that('il_estimate_em() with fixed probabilities preserves them', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo('fake_1000')
+  df <- fake_1000
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>

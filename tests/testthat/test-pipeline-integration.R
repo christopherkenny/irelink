@@ -11,7 +11,7 @@ test_that('full pipe chain: spec → model → predict works end-to-end', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo('fake_1000')
+  df <- fake_1000
 
   pairs <- il_spec() |>
     il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
@@ -39,7 +39,7 @@ test_that('full pipe chain through clustering assigns cluster IDs', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo('fake_1000')
+  df <- fake_1000
 
   clusters <- il_spec() |>
     il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
@@ -65,7 +65,7 @@ test_that('il_weights() data can be used directly with ggplot2', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo('fake_1000')
+  df <- fake_1000
 
   model <- il_spec() |>
     il_compare(first_name, cl_exact()) |>

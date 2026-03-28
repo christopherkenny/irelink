@@ -1,19 +1,17 @@
 # Tutorial 06 — Visualising Predictions
 # Translation of splink docs/demos/tutorials/06_Visualising_predictions.ipynb
-# -----------------------------------------------------------------------
 # Covers: waterfall charts, prediction inspection
 #
-# NOTE (interactive graphics): splink's comparison_viewer_dashboard() and
-# cluster_studio_dashboard() produce standalone interactive HTML files.
-# irelink does not replicate these interactive dashboards.
-# Instead, use autoplot() and il_waterfall() for static equivalents.
+# NOTE: splink's comparison_viewer_dashboard() and cluster_studio_dashboard()
+# produce standalone interactive HTML files. irelink does not replicate these;
+# use autoplot() and il_waterfall() for static equivalents.
 
 library(irelink)
 library(duckdb)
 library(DBI)
 library(ggplot2)
 
-df <- il_demo("fake_1000")
+df <- fake_1000
 con <- dbConnect(duckdb())
 
 spec <- il_spec() |>
@@ -35,19 +33,12 @@ predictions <- predict(model, threshold = 0.2)
 # Match weight distribution (splink: histogram of match_probability)
 autoplot(predictions)
 
-# Waterfall chart (splink: linker.visualisations.waterfall_chart) ----------
+# Waterfall chart (splink: linker.visualisations.waterfall_chart)
 # Show per-comparison weight contributions for a single pair
-wf <- il_waterfall(predictions, which = 1)
-print(wf)
-
-# Static waterfall visualisation
+il_waterfall(predictions, which = 1)
 autoplot(predictions, which = 1)
 
 # Cluster and inspect
 clusters <- il_cluster(predictions, threshold = 0.5)
-
-# NOTE: splink's comparison_viewer_dashboard() and cluster_studio_dashboard()
-# are interactive HTML tools. These are out of scope for irelink.
-# Use standard R tools (DT::datatable, shiny) for interactive exploration.
 
 dbDisconnect(con, shutdown = TRUE)

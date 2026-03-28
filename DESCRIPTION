@@ -31,7 +31,7 @@ Authors@R: c(
            family = "Kennedy",
            role = "cph",
            comment = "Author of splink"),
-    person("Ministry of Justice",
+    person("UK Ministry of Justice",
            role = "cph",
            comment = "Copyright holder of splink"))
 Description: Performs fast, scalable probabilistic record linkage and
@@ -70,3 +70,4 @@ Suggests:
 Config/testthat/edition: 3
 URL: http://christophertkenny.com/irelink/
 VignetteBuilder: knitr
+LazyData: true

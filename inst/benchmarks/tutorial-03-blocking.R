@@ -1,6 +1,5 @@
 # Tutorial 03 — Blocking
 # Translation of splink docs/demos/tutorials/03_Blocking.ipynb
-# -----------------------------------------------------------------------
 # Covers: blocking rule analysis, counting pairs, largest blocks,
 #         cumulative comparison scoring
 
@@ -8,7 +7,7 @@ library(irelink)
 library(duckdb)
 library(DBI)
 
-df <- il_demo("fake_1000")
+df <- fake_1000
 con <- dbConnect(duckdb())
 
 # Simple blocking: count pairs per rule (splink: count_comparisons_from_blocking_rule)

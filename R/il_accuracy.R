@@ -92,5 +92,6 @@ il_accuracy <- function(model, labels) {
     )
   })
 
-  do.call(rbind, results)
+  do.call(rbind, results) |>
+    add_class('il_accuracy')
 }

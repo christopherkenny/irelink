@@ -89,8 +89,10 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     new_records$unique_id <- paste0('new_', seq_len(nrow(new_records)))
   }
   # Add NULL columns for any comparison/blocking columns missing from new_records
-  all_needed <- unique(c(comp_cols,
-    unlist(lapply(blocking_rules, function(r) r$columns))))
+  all_needed <- unique(c(
+    comp_cols,
+    unlist(lapply(blocking_rules, function(r) r$columns))
+  ))
   for (col in setdiff(all_needed, names(new_records))) {
     new_records[[col]] <- NA_character_
   }

@@ -6,6 +6,7 @@
 #' reference.
 #'
 #' @param .data A data frame or tibble. The first (or only) input dataset.
+#'   If no `unique_id` column is present, one is generated automatically.
 #' @param ... Additional data frames for multi-table linkage.
 #' @param spec An `il_spec` object built with [il_spec()], [il_compare()],
 #'   and [il_block_on()].
@@ -18,49 +19,12 @@
 #' @export
 #'
 #' @examples
-#' df <- data.frame(
-#'   unique_id = 1:20,
-#'   first_name = c(
-#'     'John', 'Jon', 'Jane', 'Jane', 'Bob',
-#'     'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas',
-#'     'John', 'Jon', 'Jane', 'Janet', 'Bob',
-#'     'Robert', 'Alice', 'Alison', 'Tom', 'Tomas'
-#'   ),
-#'   surname = c(
-#'     'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
-#'     'Jones', 'Brown', 'Brown', 'White', 'White',
-#'     'Smith', 'Smyth', 'Doe', 'Doe', 'Jones',
-#'     'Jones', 'Brown', 'Browne', 'White', 'White'
-#'   ),
-#'   dob = c(
-#'     '1990-01-01', '1990-01-01', '1985-06-15', '1985-06-15',
-#'     '2000-12-01', '2000-12-01', '1975-03-22', '1975-03-22',
-#'     '1988-07-04', '1988-07-04', '1990-01-01', '1990-01-02',
-#'     '1985-06-15', '1985-06-16', '2000-12-01', '2000-12-02',
-#'     '1975-03-22', '1975-03-23', '1988-07-04', '1988-07-05'
-#'   ),
-#'   city = c(
-#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
-#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid',
-#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
-#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
-#'   ),
-#'   email = c(
-#'     'john@example.com', 'jon@example.com', 'jane@example.com',
-#'     'jane@example.com', 'bob@example.com', 'bobby@example.com',
-#'     'alice@example.com', 'alicia@example.com', 'tom@example.com',
-#'     'thomas@example.com', 'john@example.com', 'jon@example.com',
-#'     'jane@example.com', 'janet@example.com', 'bob@example.com',
-#'     'robert@example.com', 'alice@example.com', 'alison@example.com',
-#'     'tom@example.com', 'tomas@example.com'
-#'   )
-#' )
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_block_on(surname)
 #'
-#' model <- il_model(df, spec = spec, con = con)
+#' model <- il_model(fake_20, spec = spec, con = con)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_model <- function(.data, ..., spec, con,
                      link_type = c('dedupe', 'link', 'link_and_dedupe')) {
@@ -75,6 +39,11 @@ il_model <- function(.data, ..., spec, con,
 
   # Convert factors to character
   .data <- factor_to_char(.data)
+
+  # Auto-generate unique_id if not present
+  if (!('unique_id' %in% names(.data))) {
+    .data$unique_id <- seq_len(nrow(.data))
+  }
 
   # Validate columns referenced in spec exist in data
   spec_cols <- get_spec_columns(spec)
@@ -91,13 +60,18 @@ il_model <- function(.data, ..., spec, con,
     )
   }
 
-  # Upload data to database
+  # Upload data to database (coerce to data.frame for DBI dispatch)
+  .data <- as.data.frame(.data)
   tbl_name_l <- '__il_data_l'
   DBI::dbWriteTable(con, tbl_name_l, .data, overwrite = TRUE)
 
   tbl_name_r <- NULL
   if (length(extra_dfs) > 0L) {
     extra_dfs[[1]] <- factor_to_char(extra_dfs[[1]])
+    if (!('unique_id' %in% names(extra_dfs[[1]]))) {
+      extra_dfs[[1]]$unique_id <- seq_len(nrow(extra_dfs[[1]]))
+    }
+    extra_dfs[[1]] <- as.data.frame(extra_dfs[[1]])
     tbl_name_r <- '__il_data_r'
     DBI::dbWriteTable(con, tbl_name_r, extra_dfs[[1]], overwrite = TRUE)
   }
@@ -171,6 +145,11 @@ il_attach <- function(model, .data, ..., con, link_type = NULL) {
   # Convert factors to character
   .data <- factor_to_char(.data)
 
+  # Auto-generate unique_id if not present
+  if (!('unique_id' %in% names(.data))) {
+    .data$unique_id <- seq_len(nrow(.data))
+  }
+
   # Validate columns
   spec_cols <- get_spec_columns(model$spec)
   missing_cols <- setdiff(spec_cols, names(.data))
@@ -186,13 +165,18 @@ il_attach <- function(model, .data, ..., con, link_type = NULL) {
     )
   }
 
-  # Upload data to database
+  # Upload data to database (coerce to data.frame for DBI dispatch)
+  .data <- as.data.frame(.data)
   tbl_name_l <- '__il_data_l'
   DBI::dbWriteTable(con, tbl_name_l, .data, overwrite = TRUE)
 
   tbl_name_r <- NULL
   if (length(extra_dfs) > 0L) {
     extra_dfs[[1]] <- factor_to_char(extra_dfs[[1]])
+    if (!('unique_id' %in% names(extra_dfs[[1]]))) {
+      extra_dfs[[1]]$unique_id <- seq_len(nrow(extra_dfs[[1]]))
+    }
+    extra_dfs[[1]] <- as.data.frame(extra_dfs[[1]])
     tbl_name_r <- '__il_data_r'
     DBI::dbWriteTable(con, tbl_name_r, extra_dfs[[1]], overwrite = TRUE)
   }

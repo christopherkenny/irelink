@@ -1,6 +1,7 @@
 # Profile breakdown of individual stages
 devtools::load_all()
 set.seed(42)
+
 first_names <- c("John", "Jane", "Alice", "Bob", "Carol",
                  "David", "Eve", "Frank", "Grace", "Hank")
 surnames <- c("Smith", "Johnson", "Williams", "Brown", "Jones",
@@ -24,48 +25,31 @@ spec <- il_spec() |>
 con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
 model <- il_model(df, spec = spec, con = con)
 
-cat("--- U estimation breakdown (n=1000) ---\n")
+# U estimation breakdown
 t1 <- system.time(pairs_u <- irelink:::get_all_pairs(model, max_pairs = 1e6))["elapsed"]
-cat(sprintf("  get_all_pairs:       %.3f s  (%d pairs)\n", t1, nrow(pairs_u)))
-
 t2 <- system.time(gm <- irelink:::compute_gamma_matrix(pairs_u, spec$comparisons))["elapsed"]
-cat(sprintf("  compute_gamma_matrix: %.3f s\n", t2))
 
-# Per-method gamma
-cat("\n--- compute_gamma per method (on u-est pairs) ---\n")
-for (j in seq_along(spec$comparisons)) {
+# compute_gamma per method (on u-est pairs)
+gamma_times <- lapply(seq_along(spec$comparisons), \(j) {
   comp <- spec$comparisons[[j]]
-  col <- comp$columns
-  val_l <- pairs_u[[paste0("l_", col)]]
-  val_r <- pairs_u[[paste0("r_", col)]]
+  val_l <- pairs_u[[paste0("l_", comp$columns)]]
+  val_r <- pairs_u[[paste0("r_", comp$columns)]]
   t <- system.time(irelink:::compute_gamma(val_l, val_r, comp$method))["elapsed"]
-  cat(sprintf("  %-20s (%s): %.3f s on %d pairs\n", col, comp$method$method, t, length(val_l)))
-}
+  tibble::tibble(column = comp$columns, method = comp$method$method, elapsed = t, n_pairs = length(val_l))
+}) |> dplyr::bind_rows()
 
-# Profile EM
+# EM breakdown
 model <- il_estimate_u(model)
-br <- block_on(surname)
-cat("\n--- EM breakdown ---\n")
-t4 <- system.time(pairs_em <- irelink:::get_blocked_pairs(model, br))["elapsed"]
-cat(sprintf("  get_blocked_pairs:   %.3f s  (%d pairs)\n", t4, nrow(pairs_em)))
-
+t4 <- system.time(pairs_em <- irelink:::get_blocked_pairs(model, block_on(surname)))["elapsed"]
 t5 <- system.time(gm_em <- irelink:::compute_gamma_matrix(pairs_em, spec$comparisons))["elapsed"]
-cat(sprintf("  compute_gamma_matrix: %.3f s\n", t5))
 
 # Profile scoring
-params <- model$params$comparisons
-comp_names <- vapply(spec$comparisons, function(c) c$columns, character(1))
-
-t6 <- system.time(mu <- irelink:::extract_mu_vectors(params, comp_names))["elapsed"]
-cat(sprintf("  extract_mu_vectors:  %.3f s\n", t6))
-
+comp_names <- vapply(spec$comparisons, \(c) c$columns, character(1))
+t6 <- system.time(mu <- irelink:::extract_mu_vectors(model$params$comparisons, comp_names))["elapsed"]
 t7 <- system.time(mw <- irelink:::score_gamma_matrix(gm_em, mu))["elapsed"]
-cat(sprintf("  score_gamma_matrix:  %.3f s\n", t7))
+t8 <- system.time(irelink:::weight_to_probability(mw, 0.05))["elapsed"]
 
-t8 <- system.time(mp <- irelink:::weight_to_probability(mw, 0.05))["elapsed"]
-cat(sprintf("  weight_to_probability: %.3f s\n", t8))
-
-# Profile EM E-step vectorized vs loop
+# EM single iteration (E-step + M-step)
 n_pairs <- nrow(pairs_em)
 n_comp <- ncol(gm_em)
 m_match <- rep(0.9, n_comp)
@@ -74,7 +58,6 @@ u_match <- colMeans(gm_em)
 u_nonmatch <- 1 - u_match
 prior <- 0.05
 
-cat("\n--- EM single iteration (E-step + M-step) ---\n")
 t9 <- system.time({
   log_match <- rep(log(prior), n_pairs)
   log_nonmatch <- rep(log(1 - prior), n_pairs)
@@ -90,7 +73,6 @@ t9 <- system.time({
   max_log <- pmax(log_match, log_nonmatch)
   weights <- exp(log_match - max_log) / (exp(log_match - max_log) + exp(log_nonmatch - max_log))
 })["elapsed"]
-cat(sprintf("  E-step:              %.3f s\n", t9))
 
 t10 <- system.time({
   sum_w <- sum(weights)
@@ -101,22 +83,24 @@ t10 <- system.time({
     m_nonmatch[jj] <- 1 - m_match[jj]
   }
 })["elapsed"]
-cat(sprintf("  M-step:              %.3f s\n", t10))
 
-# Profile pair deduplication
-cat("\n--- Pair deduplication ---\n")
-all_pairs <- list()
-for (br2 in spec$blocking_rules) {
-  bp <- irelink:::get_blocked_pairs(model, br2)
-  if (nrow(bp) > 0L) all_pairs <- c(all_pairs, list(bp))
-}
-pairs_all <- do.call(rbind, all_pairs)
+# Pair deduplication
+all_pairs <- lapply(spec$blocking_rules, \(br) irelink:::get_blocked_pairs(model, br)) |>
+  dplyr::bind_rows()
 t11 <- system.time({
-  pair_key <- paste(pairs_all$l_unique_id, pairs_all$r_unique_id, sep = "||")
-  pairs_dedup <- pairs_all[!duplicated(pair_key), , drop = FALSE]
+  pair_key <- paste(all_pairs$l_unique_id, all_pairs$r_unique_id, sep = "||")
+  pairs_dedup <- all_pairs[!duplicated(pair_key), , drop = FALSE]
 })["elapsed"]
-cat(sprintf("  paste + dedup:       %.3f s  (%d -> %d pairs)\n",
-            t11, nrow(pairs_all), nrow(pairs_dedup)))
 
 DBI::dbDisconnect(con)
-cat("\nDone.\n")
+
+tibble::tibble(
+  stage = c(
+    "get_all_pairs", "compute_gamma_matrix (u)",
+    "get_blocked_pairs", "compute_gamma_matrix (em)",
+    "extract_mu_vectors", "score_gamma_matrix", "weight_to_probability",
+    "E-step", "M-step", "pair dedup"
+  ),
+  elapsed = c(t1, t2, t4, t5, t6, t7, t8, t9, t10, t11)
+)
+gamma_times

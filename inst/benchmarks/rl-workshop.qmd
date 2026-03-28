@@ -97,17 +97,14 @@ model <- il_model(
 ```{r}
 ## Train lambda via rules that we think really yield matches
 
-deterministic_rules <- list(
+# recall: estimated % of true matches captured by this set of rules
+model <- il_estimate_prior(
+  model,
   block_on(first_name, .where = "levenshtein(l.dob, r.dob) <= 1"),
   block_on(surname, .where = "levenshtein(l.dob, r.dob) <= 1"),
   block_on(first_name, .where = "levenshtein(l.surname, r.surname) <= 2"),
-  block_on(email)
-)
-
-# recall: estimated % of true matches captured by this set of rules
-model <- do.call(
-  il_estimate_prior,
-  c(list(model), deterministic_rules, list(recall = 0.6))
+  block_on(email),
+  recall = 0.6
 )
 ```
 
@@ -116,14 +113,10 @@ model <- il_estimate_u(model, max_pairs = 5e5)
 ```
 
 ```{r}
-training_blocking_rule <- 'l.first_name = r.first_name and l.surname = r.surname'
-
 model <- il_estimate_em(model, block_on(first_name, surname))
 ```
 
 ```{r}
-training_blocking_rule <- 'l.dob = r.dob'
-
 model <- il_estimate_em(model, block_on(dob))
 ```
 
@@ -163,15 +156,8 @@ head(clusters, 5)
 ```
 
 ```{r}
-cluster_count <- c()
-
-for (i in c(0.7, 0.75, 0.8, 0.85, 0.9, 0.95)) {
-  clusters <- il_cluster(predictions, threshold = i)
-  c <- length(unique(clusters$cluster_id))
-  cluster_count <- c(cluster_count, c)
-}
-
-cluster_count
+thresholds <- c(0.7, 0.75, 0.8, 0.85, 0.9, 0.95)
+sapply(thresholds, \(i) length(unique(il_cluster(predictions, threshold = i)$cluster_id)))
 ```
 
 ```{r}

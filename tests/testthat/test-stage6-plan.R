@@ -99,7 +99,7 @@ test_that('SQLite backend supports cl_exact comparisons end-to-end', {
 
 test_that('DuckDB backend works end-to-end', {
   skip_if_not_installed('duckdb')
-  df <- il_demo('fake_20')
+  df <- fake_20
   con <- DBI::dbConnect(duckdb::duckdb())
   on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
   spec <- il_spec() |>
@@ -232,7 +232,7 @@ test_that('il_estimate_em() on 1000 records completes without error', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo('fake_1000')
+  df <- fake_1000
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>
@@ -253,7 +253,7 @@ test_that('predict() on 1000 records completes without error', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo('fake_1000')
+  df <- fake_1000
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>

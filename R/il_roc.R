@@ -73,5 +73,6 @@ il_roc <- function(model, labels) {
     threshold = acc$threshold,
     fpr = acc$fp / pmax(acc$fp + acc$tn, 1L),
     tpr = acc$tp / pmax(acc$tp + acc$fn, 1L)
-  )
+  ) |>
+    add_class('il_roc')
 }

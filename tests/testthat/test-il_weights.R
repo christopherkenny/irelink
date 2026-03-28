@@ -10,7 +10,7 @@ test_that('il_weights() returns a tibble with expected columns', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo('fake_1000')
+  df <- fake_1000
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>
@@ -35,7 +35,7 @@ test_that('il_weights() has one row per comparison level', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo('fake_1000')
+  df <- fake_1000
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>
@@ -59,7 +59,7 @@ test_that('il_parameters() returns a tibble with m and u in [0, 1]', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo('fake_1000')
+  df <- fake_1000
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>
@@ -86,7 +86,7 @@ test_that('il_training_history() returns convergence data', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- il_demo('fake_1000')
+  df <- fake_1000
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_compare(surname, cl_exact()) |>

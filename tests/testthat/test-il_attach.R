@@ -95,10 +95,14 @@ test_that('il_attach() preserves trained parameters', {
 
   new_df <- data.frame(
     unique_id = 1:10,
-    first_name = c('John', 'Jon', 'Jane', 'Bob', 'Alice',
-                   'Tom', 'Eve', 'Sam', 'Pat', 'Kim'),
-    surname = c('Smith', 'Smith', 'Doe', 'Jones', 'Brown',
-                'White', 'Adams', 'Clark', 'Davis', 'Evans'),
+    first_name = c(
+      'John', 'Jon', 'Jane', 'Bob', 'Alice',
+      'Tom', 'Eve', 'Sam', 'Pat', 'Kim'
+    ),
+    surname = c(
+      'Smith', 'Smith', 'Doe', 'Jones', 'Brown',
+      'White', 'Adams', 'Clark', 'Davis', 'Evans'
+    ),
     stringsAsFactors = FALSE
   )
 
@@ -128,10 +132,14 @@ test_that('predict() works on attached model', {
 
   new_df <- data.frame(
     unique_id = 1:10,
-    first_name = c('John', 'John', 'Jane', 'Jane', 'Bob',
-                   'Bob', 'Alice', 'Alice', 'Tom', 'Tom'),
-    surname = c('Smith', 'Smith', 'Doe', 'Doe', 'Jones',
-                'Jones', 'Brown', 'Brown', 'White', 'White'),
+    first_name = c(
+      'John', 'John', 'Jane', 'Jane', 'Bob',
+      'Bob', 'Alice', 'Alice', 'Tom', 'Tom'
+    ),
+    surname = c(
+      'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
+      'Jones', 'Brown', 'Brown', 'White', 'White'
+    ),
     stringsAsFactors = FALSE
   )
 
@@ -211,10 +219,14 @@ test_that('il_find_matches() works on attached model', {
 
   existing_df <- data.frame(
     unique_id = 1:10,
-    first_name = c('John', 'Jon', 'Jane', 'Bob', 'Alice',
-                   'Tom', 'Eve', 'Sam', 'Pat', 'Kim'),
-    surname = c('Smith', 'Smith', 'Doe', 'Jones', 'Brown',
-                'White', 'Adams', 'Clark', 'Davis', 'Evans'),
+    first_name = c(
+      'John', 'Jon', 'Jane', 'Bob', 'Alice',
+      'Tom', 'Eve', 'Sam', 'Pat', 'Kim'
+    ),
+    surname = c(
+      'Smith', 'Smith', 'Doe', 'Jones', 'Brown',
+      'White', 'Adams', 'Clark', 'Davis', 'Evans'
+    ),
     stringsAsFactors = FALSE
   )
 

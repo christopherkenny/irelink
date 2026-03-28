@@ -1,8 +1,7 @@
+# Profile il_find_matches and compare clustering/scoring approaches
 devtools::load_all()
 set.seed(42)
 
-# --- Profile il_find_matches row-by-row loop ---
-cat("=== il_find_matches profiling ===\n")
 first_names <- c("John", "Jane", "Alice", "Bob", "Carol",
                  "David", "Eve", "Frank", "Grace", "Hank")
 surnames <- c("Smith", "Johnson", "Williams", "Brown", "Jones",
@@ -28,49 +27,37 @@ model <- il_model(df, spec = spec, con = con) |>
   il_estimate_u() |>
   il_estimate_em(block_on(surname))
 
-new_recs <- data.frame(
-  first_name = sample(first_names, 5, replace = TRUE),
-  surname = sample(surnames, 5, replace = TRUE),
-  dob = as.character(as.Date("1980-01-01") + sample(0:5000, 5, replace = TRUE)),
-  city = sample(c("Portland","Seattle"), 5, replace = TRUE),
-  stringsAsFactors = FALSE
-)
-cat("  5 new records against 500:\n")
-t1 <- system.time(res <- il_find_matches(model, new_recs))["elapsed"]
-cat(sprintf("    %.3f s  (%d matches)\n", t1, nrow(res)))
-flush.console()
+# il_find_matches scaling
+make_new_recs <- function(n_new) {
+  data.frame(
+    first_name = sample(first_names, n_new, replace = TRUE),
+    surname = sample(surnames, n_new, replace = TRUE),
+    dob = as.character(as.Date("1980-01-01") + sample(0:5000, n_new, replace = TRUE)),
+    city = sample(c("Portland","Seattle"), n_new, replace = TRUE),
+    stringsAsFactors = FALSE
+  )
+}
 
-new_recs_50 <- data.frame(
-  first_name = sample(first_names, 50, replace = TRUE),
-  surname = sample(surnames, 50, replace = TRUE),
-  dob = as.character(as.Date("1980-01-01") + sample(0:5000, 50, replace = TRUE)),
-  city = sample(c("Portland","Seattle"), 50, replace = TRUE),
-  stringsAsFactors = FALSE
-)
-cat("  50 new records against 500:\n")
-t2 <- system.time(res2 <- il_find_matches(model, new_recs_50))["elapsed"]
-cat(sprintf("    %.3f s  (%d matches)\n", t2, nrow(res2)))
+lapply(c(5, 50), \(n_new) {
+  t <- system.time(res <- il_find_matches(model, make_new_recs(n_new)))["elapsed"]
+  tibble::tibble(n_new = n_new, elapsed = t, n_matches = nrow(res))
+}) |> dplyr::bind_rows()
+
 DBI::dbDisconnect(con)
-flush.console()
 
-# --- igraph comparison for clustering ---
-cat("\n=== igraph vs union-find clustering ===\n")
+# igraph vs union-find clustering
 if (requireNamespace("igraph", quietly = TRUE)) {
-  for (n_edges in c(5000, 20000, 50000, 100000)) {
+  lapply(c(5000, 20000, 50000, 100000), \(n_edges) {
     n_nodes <- n_edges / 5
     ids_l <- as.character(sample(seq_len(n_nodes), n_edges, replace = TRUE))
     ids_r <- as.character(sample(seq_len(n_nodes), n_edges, replace = TRUE))
-    probs <- runif(n_edges, 0.5, 1)
     pairs_t <- tibble::tibble(
       unique_id_l = ids_l, unique_id_r = ids_r,
-      match_weight = rnorm(n_edges), match_probability = probs
+      match_weight = rnorm(n_edges), match_probability = runif(n_edges, 0.5, 1)
     )
     pairs_t <- structure(pairs_t, class = c("il_compared", class(pairs_t)), model = NULL)
 
-    # Union-find (current)
-    t_uf <- system.time(cl_uf <- il_cluster(pairs_t))["elapsed"]
-
-    # igraph components
+    t_uf <- system.time(il_cluster(pairs_t))["elapsed"]
     t_ig <- system.time({
       all_ids <- unique(c(ids_l, ids_r))
       g <- igraph::graph_from_data_frame(
@@ -78,22 +65,17 @@ if (requireNamespace("igraph", quietly = TRUE)) {
         directed = FALSE, vertices = data.frame(name = all_ids)
       )
       comp <- igraph::components(g)
-      result_ig <- tibble::tibble(
+      tibble::tibble(
         unique_id = all_ids,
         cluster_id = paste0("cluster_", comp$membership[all_ids])
       )
     })["elapsed"]
 
-    cat(sprintf("  %6d edges: union-find %.3f s  |  igraph %.3f s  |  speedup %.1fx\n",
-                n_edges, t_uf, t_ig, t_uf / max(t_ig, 0.001)))
-    flush.console()
-  }
-} else {
-  cat("  igraph not available\n")
+    tibble::tibble(n_edges = n_edges, union_find = t_uf, igraph = t_ig, speedup = t_uf / max(t_ig, 0.001))
+  }) |> dplyr::bind_rows()
 }
 
-# --- Matrix multiply vs loop for scoring ---
-cat("\n=== Matrix vs loop scoring ===\n")
+# Matrix vs loop scoring
 n_pairs <- 100000
 n_comp <- 4
 gm <- matrix(sample(0:1, n_pairs * n_comp, replace = TRUE), nrow = n_pairs)
@@ -122,9 +104,6 @@ t_mat <- system.time({
   mw_mat <- as.numeric(gm %*% w1 + (1 - gm) %*% w0)
 })["elapsed"]
 
-cat(sprintf("  100K pairs, 4 comps: loop %.3f s  |  matrix %.3f s  |  max diff: %e\n",
-            t_loop, t_mat, max(abs(mw_loop - mw_mat))))
-
 # Larger
 n_pairs2 <- 500000
 gm2 <- matrix(sample(0:1, n_pairs2 * n_comp, replace = TRUE), nrow = n_pairs2)
@@ -144,6 +123,10 @@ t_mat2 <- system.time({
   w0 <- log2(pmax(m_nm, 1e-10) / pmax(u_nm, 1e-10))
   mw2_m <- as.numeric(gm2 %*% w1 + (1 - gm2) %*% w0)
 })["elapsed"]
-cat(sprintf("  500K pairs, 4 comps: loop %.3f s  |  matrix %.3f s\n", t_loop2, t_mat2))
 
-cat("\nDone.\n")
+tibble::tibble(
+  n_pairs  = c(n_pairs, n_pairs2),
+  loop     = c(t_loop, t_loop2),
+  matrix   = c(t_mat, t_mat2),
+  max_diff = c(max(abs(mw_loop - mw_mat)), NA_real_)
+)

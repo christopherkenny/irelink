@@ -87,11 +87,16 @@ reference:
       - il_errors
       - il_unlinkables
       - il_graph_metrics
+      - autoplot.il_accuracy
+      - autoplot.il_roc
+      - autoplot.il_precision_recall
+      - autoplot.il_unlinkables
 
   - title: "Data Profiling"
     desc: "Explore and summarise input data before linkage."
     contents:
       - il_completeness
+      - autoplot.il_completeness
       - il_count_pairs
       - il_largest_blocks
       - il_profile
@@ -103,7 +108,15 @@ reference:
       - il_load
       - il_attach
       - il_cleanup
-      - il_demo
+
+  - title: "Datasets"
+    desc: "Bundled benchmark datasets from the splink ecosystem."
+    contents:
+      - fake_20
+      - fake_1000
+      - fake_1000_labels
+      - febrl4a
+      - febrl4b
 
   - title: "Unit Helpers"
     desc: "Lightweight constructors for physical and temporal units."

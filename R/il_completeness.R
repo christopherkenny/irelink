@@ -82,5 +82,6 @@ il_completeness <- function(..., con) {
     results <- c(results, rows)
   }
 
-  do.call(rbind, results)
+  do.call(rbind, results) |>
+    add_class('il_completeness')
 }

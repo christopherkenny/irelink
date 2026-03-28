@@ -14,7 +14,7 @@
 #' @export
 #'
 #' @examples
-#' df <- il_demo('fake_20')
+#' df <- fake_20
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
@@ -67,8 +67,10 @@ il_estimate_m_from_column <- function(model, label_col) {
     colnames(gamma_mat) <- comp_names
   } else {
     # Fallback: pair generation via SQL self-join (works on all backends)
-    cols_needed <- unique(c('unique_id', col_name,
-      vapply(comparisons, function(c) c$columns, character(1))))
+    cols_needed <- unique(c(
+      'unique_id', col_name,
+      vapply(comparisons, function(c) c$columns, character(1))
+    ))
     sel <- build_select_aliases(cols_needed)
 
     sql <- glue::glue(
