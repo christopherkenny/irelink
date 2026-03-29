@@ -73,6 +73,7 @@ reference:
       - il_parameters
       - il_weights
       - il_training_history
+      - autoplot.il_training_history
       - il_waterfall
       - il_compare_records
       - il_string_similarity
@@ -102,8 +103,10 @@ reference:
       - il_completeness
       - autoplot.il_completeness
       - il_count_pairs
+      - autoplot.il_count_pairs
       - il_largest_blocks
       - il_profile
+      - autoplot.il_profile
 
   - title: "Persistence and Utilities"
     desc: "Save, load, and manage linkage models and resources."
