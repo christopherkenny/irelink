@@ -222,13 +222,13 @@ matching:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 5</span></span></span>
 <span><span class="co">#&gt;   comparison    level     m_prob  u_prob weight</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> given_name    match     0.603  0.003<span style="text-decoration: underline;">2</span>    7.56</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> given_name    non_match 0.397  0.997    -<span style="color: #BB0000;">1.33</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> surname       match     0.687  0.003<span style="text-decoration: underline;">03</span>   7.83</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> surname       non_match 0.313  0.997    -<span style="color: #BB0000;">1.67</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> date_of_birth match     0.925  0.000<span style="text-decoration: underline;">14</span>  12.7 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> date_of_birth non_match 0.075<span style="text-decoration: underline;">1</span> 1.000    -<span style="color: #BB0000;">3.73</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> postcode      match     0.869  0.001<span style="text-decoration: underline;">08</span>   9.65</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> given_name    match     0.604  0.002<span style="text-decoration: underline;">68</span>   7.82</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> given_name    non_match 0.396  0.997    -<span style="color: #BB0000;">1.33</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> surname       match     0.686  0.003<span style="text-decoration: underline;">25</span>   7.72</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> surname       non_match 0.314  0.997    -<span style="color: #BB0000;">1.66</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> date_of_birth match     0.923  0.000<span style="text-decoration: underline;">15</span>  12.6 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> date_of_birth non_match 0.077<span style="text-decoration: underline;">3</span> 1.000    -<span style="color: #BB0000;">3.69</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> postcode      match     0.869  0.000<span style="text-decoration: underline;">99</span>   9.78</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> postcode      non_match 0.131  0.999    -<span style="color: #BB0000;">2.93</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -246,14 +246,14 @@ matching:</p>
 <code class="sourceCode R"><span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">predictions</span>, threshold <span class="op">=</span> <span class="fl">0.85</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">clusters</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
-<span><span class="co">#&gt;   unique_id cluster_id</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 43        cluster_1 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 51        cluster_2 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 209       cluster_3 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 243       cluster_4 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 314       cluster_5 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 319       cluster_6</span></span></code></pre></div>
+<span><span class="co">#&gt;   unique_id cluster_id </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 43        cluster_43 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 51        cluster_51 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 243       cluster_221</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 319       cluster_319</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 374       cluster_374</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 527       cluster_527</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>
