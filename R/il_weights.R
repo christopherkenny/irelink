@@ -7,7 +7,7 @@
 #' @param model A trained `il_model` object.
 #'
 #' @return A tibble with columns `comparison`, `level`, `m_prob`,
-#'   `u_prob`, and `log2_bayes_factor`.
+#'   `u_prob`, and `weight`.
 #' @export
 #'
 #' @examples

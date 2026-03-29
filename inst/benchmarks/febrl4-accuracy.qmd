@@ -102,6 +102,8 @@ spec <- il_spec() |>
   il_block_on(state, address_1) |>
   il_block_on(street_number, address_1) |>
   il_block_on(postcode)
+
+spec
 ```
 
 ## Train the model
@@ -129,6 +131,8 @@ model <- il_model(
   il_estimate_u(max_pairs = 1e6) |>
   il_estimate_em(blocking = block_on(date_of_birth)) |>
   il_estimate_em(blocking = block_on(postcode))
+
+model
 ```
 
 ## Inspect parameters
@@ -151,6 +155,12 @@ High m (agreement rate among true matches) combined with low u (agreement rate a
 autoplot(model, type = 'parameters')
 ```
 
+The underlying numbers are available via `il_weights()`, which reports the log-2 Bayes factor and the m and u probabilities for each comparison level.
+
+```{r weights-table}
+il_weights(model)
+```
+
 The training history shows how m and u estimates evolved across EM iterations.
 Flat lines indicate the parameters converged quickly; a jagged path suggests the blocking rule for that session provided little signal.
 
@@ -170,7 +180,31 @@ A bimodal shape, with a cluster near zero for non-matches and a cluster at high 
 #| fig-width: 6
 #| fig-height: 3
 predictions <- predict(model, threshold = 0.1)
+nrow(predictions)
 autoplot(predictions)
+```
+
+A waterfall chart makes that distribution more interpretable by showing which fields pushed an individual pair up or down.
+Here we inspect the predicted pair closest to the `0.9` decision threshold used later in the error analysis.
+
+```{r waterfall-pair}
+inspect_idx <- predictions |>
+  mutate(
+    row_id = row_number(),
+    distance_to_review_threshold = abs(match_probability - 0.9)
+  ) |>
+  slice_min(distance_to_review_threshold, n = 1, with_ties = FALSE) |>
+  pull(row_id)
+
+predictions |>
+  slice(inspect_idx) |>
+  select(unique_id_l, unique_id_r, match_weight, match_probability)
+```
+
+```{r waterfall-plot}
+#| fig-width: 7
+#| fig-height: 4
+autoplot(predictions, which = inspect_idx)
 ```
 
 ## Evaluate
@@ -178,6 +212,8 @@ autoplot(predictions)
 Because every record in `febrl4b` is a corrupted duplicate of exactly one record in `febrl4a`, the full set of 5,000 true positive pairs is known.
 We recover them by matching on the entity number embedded in `rec_id` (for example, `rec-1070-org` and `rec-1070-dup-0` share entity `1070`).
 The model assigns `unique_id` in row order, so the mapping from data rows to model IDs is direct.
+For negatives, we avoid random cross-table pairs because they are usually trivially non-matching and can make ROC and precision-recall curves look artificially perfect.
+Instead we sample hard negatives from the blocked candidate-pair space: pairs the model genuinely considered, but which belong to different entities.
 
 ```{r labels}
 ids_a <- df_a |>
@@ -197,21 +233,26 @@ positives <- inner_join(ids_a, ids_b, by = 'entity', suffix = c('_l', '_r')) |>
   mutate(is_match = 1L) |>
   select(unique_id_l, unique_id_r, is_match)
 
+candidate_pairs <- predict(model, threshold = 0) |>
+  select(unique_id_l, unique_id_r) |>
+  distinct()
+
 set.seed(42)
-negatives <- tibble(
-  unique_id_l = sample(ids_a$unique_id, size = 10000L, replace = TRUE),
-  unique_id_r = sample(ids_b$unique_id, size = 10000L, replace = TRUE)
-) |>
+candidate_negatives <- candidate_pairs |>
   left_join(ids_a, by = c('unique_id_l' = 'unique_id')) |>
   left_join(
     ids_b,
     by = c('unique_id_r' = 'unique_id'),
     suffix = c('_l', '_r')
   ) |>
-  mutate(is_match = as.integer(entity_l == entity_r)) |>
-  select(unique_id_l, unique_id_r, is_match)
+  filter(entity_l != entity_r)
 
-labels <- bind_rows(positives, negatives)
+negatives <- candidate_negatives |>
+  slice_sample(n = min(10000L, nrow(candidate_negatives))) |>
+  transmute(unique_id_l, unique_id_r, is_match = 0L)
+
+labels <- bind_rows(positives, negatives) |>
+  distinct(unique_id_l, unique_id_r, .keep_all = TRUE)
 labels
 ```
 

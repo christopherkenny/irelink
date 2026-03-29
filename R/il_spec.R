@@ -51,8 +51,23 @@ print.il_spec <- function(x, ...) {
   } else {
     cat(sprintf('  Blocking rules (%d, OR-ed):\n', length(rules)))
     for (i in seq_along(rules)) {
-      cols <- paste(rules[[i]]$columns, collapse = ', ')
-      cat(sprintf('    %d. %s\n', i, cols))
+      rule <- rules[[i]]
+      has_cols <- length(rule$columns) > 0L
+      has_where <- !is.null(rule$where) && !is.na(rule$where) && nzchar(rule$where)
+      rule_label <- if (has_cols && has_where) {
+        paste0(
+          paste(rule$columns, collapse = ', '),
+          ' + WHERE ',
+          rule$where
+        )
+      } else if (has_cols) {
+        paste(rule$columns, collapse = ', ')
+      } else if (has_where) {
+        paste0('WHERE ', rule$where)
+      } else {
+        '(empty rule)'
+      }
+      cat(sprintf('    %d. %s\n', i, rule_label))
     }
   }
 

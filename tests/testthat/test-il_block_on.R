@@ -46,10 +46,18 @@ test_that('print.il_spec() shows blocking rules', {
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>
     il_block_on(first_name) |>
+    il_block_on(
+      .where = 'l.given_name = r.surname AND l.surname = r.given_name'
+    ) |>
     il_block_on(surname)
 
   expect_output(print(spec), 'first_name')
   expect_output(print(spec), 'surname')
+  expect_output(
+    print(spec),
+    'WHERE l.given_name = r.surname AND l.surname = r.given_name',
+    fixed = TRUE
+  )
 })
 
 # --- block_on() (standalone) ----------------------------------------------

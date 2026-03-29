@@ -6,8 +6,8 @@
 #'
 #' @param model A trained `il_model` object.
 #'
-#' @return A tibble with columns `iteration`, `comparison`, `level`, and
-#'   `value`.
+#' @return A tibble with columns `session`, `iteration`, `comparison`,
+#'   `level`, and `value`.
 #' @export
 #'
 #' @examples

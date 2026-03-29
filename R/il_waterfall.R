@@ -8,8 +8,9 @@
 #' @param which An integer index identifying which row (pair) to
 #'   decompose. Defaults to `1L`.
 #'
-#' @return A tibble with columns `step`, `order`, `contribution`, and
-#'   `direction` (positive, negative, prior, or final).
+#' @return A tibble with columns `step`, `order`, `contribution`,
+#'   `direction`, `start`, and `end`. The rows include the prior odds,
+#'   one row per comparison contribution, and a final total.
 #' @export
 #'
 #' @examples
@@ -91,13 +92,27 @@ il_waterfall <- function(pairs, which = 1L) {
   contributions <- per_comparison_contribution(
     gamma, mu, if (has_tf) tf_adjs else NULL
   )
+  prior <- model$params$prior %||% 0.05
+  prior_weight <- log2(prior / (1 - prior))
+  final_weight <- prior_weight + sum(contributions)
 
-  direction <- ifelse(contributions >= 0, 'positive', 'negative')
+  direction <- c(
+    'prior',
+    ifelse(contributions >= 0, 'positive', 'negative'),
+    'final'
+  )
+  step <- c('Prior', comp_names, 'Final')
+  contribution <- c(prior_weight, contributions, final_weight)
+  cumulative <- cumsum(c(prior_weight, contributions))
+  start <- c(0, head(cumulative, -1), 0)
+  end <- c(cumulative, final_weight)
 
   tibble::tibble(
-    step = comp_names,
-    order = seq_along(comp_names),
-    contribution = contributions,
-    direction = direction
+    step = step,
+    order = seq_along(step),
+    contribution = contribution,
+    direction = direction,
+    start = start,
+    end = end
   )
 }

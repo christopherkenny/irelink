@@ -98,12 +98,20 @@ test_that('il_waterfall() returns per-comparison weight contributions', {
   if (nrow(pairs) > 0) {
     wf <- il_waterfall(pairs, which = 1L)
     expect_s3_class(wf, 'tbl_df')
-    # Should have one row per comparison
-    expect_true(nrow(wf) >= 2)
-    # Contributions should sum to the total match weight
+    expect_equal(wf$step[1], 'Prior')
+    expect_equal(wf$step[nrow(wf)], 'Final')
+    expect_true(all(c('start', 'end', 'direction') %in% names(wf)))
+
+    comp_rows <- wf[!(wf$direction %in% c('prior', 'final')), , drop = FALSE]
+    expect_true(nrow(comp_rows) >= 2)
     expect_equal(
-      sum(wf$contribution),
+      sum(comp_rows$contribution),
       pairs$match_weight[1],
+      tolerance = 0.01
+    )
+    expect_equal(
+      wf$contribution[wf$direction == 'final'],
+      wf$contribution[wf$direction == 'prior'] + pairs$match_weight[1],
       tolerance = 0.01
     )
   }

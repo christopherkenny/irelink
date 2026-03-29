@@ -491,3 +491,17 @@ Note any things that we can learn from their approach.
 Then, develop a plan so that we can minimize the amount of data that we pull out and optimize the amount of processing in SQL for our clustering steps.
 
 While doing this, consider how this impacts future extensibility and keep careful notes on what you find an change in `inst/refs/21-clusters.md`.
+
+
+## Updating plots (Sonnet 4.6 medium)
+
+Can you now do a writeup in `inst/benchmarks` as a Quarto file which provides light prose (explaining what's going on, but without excessive detail), to test the accuracy of our method.
+I want you to use the febrl4 data and attempt this: https://moj-analytical-services.github.io/splink/demos/examples/duckdb/febrl4.html
+
+Identify if we are missing features for their default plots and implement them.
+
+
+## Cross-checking plots (Codex GPT-5.4)
+
+Can you review all of the autoplot methods for this new record linking R package?
+Please fix any issues you encounter.
