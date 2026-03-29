@@ -116,6 +116,8 @@ Examine parameters, weights, and training diagnostics.
   : Extract Match Weights by Comparison Level
 - [`il_training_history()`](http://christophertkenny.com/irelink/reference/il_training_history.md)
   : Extract EM Training History
+- [`autoplot(`*`<il_training_history>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_training_history.md)
+  : Plot EM Training History
 - [`il_waterfall()`](http://christophertkenny.com/irelink/reference/il_waterfall.md)
   : Extract Waterfall Data for a Single Pair
 - [`il_compare_records()`](http://christophertkenny.com/irelink/reference/il_compare_records.md)
@@ -168,10 +170,14 @@ Explore and summarise input data before linkage.
   : Plot Column Completeness
 - [`il_count_pairs()`](http://christophertkenny.com/irelink/reference/il_count_pairs.md)
   : Count Candidate Pairs Under Blocking Rules
+- [`autoplot(`*`<il_count_pairs>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_count_pairs.md)
+  : Plot Blocking Rule Pair Counts
 - [`il_largest_blocks()`](http://christophertkenny.com/irelink/reference/il_largest_blocks.md)
   : Identify the Largest Blocking Bins
 - [`il_profile()`](http://christophertkenny.com/irelink/reference/il_profile.md)
   : Profile Column Value Distributions
+- [`autoplot(`*`<il_profile>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_profile.md)
+  : Plot Column Value Profiles
 
 ## Persistence and Utilities
 

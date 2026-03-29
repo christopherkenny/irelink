@@ -83,19 +83,11 @@ labels <- data.frame(
 )
 
 il_roc(model, labels = labels)
-#> # A tibble: 21 × 3
-#>    threshold   fpr   tpr
-#>        <dbl> <dbl> <dbl>
-#>  1      0        1     1
-#>  2      0.05     1     1
-#>  3      0.1      1     1
-#>  4      0.15     1     1
-#>  5      0.2      1     1
-#>  6      0.25     1     1
-#>  7      0.3      1     1
-#>  8      0.35     1     1
-#>  9      0.4      1     1
-#> 10      0.45     1     1
-#> # ℹ 11 more rows
+#> # A tibble: 3 × 3
+#>   threshold   fpr   tpr
+#>       <dbl> <dbl> <dbl>
+#> 1     0         1     1
+#> 2     0.969     1     1
+#> 3     1         0     0
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

@@ -74,19 +74,19 @@ model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
 
 il_training_history(model)
-#> # A tibble: 45 × 4
-#>    iteration comparison level value
-#>        <int> <chr>      <chr> <dbl>
-#>  1         1 first_name match 0.881
-#>  2         1 surname    match 0.965
-#>  3         1 dob        match 0.865
-#>  4         2 first_name match 0.873
-#>  5         2 surname    match 0.966
-#>  6         2 dob        match 0.842
-#>  7         3 first_name match 0.872
-#>  8         3 surname    match 0.967
-#>  9         3 dob        match 0.831
-#> 10         4 first_name match 0.873
+#> # A tibble: 45 × 5
+#>    session iteration comparison level value
+#>      <int>     <int> <chr>      <chr> <dbl>
+#>  1       1         1 first_name match 0.881
+#>  2       1         1 surname    match 0.965
+#>  3       1         1 dob        match 0.865
+#>  4       1         2 first_name match 0.873
+#>  5       1         2 surname    match 0.966
+#>  6       1         2 dob        match 0.842
+#>  7       1         3 first_name match 0.872
+#>  8       1         3 surname    match 0.967
+#>  9       1         3 dob        match 0.831
+#> 10       1         4 first_name match 0.873
 #> # ℹ 35 more rows
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
