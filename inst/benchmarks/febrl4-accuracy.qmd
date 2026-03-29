@@ -1,0 +1,266 @@
+---
+title: "Accuracy benchmark: FEBRL 4 record linkage"
+format:
+  html:
+    embed-resources: true
+---
+
+This document reproduces the [splink FEBRL 4 demo](https://moj-analytical-services.github.io/splink/demos/examples/duckdb/febrl4.html) using irelink and evaluates accuracy against the ground truth encoded in the data.
+FEBRL 4 is a standard record-linkage benchmark: `febrl4a` contains 5,000 original records and `febrl4b` contains 5,000 corrupted duplicates, one per original, with typographical errors, missing values, and transpositions.
+Because the match structure is one-to-one, the full set of true positive pairs is known.
+
+```{r setup}
+#| message: false
+devtools::load_all()
+library(dplyr)
+library(ggplot2)
+library(stringr)
+
+con <- DBI::dbConnect(duckdb::duckdb())
+```
+
+## Prepare the data
+
+The FEBRL generator stores `date_of_birth`, `soc_sec_id`, `postcode`, and `street_number` as integers.
+We convert them to character so that string-distance comparisons (Damerau-Levenshtein) work correctly.
+
+```{r prepare}
+prep <- function(df) {
+  mutate(
+    df,
+    across(c(date_of_birth, soc_sec_id, postcode, street_number), as.character)
+  )
+}
+
+df_a <- prep(febrl4a)
+df_b <- prep(febrl4b)
+```
+
+## Explore data quality
+
+Check how complete each column is across both tables.
+Table B has more missing values because the corruption process drops fields.
+
+```{r completeness}
+#| fig-width: 7
+#| fig-height: 3.5
+il_completeness(df_a, df_b, con = con) |> autoplot()
+```
+
+Profile the highest-frequency values for the name columns.
+Highly skewed distributions inflate u-probabilities, so spotting them early is useful.
+
+```{r profile}
+#| fig-width: 7
+#| fig-height: 3.5
+il_profile(df_a, given_name, surname, con = con, top_n = 8) |> autoplot()
+```
+
+## Blocking analysis
+
+We use seven blocking rules, matching the splink tutorial.
+Together they generate around 55,000 candidate pairs from 25 million possible cross-table combinations, a reduction of roughly 450x.
+
+```{r count-pairs}
+#| fig-width: 7
+#| fig-height: 3.5
+il_count_pairs(
+  df_a,
+  df_b,
+  block_on(given_name, surname),
+  block_on(.where = 'l.given_name = r.surname AND l.surname = r.given_name'),
+  block_on(date_of_birth),
+  block_on(soc_sec_id),
+  block_on(state, address_1),
+  block_on(street_number, address_1),
+  block_on(postcode),
+  con = con,
+  link_type = 'link'
+) |>
+  autoplot()
+```
+
+## Define the specification
+
+The comparisons follow the splink detailed model: fuzzy name matching, date-of-birth and social-security-ID edit distance, exact street number, and postcode edit distance.
+Term-frequency adjustment is applied to street number to avoid inflating match weights for common values like "1".
+
+```{r spec}
+spec <- il_spec() |>
+  il_compare(col = given_name, method = cl_name()) |>
+  il_compare(col = surname, method = cl_name()) |>
+  il_compare(col = date_of_birth, method = cl_damerau_levenshtein(1, 2)) |>
+  il_compare(col = soc_sec_id, method = cl_damerau_levenshtein(1, 2)) |>
+  il_compare(col = street_number, method = cl_exact(term_frequency = TRUE)) |>
+  il_compare(col = postcode, method = cl_damerau_levenshtein(1, 2)) |>
+  il_block_on(given_name, surname) |>
+  il_block_on(
+    .where = 'l.given_name = r.surname AND l.surname = r.given_name'
+  ) |>
+  il_block_on(date_of_birth) |>
+  il_block_on(soc_sec_id) |>
+  il_block_on(state, address_1) |>
+  il_block_on(street_number, address_1) |>
+  il_block_on(postcode)
+```
+
+## Train the model
+
+We build a link-type model across two source tables, then estimate parameters in three stages:
+
+
+1. **Prior:** the baseline match probability, estimated from deterministic rules assumed to capture about 80% of true matches.
+2. **U-probabilities:** the chance of agreement by coincidence, estimated from random record pairs.
+3. **M-probabilities:** the chance of agreement among true matches, estimated by two EM sessions that each hold a different blocking rule fixed.
+
+```{r train}
+model <- il_model(
+  .data = df_a,
+  df_b,
+  spec = spec,
+  con = con,
+  link_type = 'link'
+) |>
+  il_estimate_prior(
+    block_on(soc_sec_id),
+    block_on(given_name, surname, date_of_birth),
+    recall = 0.8
+  ) |>
+  il_estimate_u(max_pairs = 1e6) |>
+  il_estimate_em(blocking = block_on(date_of_birth)) |>
+  il_estimate_em(blocking = block_on(postcode))
+```
+
+## Inspect parameters
+
+The match-weight chart summarises the log-Bayes-factor each comparison contributes.
+`soc_sec_id` dominates because even a single-edit match is strong evidence for a field that is nearly unique per person.
+
+```{r weights}
+#| fig-width: 6
+#| fig-height: 3.5
+autoplot(model)
+```
+
+The m/u chart separates the two components of each weight.
+High m (agreement rate among true matches) combined with low u (agreement rate among random pairs) produces a large match weight.
+
+```{r params}
+#| fig-width: 7
+#| fig-height: 4
+autoplot(model, type = 'parameters')
+```
+
+The training history shows how m and u estimates evolved across EM iterations.
+Flat lines indicate the parameters converged quickly; a jagged path suggests the blocking rule for that session provided little signal.
+
+```{r history}
+#| fig-width: 7
+#| fig-height: 4
+il_training_history(model) |>
+  autoplot()
+```
+
+## Predict
+
+We generate all candidate pairs above a low threshold of 0.1 to retain near-matches for inspection, then examine the match-weight distribution.
+A bimodal shape, with a cluster near zero for non-matches and a cluster at high weights for matches, indicates good model separation.
+
+```{r predict}
+#| fig-width: 6
+#| fig-height: 3
+predictions <- predict(model, threshold = 0.1)
+autoplot(predictions)
+```
+
+## Evaluate
+
+Because every record in `febrl4b` is a corrupted duplicate of exactly one record in `febrl4a`, the full set of 5,000 true positive pairs is known.
+We recover them by matching on the entity number embedded in `rec_id` (for example, `rec-1070-org` and `rec-1070-dup-0` share entity `1070`).
+The model assigns `unique_id` in row order, so the mapping from data rows to model IDs is direct.
+
+```{r labels}
+ids_a <- df_a |>
+  mutate(
+    unique_id = row_number(),
+    entity = str_extract(rec_id, '(?<=rec-)\\d+')
+  ) |>
+  select(unique_id, entity)
+ids_b <- df_b |>
+  mutate(
+    unique_id = row_number(),
+    entity = str_extract(rec_id, '(?<=rec-)\\d+')
+  ) |>
+  select(unique_id, entity)
+
+positives <- inner_join(ids_a, ids_b, by = 'entity', suffix = c('_l', '_r')) |>
+  mutate(is_match = 1L) |>
+  select(unique_id_l, unique_id_r, is_match)
+
+set.seed(42)
+negatives <- tibble(
+  unique_id_l = sample(ids_a$unique_id, size = 10000L, replace = TRUE),
+  unique_id_r = sample(ids_b$unique_id, size = 10000L, replace = TRUE)
+) |>
+  left_join(ids_a, by = c('unique_id_l' = 'unique_id')) |>
+  left_join(
+    ids_b,
+    by = c('unique_id_r' = 'unique_id'),
+    suffix = c('_l', '_r')
+  ) |>
+  mutate(is_match = as.integer(entity_l == entity_r)) |>
+  select(unique_id_l, unique_id_r, is_match)
+
+labels <- bind_rows(positives, negatives)
+labels
+```
+
+### Precision, recall, and F1
+
+The accuracy chart shows how precision, recall, and F1 vary across all thresholds.
+Not every true match is recoverable because some records are too corrupted, so the goal is balance rather than perfect recall.
+
+```{r accuracy}
+#| fig-width: 6
+#| fig-height: 3.5
+il_accuracy(model, labels = labels) |>
+  autoplot()
+```
+
+### ROC curve
+
+```{r roc}
+#| fig-width: 5
+#| fig-height: 4
+il_roc(model, labels = labels) |>
+  autoplot()
+```
+
+### Precision-recall curve
+
+```{r pr}
+#| fig-width: 5
+#| fig-height: 4
+il_precision_recall(model, labels = labels) |>
+  autoplot()
+```
+
+### Errors at threshold 0.9
+
+False negatives are typically heavily corrupted records where key fields are missing or garbled beyond what the comparison thresholds can accommodate.
+False positives are pairs that coincidentally agree on enough fields to exceed the threshold despite referring to different people.
+
+```{r errors}
+errs <- il_errors(model, labels = labels, threshold = 0.9)
+errs |>
+  filter(error_type == 'false_negative')
+errs |>
+  filter(error_type == 'false_positive')
+```
+
+## Cleanup
+
+```{r cleanup}
+il_cleanup(model)
+DBI::dbDisconnect(con, shutdown = TRUE)
+```

@@ -283,13 +283,18 @@ get_blocked_pairs <- function(model, blocking) {
 
   cols <- model$data$columns
   sel <- build_select_aliases(cols)
-  block_where <- build_blocking_condition(blocking$columns)
+  block_where <- build_blocking_condition(blocking$columns, blocking$where)
 
   table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
   parts <- vapply(table_pairs, function(tp) {
+    where_clause <- if (nzchar(block_where)) {
+      glue::glue('{tp$join_cond} AND {block_where}')
+    } else {
+      tp$join_cond
+    }
     glue::glue(
       'SELECT {sel$left}, {sel$right} FROM {tp$from_l} l, {tp$from_r} r ',
-      'WHERE {tp$join_cond} AND {block_where}'
+      'WHERE {where_clause}'
     )
   }, character(1))
   sql <- paste(parts, collapse = ' UNION ')

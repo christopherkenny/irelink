@@ -67,5 +67,5 @@ il_training_history <- function(model) {
   if (is.null(history) || length(history) == 0L) {
     cli::cli_abort('No training history available. Run {.fn il_estimate_em} first.')
   }
-  do.call(rbind, history)
+  add_class(do.call(rbind, history), 'il_training_history')
 }

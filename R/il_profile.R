@@ -97,5 +97,5 @@ il_profile <- function(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL) {
     out
   })
 
-  do.call(rbind, results)
+  add_class(do.call(rbind, results), 'il_profile')
 }

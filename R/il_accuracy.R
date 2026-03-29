@@ -73,7 +73,7 @@ il_accuracy <- function(model, labels) {
   label_probs <- scored$label_probs
   actual_positive <- scored$actual_positive
 
-  thresholds <- sort(unique(c(seq(0, 1, by = 0.05))))
+  thresholds <- sort(unique(c(0, label_probs, 1)))
 
   results <- lapply(thresholds, function(t) {
     predicted_positive <- label_probs >= t

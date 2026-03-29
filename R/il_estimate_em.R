@@ -126,6 +126,7 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5, ...) {
     m_nonmatch <- 1 - m_match
 
     history[[iter]] <- tibble::tibble(
+      session = length(model$params$history) + 1L,
       iteration = iter,
       comparison = comp_names,
       level = 'match',

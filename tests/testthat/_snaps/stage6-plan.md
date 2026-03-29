@@ -65,12 +65,12 @@
            comparisons:   <chr>      <chr>     <dbl> <dbl>
            comparisons: 1 first_name match     0.653   0.2
            comparisons: 2 first_name non_match 0.347   0.8
-          history: 1                , first_name       , match            , 0.682432432432432
-           history: 2               , first_name      , match           , 0.65676738410596
-           history: 3                , first_name       , match            , 0.653281533765247
-           history: 4                , first_name       , match            , 0.652799474080288
-           history: 5                , first_name       , match            , 0.652732644812339
-           history: 6                , first_name       , match            , 0.652723376913114
+          history: 1                , 1                , first_name       , match            , 0.682432432432432
+           history: 1               , 2               , first_name      , match           , 0.65676738410596
+           history: 1                , 3                , first_name       , match            , 0.653281533765247
+           history: 1                , 4                , first_name       , match            , 0.652799474080288
+           history: 1                , 5                , first_name       , match            , 0.652732644812339
+           history: 1                , 6                , first_name       , match            , 0.652723376913114
 
 # unit helper print snapshot
 

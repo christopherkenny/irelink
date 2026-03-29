@@ -158,5 +158,5 @@ il_count_pairs <- function(.data, ..., con = NULL,
   out$cumulative_pairs <- cum_pairs
   out$pct_of_cartesian <- round(cum_pairs / cartesian * 100, 4)
 
-  out
+  add_class(out, 'il_count_pairs')
 }
