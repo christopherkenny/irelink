@@ -75,13 +75,70 @@ il_cluster <- function(pairs, threshold = NULL,
     return(tibble::tibble(unique_id = character(0), cluster_id = character(0)))
   }
 
-  # Collect ALL unique IDs before threshold filtering
+  # Try SQL path first (DuckDB / PostgreSQL)
+  model <- attr(pairs, 'model')
+  con <- if (!is.null(model)) model$con else NULL
+  use_sql <- !is.null(con) && DBI::dbIsValid(con) &&
+    detect_dialect(con) %in% c('duckdb', 'postgres')
+
+  if (use_sql) {
+    return(cluster_sql(con, pairs, threshold, method))
+  }
+
+  # Fallback: igraph (works for SQLite or when no connection available)
+  cluster_igraph(pairs, threshold, method)
+}
+
+#' SQL-path clustering (DuckDB/PostgreSQL)
+#' @noRd
+cluster_sql <- function(con, pairs, threshold, method) {
+  edges_tbl <- cc_upload_edges(con, pairs, threshold = threshold)
+
+  if (method == 'best_link') {
+    filtered_tbl <- sql_best_link_filter(con, edges_tbl)
+    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
+    DBI::dbExecute(con, glue::glue(
+      'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
+    ))
+  }
+
+  result <- solve_cc_sql(con, edges_tbl)
+
+  # Collect any isolated IDs not in edges (all unique IDs from pairs)
+  all_ids <- unique(c(
+    as.character(pairs$unique_id_l),
+    as.character(pairs$unique_id_r)
+  ))
+  in_result <- result$node_id
+  isolated <- setdiff(all_ids, in_result)
+
+  if (length(isolated) > 0L) {
+    iso_df <- tibble::tibble(
+      node_id = isolated,
+      cluster_id = paste0('cluster_', isolated)
+    )
+    result <- rbind(result, iso_df)
+  }
+
+  # Normalise cluster IDs
+  result$cluster_id <- paste0('cluster_', result$cluster_id)
+
+  tibble::tibble(
+    unique_id = result$node_id,
+    cluster_id = result$cluster_id
+  )
+}
+
+#' igraph-path clustering (fallback for SQLite or no DB connection)
+#' @noRd
+cluster_igraph <- function(pairs, threshold, method) {
+  rlang::check_installed('igraph', reason = 'for clustering without a DuckDB or PostgreSQL connection.')
+
   all_ids <- unique(c(
     as.character(pairs$unique_id_l),
     as.character(pairs$unique_id_r)
   ))
 
-  # Apply threshold filter to edges only
   if (!is.null(threshold)) {
     pairs <- pairs[which(pairs$match_probability >= threshold), , drop = FALSE]
   }
@@ -90,7 +147,6 @@ il_cluster <- function(pairs, threshold = NULL,
     pairs <- best_link_filter(pairs)
   }
 
-  # Connected components via igraph (1000x faster than R union-find)
   edges <- data.frame(
     from = as.character(pairs$unique_id_l),
     to = as.character(pairs$unique_id_r),

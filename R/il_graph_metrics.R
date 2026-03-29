@@ -70,6 +70,82 @@
 #' metrics$clusters
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_graph_metrics <- function(pairs, clusters) {
+  # Try SQL path first
+  model <- attr(pairs, 'model')
+  con <- if (!is.null(model)) model$con else NULL
+  use_sql <- !is.null(con) && DBI::dbIsValid(con) &&
+    detect_dialect(con) %in% c('duckdb', 'postgres')
+
+  if (use_sql) {
+    return(graph_metrics_sql(con, pairs, clusters))
+  }
+
+  graph_metrics_r(pairs, clusters)
+}
+
+#' SQL-path graph metrics
+#' @noRd
+graph_metrics_sql <- function(con, pairs, clusters) {
+  # Upload edges
+  edges_tbl <- cc_tbl('metrics_edges')
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
+  edges_df <- data.frame(
+    unique_id_l = as.character(pairs$unique_id_l),
+    unique_id_r = as.character(pairs$unique_id_r),
+    match_probability = pairs$match_probability,
+    match_weight = pairs$match_weight,
+    stringsAsFactors = FALSE
+  )
+  DBI::dbWriteTable(con, edges_tbl, edges_df)
+
+  # Upload cluster assignments
+  cc_tbl_name <- cc_tbl('metrics_cc')
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {cc_tbl_name}'))
+  cc_df <- data.frame(
+    node_id = as.character(clusters$unique_id),
+    cluster_id = as.character(clusters$cluster_id),
+    stringsAsFactors = FALSE
+  )
+  DBI::dbWriteTable(con, cc_tbl_name, cc_df)
+
+  # Node metrics via SQL
+  nm_tbl <- sql_node_metrics(con, cc_tbl_name, edges_tbl)
+  nodes_raw <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {nm_tbl}'))
+  nodes <- tibble::tibble(
+    unique_id = nodes_raw$node_id,
+    cluster_id = nodes_raw$cluster_id,
+    degree = as.integer(nodes_raw$node_degree)
+  )
+
+  # Cluster metrics via SQL
+  cm_tbl <- sql_cluster_metrics(con, nm_tbl)
+  clusters_raw <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {cm_tbl}'))
+  cluster_tbl <- tibble::tibble(
+    cluster_id = clusters_raw$cluster_id,
+    n_nodes = as.integer(clusters_raw$n_nodes),
+    n_edges = as.integer(clusters_raw$n_edges),
+    density = clusters_raw$density
+  )
+
+  # Edge-level (just pass through)
+  edges <- tibble::tibble(
+    unique_id_l = as.character(pairs$unique_id_l),
+    unique_id_r = as.character(pairs$unique_id_r),
+    match_probability = pairs$match_probability,
+    match_weight = pairs$match_weight
+  )
+
+  # Clean up
+  for (tbl in c(edges_tbl, cc_tbl_name, nm_tbl, cm_tbl)) {
+    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
+  }
+
+  list(nodes = nodes, edges = edges, clusters = cluster_tbl)
+}
+
+#' R-path graph metrics (fallback)
+#' @noRd
+graph_metrics_r <- function(pairs, clusters) {
   all_ids <- clusters$unique_id
 
   # Compute node degree
