@@ -82,11 +82,13 @@ model <- il_estimate_em(model, block_on(surname))
 pairs <- predict(model, threshold = 0.5)
 
 il_waterfall(pairs, which = 1)
-#> # A tibble: 3 × 4
-#>   step       order contribution direction
-#>   <chr>      <int>        <dbl> <chr>    
-#> 1 first_name     1         3.06 positive 
-#> 2 surname        2         2.77 positive 
-#> 3 dob            3         3.38 positive 
+#> # A tibble: 5 × 6
+#>   step       order contribution direction start   end
+#>   <chr>      <int>        <dbl> <chr>     <dbl> <dbl>
+#> 1 Prior          1        -4.25 prior      0    -4.25
+#> 2 first_name     2         3.06 positive  -4.25 -1.19
+#> 3 surname        3         2.77 positive  -1.19  1.58
+#> 4 dob            4         3.38 positive   1.58  4.95
+#> 5 Final          5         4.95 final      0     4.95
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
