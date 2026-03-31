@@ -86,10 +86,8 @@ test_that('compute_tf_adjustment() produces correct adjustments', {
   )
 
   mu <- list(
-    m_match = 0.95,
-    m_nonmatch = 0.05,
-    u_match = 0.10,
-    u_nonmatch = 0.90
+    m_levels = list(city = c(0.05, 0.95)),
+    u_levels = list(city = c(0.90, 0.10))
   )
 
   adj <- irelink:::compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
@@ -115,7 +113,7 @@ test_that('TF adjustment is zero when term_frequency is FALSE', {
     dimnames = list(NULL, 'city')
   )
   tf_data <- data.frame(tf_city_l = c(0.5, 0.5), tf_city_r = c(0.5, 0.5))
-  mu <- list(m_match = 0.9, m_nonmatch = 0.1, u_match = 0.1, u_nonmatch = 0.9)
+  mu <- list(m_levels = list(city = c(0.1, 0.9)), u_levels = list(city = c(0.9, 0.1)))
 
   adj <- irelink:::compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
   expect_equal(adj, c(0, 0))

@@ -70,25 +70,41 @@ il_estimate_u <- function(model, max_pairs = 1e6) {
     cli::cli_abort('No pairs available for u estimation.')
   }
 
-  # u = fraction of random pairs that agree at each level
-  n_pairs <- nrow(gamma_mat)
-  u_match <- colMeans(gamma_mat)
-  u_nonmatch <- 1 - u_match
-
+  comparisons <- model$spec$comparisons
   comp_names <- colnames(gamma_mat)
-  params_tbl <- tibble::tibble(
-    comparison = rep(comp_names, each = 2L),
-    level = rep(c('match', 'non_match'), times = length(comp_names)),
-    u = as.numeric(rbind(u_match, u_nonmatch))
-  )
+  n_pairs <- nrow(gamma_mat)
+
+  # Build per-level u frequencies: for each comparison, count fraction at
+  # each gamma level
+  rows <- list()
+  for (j in seq_along(comp_names)) {
+    cn <- comp_names[j]
+    n_levels <- n_gamma_levels(comparisons[[j]]$method)
+    gammas_j <- gamma_mat[, j]
+    for (k in seq(0L, n_levels - 1L)) {
+      u_k <- sum(gammas_j == k) / n_pairs
+      rows <- c(rows, list(data.frame(
+        comparison = cn,
+        gamma_level = k,
+        u = max(u_k, 1e-6),
+        stringsAsFactors = FALSE
+      )))
+    }
+  }
+  params_tbl <- tibble::as_tibble(do.call(rbind, rows))
 
   if (is.null(model$params$comparisons)) {
     params_tbl$m <- NA_real_
   } else {
+    old_params <- model$params$comparisons
+    # Migrate legacy format if needed
+    if ('level' %in% names(old_params) && !'gamma_level' %in% names(old_params)) {
+      old_params <- migrate_params_to_gamma_level(old_params)
+    }
     params_tbl <- merge(
-      params_tbl[, c('comparison', 'level', 'u')],
-      model$params$comparisons[, c('comparison', 'level', 'm')],
-      by = c('comparison', 'level'), all.x = TRUE
+      params_tbl[, c('comparison', 'gamma_level', 'u')],
+      old_params[, c('comparison', 'gamma_level', 'm')],
+      by = c('comparison', 'gamma_level'), all.x = TRUE
     )
     params_tbl <- tibble::as_tibble(params_tbl)
   }

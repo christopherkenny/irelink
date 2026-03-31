@@ -13,8 +13,9 @@ il_waterfall(pairs, which = 1L)
 decompose. Defaults to \code{1L}.}
 }
 \value{
-A tibble with columns \code{step}, \code{order}, \code{contribution}, and
-\code{direction} (positive, negative, prior, or final).
+A tibble with columns \code{step}, \code{order}, \code{contribution},
+\code{direction}, \code{start}, and \code{end}. The rows include the prior odds,
+one row per comparison contribution, and a final total.
 }
 \description{
 Returns a tidy tibble showing how each comparison contributed to the

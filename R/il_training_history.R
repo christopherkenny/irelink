@@ -67,5 +67,10 @@ il_training_history <- function(model) {
   if (is.null(history) || length(history) == 0L) {
     cli::cli_abort('No training history available. Run {.fn il_estimate_em} first.')
   }
-  add_class(do.call(rbind, history), 'il_training_history')
+  result <- do.call(rbind, history)
+  # Migrate legacy format if needed
+  if ('level' %in% names(result) && !'gamma_level' %in% names(result)) {
+    result <- migrate_params_to_gamma_level(result)
+  }
+  add_class(result, 'il_training_history')
 }

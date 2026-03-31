@@ -10,8 +10,8 @@ il_training_history(model)
 \item{model}{A trained \code{il_model} object.}
 }
 \value{
-A tibble with columns \code{iteration}, \code{comparison}, \code{level}, and
-\code{value}.
+A tibble with columns \code{session}, \code{iteration}, \code{comparison},
+\code{level}, and \code{value}.
 }
 \description{
 Returns a tidy tibble of parameter estimates at each EM iteration,

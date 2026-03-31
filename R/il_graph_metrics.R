@@ -70,6 +70,7 @@
 #' metrics$clusters
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_graph_metrics <- function(pairs, clusters) {
+  pairs <- ensure_collected(pairs)
   # Try SQL path first
   model <- attr(pairs, 'model')
   con <- if (!is.null(model)) model$con else NULL

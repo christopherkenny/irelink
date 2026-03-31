@@ -79,23 +79,47 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5, ...) {
   n_comp <- ncol(gamma_mat)
   n_pairs <- nrow(gamma_mat)
 
-  # Initialize m and u
-  params <- model$params$comparisons
-  m_match <- rep(0.9, n_comp)
-  m_nonmatch <- rep(0.1, n_comp)
-  u_match <- rep(0.1, n_comp)
-  u_nonmatch <- rep(0.9, n_comp)
+  # Determine number of gamma levels per comparison
+  levels_per_comp <- vapply(comparisons, function(c) n_gamma_levels(c$method), integer(1))
 
+  # Initialize m and u as per-level vectors (list of numeric vectors)
+  m_list <- vector('list', n_comp)
+  u_list <- vector('list', n_comp)
+  names(m_list) <- comp_names
+  names(u_list) <- comp_names
+
+  params <- model$params$comparisons
   if (!is.null(params)) {
-    for (j in seq_len(n_comp)) {
-      cn <- comp_names[j]
-      row_m <- params[params$comparison == cn & params$level == 'match', ]
-      row_nm <- params[params$comparison == cn & params$level == 'non_match', ]
-      if (nrow(row_m) > 0L && !is.na(row_m$m[1])) m_match[j] <- row_m$m[1]
-      if (nrow(row_nm) > 0L && !is.na(row_nm$m[1])) m_nonmatch[j] <- row_nm$m[1]
-      if (nrow(row_m) > 0L && !is.na(row_m$u[1])) u_match[j] <- row_m$u[1]
-      if (nrow(row_nm) > 0L && !is.na(row_nm$u[1])) u_nonmatch[j] <- row_nm$u[1]
+    if ('level' %in% names(params) && !'gamma_level' %in% names(params)) {
+      params <- migrate_params_to_gamma_level(params)
     }
+  }
+
+  for (j in seq_len(n_comp)) {
+    cn <- comp_names[j]
+    nl <- levels_per_comp[j]
+
+    # Default m: high probability for highest level, low for others
+    m_default <- rep(0.1 / max(nl - 1L, 1L), nl)
+    m_default[nl] <- 0.9
+    u_default <- rep(1 / nl, nl)
+
+    if (!is.null(params)) {
+      rows <- params[params$comparison == cn, ]
+      rows <- rows[order(rows$gamma_level), ]
+      if (nrow(rows) == nl) {
+        m_vec <- ifelse(is.na(rows$m), m_default, rows$m)
+        u_vec <- ifelse(is.na(rows$u), u_default, rows$u)
+      } else {
+        m_vec <- m_default
+        u_vec <- u_default
+      }
+    } else {
+      m_vec <- m_default
+      u_vec <- u_default
+    }
+    m_list[[j]] <- m_vec
+    u_list[[j]] <- u_vec
   }
 
   prior <- model$params$prior %||% 0.05
@@ -104,45 +128,72 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5, ...) {
   history <- list()
 
   for (iter in seq_len(max_iter)) {
-    # E-step: compute posterior match probability via matrix multiply
-    log_m1 <- log(pmax(m_match, 1e-10))
-    log_m0 <- log(pmax(m_nonmatch, 1e-10))
-    log_u1 <- log(pmax(u_match, 1e-10))
-    log_u0 <- log(pmax(u_nonmatch, 1e-10))
+    # E-step: compute posterior match probability using per-level log-likelihoods
+    log_match <- rep(log(prior), n_pairs)
+    log_nonmatch <- rep(log(1 - prior), n_pairs)
 
-    log_match <- log(prior) + as.numeric(gamma_mat %*% (log_m1 - log_m0)) + sum(log_m0)
-    log_nonmatch <- log(1 - prior) + as.numeric(gamma_mat %*% (log_u1 - log_u0)) + sum(log_u0)
+    for (j in seq_len(n_comp)) {
+      m_vec <- pmax(m_list[[j]], 1e-10)
+      u_vec <- pmax(u_list[[j]], 1e-10)
+      # Look up log-probabilities by gamma level
+      log_m_vals <- log(m_vec)
+      log_u_vals <- log(u_vec)
+      idx <- gamma_mat[, j] + 1L  # R 1-indexed
+      log_match <- log_match + log_m_vals[idx]
+      log_nonmatch <- log_nonmatch + log_u_vals[idx]
+    }
 
     max_log <- pmax(log_match, log_nonmatch)
     weights <- exp(log_match - max_log) /
       (exp(log_match - max_log) + exp(log_nonmatch - max_log))
 
-    # M-step: update m via matrix-vector multiply (u stays from estimate_u)
+    # M-step: update m per-level (u stays from estimate_u)
     sum_w <- sum(weights)
+    old_m_list <- m_list
 
-    old_m_match <- m_match
-    raw <- (as.numeric(crossprod(gamma_mat, weights)) + 0.5) / (sum_w + 1.0)
-    m_match <- pmax(pmin(raw, 0.99), 0.01)
-    m_nonmatch <- 1 - m_match
+    for (j in seq_len(n_comp)) {
+      nl <- levels_per_comp[j]
+      raw <- numeric(nl)
+      for (k in seq(0L, nl - 1L)) {
+        mask <- gamma_mat[, j] == k
+        raw[k + 1L] <- (sum(weights[mask]) + 0.5 / nl) / (sum_w + 0.5)
+      }
+      # Ensure probabilities sum to 1 and stay in bounds
+      raw <- pmax(raw, 0.001)
+      raw <- raw / sum(raw)
+      m_list[[j]] <- raw
+    }
 
     history[[iter]] <- tibble::tibble(
       session = length(model$params$history) + 1L,
       iteration = iter,
-      comparison = comp_names,
-      level = 'match',
-      value = m_match
+      comparison = rep(comp_names, times = levels_per_comp),
+      gamma_level = unlist(lapply(levels_per_comp, function(nl) seq(0L, nl - 1L))),
+      value = unlist(m_list)
     )
 
-    if (max(abs(m_match - old_m_match)) < tol) break
+    max_change <- max(vapply(seq_len(n_comp), function(j) {
+      max(abs(m_list[[j]] - old_m_list[[j]]))
+    }, numeric(1)))
+    if (max_change < tol) break
   }
 
   # Store updated parameters
-  model$params$comparisons <- tibble::tibble(
-    comparison = rep(comp_names, each = 2L),
-    level = rep(c('match', 'non_match'), times = n_comp),
-    m = as.numeric(rbind(m_match, m_nonmatch)),
-    u = as.numeric(rbind(u_match, u_nonmatch))
-  )
+  rows <- list()
+  for (j in seq_len(n_comp)) {
+    cn <- comp_names[j]
+    nl <- levels_per_comp[j]
+    for (k in seq(0L, nl - 1L)) {
+      rows <- c(rows, list(data.frame(
+        comparison = cn,
+        gamma_level = k,
+        m = m_list[[j]][k + 1L],
+        u = u_list[[j]][k + 1L],
+        stringsAsFactors = FALSE
+      )))
+    }
+  }
+  model$params$comparisons <- tibble::as_tibble(do.call(rbind, rows))
 
   model$params$history <- c(model$params$history, history)
   model$trained <- TRUE

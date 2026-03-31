@@ -25,14 +25,16 @@ dialect_has_fuzzy_sql <- function(dialect) {
   dialect %in% c('duckdb', 'postgres')
 }
 
-#' Generate a binary gamma CASE expression (0/1) for one comparison
+#' Generate a multi-level gamma CASE expression for one comparison
 #'
 #' Used to push gamma computation into SQL for backends that support
-#' string similarity functions (DuckDB, PostgreSQL).
+#' string similarity functions (DuckDB, PostgreSQL). Returns integer
+#' gamma codes: 0 (else) through K (best match), where K depends on
+#' the number of thresholds.
 #'
 #' @param comp A comparison entry from the spec (with $columns, $method).
 #' @param dialect SQL dialect string.
-#' @return A SQL expression that evaluates to 0 or 1.
+#' @return A SQL expression that evaluates to an integer gamma code.
 #' @noRd
 sql_gamma_case <- function(comp, dialect) {
   col <- comp$columns
@@ -50,82 +52,154 @@ sql_gamma_case <- function(comp, dialect) {
     ))
   }
 
+  # Build multi-level CASE for similarity methods with thresholds.
+  # Thresholds are stored strictest-first (descending for similarity,
+  # ascending for distance). The SQL CASE evaluates top-to-bottom,
+  # returning the first match — so strictest threshold gets highest gamma.
+
   if (method == 'jaro_winkler') {
-    t <- thresholds[1]
-    return(glue::glue(
-      'CASE WHEN {null_guard} AND jaro_winkler_similarity(l.{col}, r.{col}) >= {t} THEN 1 ELSE 0 END'
-    ))
+    n <- length(thresholds)
+    whens <- vapply(seq_along(thresholds), function(i) {
+      glue::glue('WHEN {null_guard} AND jaro_winkler_similarity(l.{col}, r.{col}) >= {thresholds[i]} THEN {n - i + 1L}')
+    }, character(1))
+    return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'jaro') {
-    t <- thresholds[1]
-    return(glue::glue(
-      'CASE WHEN {null_guard} AND jaro_similarity(l.{col}, r.{col}) >= {t} THEN 1 ELSE 0 END'
-    ))
+    n <- length(thresholds)
+    whens <- vapply(seq_along(thresholds), function(i) {
+      glue::glue('WHEN {null_guard} AND jaro_similarity(l.{col}, r.{col}) >= {thresholds[i]} THEN {n - i + 1L}')
+    }, character(1))
+    return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'levenshtein') {
-    t <- thresholds[1]
-    return(glue::glue(
-      'CASE WHEN {null_guard} AND levenshtein(l.{col}, r.{col}) <= {t} THEN 1 ELSE 0 END'
-    ))
+    n <- length(thresholds)
+    whens <- vapply(seq_along(thresholds), function(i) {
+      glue::glue('WHEN {null_guard} AND levenshtein(l.{col}, r.{col}) <= {thresholds[i]} THEN {n - i + 1L}')
+    }, character(1))
+    return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'damerau_levenshtein') {
-    t <- thresholds[1]
-    return(glue::glue(
-      'CASE WHEN {null_guard} AND damerau_levenshtein(l.{col}, r.{col}) <= {t} THEN 1 ELSE 0 END'
-    ))
+    n <- length(thresholds)
+    whens <- vapply(seq_along(thresholds), function(i) {
+      glue::glue('WHEN {null_guard} AND damerau_levenshtein(l.{col}, r.{col}) <= {thresholds[i]} THEN {n - i + 1L}')
+    }, character(1))
+    return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'numeric_diff') {
-    t <- thresholds[1]
-    return(glue::glue(
-      'CASE WHEN {null_guard} AND ABS(CAST(l.{col} AS DOUBLE) - CAST(r.{col} AS DOUBLE)) <= {t} THEN 1 ELSE 0 END'
-    ))
+    n <- length(thresholds)
+    whens <- vapply(seq_along(thresholds), function(i) {
+      glue::glue('WHEN {null_guard} AND ABS(CAST(l.{col} AS DOUBLE) - CAST(r.{col} AS DOUBLE)) <= {thresholds[i]} THEN {n - i + 1L}')
+    }, character(1))
+    return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'pct_diff') {
-    t <- thresholds[1]
-    return(glue::glue(
-      'CASE WHEN {null_guard} AND ABS(CAST(l.{col} AS DOUBLE) - CAST(r.{col} AS DOUBLE)) / ',
-      'NULLIF(GREATEST(ABS(CAST(l.{col} AS DOUBLE)), ABS(CAST(r.{col} AS DOUBLE))), 0) <= {t} THEN 1 ELSE 0 END'
-    ))
+    n <- length(thresholds)
+    whens <- vapply(seq_along(thresholds), function(i) {
+      glue::glue(
+        'WHEN {null_guard} AND ABS(CAST(l.{col} AS DOUBLE) - CAST(r.{col} AS DOUBLE)) / ',
+        'NULLIF(GREATEST(ABS(CAST(l.{col} AS DOUBLE)), ABS(CAST(r.{col} AS DOUBLE))), 0) <= {thresholds[i]} THEN {n - i + 1L}'
+      )
+    }, character(1))
+    return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'date_diff') {
-    t <- thresholds[1]
-    unit <- level$units[1]
-    mult <- switch(unit,
-      'days' = 1,
-      'months' = 30,
-      'years' = 365,
-      1
-    )
-    days_val <- t * mult
-    if (dialect == 'duckdb') {
-      return(glue::glue(
-        'CASE WHEN {null_guard} AND ABS(CAST(l.{col} AS DATE) - CAST(r.{col} AS DATE)) <= {days_val} THEN 1 ELSE 0 END'
-      ))
-    }
-    return(glue::glue(
-      'CASE WHEN {null_guard} AND ABS(JULIANDAY(l.{col}) - JULIANDAY(r.{col})) <= {days_val} THEN 1 ELSE 0 END'
-    ))
+    n <- length(thresholds)
+    whens <- vapply(seq_along(thresholds), function(i) {
+      mult <- switch(level$units[i],
+        'days' = 1,
+        'months' = 30,
+        'years' = 365,
+        1
+      )
+      days_val <- thresholds[i] * mult
+      if (dialect == 'duckdb') {
+        glue::glue('WHEN {null_guard} AND ABS(CAST(l.{col} AS DATE) - CAST(r.{col} AS DATE)) <= {days_val} THEN {n - i + 1L}')
+      } else {
+        glue::glue('WHEN {null_guard} AND ABS(JULIANDAY(l.{col}) - JULIANDAY(r.{col})) <= {days_val} THEN {n - i + 1L}')
+      }
+    }, character(1))
+    return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'levels') {
-    for (sublevel in level$levels) {
-      if (!isTRUE(sublevel$is_null_level) && !isTRUE(sublevel$is_else_level)) {
-        inner_comp <- list(columns = col, method = sublevel)
-        return(sql_gamma_case(inner_comp, dialect))
-      }
+    # Build multi-level CASE from sublevels (skip null and else)
+    sublevels <- Filter(function(l) {
+      !isTRUE(l$is_null_level) && !isTRUE(l$is_else_level)
+    }, level$levels)
+    n <- length(sublevels)
+    if (n == 0L) {
+      return(glue::glue(
+        'CASE WHEN {null_guard} AND l.{col} = r.{col} THEN 1 ELSE 0 END'
+      ))
     }
+    whens <- vapply(seq_along(sublevels), function(i) {
+      sub <- sublevels[[i]]
+      cond <- sql_sublevel_condition(sub, col, dialect, null_guard)
+      glue::glue('WHEN {cond} THEN {n - i + 1L}')
+    }, character(1))
+    return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   # Fallback: exact match
   glue::glue(
     'CASE WHEN {null_guard} AND l.{col} = r.{col} THEN 1 ELSE 0 END'
   )
+}
+
+#' Generate a SQL condition for a single sublevel within cl_levels()
+#' @param sub An il_comparison_level sublevel object.
+#' @param col Column name.
+#' @param dialect SQL dialect string.
+#' @param null_guard SQL null guard clause.
+#' @return A SQL condition string.
+#' @noRd
+sql_sublevel_condition <- function(sub, col, dialect, null_guard) {
+  method <- sub$method
+
+  if (method == 'exact') {
+    return(glue::glue('{null_guard} AND l.{col} = r.{col}'))
+  }
+  if (method == 'jaro_winkler') {
+    t <- sub$thresholds[1]
+    return(glue::glue('{null_guard} AND jaro_winkler_similarity(l.{col}, r.{col}) >= {t}'))
+  }
+  if (method == 'jaro') {
+    t <- sub$thresholds[1]
+    return(glue::glue('{null_guard} AND jaro_similarity(l.{col}, r.{col}) >= {t}'))
+  }
+  if (method == 'levenshtein') {
+    t <- sub$thresholds[1]
+    return(glue::glue('{null_guard} AND levenshtein(l.{col}, r.{col}) <= {t}'))
+  }
+  if (method == 'damerau_levenshtein') {
+    t <- sub$thresholds[1]
+    return(glue::glue('{null_guard} AND damerau_levenshtein(l.{col}, r.{col}) <= {t}'))
+  }
+  if (method == 'numeric_diff') {
+    t <- sub$thresholds[1]
+    return(glue::glue('{null_guard} AND ABS(CAST(l.{col} AS DOUBLE) - CAST(r.{col} AS DOUBLE)) <= {t}'))
+  }
+  if (method == 'date_diff') {
+    t <- sub$thresholds[1]
+    mult <- switch(sub$units[1], 'days' = 1, 'months' = 30, 'years' = 365, 1)
+    days_val <- t * mult
+    if (dialect == 'duckdb') {
+      return(glue::glue('{null_guard} AND ABS(CAST(l.{col} AS DATE) - CAST(r.{col} AS DATE)) <= {days_val}'))
+    }
+    return(glue::glue('{null_guard} AND ABS(JULIANDAY(l.{col}) - JULIANDAY(r.{col})) <= {days_val}'))
+  }
+  if (method == 'custom') {
+    sql_expr <- glue::glue(sub$sql_expr, col = col, .open = '{', .close = '}')
+    return(glue::glue('{null_guard} AND ({sql_expr})'))
+  }
+  # Default: exact match
+  glue::glue('{null_guard} AND l.{col} = r.{col}')
 }
 
 #' Build a SQL query that returns pairs with gamma columns computed in SQL
@@ -465,4 +539,131 @@ count_blocked_pairs <- function(con, tbl_l, tbl_r, where, dedupe = TRUE) {
   }
   res <- DBI::dbGetQuery(con, sql)
   as.integer(res$n[1])
+}
+
+# --- SQL-side scoring helpers (lazy prediction pipeline) --------------------
+
+#' Generate a CASE expression for one comparison's match-weight contribution
+#'
+#' Pre-computes log2(m/u) per gamma level in R and embeds the constants
+#' as SQL CASE branches.
+#'
+#' @param comp_name Column name of the comparison.
+#' @param m_vec Numeric vector of m probabilities (one per gamma level).
+#' @param u_vec Numeric vector of u probabilities (one per gamma level).
+#' @return A SQL expression string.
+#' @noRd
+sql_weight_case <- function(comp_name, m_vec, u_vec) {
+  weights <- log2(pmax(m_vec, 1e-10) / pmax(u_vec, 1e-10))
+  whens <- vapply(seq_along(weights), function(i) {
+    glue::glue('WHEN {i - 1L} THEN {weights[i]}')
+  }, character(1))
+  glue::glue(
+    'CASE gamma_{comp_name} {paste(whens, collapse = " ")} ELSE 0.0 END'
+  )
+}
+
+#' Generate a CASE expression for TF adjustment of one comparison
+#'
+#' Returns log2(u_exact / max(tf_l, tf_r)) when gamma equals the highest
+#' level, 0 otherwise.  Uses LN(x)/LN(2) for portability across DuckDB
+#' and PostgreSQL.
+#'
+#' @param col Column name.
+#' @param max_level Integer: highest gamma level (exact match).
+#' @param u_exact Numeric: u probability at the highest gamma level.
+#' @return A SQL expression string.
+#' @noRd
+sql_tf_adj_expr <- function(col, max_level, u_exact) {
+  log2_u <- log2(max(u_exact, 1e-10))
+  ln2 <- log(2)
+  glue::glue(
+    'CASE WHEN gamma_{col} = {max_level} ',
+    'AND tf_{col}_l IS NOT NULL AND tf_{col}_r IS NOT NULL ',
+    'AND GREATEST(tf_{col}_l, tf_{col}_r) > 0 ',
+    'THEN {log2_u} - LN(GREATEST(tf_{col}_l, tf_{col}_r)) / {ln2} ',
+    'ELSE 0.0 END'
+  )
+}
+
+#' Build a complete SQL query that scores and filters pairs
+#'
+#' Wraps [build_gamma_query()] with per-comparison weight CASE expressions,
+#' TF adjustments, and a match-probability logistic transform.  The result
+#' is a query whose output columns match [predict.il_model()].
+#'
+#' @param model A trained il_model object.
+#' @param threshold Numeric match-probability threshold.
+#' @return A SQL query string.
+#' @noRd
+build_scored_query <- function(model, threshold = 0.85) {
+  comparisons <- model$spec$comparisons
+  params      <- model$params$comparisons
+  prior       <- model$params$prior %||% 0.05
+  comp_names  <- vapply(comparisons, function(c) c$columns, character(1))
+  blocking_rules <- model$spec$blocking_rules
+
+  mu <- extract_mu_vectors(params, comp_names)
+  gamma_sql <- build_gamma_query(model, blocking_rules)
+
+  # Per-comparison weight CASE expressions
+  weight_parts <- vapply(seq_along(comparisons), function(j) {
+    cn <- comp_names[j]
+    sql_weight_case(cn, mu$m_levels[[cn]], mu$u_levels[[cn]])
+  }, character(1))
+
+  # TF adjustment CASE expressions (both for sum and as separate columns)
+  tf_parts <- character(0)
+  tf_adj_selects <- character(0)
+  for (j in seq_along(comparisons)) {
+    comp <- comparisons[[j]]
+    if (isTRUE(comp$method$term_frequency)) {
+      col <- comp$columns
+      max_level <- n_gamma_levels(comp$method) - 1L
+      u_exact <- mu$u_levels[[col]][max_level + 1L]
+      expr <- sql_tf_adj_expr(col, max_level, u_exact)
+      tf_parts <- c(tf_parts, expr)
+      tf_adj_selects <- c(
+        tf_adj_selects,
+        glue::glue('({expr}) AS tf_adj_{col}')
+      )
+    }
+  }
+
+  all_weight_parts <- c(weight_parts, tf_parts)
+  weight_expr <- paste(all_weight_parts, collapse = ' + ')
+
+  log_prior_odds <- log(prior / (1 - prior))
+  ln2 <- log(2)
+
+  gamma_cols <- paste0('gamma_', comp_names)
+  gamma_select <- paste(gamma_cols, collapse = ', ')
+
+  # tf_adj columns: inner SELECT computes them, outer just references by name
+  inner_tf_adj <- ''
+  outer_tf_adj <- ''
+  if (length(tf_adj_selects) > 0L) {
+    inner_tf_adj <- paste0(', ', paste(tf_adj_selects, collapse = ', '))
+    tf_col_names <- vapply(comparisons[vapply(comparisons, function(c) {
+      isTRUE(c$method$term_frequency)
+    }, logical(1))], function(c) c$columns, character(1))
+    outer_tf_adj <- paste0(', ', paste0('tf_adj_', tf_col_names, collapse = ', '))
+  }
+
+  # Two-level nesting:
+  #   Inner: gamma query + match_weight + tf_adj columns
+  #   Outer: match_probability + threshold filter
+  glue::glue(
+    'SELECT unique_id_l, unique_id_r, {gamma_select}, ',
+    'match_weight{outer_tf_adj}, ',
+    '1.0 / (1.0 + EXP(-({log_prior_odds} + match_weight * {ln2}))) ',
+    'AS match_probability ',
+    'FROM (',
+    'SELECT l_unique_id AS unique_id_l, r_unique_id AS unique_id_r, ',
+    '{gamma_select}{inner_tf_adj}, ',
+    '({weight_expr}) AS match_weight ',
+    'FROM ({gamma_sql}) AS gamma_pairs',
+    ') AS weighted_pairs ',
+    'WHERE 1.0 / (1.0 + EXP(-({log_prior_odds} + match_weight * {ln2}))) >= {threshold}'
+  )
 }

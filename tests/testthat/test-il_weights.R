@@ -23,7 +23,7 @@ test_that('il_weights() returns a tibble with expected columns', {
   w <- il_weights(model)
   expect_s3_class(w, 'tbl_df')
   expect_true('comparison' %in% names(w))
-  expect_true('level' %in% names(w))
+  expect_true('gamma_level' %in% names(w))
   expect_true('weight' %in% names(w))
 })
 

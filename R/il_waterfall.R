@@ -66,6 +66,7 @@
 #' il_waterfall(pairs, which = 1)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_waterfall <- function(pairs, which = 1L) {
+  pairs <- ensure_collected(pairs)
   validate_il_compared(pairs)
   model <- attr(pairs, 'model')
   if (is.null(model)) {
@@ -90,7 +91,7 @@ il_waterfall <- function(pairs, which = 1L) {
 
   has_tf <- any(tf_adjs != 0)
   contributions <- per_comparison_contribution(
-    gamma, mu, if (has_tf) tf_adjs else NULL
+    gamma, mu, comp_names, if (has_tf) tf_adjs else NULL
   )
   prior <- model$params$prior %||% 0.05
   prior_weight <- log2(prior / (1 - prior))

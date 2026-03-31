@@ -23,13 +23,13 @@ autoplot.il_model <- function(object, type = c('weights', 'parameters'), ...) {
     long <- rbind(
       tibble::tibble(
         comparison = wt$comparison,
-        level = wt$level,
+        gamma_level = wt$gamma_level,
         probability = wt$m_prob,
         parameter = 'm'
       ),
       tibble::tibble(
         comparison = wt$comparison,
-        level = wt$level,
+        gamma_level = wt$gamma_level,
         probability = wt$u_prob,
         parameter = 'u'
       )
@@ -44,7 +44,7 @@ autoplot.il_model <- function(object, type = c('weights', 'parameters'), ...) {
         )
       ) +
         ggplot2::geom_col(position = 'dodge') +
-        ggplot2::facet_wrap(~ .data[['level']]) +
+        ggplot2::facet_wrap(~ .data[['gamma_level']]) +
         ggplot2::labs(
           title = 'Model Parameters',
           x = 'Comparison',
@@ -61,7 +61,7 @@ autoplot.il_model <- function(object, type = c('weights', 'parameters'), ...) {
     ggplot2::aes(
       x = .data[['comparison']],
       y = .data[['weight']],
-      fill = .data[['level']]
+      fill = factor(.data[['gamma_level']])
     )
   ) +
     ggplot2::geom_col(position = 'dodge') +
@@ -69,7 +69,7 @@ autoplot.il_model <- function(object, type = c('weights', 'parameters'), ...) {
       title = 'Match Weights',
       x = 'Comparison',
       y = 'Weight (log2)',
-      fill = 'Level'
+      fill = 'Gamma Level'
     ) +
     ggplot2::theme_minimal()
 }
@@ -132,6 +132,11 @@ autoplot.il_compared <- function(object, which = NULL, ...) {
       y = 'Count'
     ) +
     ggplot2::theme_minimal()
+}
+
+#' @exportS3Method ggplot2::autoplot
+autoplot.il_compared_lazy <- function(object, which = NULL, ...) {
+  autoplot.il_compared(collect_il_compared_lazy(object), which = which, ...)
 }
 
 #' Plot Accuracy Metrics Across Thresholds
@@ -360,7 +365,7 @@ autoplot.il_training_history <- function(object, ...) {
       x = .data[['iteration']],
       y = .data[['value']],
       colour = factor(.data[['session']]),
-      group = interaction(.data[['session']], .data[['level']])
+      group = interaction(.data[['session']], .data[['gamma_level']])
     )
   ) +
     ggplot2::geom_line(linewidth = 0.8) +

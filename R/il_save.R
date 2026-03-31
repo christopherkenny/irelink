@@ -242,6 +242,13 @@ il_load <- function(path) {
   params <- raw$params
   if (!is.null(params$comparisons)) {
     params$comparisons <- tibble::as_tibble(as.data.frame(params$comparisons))
+    # Migrate legacy level → gamma_level format
+    if ('level' %in% names(params$comparisons) && !'gamma_level' %in% names(params$comparisons)) {
+      params$comparisons <- migrate_params_to_gamma_level(params$comparisons)
+    }
+    if ('gamma_level' %in% names(params$comparisons)) {
+      params$comparisons$gamma_level <- as.integer(params$comparisons$gamma_level)
+    }
   }
   if (!is.null(params$prior) && length(params$prior) == 1L) {
     params$prior <- as.numeric(params$prior)

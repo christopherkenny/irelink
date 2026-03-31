@@ -11,7 +11,7 @@ il_weights(model)
 }
 \value{
 A tibble with columns \code{comparison}, \code{level}, \code{m_prob},
-\code{u_prob}, and \code{log2_bayes_factor}.
+\code{u_prob}, and \code{weight}.
 }
 \description{
 Returns a tidy tibble of comparison levels with their m probabilities,

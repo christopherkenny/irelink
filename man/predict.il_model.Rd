@@ -4,7 +4,13 @@
 \alias{predict.il_model}
 \title{Score Record Pairs from a Trained Model}
 \usage{
-\method{predict}{il_model}(object, threshold = 0.85, type = c("pairs", "weights"), ...)
+\method{predict}{il_model}(
+  object,
+  threshold = 0.85,
+  type = c("pairs", "weights"),
+  collect = TRUE,
+  ...
+)
 }
 \arguments{
 \item{object}{A trained \code{il_model} object.}
@@ -16,12 +22,22 @@ to \code{0.85}.}
 \item{type}{One of \code{"pairs"} (default) to return scored pairs, or
 \code{"weights"} to return match weights on a log-2 Bayes-factor scale.}
 
+\item{collect}{If \code{TRUE} (the default), scored pairs are collected
+into an in-memory tibble.
+If \code{FALSE}, scoring is performed entirely in-database and the
+result is a lightweight \code{il_compared_lazy} reference that
+\code{\link[=il_cluster]{il_cluster()}} can consume directly — avoiding the round-trip of
+collecting millions of rows into R and re-uploading them.
+Requires a DuckDB or PostgreSQL backend.}
+
 \item{...}{Additional arguments passed to the generic.}
 }
 \value{
-An \code{il_compared} tibble with one row per candidate pair,
-including columns for record IDs, match weight, match probability,
-and per-comparison gamma values.
+When \code{collect = TRUE}: an \code{il_compared} tibble with one row
+per candidate pair, including columns for record IDs, match weight,
+match probability, and per-comparison gamma values.
+When \code{collect = FALSE}: an \code{il_compared_lazy} object referencing the
+scored pairs table in the database.
 }
 \description{
 Generates and scores all candidate record pairs that pass the blocking

@@ -174,11 +174,11 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
   list(ids = ids, gamma_mat = gamma_mat)
 }
 
-#' Compute binary comparison level (gamma) for a pair of values
+#' Compute multi-level gamma for a pair of values
 #' @param val_l Left record values (vector).
 #' @param val_r Right record values (vector).
 #' @param comp_level An il_comparison_level object.
-#' @return Integer vector: 1 = match, 0 = non-match.
+#' @return Integer vector: 0 (else) through K (best match).
 #' @noRd
 compute_gamma <- function(val_l, val_r, comp_level) {
   method <- comp_level$method
@@ -189,19 +189,27 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     return(ifelse(both_present & val_l == val_r, 1L, 0L))
   }
 
+  # Multi-threshold: loop from most lenient to strictest, overwriting
+  # with higher gamma levels. Thresholds are stored strictest-first.
+  thresholds <- comp_level$thresholds
+
   if (method %in% c('levenshtein', 'damerau_levenshtein')) {
-    threshold <- comp_level$thresholds[1]
     dist <- rep(NA_real_, n)
     dist[both_present] <- stringdist::stringdist(
       as.character(val_l[both_present]),
       as.character(val_r[both_present]),
       method = 'lv'
     )
-    return(ifelse(both_present & !is.na(dist) & dist <= threshold, 1L, 0L))
+    gamma <- rep(0L, n)
+    nt <- length(thresholds)
+    for (i in rev(seq_along(thresholds))) {
+      level_code <- nt - i + 1L
+      gamma[both_present & !is.na(dist) & dist <= thresholds[i]] <- level_code
+    }
+    return(gamma)
   }
 
   if (method %in% c('jaro_winkler', 'jaro')) {
-    threshold <- comp_level$thresholds[1]
     p <- if (method == 'jaro_winkler') 0.1 else 0
     score <- rep(NA_real_, n)
     score[both_present] <- 1 - stringdist::stringdist(
@@ -209,11 +217,16 @@ compute_gamma <- function(val_l, val_r, comp_level) {
       as.character(val_r[both_present]),
       method = 'jw', p = p
     )
-    return(ifelse(both_present & !is.na(score) & score >= threshold, 1L, 0L))
+    gamma <- rep(0L, n)
+    nt <- length(thresholds)
+    for (i in rev(seq_along(thresholds))) {
+      level_code <- nt - i + 1L
+      gamma[both_present & !is.na(score) & score >= thresholds[i]] <- level_code
+    }
+    return(gamma)
   }
 
   if (method %in% c('jaccard', 'cosine')) {
-    threshold <- comp_level$thresholds[1]
     sd_method <- if (method == 'jaccard') 'jaccard' else 'cosine'
     score <- rep(NA_real_, n)
     score[both_present] <- 1 - stringdist::stringdist(
@@ -221,11 +234,16 @@ compute_gamma <- function(val_l, val_r, comp_level) {
       as.character(val_r[both_present]),
       method = sd_method, q = 2
     )
-    return(ifelse(both_present & !is.na(score) & score >= threshold, 1L, 0L))
+    gamma <- rep(0L, n)
+    nt <- length(thresholds)
+    for (i in rev(seq_along(thresholds))) {
+      level_code <- nt - i + 1L
+      gamma[both_present & !is.na(score) & score >= thresholds[i]] <- level_code
+    }
+    return(gamma)
   }
 
   if (method %in% c('numeric_diff', 'pct_diff')) {
-    threshold <- comp_level$thresholds[1]
     num_l <- suppressWarnings(as.numeric(val_l))
     num_r <- suppressWarnings(as.numeric(val_r))
     bp <- !is.na(num_l) & !is.na(num_r)
@@ -236,33 +254,53 @@ compute_gamma <- function(val_l, val_r, comp_level) {
       denom[denom == 0] <- NA_real_
       diff <- abs(num_l - num_r) / denom
     }
-    return(ifelse(bp & !is.na(diff) & diff <= threshold, 1L, 0L))
+    gamma <- rep(0L, n)
+    nt <- length(thresholds)
+    for (i in rev(seq_along(thresholds))) {
+      level_code <- nt - i + 1L
+      gamma[bp & !is.na(diff) & diff <= thresholds[i]] <- level_code
+    }
+    return(gamma)
   }
 
   if (method == 'date_diff') {
-    threshold_days <- comp_level$thresholds[1]
-    unit <- comp_level$units[1]
-    mult <- switch(unit,
-      'days' = 1,
-      'months' = 30,
-      'years' = 365,
-      1
-    )
-    days_thresh <- threshold_days * mult
     date_l <- suppressWarnings(as.Date(val_l))
     date_r <- suppressWarnings(as.Date(val_r))
     bp <- !is.na(date_l) & !is.na(date_r)
     diff <- abs(as.numeric(date_l - date_r))
-    return(ifelse(bp & !is.na(diff) & diff <= days_thresh, 1L, 0L))
+    gamma <- rep(0L, n)
+    nt <- length(thresholds)
+    for (i in rev(seq_along(thresholds))) {
+      unit <- comp_level$units[i]
+      mult <- switch(unit,
+        'days' = 1,
+        'months' = 30,
+        'years' = 365,
+        1
+      )
+      days_thresh <- thresholds[i] * mult
+      level_code <- nt - i + 1L
+      gamma[bp & !is.na(diff) & diff <= days_thresh] <- level_code
+    }
+    return(gamma)
   }
 
   if (method == 'levels') {
-    # Use the first non-null, non-else level for matching
-    for (sublevel in comp_level$levels) {
-      if (!isTRUE(sublevel$is_null_level) && !isTRUE(sublevel$is_else_level)) {
-        return(compute_gamma(val_l, val_r, sublevel))
-      }
+    # Check sublevels from best to worst (skip null/else)
+    sublevels <- Filter(function(l) {
+      !isTRUE(l$is_null_level) && !isTRUE(l$is_else_level)
+    }, comp_level$levels)
+    nsub <- length(sublevels)
+    if (nsub == 0L) {
+      return(ifelse(both_present & val_l == val_r, 1L, 0L))
     }
+    gamma <- rep(0L, n)
+    for (i in rev(seq_along(sublevels))) {
+      sub_gamma <- compute_gamma(val_l, val_r, sublevels[[i]])
+      level_code <- nsub - i + 1L
+      gamma[sub_gamma > 0L] <- level_code
+    }
+    return(gamma)
   }
 
   # Fallback: exact match

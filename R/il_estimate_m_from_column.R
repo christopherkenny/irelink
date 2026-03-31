@@ -88,24 +88,54 @@ il_estimate_m_from_column <- function(model, label_col) {
     gamma_mat <- compute_gamma_matrix(pairs, comparisons)
   }
 
-  m_match <- colMeans(gamma_mat)
-  m_nonmatch <- 1 - m_match
+  # Compute per-level m frequencies from within-cluster pairs
+  n_pairs <- nrow(gamma_mat)
+  levels_per_comp <- vapply(comparisons, function(c) n_gamma_levels(c$method), integer(1))
 
   if (!is.null(model$params$comparisons)) {
     params <- model$params$comparisons
+    if ('level' %in% names(params) && !'gamma_level' %in% names(params)) {
+      params <- migrate_params_to_gamma_level(params)
+    }
     for (j in seq_along(comp_names)) {
       cn <- comp_names[j]
-      params$m[params$comparison == cn & params$level == 'match'] <- m_match[j]
-      params$m[params$comparison == cn & params$level == 'non_match'] <- m_nonmatch[j]
+      nl <- levels_per_comp[j]
+      for (k in seq(0L, nl - 1L)) {
+        m_k <- sum(gamma_mat[, j] == k) / n_pairs
+        m_k <- max(m_k, 0.001)
+        row_idx <- params$comparison == cn & params$gamma_level == k
+        if (any(row_idx)) {
+          params$m[row_idx] <- m_k
+        }
+      }
+    }
+    for (cn in comp_names) {
+      idx <- params$comparison == cn
+      m_vals <- params$m[idx]
+      params$m[idx] <- m_vals / sum(m_vals)
     }
     model$params$comparisons <- params
   } else {
-    model$params$comparisons <- tibble::tibble(
-      comparison = rep(comp_names, each = 2L),
-      level = rep(c('match', 'non_match'), times = length(comp_names)),
-      m = as.numeric(rbind(m_match, m_nonmatch)),
-      u = NA_real_
-    )
+    rows <- list()
+    for (j in seq_along(comp_names)) {
+      cn <- comp_names[j]
+      nl <- levels_per_comp[j]
+      for (k in seq(0L, nl - 1L)) {
+        m_k <- max(sum(gamma_mat[, j] == k) / n_pairs, 0.001)
+        rows <- c(rows, list(data.frame(
+          comparison = cn, gamma_level = k,
+          m = m_k, u = NA_real_,
+          stringsAsFactors = FALSE
+        )))
+      }
+    }
+    params_tbl <- tibble::as_tibble(do.call(rbind, rows))
+    for (cn in comp_names) {
+      idx <- params_tbl$comparison == cn
+      m_vals <- params_tbl$m[idx]
+      params_tbl$m[idx] <- m_vals / sum(m_vals)
+    }
+    model$params$comparisons <- params_tbl
   }
 
   model$trained <- TRUE

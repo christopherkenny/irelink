@@ -67,16 +67,17 @@ il_weights <- function(model) {
   if (is.null(params)) {
     cli::cli_abort('Model has no parameters yet. Run training verbs first.')
   }
-  m <- params$m
-  u <- params$u
-  # Guard against log(0) or division by zero
-  m <- pmax(m, 1e-10)
-  u <- pmax(u, 1e-10)
+  # Migrate legacy format if needed
+  if ('level' %in% names(params) && !'gamma_level' %in% names(params)) {
+    params <- migrate_params_to_gamma_level(params)
+  }
+  m <- pmax(params$m, 1e-10)
+  u <- pmax(params$u, 1e-10)
   match_weight <- log2(m / u)
 
   tibble::tibble(
     comparison = params$comparison,
-    level = params$level,
+    gamma_level = params$gamma_level,
     m_prob = params$m,
     u_prob = params$u,
     weight = match_weight

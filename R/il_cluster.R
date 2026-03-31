@@ -71,6 +71,12 @@ il_cluster <- function(pairs, threshold = NULL,
                        method = c('connected', 'best_link')) {
   method <- match.arg(method)
 
+  # Lazy path: pairs are still in the database
+
+  if (inherits(pairs, 'il_compared_lazy')) {
+    return(cluster_lazy(pairs, threshold, method))
+  }
+
   if (nrow(pairs) == 0L) {
     return(tibble::tibble(unique_id = character(0), cluster_id = character(0)))
   }
@@ -198,4 +204,63 @@ best_link_filter <- function(pairs) {
   }, logical(1))
 
   pairs[keep, , drop = FALSE]
+}
+
+#' Cluster directly from a lazy prediction table (no round-trip)
+#' @noRd
+cluster_lazy <- function(pairs, threshold, method) {
+  con <- pairs$con
+  predicted_tbl <- pairs$predicted_tbl
+
+  # Create edges table directly from the predicted table
+  edges_tbl <- cc_tbl('edges')
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
+
+  threshold_where <- ''
+  if (!is.null(threshold)) {
+    threshold_where <- glue::glue(' WHERE match_probability >= {threshold}')
+  }
+
+  DBI::dbExecute(con, glue::glue(
+    'CREATE TABLE {edges_tbl} AS ',
+    'SELECT unique_id_l, unique_id_r, match_probability ',
+    'FROM {predicted_tbl}{threshold_where}'
+  ))
+
+  if (method == 'best_link') {
+    filtered_tbl <- sql_best_link_filter(con, edges_tbl)
+    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
+    DBI::dbExecute(con, glue::glue(
+      'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
+    ))
+  }
+
+  result <- solve_cc_sql(con, edges_tbl)
+
+  # Collect all unique IDs from the predicted table for isolated-node detection
+  all_ids <- DBI::dbGetQuery(con, glue::glue(
+    'SELECT DISTINCT id FROM (',
+    'SELECT unique_id_l AS id FROM {predicted_tbl} ',
+    'UNION ',
+    'SELECT unique_id_r AS id FROM {predicted_tbl}',
+    ') sub'
+  ))$id
+
+  in_result <- result$node_id
+  isolated <- setdiff(all_ids, in_result)
+
+  if (length(isolated) > 0L) {
+    iso_df <- tibble::tibble(
+      node_id = isolated,
+      cluster_id = paste0('cluster_', isolated)
+    )
+    result <- rbind(result, iso_df)
+  }
+
+  result$cluster_id <- paste0('cluster_', result$cluster_id)
+
+  tibble::tibble(
+    unique_id = result$node_id,
+    cluster_id = result$cluster_id
+  )
 }

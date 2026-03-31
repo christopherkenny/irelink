@@ -11,11 +11,20 @@
 #'   to `0.85`.
 #' @param type One of `"pairs"` (default) to return scored pairs, or
 #'   `"weights"` to return match weights on a log-2 Bayes-factor scale.
+#' @param collect If `TRUE` (the default), scored pairs are collected
+#'   into an in-memory tibble.
+#'   If `FALSE`, scoring is performed entirely in-database and the
+#'   result is a lightweight `il_compared_lazy` reference that
+#'   [il_cluster()] can consume directly — avoiding the round-trip of
+#'   collecting millions of rows into R and re-uploading them.
+#'   Requires a DuckDB or PostgreSQL backend.
 #' @param ... Additional arguments passed to the generic.
 #'
-#' @return An `il_compared` tibble with one row per candidate pair,
-#'   including columns for record IDs, match weight, match probability,
-#'   and per-comparison gamma values.
+#' @return When `collect = TRUE`: an `il_compared` tibble with one row
+#'   per candidate pair, including columns for record IDs, match weight,
+#'   match probability, and per-comparison gamma values.
+#'   When `collect = FALSE`: an `il_compared_lazy` object referencing the
+#'   scored pairs table in the database.
 #' @export
 #'
 #' @examples
@@ -70,12 +79,24 @@
 #' pairs <- predict(model, threshold = 0.5)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 predict.il_model <- function(object, threshold = 0.85,
-                             type = c('pairs', 'weights'), ...) {
+                             type = c('pairs', 'weights'),
+                             collect = TRUE, ...) {
   type <- match.arg(type)
   validate_il_model(object)
 
   if (!object$trained) {
     cli::cli_abort('Model must be trained before prediction. Use {.fn il_estimate_em} first.')
+  }
+
+  # Lazy path: push scoring entirely into SQL
+  if (!collect) {
+    dialect <- detect_dialect(object$con)
+    if (!dialect_has_fuzzy_sql(dialect)) {
+      cli::cli_abort(
+        '{.arg collect = FALSE} requires a DuckDB or PostgreSQL backend.'
+      )
+    }
+    return(predict_lazy(object, threshold))
   }
 
   comparisons <- object$spec$comparisons
@@ -135,4 +156,29 @@ predict.il_model <- function(object, threshold = 0.85,
   result <- result[result$match_probability >= threshold, , drop = FALSE]
   result <- tibble::as_tibble(result)
   new_il_compared(result, model = object)
+}
+
+#' SQL-side prediction (lazy path)
+#'
+#' Pushes gamma computation, scoring, TF adjustment, and threshold
+#' filtering entirely into SQL.  Returns an [il_compared_lazy] reference.
+#'
+#' @param model A trained il_model.
+#' @param threshold Numeric match-probability threshold.
+#' @return An `il_compared_lazy` object.
+#' @noRd
+predict_lazy <- function(model, threshold) {
+  con <- model$con
+  predicted_tbl <- '__il_predicted'
+  scored_sql <- build_scored_query(model, threshold)
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {predicted_tbl}'))
+  DBI::dbExecute(con, glue::glue(
+    'CREATE TABLE {predicted_tbl} AS {scored_sql}'
+  ))
+  new_il_compared_lazy(
+    con = con,
+    predicted_tbl = predicted_tbl,
+    model = model,
+    threshold = threshold
+  )
 }

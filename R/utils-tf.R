@@ -105,14 +105,14 @@ sql_tf_select_exprs <- function(tf_cols) {
 #' Compute TF adjustment vector for match weights
 #'
 #' For each pair, adds `log2(u_exact / max(tf_l, tf_r))` to the match weight
-#' when gamma = 1 and TF is enabled for that comparison. Following splink,
-#' this effectively replaces the global u-probability with the value-specific
-#' frequency.
+#' when gamma equals the highest level (exact match) and TF is enabled for
+#' that comparison. Following splink, this effectively replaces the global
+#' u-probability with the value-specific frequency.
 #'
 #' @param gamma_mat Integer matrix (n_pairs x n_comparisons).
 #' @param tf_data Data frame with `tf_<col>_l` and `tf_<col>_r` columns.
 #' @param comparisons List of comparison entries from the spec.
-#' @param mu List of m/u vectors from `extract_mu_vectors()`.
+#' @param mu List of m/u from `extract_mu_vectors()`.
 #' @return Numeric vector of TF adjustments (length = nrow(gamma_mat)).
 #' @noRd
 compute_tf_adjustment <- function(gamma_mat, tf_data, comparisons, mu) {
@@ -136,10 +136,12 @@ compute_tf_adjustment <- function(gamma_mat, tf_data, comparisons, mu) {
 
     # Use maximum of left/right TF values (following splink)
     tf_max <- pmax(tf_l, tf_r, na.rm = TRUE)
-    u_exact <- mu$u_match[j]
 
-    # Only adjust where gamma = 1 (exact match) and TF is available
-    mask <- gamma_mat[, j] == 1L & !is.na(tf_max) & tf_max > 0
+    # TF applies at the highest gamma level (exact match)
+    max_level <- n_gamma_levels(comp$method) - 1L
+    u_exact <- mu$u_levels[[col]][max_level + 1L]
+
+    mask <- gamma_mat[, j] == max_level & !is.na(tf_max) & tf_max > 0
     if (any(mask)) {
       adjustment[mask] <- adjustment[mask] +
         log2(pmax(u_exact, 1e-10) / tf_max[mask])
@@ -151,14 +153,14 @@ compute_tf_adjustment <- function(gamma_mat, tf_data, comparisons, mu) {
 
 #' Compute per-comparison TF adjustment for each pair
 #'
-#' Returns a matrix of per-comparison TF adjustments (same shape as
-#' gamma_mat), for storage in the result tibble and use by the waterfall.
+#' Returns a list of per-comparison TF adjustments for storage in the
+#' result tibble and use by the waterfall.
 #'
 #' @param gamma_mat Integer matrix (n_pairs x n_comparisons).
 #' @param tf_data Data frame with TF columns.
 #' @param comparisons List of comparison entries from the spec.
-#' @param mu List of m/u vectors from `extract_mu_vectors()`.
-#' @return A numeric matrix (n_pairs x n_tf_comparisons), or NULL if no TF.
+#' @param mu List of m/u from `extract_mu_vectors()`.
+#' @return A named list of numeric vectors (one per TF comparison), or NULL.
 #' @noRd
 compute_tf_adjustment_matrix <- function(gamma_mat, tf_data, comparisons, mu) {
   tf_cols <- tf_columns(comparisons)
@@ -181,8 +183,9 @@ compute_tf_adjustment_matrix <- function(gamma_mat, tf_data, comparisons, mu) {
 
     if (!is.null(tf_l) && !is.null(tf_r)) {
       tf_max <- pmax(tf_l, tf_r, na.rm = TRUE)
-      u_exact <- mu$u_match[j]
-      mask <- gamma_mat[, j] == 1L & !is.na(tf_max) & tf_max > 0
+      max_level <- n_gamma_levels(comp$method) - 1L
+      u_exact <- mu$u_levels[[col]][max_level + 1L]
+      mask <- gamma_mat[, j] == max_level & !is.na(tf_max) & tf_max > 0
       if (any(mask)) {
         adj[mask] <- log2(pmax(u_exact, 1e-10) / tf_max[mask])
       }

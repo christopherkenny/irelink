@@ -142,6 +142,34 @@ new_comparison_level <- function(method, ..., is_null_level = FALSE,
   )
 }
 
+#' Count the number of gamma levels a comparison produces
+#'
+#' Binary comparisons (cl_exact, single-threshold fuzzy) produce 2 levels.
+#' Multi-threshold comparisons produce `length(thresholds) + 1` levels.
+#' Composite comparisons (cl_levels) count non-null, non-else sublevels + 1.
+#'
+#' @param comp_method An il_comparison_level object (the `$method` element).
+#' @return Integer: the number of gamma levels (always >= 2).
+#' @noRd
+n_gamma_levels <- function(comp_method) {
+  method <- comp_method$method
+
+  if (method == 'exact') return(2L)
+
+  if (!is.null(comp_method$thresholds)) {
+    return(length(comp_method$thresholds) + 1L)
+  }
+
+  if (method == 'levels') {
+    n <- sum(vapply(comp_method$levels, function(l) {
+      !isTRUE(l$is_null_level) && !isTRUE(l$is_else_level)
+    }, logical(1)))
+    return(max(n + 1L, 2L))
+  }
+
+  2L
+}
+
 #' Prepend a class to a tibble
 #'
 #' Adds a custom S3 class in front of the existing class vector so that
@@ -156,4 +184,87 @@ new_comparison_level <- function(method, ..., is_null_level = FALSE,
 add_class <- function(x, cls) {
   class(x) <- c(cls, class(x))
   x
+}
+
+# --- Lazy compared object (DB-backed prediction) ----------------------------
+
+#' Construct an il_compared_lazy Object
+#'
+#' A lightweight reference to a scored-pairs table in the database.
+#' Avoids collecting millions of rows into R when the downstream consumer
+#' (e.g., [il_cluster()]) can operate directly in SQL.
+#'
+#' @param con A valid DBI connection.
+#' @param predicted_tbl Character table name in the database.
+#' @param model The `il_model` that produced the predictions.
+#' @param threshold Numeric threshold used during prediction.
+#' @param n_pairs Integer count of pairs in the table.
+#'
+#' @return An `il_compared_lazy` S3 object.
+#' @noRd
+new_il_compared_lazy <- function(con, predicted_tbl, model,
+                                 threshold = 0.85, n_pairs = NULL) {
+  if (is.null(n_pairs)) {
+    n_pairs <- DBI::dbGetQuery(
+      con, glue::glue('SELECT COUNT(*) AS n FROM {predicted_tbl}')
+    )$n
+  }
+  structure(
+    list(
+      con = con,
+      predicted_tbl = predicted_tbl,
+      model = model,
+      threshold = threshold,
+      n_pairs = as.integer(n_pairs)
+    ),
+    class = 'il_compared_lazy'
+  )
+}
+
+#' @export
+print.il_compared_lazy <- function(x, ...) {
+  cat(
+    sprintf(
+      '<il_compared_lazy> %s pairs in table %s (threshold = %s)\n',
+      format(x$n_pairs, big.mark = ','), x$predicted_tbl, x$threshold
+    )
+  )
+  invisible(x)
+}
+
+#' @export
+format.il_compared_lazy <- function(x, ...) {
+  sprintf(
+    '<il_compared_lazy> [%s pairs, tbl=%s]',
+    format(x$n_pairs, big.mark = ','), x$predicted_tbl
+  )
+}
+
+#' Collect a lazy compared object into an il_compared tibble
+#' @param x An `il_compared_lazy` object.
+#' @param ... Ignored.
+#' @return An `il_compared` tibble.
+#' @noRd
+collect_il_compared_lazy <- function(x, ...) {
+  result <- DBI::dbGetQuery(
+    x$con, glue::glue('SELECT * FROM {x$predicted_tbl}')
+  )
+  result <- tibble::as_tibble(result)
+  new_il_compared(result, model = x$model)
+}
+
+#' Materialise lazy or collected pairs into an il_compared tibble
+#'
+#' Internal helper.  If `pairs` is already an `il_compared` tibble,
+#' returns it unchanged.  If it is an `il_compared_lazy` reference,
+#' collects from the database.
+#'
+#' @param pairs An `il_compared` or `il_compared_lazy` object.
+#' @return An `il_compared` tibble.
+#' @noRd
+ensure_collected <- function(pairs) {
+  if (inherits(pairs, 'il_compared_lazy')) {
+    return(collect_il_compared_lazy(pairs))
+  }
+  pairs
 }
