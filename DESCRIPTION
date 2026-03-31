@@ -54,7 +54,6 @@ Imports:
     duckdb,
     ggplot2,
     glue,
-    igraph,
     jsonlite,
     rlang,
     stringdist,
@@ -62,6 +61,7 @@ Imports:
 Suggests:
     dbplyr,
     dplyr,
+    igraph,
     knitr,
     rmarkdown,
     RSQLite,

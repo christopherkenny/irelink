@@ -76,7 +76,6 @@ il_compare_records <- function(record_a, record_b, spec, con = NULL) {
 
   own_con <- is.null(con)
   if (own_con) {
-    rlang::check_installed('duckdb', reason = 'for default connection')
     con <- DBI::dbConnect(duckdb::duckdb())
     on.exit(DBI::dbDisconnect(con, shutdown = TRUE), add = TRUE)
   }

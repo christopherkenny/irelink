@@ -15,7 +15,6 @@
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_model <- function(object, type = c('weights', 'parameters'), ...) {
-  rlang::check_installed('ggplot2')
   type <- match.arg(type)
 
   if (type == 'parameters') {
@@ -90,7 +89,6 @@ autoplot.il_model <- function(object, type = c('weights', 'parameters'), ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_compared <- function(object, which = NULL, ...) {
-  rlang::check_installed('ggplot2')
   if (!is.null(which)) {
     wf <- il_waterfall(object, which = which)
     return(
@@ -150,7 +148,6 @@ autoplot.il_compared_lazy <- function(object, which = NULL, ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_accuracy <- function(object, ...) {
-  rlang::check_installed('ggplot2')
   long <- rbind(
     tibble::tibble(
       threshold = object$threshold,
@@ -197,7 +194,6 @@ autoplot.il_accuracy <- function(object, ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_roc <- function(object, ...) {
-  rlang::check_installed('ggplot2')
   object <- object[order(object$fpr, -object$tpr), ]
   ggplot2::ggplot(
     object,
@@ -233,7 +229,6 @@ autoplot.il_roc <- function(object, ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_precision_recall <- function(object, ...) {
-  rlang::check_installed('ggplot2')
   object <- object[order(object$recall, -object$precision), ]
   ggplot2::ggplot(
     object,
@@ -265,7 +260,6 @@ autoplot.il_precision_recall <- function(object, ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_unlinkables <- function(object, ...) {
-  rlang::check_installed('ggplot2')
   ggplot2::ggplot(
     object,
     ggplot2::aes(
@@ -297,7 +291,6 @@ autoplot.il_unlinkables <- function(object, ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_count_pairs <- function(object, ...) {
-  rlang::check_installed('ggplot2')
   ggplot2::ggplot(
     object,
     ggplot2::aes(
@@ -326,7 +319,6 @@ autoplot.il_count_pairs <- function(object, ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_profile <- function(object, ...) {
-  rlang::check_installed('ggplot2')
   object$facet_value <- paste(object$column, object$value, sep = '___')
   ggplot2::ggplot(
     object,
@@ -358,7 +350,6 @@ autoplot.il_profile <- function(object, ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_training_history <- function(object, ...) {
-  rlang::check_installed('ggplot2')
   ggplot2::ggplot(
     object,
     ggplot2::aes(
@@ -391,7 +382,6 @@ autoplot.il_training_history <- function(object, ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_completeness <- function(object, ...) {
-  rlang::check_installed('ggplot2')
   ggplot2::ggplot(
     object,
     ggplot2::aes(
