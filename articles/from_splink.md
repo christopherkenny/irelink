@@ -82,7 +82,7 @@ that return a pre-configured set of levels.
 |----------------------------------------------------------------|-----------------------------------------------|
 | `linker.visualisations.match_weights_chart()`                  | `il_weights(model)`                           |
 | `linker.visualisations.parameter_estimate_comparisons_chart()` | `il_parameters(model)`                        |
-| `linker.visualisations.waterfall_chart(...)`                   | `il_waterfall(model, ...)`                    |
+| `linker.visualisations.waterfall_chart(...)`                   | `il_waterfall(pairs, ...)`                    |
 | `linker.misc.query_comparison_details(...)`                    | `il_compare_records(record_a, record_b, ...)` |
 | `linker.training.prediction_errors_from_labels_column(...)`    | `il_errors(model, ...)`                       |
 | `linker.evaluation.unlinkables_chart()`                        | `il_unlinkables(model)`                       |
@@ -108,7 +108,7 @@ that return a pre-configured set of levels.
 | splink (Python)                       | irelink (R)            |
 |---------------------------------------|------------------------|
 | `linker.misc.save_model_to_json(...)` | `il_save(model, path)` |
-| `load_model_from_json(...)`           | `il_load(path, con)`   |
+| `load_model_from_json(...)`           | `il_load(path)`        |
 | *no direct equivalent*                | `il_cleanup(model)`    |
 
 ## Blocking rules
