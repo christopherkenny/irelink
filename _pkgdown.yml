@@ -87,6 +87,7 @@ reference:
     desc: "Assess model quality against labelled data."
     contents:
       - il_accuracy
+      - labels_from_column
       - il_precision_recall
       - il_roc
       - il_errors
@@ -96,6 +97,13 @@ reference:
       - autoplot.il_roc
       - autoplot.il_precision_recall
       - autoplot.il_unlinkables
+
+  - title: "Blocking"
+    desc: "Suggest and evaluate blocking rules to reduce candidate pairs."
+    contents:
+      - il_suggest_blocking
+      - il_find_blocking_below
+      - block_from_labels
 
   - title: "Data Profiling"
     desc: "Explore and summarise input data before linkage."
