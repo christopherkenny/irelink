@@ -506,7 +506,7 @@ Identify if we are missing features for their default plots and implement them.
 Can you review all of the autoplot methods for this new record linking R package?
 Please fix any issues you encounter.
 
-## Cross-checking vignetyes (Codex GPT-5.4)
+## Cross-checking vignettes (Opus 4.6 high)
 
 Can you review all of the vignettes for this new record linking R package?
 Please fix any issues you encounter.
