@@ -59,6 +59,7 @@ an S3 method for <code><a href="https://rdrr.io/r/stats/predict.html" class="ext
 <span>  threshold <span class="op">=</span> <span class="fl">0.85</span>,</span>
 <span>  type <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"pairs"</span>, <span class="st">"weights"</span><span class="op">)</span>,</span>
 <span>  collect <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  include_fields <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -90,6 +91,13 @@ result is a lightweight <code>il_compared_lazy</code> reference that
 <code><a href="il_cluster.html">il_cluster()</a></code> can consume directly — avoiding the round-trip of
 collecting millions of rows into R and re-uploading them.
 Requires a DuckDB or PostgreSQL backend.</p></dd>
+
+
+<dt id="arg-include-fields">include_fields<a class="anchor" aria-label="anchor" href="#arg-include-fields"></a></dt>
+<dd><p>If <code>TRUE</code>, the original column values from both
+records in each pair are included in the output (suffixed <code>_l</code> and
+<code>_r</code>). Defaults to <code>FALSE</code> for performance. Only applies when
+<code>collect = TRUE</code>.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

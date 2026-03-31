@@ -14,6 +14,7 @@ predict(
   threshold = 0.85,
   type = c("pairs", "weights"),
   collect = TRUE,
+  include_fields = FALSE,
   ...
 )
 ```
@@ -43,6 +44,12 @@ predict(
   can consume directly — avoiding the round-trip of collecting millions
   of rows into R and re-uploading them. Requires a DuckDB or PostgreSQL
   backend.
+
+- include_fields:
+
+  If `TRUE`, the original column values from both records in each pair
+  are included in the output (suffixed `_l` and `_r`). Defaults to
+  `FALSE` for performance. Only applies when `collect = TRUE`.
 
 - ...:
 

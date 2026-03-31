@@ -53,7 +53,14 @@ call updates the model cumulatively.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">il_estimate_em</span><span class="op">(</span><span class="va">model</span>, <span class="va">blocking</span>, convergence <span class="op">=</span> <span class="fl">1e-05</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">il_estimate_em</span><span class="op">(</span></span>
+<span>  <span class="va">model</span>,</span>
+<span>  <span class="va">blocking</span>,</span>
+<span>  convergence <span class="op">=</span> <span class="fl">1e-05</span>,</span>
+<span>  fix_u <span class="op">=</span> <span class="cn">TRUE</span>,</span>
+<span>  fix_m <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  <span class="va">...</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -70,8 +77,19 @@ call updates the model cumulatively.</p>
 
 <dt id="arg-convergence">convergence<a class="anchor" aria-label="anchor" href="#arg-convergence"></a></dt>
 <dd><p>A numeric convergence tolerance. The EM loop stops
-when the largest change in any m parameter is below this value.
+when the largest change in any updated parameter is below this value.
 Defaults to <code>1e-5</code>.</p></dd>
+
+
+<dt id="arg-fix-u">fix_u<a class="anchor" aria-label="anchor" href="#arg-fix-u"></a></dt>
+<dd><p>Logical. If <code>TRUE</code> (the default), hold u parameters fixed
+during EM — only m is updated. Set to <code>FALSE</code> to also estimate u.</p></dd>
+
+
+<dt id="arg-fix-m">fix_m<a class="anchor" aria-label="anchor" href="#arg-fix-m"></a></dt>
+<dd><p>Logical. If <code>TRUE</code>, hold m parameters fixed during EM.
+Defaults to <code>FALSE</code>. At least one of <code>fix_u</code> and <code>fix_m</code> must be
+<code>FALSE</code>, otherwise the algorithm cannot learn anything.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

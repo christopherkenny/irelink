@@ -8,7 +8,7 @@ labelled pairs. Designed for use with
 ## Usage
 
 ``` r
-il_roc(model, labels)
+il_roc(model, labels = NULL, labels_col = NULL)
 ```
 
 ## Arguments
@@ -20,7 +20,12 @@ il_roc(model, labels)
 - labels:
 
   A data frame of labelled pairs with a logical or integer match
-  indicator.
+  indicator. Required unless `labels_col` is provided.
+
+- labels_col:
+
+  Optional string naming a column in the original data containing
+  ground-truth cluster/entity IDs.
 
 ## Value
 

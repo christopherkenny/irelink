@@ -50,7 +50,7 @@ thresholds. Requires labelled pairs.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">il_accuracy</span><span class="op">(</span><span class="va">model</span>, <span class="va">labels</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">il_accuracy</span><span class="op">(</span><span class="va">model</span>, labels <span class="op">=</span> <span class="cn">NULL</span>, labels_col <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -63,7 +63,13 @@ thresholds. Requires labelled pairs.</p>
 
 <dt id="arg-labels">labels<a class="anchor" aria-label="anchor" href="#arg-labels"></a></dt>
 <dd><p>A data frame of labelled pairs with a logical or integer
-match indicator.</p></dd>
+match indicator. Required unless <code>labels_col</code> is provided.</p></dd>
+
+
+<dt id="arg-labels-col">labels_col<a class="anchor" aria-label="anchor" href="#arg-labels-col"></a></dt>
+<dd><p>Optional string naming a column in the original data
+containing ground-truth cluster/entity IDs. When provided, pairwise
+labels are derived automatically via <code><a href="labels_from_column.html">labels_from_column()</a></code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

@@ -141,6 +141,8 @@ Assess model quality against labelled data.
 
 - [`il_accuracy()`](http://christophertkenny.com/irelink/reference/il_accuracy.md)
   : Accuracy Metrics Across Thresholds
+- [`labels_from_column()`](http://christophertkenny.com/irelink/reference/labels_from_column.md)
+  : Derive Pairwise Labels from a Ground-Truth Column
 - [`il_precision_recall()`](http://christophertkenny.com/irelink/reference/il_precision_recall.md)
   : Compute Precision-Recall Curve Data
 - [`il_roc()`](http://christophertkenny.com/irelink/reference/il_roc.md)
@@ -159,6 +161,17 @@ Assess model quality against labelled data.
   : Plot Precision–Recall Curve
 - [`autoplot(`*`<il_unlinkables>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_unlinkables.md)
   : Plot Unlinkables Curve
+
+## Blocking
+
+Suggest and evaluate blocking rules to reduce candidate pairs.
+
+- [`il_suggest_blocking()`](http://christophertkenny.com/irelink/reference/il_suggest_blocking.md)
+  : Suggest Blocking Rules
+- [`il_find_blocking_below()`](http://christophertkenny.com/irelink/reference/il_find_blocking_below.md)
+  : Find Blocking Rules Below a Pair-Count Threshold
+- [`block_from_labels()`](http://christophertkenny.com/irelink/reference/block_from_labels.md)
+  : Derive Blocking Rules from Labelled Pairs
 
 ## Data Profiling
 

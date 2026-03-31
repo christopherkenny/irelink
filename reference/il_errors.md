@@ -7,7 +7,7 @@ for understanding which record pairs the model gets wrong.
 ## Usage
 
 ``` r
-il_errors(model, labels, threshold = 0.85)
+il_errors(model, labels = NULL, threshold = 0.85, labels_col = NULL)
 ```
 
 ## Arguments
@@ -19,12 +19,17 @@ il_errors(model, labels, threshold = 0.85)
 - labels:
 
   A data frame of labelled pairs with a logical or integer match
-  indicator.
+  indicator. Required unless `labels_col` is provided.
 
 - threshold:
 
   A numeric value between 0 and 1 for classifying pairs as matches.
   Defaults to `0.85`.
+
+- labels_col:
+
+  Optional string naming a column in the original data containing
+  ground-truth cluster/entity IDs.
 
 ## Value
 

@@ -7,7 +7,7 @@ thresholds. Requires labelled pairs.
 ## Usage
 
 ``` r
-il_accuracy(model, labels)
+il_accuracy(model, labels = NULL, labels_col = NULL)
 ```
 
 ## Arguments
@@ -19,7 +19,14 @@ il_accuracy(model, labels)
 - labels:
 
   A data frame of labelled pairs with a logical or integer match
-  indicator.
+  indicator. Required unless `labels_col` is provided.
+
+- labels_col:
+
+  Optional string naming a column in the original data containing
+  ground-truth cluster/entity IDs. When provided, pairwise labels are
+  derived automatically via
+  [`labels_from_column()`](http://christophertkenny.com/irelink/reference/labels_from_column.md).
 
 ## Value
 

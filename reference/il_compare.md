@@ -9,7 +9,7 @@ layers.
 ## Usage
 
 ``` r
-il_compare(spec, col, method, ...)
+il_compare(spec, col, method, ..., transform = NULL)
 ```
 
 ## Arguments
@@ -35,6 +35,14 @@ il_compare(spec, col, method, ...)
 
   Reserved for future use.
 
+- transform:
+
+  An optional transformation function applied to both left and right
+  column values *before* comparison. Common choices include `tolower`,
+  `toupper`, and `trimws`, which are automatically translated to SQL
+  when a database backend is available. Custom functions work on the
+  R-side path only.
+
 ## Value
 
 An updated `il_spec` (a new copy; the input is not modified).
@@ -55,7 +63,7 @@ spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_compare(dob, cl_date_diff(days(30), days(365)))
 
-# Target multiple columns with the same method
+# Apply a transform before comparing
 spec <- il_spec() |>
-  il_compare(c(first_name, last_name), cl_jaro_winkler(0.9, 0.7))
+  il_compare(first_name, cl_jaro_winkler(0.9, 0.7), transform = tolower)
 ```

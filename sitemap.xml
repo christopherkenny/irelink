@@ -20,6 +20,7 @@
 <url><loc>http://christophertkenny.com/irelink/reference/autoplot.il_roc.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/autoplot.il_training_history.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/autoplot.il_unlinkables.html</loc></url>
+<url><loc>http://christophertkenny.com/irelink/reference/block_from_labels.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/block_on.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/cl_and.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/cl_array_intersect.html</loc></url>
@@ -67,6 +68,7 @@
 <url><loc>http://christophertkenny.com/irelink/reference/il_estimate_m_from_labels.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_estimate_prior.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_estimate_u.html</loc></url>
+<url><loc>http://christophertkenny.com/irelink/reference/il_find_blocking_below.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_find_matches.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_graph_metrics.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_largest_blocks.html</loc></url>
@@ -79,6 +81,7 @@
 <url><loc>http://christophertkenny.com/irelink/reference/il_save.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_spec.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_string_similarity.html</loc></url>
+<url><loc>http://christophertkenny.com/irelink/reference/il_suggest_blocking.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_training_history.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_unlinkables.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_waterfall.html</loc></url>
@@ -88,6 +91,7 @@
 <url><loc>http://christophertkenny.com/irelink/reference/is_il_model.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/is_il_spec.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/km.html</loc></url>
+<url><loc>http://christophertkenny.com/irelink/reference/labels_from_column.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/mi.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/months.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/predict.il_model.html</loc></url>

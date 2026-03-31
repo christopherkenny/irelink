@@ -8,7 +8,14 @@ updates the model cumulatively.
 ## Usage
 
 ``` r
-il_estimate_em(model, blocking, convergence = 1e-05, ...)
+il_estimate_em(
+  model,
+  blocking,
+  convergence = 1e-05,
+  fix_u = TRUE,
+  fix_m = FALSE,
+  ...
+)
 ```
 
 ## Arguments
@@ -25,7 +32,19 @@ il_estimate_em(model, blocking, convergence = 1e-05, ...)
 - convergence:
 
   A numeric convergence tolerance. The EM loop stops when the largest
-  change in any m parameter is below this value. Defaults to `1e-5`.
+  change in any updated parameter is below this value. Defaults to
+  `1e-5`.
+
+- fix_u:
+
+  Logical. If `TRUE` (the default), hold u parameters fixed during EM —
+  only m is updated. Set to `FALSE` to also estimate u.
+
+- fix_m:
+
+  Logical. If `TRUE`, hold m parameters fixed during EM. Defaults to
+  `FALSE`. At least one of `fix_u` and `fix_m` must be `FALSE`,
+  otherwise the algorithm cannot learn anything.
 
 - ...:
 
