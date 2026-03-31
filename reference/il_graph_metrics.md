@@ -97,10 +97,10 @@ metrics$clusters
 #> # A tibble: 5 × 4
 #>   cluster_id n_nodes n_edges density
 #>   <chr>        <int>   <int>   <dbl>
-#> 1 cluster_10       3       3       1
-#> 2 cluster_15       3       3       1
-#> 3 cluster_1        3       3       1
-#> 4 cluster_17       3       3       1
+#> 1 cluster_1        3       3       1
+#> 2 cluster_17       3       3       1
+#> 3 cluster_10       3       3       1
+#> 4 cluster_15       3       3       1
 #> 5 cluster_13       3       3       1
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
