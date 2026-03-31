@@ -181,15 +181,17 @@ generate the training pairs:</p>
 <p>You can inspect the learned parameters at any time:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_weights.html">il_weights</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 5</span></span></span>
-<span><span class="co">#&gt;   comparison level     m_prob u_prob weight</span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> first_name match     0.876  0.105    3.06</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> first_name non_match 0.124  0.895   -<span style="color: #BB0000;">2.85</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> surname    match     0.967  0.142    2.77</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> surname    non_match 0.032<span style="text-decoration: underline;">8</span> 0.858   -<span style="color: #BB0000;">4.71</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> dob        match     0.821  0.078<span style="text-decoration: underline;">9</span>   3.38</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> dob        non_match 0.179  0.921   -<span style="color: #BB0000;">2.36</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 8 × 5</span></span></span>
+<span><span class="co">#&gt;   comparison gamma_level m_prob u_prob weight</span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> first_name           0 0.010<span style="text-decoration: underline;">4</span> 0.832   -<span style="color: #BB0000;">6.32</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> first_name           1 0.244  0.063<span style="text-decoration: underline;">2</span>   1.95</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> first_name           2 0.746  0.105    2.82</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> surname              0 0.010<span style="text-decoration: underline;">3</span> 0.821   -<span style="color: #BB0000;">6.31</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> surname              1 0.010<span style="text-decoration: underline;">3</span> 0.036<span style="text-decoration: underline;">8</span>  -<span style="color: #BB0000;">1.83</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> surname              2 0.979  0.142    2.78</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span> dob                  0 0.090<span style="text-decoration: underline;">8</span> 0.921   -<span style="color: #BB0000;">3.34</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">8</span> dob                  1 0.909  0.078<span style="text-decoration: underline;">9</span>   3.53</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="step-4-predict">Step 4: Predict<a class="anchor" aria-label="anchor" href="#step-4-predict"></a>
@@ -202,12 +204,12 @@ above a match-weight threshold:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
 <span><span class="co">#&gt;   unique_id_l unique_id_r match_weight match_probability gamma_first_name</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           1          11         9.20             0.969                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           2          11         9.20             0.969                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           7          17         9.20             0.969                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           5          15         9.20             0.969                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           6          15         9.20             0.969                1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           1           2         9.20             0.969                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           7          17         9.13             0.967                2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           2          11         9.13             0.967                2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           6          15         9.13             0.967                2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           5          15         9.13             0.967                2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           3           4         9.13             0.967                2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           1           2         9.13             0.967                2</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: gamma_surname &lt;int&gt;, gamma_dob &lt;int&gt;</span></span></span></code></pre></div>
 <p>Each row is a candidate pair with columns for the left and right
 record identifiers, the per-comparison gamma values, and the overall
@@ -224,12 +226,12 @@ clusters using connected-components analysis:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 1         cluster_1 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 2         cluster_1 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 7         cluster_17</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 4         cluster_13</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 9         cluster_19</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 11        cluster_1</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 6         cluster_15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 5         cluster_15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 3         cluster_13</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 17        cluster_17</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 15        cluster_15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 7         cluster_17</span></span></code></pre></div>
 <p>Each record is assigned a <code>cluster_id</code>. Records sharing
 the same cluster are considered to be the same entity.</p>
 </div>

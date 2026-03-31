@@ -87,7 +87,7 @@ il_accuracy(model, labels = labels)
 #>   threshold    tp    fp    fn    tn precision recall    f1
 #>       <dbl> <int> <int> <int> <int>     <dbl>  <dbl> <dbl>
 #> 1     0         1     1     0     0       0.5      1 0.667
-#> 2     0.969     1     1     0     0       0.5      1 0.667
+#> 2     0.967     1     1     0     0       0.5      1 0.667
 #> 3     1         0     0     1     1       1        0 0    
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

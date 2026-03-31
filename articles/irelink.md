@@ -123,15 +123,17 @@ You can inspect the learned parameters at any time:
 
 ``` r
 il_weights(model)
-#> # A tibble: 6 × 5
-#>   comparison level     m_prob u_prob weight
-#>   <chr>      <chr>      <dbl>  <dbl>  <dbl>
-#> 1 first_name match     0.876  0.105    3.06
-#> 2 first_name non_match 0.124  0.895   -2.85
-#> 3 surname    match     0.967  0.142    2.77
-#> 4 surname    non_match 0.0328 0.858   -4.71
-#> 5 dob        match     0.821  0.0789   3.38
-#> 6 dob        non_match 0.179  0.921   -2.36
+#> # A tibble: 8 × 5
+#>   comparison gamma_level m_prob u_prob weight
+#>   <chr>            <int>  <dbl>  <dbl>  <dbl>
+#> 1 first_name           0 0.0104 0.832   -6.32
+#> 2 first_name           1 0.244  0.0632   1.95
+#> 3 first_name           2 0.746  0.105    2.82
+#> 4 surname              0 0.0103 0.821   -6.31
+#> 5 surname              1 0.0103 0.0368  -1.83
+#> 6 surname              2 0.979  0.142    2.78
+#> 7 dob                  0 0.0908 0.921   -3.34
+#> 8 dob                  1 0.909  0.0789   3.53
 ```
 
 ## Step 4: Predict
@@ -145,12 +147,12 @@ head(pairs)
 #> # A tibble: 6 × 7
 #>   unique_id_l unique_id_r match_weight match_probability gamma_first_name
 #>         <int>       <int>        <dbl>             <dbl>            <int>
-#> 1           1          11         9.20             0.969                1
-#> 2           2          11         9.20             0.969                1
-#> 3           7          17         9.20             0.969                1
-#> 4           5          15         9.20             0.969                1
-#> 5           6          15         9.20             0.969                1
-#> 6           1           2         9.20             0.969                1
+#> 1           7          17         9.13             0.967                2
+#> 2           2          11         9.13             0.967                2
+#> 3           6          15         9.13             0.967                2
+#> 4           5          15         9.13             0.967                2
+#> 5           3           4         9.13             0.967                2
+#> 6           1           2         9.13             0.967                2
 #> # ℹ 2 more variables: gamma_surname <int>, gamma_dob <int>
 ```
 
@@ -170,12 +172,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 1         cluster_1 
-#> 2 2         cluster_1 
-#> 3 7         cluster_17
-#> 4 4         cluster_13
-#> 5 9         cluster_19
-#> 6 11        cluster_1
+#> 1 6         cluster_15
+#> 2 5         cluster_15
+#> 3 3         cluster_13
+#> 4 17        cluster_17
+#> 5 15        cluster_15
+#> 6 7         cluster_17
 ```
 
 Each record is assigned a `cluster_id`. Records sharing the same cluster

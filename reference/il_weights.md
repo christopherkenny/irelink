@@ -22,7 +22,7 @@ il_weights(model)
 ## Value
 
 A tibble with columns `comparison`, `level`, `m_prob`, `u_prob`, and
-`log2_bayes_factor`.
+`weight`.
 
 ## Examples
 
@@ -76,14 +76,16 @@ model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
 
 il_weights(model)
-#> # A tibble: 6 × 5
-#>   comparison level     m_prob u_prob weight
-#>   <chr>      <chr>      <dbl>  <dbl>  <dbl>
-#> 1 first_name match     0.876  0.105    3.06
-#> 2 first_name non_match 0.124  0.895   -2.85
-#> 3 surname    match     0.967  0.142    2.77
-#> 4 surname    non_match 0.0328 0.858   -4.71
-#> 5 dob        match     0.821  0.0789   3.38
-#> 6 dob        non_match 0.179  0.921   -2.36
+#> # A tibble: 8 × 5
+#>   comparison gamma_level m_prob u_prob weight
+#>   <chr>            <int>  <dbl>  <dbl>  <dbl>
+#> 1 first_name           0 0.0104 0.832   -6.32
+#> 2 first_name           1 0.244  0.0632   1.95
+#> 3 first_name           2 0.746  0.105    2.82
+#> 4 surname              0 0.0103 0.821   -6.31
+#> 5 surname              1 0.0103 0.0368  -1.83
+#> 6 surname              2 0.979  0.142    2.78
+#> 7 dob                  0 0.0908 0.921   -3.34
+#> 8 dob                  1 0.909  0.0789   3.53
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

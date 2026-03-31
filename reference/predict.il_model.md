@@ -9,7 +9,13 @@ S3 method for [`stats::predict()`](https://rdrr.io/r/stats/predict.html)
 
 ``` r
 # S3 method for class 'il_model'
-predict(object, threshold = 0.85, type = c("pairs", "weights"), ...)
+predict(
+  object,
+  threshold = 0.85,
+  type = c("pairs", "weights"),
+  collect = TRUE,
+  ...
+)
 ```
 
 ## Arguments
@@ -28,15 +34,27 @@ predict(object, threshold = 0.85, type = c("pairs", "weights"), ...)
   One of `"pairs"` (default) to return scored pairs, or `"weights"` to
   return match weights on a log-2 Bayes-factor scale.
 
+- collect:
+
+  If `TRUE` (the default), scored pairs are collected into an in-memory
+  tibble. If `FALSE`, scoring is performed entirely in-database and the
+  result is a lightweight `il_compared_lazy` reference that
+  [`il_cluster()`](http://christophertkenny.com/irelink/reference/il_cluster.md)
+  can consume directly — avoiding the round-trip of collecting millions
+  of rows into R and re-uploading them. Requires a DuckDB or PostgreSQL
+  backend.
+
 - ...:
 
   Additional arguments passed to the generic.
 
 ## Value
 
-An `il_compared` tibble with one row per candidate pair, including
-columns for record IDs, match weight, match probability, and
-per-comparison gamma values.
+When `collect = TRUE`: an `il_compared` tibble with one row per
+candidate pair, including columns for record IDs, match weight, match
+probability, and per-comparison gamma values. When `collect = FALSE`: an
+`il_compared_lazy` object referencing the scored pairs table in the
+database.
 
 ## Examples
 

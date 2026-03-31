@@ -168,17 +168,23 @@ autoplot(model, type = "parameters")
 
 ``` r
 il_weights(model)
-#> # A tibble: 8 × 5
-#>   comparison    level     m_prob  u_prob weight
-#>   <chr>         <chr>      <dbl>   <dbl>  <dbl>
-#> 1 given_name    match     0.604  0.00268   7.82
-#> 2 given_name    non_match 0.396  0.997    -1.33
-#> 3 surname       match     0.686  0.00325   7.72
-#> 4 surname       non_match 0.314  0.997    -1.66
-#> 5 date_of_birth match     0.923  0.00015  12.6 
-#> 6 date_of_birth non_match 0.0773 1.000    -3.69
-#> 7 postcode      match     0.869  0.00099   9.78
-#> 8 postcode      non_match 0.131  0.999    -2.93
+#> # A tibble: 14 × 5
+#>    comparison    gamma_level   m_prob  u_prob weight
+#>    <chr>               <int>    <dbl>   <dbl>  <dbl>
+#>  1 given_name              0 0.207    0.973   -2.23 
+#>  2 given_name              1 0.000999 0.0216  -4.44 
+#>  3 given_name              2 0.000999 0.00086  0.217
+#>  4 given_name              3 0.188    0.00143  7.04 
+#>  5 given_name              4 0.603    0.00315  7.58 
+#>  6 surname                 0 0.145    0.981   -2.76 
+#>  7 surname                 1 0.0150   0.0138   0.123
+#>  8 surname                 2 0.0149   0.0008   4.22 
+#>  9 surname                 3 0.151    0.0011   7.10 
+#> 10 surname                 4 0.674    0.00324  7.70 
+#> 11 date_of_birth           0 0.0830   1.000   -3.59 
+#> 12 date_of_birth           1 0.917    0.00019 12.2  
+#> 13 postcode                0 0.136    0.999   -2.87 
+#> 14 postcode                1 0.864    0.00103  9.71
 ```
 
 ## Predict and cluster
@@ -186,7 +192,7 @@ il_weights(model)
 ``` r
 predictions <- predict(model, threshold = 0.5)
 nrow(predictions)
-#> [1] 167
+#> [1] 160
 ```
 
 ``` r
@@ -203,12 +209,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 185       cluster_185
-#> 2 236       cluster_236
-#> 3 419       cluster_330
-#> 4 448       cluster_448
-#> 5 517       cluster_517
-#> 6 611       cluster_564
+#> 1 319       cluster_319
+#> 2 567       cluster_280
+#> 3 575       cluster_575
+#> 4 885       cluster_300
+#> 5 113       cluster_113
+#> 6 334       cluster_334
 ```
 
 ## Evaluate against ground truth

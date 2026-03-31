@@ -26,8 +26,9 @@ il_waterfall(pairs, which = 1L)
 
 ## Value
 
-A tibble with columns `step`, `order`, `contribution`, and `direction`
-(positive, negative, prior, or final).
+A tibble with columns `step`, `order`, `contribution`, `direction`,
+`start`, and `end`. The rows include the prior odds, one row per
+comparison contribution, and a final total.
 
 ## Examples
 
@@ -86,9 +87,9 @@ il_waterfall(pairs, which = 1)
 #>   step       order contribution direction start   end
 #>   <chr>      <int>        <dbl> <chr>     <dbl> <dbl>
 #> 1 Prior          1        -4.25 prior      0    -4.25
-#> 2 first_name     2         3.06 positive  -4.25 -1.19
-#> 3 surname        3         2.77 positive  -1.19  1.58
-#> 4 dob            4         3.38 positive   1.58  4.95
-#> 5 Final          5         4.95 final      0     4.95
+#> 2 first_name     2         2.82 positive  -4.25 -1.42
+#> 3 surname        3         2.78 positive  -1.42  1.36
+#> 4 dob            4         3.53 positive   1.36  4.89
+#> 5 Final          5         4.89 final      0     4.89
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

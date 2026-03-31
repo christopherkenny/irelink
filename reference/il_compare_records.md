@@ -88,6 +88,6 @@ il_compare_records(record_a, record_b, spec = spec, con = con)
 #> # A tibble: 1 × 3
 #>   gamma_first_name gamma_surname gamma_dob
 #>              <int>         <int>     <int>
-#> 1                1             1         1
+#> 1                2             2         1
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

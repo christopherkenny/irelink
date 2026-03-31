@@ -91,6 +91,6 @@ il_errors(model, labels = labels, threshold = 0.85)
 #> # A tibble: 1 × 6
 #>   unique_id_l unique_id_r match_weight match_probability true_label error_type  
 #>         <int>       <int>        <dbl>             <dbl> <lgl>      <chr>       
-#> 1           1           2         9.20             0.969 FALSE      false_posit…
+#> 1           1           2         9.13             0.967 FALSE      false_posit…
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

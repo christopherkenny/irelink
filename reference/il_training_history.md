@@ -20,7 +20,8 @@ il_training_history(model)
 
 ## Value
 
-A tibble with columns `iteration`, `comparison`, `level`, and `value`.
+A tibble with columns `session`, `iteration`, `comparison`, `level`, and
+`value`.
 
 ## Examples
 
@@ -74,19 +75,19 @@ model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
 
 il_training_history(model)
-#> # A tibble: 45 × 5
-#>    session iteration comparison level value
-#>      <int>     <int> <chr>      <chr> <dbl>
-#>  1       1         1 first_name match 0.881
-#>  2       1         1 surname    match 0.965
-#>  3       1         1 dob        match 0.865
-#>  4       1         2 first_name match 0.873
-#>  5       1         2 surname    match 0.966
-#>  6       1         2 dob        match 0.842
-#>  7       1         3 first_name match 0.872
-#>  8       1         3 surname    match 0.967
-#>  9       1         3 dob        match 0.831
-#> 10       1         4 first_name match 0.873
-#> # ℹ 35 more rows
+#> # A tibble: 136 × 5
+#>    session iteration comparison gamma_level  value
+#>      <int>     <int> <chr>            <int>  <dbl>
+#>  1       1         1 first_name           0 0.0111
+#>  2       1         1 first_name           1 0.203 
+#>  3       1         1 first_name           2 0.786 
+#>  4       1         1 surname              0 0.0107
+#>  5       1         1 surname              1 0.0107
+#>  6       1         1 surname              2 0.979 
+#>  7       1         1 dob                  0 0.107 
+#>  8       1         1 dob                  1 0.893 
+#>  9       1         2 first_name           0 0.0103
+#> 10       1         2 first_name           1 0.238 
+#> # ℹ 126 more rows
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

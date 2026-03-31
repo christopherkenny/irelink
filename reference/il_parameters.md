@@ -72,14 +72,16 @@ model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
 
 il_parameters(model)
-#> # A tibble: 6 × 4
-#>   comparison level          m      u
-#>   <chr>      <chr>      <dbl>  <dbl>
-#> 1 first_name match     0.876  0.105 
-#> 2 first_name non_match 0.124  0.895 
-#> 3 surname    match     0.967  0.142 
-#> 4 surname    non_match 0.0328 0.858 
-#> 5 dob        match     0.821  0.0789
-#> 6 dob        non_match 0.179  0.921 
+#> # A tibble: 8 × 4
+#>   comparison gamma_level      m      u
+#>   <chr>            <int>  <dbl>  <dbl>
+#> 1 first_name           0 0.0104 0.832 
+#> 2 first_name           1 0.244  0.0632
+#> 3 first_name           2 0.746  0.105 
+#> 4 surname              0 0.0103 0.821 
+#> 5 surname              1 0.0103 0.0368
+#> 6 surname              2 0.979  0.142 
+#> 7 dob                  0 0.0908 0.921 
+#> 8 dob                  1 0.909  0.0789
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

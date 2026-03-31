@@ -68,8 +68,9 @@ decompose. Defaults to <code>1L</code>.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble with columns <code>step</code>, <code>order</code>, <code>contribution</code>, and
-<code>direction</code> (positive, negative, prior, or final).</p>
+    <p>A tibble with columns <code>step</code>, <code>order</code>, <code>contribution</code>,
+<code>direction</code>, <code>start</code>, and <code>end</code>. The rows include the prior odds,
+one row per comparison contribution, and a final total.</p>
     </div>
 
     <div class="section level2">
@@ -128,10 +129,10 @@ decompose. Defaults to <code>1L</code>.</p></dd>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   step       order contribution direction start   end</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> Prior          1        -<span style="color: #BB0000;">4.25</span> prior      0    -<span style="color: #BB0000;">4.25</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> first_name     2         3.06 positive  -<span style="color: #BB0000;">4.25</span> -<span style="color: #BB0000;">1.19</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> surname        3         2.77 positive  -<span style="color: #BB0000;">1.19</span>  1.58</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> dob            4         3.38 positive   1.58  4.95</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> Final          5         4.95 final      0     4.95</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> first_name     2         2.82 positive  -<span style="color: #BB0000;">4.25</span> -<span style="color: #BB0000;">1.42</span></span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> surname        3         2.78 positive  -<span style="color: #BB0000;">1.42</span>  1.36</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> dob            4         3.53 positive   1.36  4.89</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> Final          5         4.89 final      0     4.89</span>
 <span class="r-in"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>

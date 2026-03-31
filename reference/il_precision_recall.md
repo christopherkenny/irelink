@@ -87,7 +87,7 @@ il_precision_recall(model, labels = labels)
 #>   threshold precision recall
 #>       <dbl>     <dbl>  <dbl>
 #> 1     0           0.5      1
-#> 2     0.969       0.5      1
+#> 2     0.967       0.5      1
 #> 3     1           1        0
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
