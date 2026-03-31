@@ -8,8 +8,13 @@
 #' @param model An `il_model` object (piped in).
 #' @param blocking A blocking rule created by [block_on()].
 #' @param convergence A numeric convergence tolerance. The EM loop stops
-#'   when the largest change in any m parameter is below this value.
+#'   when the largest change in any updated parameter is below this value.
 #'   Defaults to `1e-5`.
+#' @param fix_u Logical. If `TRUE` (the default), hold u parameters fixed
+#'   during EM — only m is updated. Set to `FALSE` to also estimate u.
+#' @param fix_m Logical. If `TRUE`, hold m parameters fixed during EM.
+#'   Defaults to `FALSE`. At least one of `fix_u` and `fix_m` must be
+#'   `FALSE`, otherwise the algorithm cannot learn anything.
 #' @param ... Reserved for future options.
 #'
 #' @return An updated `il_model` with trained m and u parameters.
@@ -65,8 +70,12 @@
 #'
 #' model <- il_estimate_em(model, block_on(surname))
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_estimate_em <- function(model, blocking, convergence = 1e-5, ...) {
+il_estimate_em <- function(model, blocking, convergence = 1e-5,
+                           fix_u = TRUE, fix_m = FALSE, ...) {
   validate_il_model(model)
+  if (fix_u && fix_m) {
+    cli::cli_abort('At least one of {.arg fix_u} and {.arg fix_m} must be {.code FALSE}.')
+  }
   result <- get_pairs_with_gammas(model, list(blocking))
   gamma_mat <- result$gamma_mat
 
@@ -147,21 +156,38 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5, ...) {
     weights <- exp(log_match - max_log) /
       (exp(log_match - max_log) + exp(log_nonmatch - max_log))
 
-    # M-step: update m per-level (u stays from estimate_u)
+    # M-step: update m and/or u per-level
     sum_w <- sum(weights)
+    sum_nw <- sum(1 - weights)
     old_m_list <- m_list
+    old_u_list <- u_list
 
-    for (j in seq_len(n_comp)) {
-      nl <- levels_per_comp[j]
-      raw <- numeric(nl)
-      for (k in seq(0L, nl - 1L)) {
-        mask <- gamma_mat[, j] == k
-        raw[k + 1L] <- (sum(weights[mask]) + 0.5 / nl) / (sum_w + 0.5)
+    if (!fix_m) {
+      for (j in seq_len(n_comp)) {
+        nl <- levels_per_comp[j]
+        raw <- numeric(nl)
+        for (k in seq(0L, nl - 1L)) {
+          mask <- gamma_mat[, j] == k
+          raw[k + 1L] <- (sum(weights[mask]) + 0.5 / nl) / (sum_w + 0.5)
+        }
+        raw <- pmax(raw, 0.001)
+        raw <- raw / sum(raw)
+        m_list[[j]] <- raw
       }
-      # Ensure probabilities sum to 1 and stay in bounds
-      raw <- pmax(raw, 0.001)
-      raw <- raw / sum(raw)
-      m_list[[j]] <- raw
+    }
+
+    if (!fix_u) {
+      for (j in seq_len(n_comp)) {
+        nl <- levels_per_comp[j]
+        raw <- numeric(nl)
+        for (k in seq(0L, nl - 1L)) {
+          mask <- gamma_mat[, j] == k
+          raw[k + 1L] <- (sum((1 - weights)[mask]) + 0.5 / nl) / (sum_nw + 0.5)
+        }
+        raw <- pmax(raw, 0.001)
+        raw <- raw / sum(raw)
+        u_list[[j]] <- raw
+      }
     }
 
     history[[iter]] <- tibble::tibble(
@@ -172,9 +198,18 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5, ...) {
       value = unlist(m_list)
     )
 
-    max_change <- max(vapply(seq_len(n_comp), function(j) {
-      max(abs(m_list[[j]] - old_m_list[[j]]))
-    }, numeric(1)))
+    changes <- numeric(0)
+    if (!fix_m) {
+      changes <- c(changes, vapply(seq_len(n_comp), function(j) {
+        max(abs(m_list[[j]] - old_m_list[[j]]))
+      }, numeric(1)))
+    }
+    if (!fix_u) {
+      changes <- c(changes, vapply(seq_len(n_comp), function(j) {
+        max(abs(u_list[[j]] - old_u_list[[j]]))
+      }, numeric(1)))
+    }
+    max_change <- max(changes)
     if (max_change < tol) break
   }
 

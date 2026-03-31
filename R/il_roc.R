@@ -6,7 +6,9 @@
 #'
 #' @param model A trained `il_model` object.
 #' @param labels A data frame of labelled pairs with a logical or integer
-#'   match indicator.
+#'   match indicator. Required unless `labels_col` is provided.
+#' @param labels_col Optional string naming a column in the original data
+#'   containing ground-truth cluster/entity IDs.
 #'
 #' @return A tibble with columns `threshold`, `fpr`, and `tpr`.
 #' @export
@@ -67,7 +69,8 @@
 #'
 #' il_roc(model, labels = labels)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_roc <- function(model, labels) {
+il_roc <- function(model, labels = NULL, labels_col = NULL) {
+  labels <- resolve_labels(model, labels, labels_col)
   acc <- il_accuracy(model, labels)
   tibble::tibble(
     threshold = acc$threshold,

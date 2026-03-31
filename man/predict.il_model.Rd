@@ -9,6 +9,7 @@
   threshold = 0.85,
   type = c("pairs", "weights"),
   collect = TRUE,
+  include_fields = FALSE,
   ...
 )
 }
@@ -29,6 +30,11 @@ result is a lightweight \code{il_compared_lazy} reference that
 \code{\link[=il_cluster]{il_cluster()}} can consume directly — avoiding the round-trip of
 collecting millions of rows into R and re-uploading them.
 Requires a DuckDB or PostgreSQL backend.}
+
+\item{include_fields}{If \code{TRUE}, the original column values from both
+records in each pair are included in the output (suffixed \verb{_l} and
+\verb{_r}). Defaults to \code{FALSE} for performance. Only applies when
+\code{collect = TRUE}.}
 
 \item{...}{Additional arguments passed to the generic.}
 }

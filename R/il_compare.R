@@ -14,6 +14,11 @@
 #'   compare. Accepts bare names, `c()`, and tidyselect helpers.
 #' @param method A comparison helper object created by a `cl_*()` function
 #'   such as [cl_exact()] or [cl_jaro_winkler()].
+#' @param transform An optional transformation function applied to both
+#'   left and right column values *before* comparison. Common choices
+#'   include `tolower`, `toupper`, and `trimws`, which are automatically
+#'   translated to SQL when a database backend is available. Custom
+#'   functions work on the R-side path only.
 #' @param ... Reserved for future use.
 #'
 #' @return An updated `il_spec` (a new copy; the input is not modified).
@@ -24,20 +29,26 @@
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_compare(dob, cl_date_diff(days(30), days(365)))
 #'
-#' # Target multiple columns with the same method
+#' # Apply a transform before comparing
 #' spec <- il_spec() |>
-#'   il_compare(c(first_name, last_name), cl_jaro_winkler(0.9, 0.7))
-il_compare <- function(spec, col, method, ...) {
+#'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7), transform = tolower)
+il_compare <- function(spec, col, method, ..., transform = NULL) {
   if (!inherits(spec, 'il_spec')) {
     cli::cli_abort(
       '{.arg spec} must be an {.cls il_spec} object, not {.obj_type_friendly {spec}}.',
       class = 'il_error_type'
     )
   }
+  if (!is.null(transform) && !is.function(transform)) {
+    cli::cli_abort(
+      '{.arg transform} must be a function or {.code NULL}, not {.obj_type_friendly {transform}}.',
+      class = 'il_error_type'
+    )
+  }
   col_expr <- rlang::enquo(col)
   columns <- extract_col_names(col_expr)
   for (column in columns) {
-    entry <- list(columns = column, method = method)
+    entry <- list(columns = column, method = method, transform = transform)
     spec$comparisons <- c(spec$comparisons, list(entry))
   }
   spec

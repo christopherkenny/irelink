@@ -4,13 +4,17 @@
 \alias{il_accuracy}
 \title{Accuracy Metrics Across Thresholds}
 \usage{
-il_accuracy(model, labels)
+il_accuracy(model, labels = NULL, labels_col = NULL)
 }
 \arguments{
 \item{model}{A trained \code{il_model} object.}
 
 \item{labels}{A data frame of labelled pairs with a logical or integer
-match indicator.}
+match indicator. Required unless \code{labels_col} is provided.}
+
+\item{labels_col}{Optional string naming a column in the original data
+containing ground-truth cluster/entity IDs. When provided, pairwise
+labels are derived automatically via \code{\link[=labels_from_column]{labels_from_column()}}.}
 }
 \value{
 A tibble with one row per threshold, containing columns

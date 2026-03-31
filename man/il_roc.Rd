@@ -4,13 +4,16 @@
 \alias{il_roc}
 \title{Compute ROC Curve Data}
 \usage{
-il_roc(model, labels)
+il_roc(model, labels = NULL, labels_col = NULL)
 }
 \arguments{
 \item{model}{A trained \code{il_model} object.}
 
 \item{labels}{A data frame of labelled pairs with a logical or integer
-match indicator.}
+match indicator. Required unless \code{labels_col} is provided.}
+
+\item{labels_col}{Optional string naming a column in the original data
+containing ground-truth cluster/entity IDs.}
 }
 \value{
 A tibble with columns \code{threshold}, \code{fpr}, and \code{tpr}.

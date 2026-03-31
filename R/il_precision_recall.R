@@ -6,7 +6,9 @@
 #'
 #' @param model A trained `il_model` object.
 #' @param labels A data frame of labelled pairs with a logical or integer
-#'   match indicator.
+#'   match indicator. Required unless `labels_col` is provided.
+#' @param labels_col Optional string naming a column in the original data
+#'   containing ground-truth cluster/entity IDs.
 #'
 #' @return A tibble with columns `threshold`, `precision`, and `recall`.
 #' @export
@@ -67,7 +69,8 @@
 #'
 #' il_precision_recall(model, labels = labels)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_precision_recall <- function(model, labels) {
+il_precision_recall <- function(model, labels = NULL, labels_col = NULL) {
+  labels <- resolve_labels(model, labels, labels_col)
   acc <- il_accuracy(model, labels)
   tibble::tibble(
     threshold = acc$threshold,

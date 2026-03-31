@@ -1,5 +1,92 @@
 # Shared helpers for evaluation functions (il_accuracy, il_errors, etc.).
 
+#' Derive Pairwise Labels from a Ground-Truth Column
+#'
+#' Given a model and a column name containing cluster or entity IDs,
+#' generates pairwise labels for all predicted pairs. Two records
+#' sharing the same value in `labels_col` are labelled as matches.
+#'
+#' This is a convenience wrapper: instead of manually building a labels
+#' data frame with `unique_id_l`, `unique_id_r`, and `is_match`, you
+#' supply the column name and let irelink derive everything.
+#'
+#' @param model A trained `il_model` object.
+#' @param labels_col A string naming the column in the original data that
+#'   contains the ground-truth cluster or entity identifier.
+#' @param threshold Match-probability threshold for selecting predicted
+#'   pairs. Defaults to `0` to include all candidate pairs.
+#'
+#' @return A data frame with columns `unique_id_l`, `unique_id_r`, and
+#'   `is_match` (integer 0/1).
+#' @export
+#'
+#' @examples
+#' \dontrun{
+#' labels <- labels_from_column(model, "cluster")
+#' il_accuracy(model, labels)
+#' }
+labels_from_column <- function(model, labels_col, threshold = 0) {
+  validate_il_model(model)
+  pairs <- predict(model, threshold = threshold)
+  resolve_labels_from_pairs(model, pairs, labels_col)
+}
+
+#' Resolve labels for already-predicted pairs
+#' @noRd
+resolve_labels_from_pairs <- function(model, pairs, labels_col) {
+  con <- model$con
+  tbl_l <- model$data$tbl_l
+  tbl_r <- model$data$tbl_r %||% tbl_l
+
+  id_l <- as.character(pairs$unique_id_l)
+  id_r <- as.character(pairs$unique_id_r)
+  all_ids <- unique(c(id_l, id_r))
+  id_list <- paste(DBI::dbQuoteString(con, all_ids), collapse = ', ')
+
+  # Fetch ground-truth column for all relevant IDs
+  sql_l <- glue::glue(
+    'SELECT unique_id, {labels_col} FROM {tbl_l} WHERE unique_id IN ({id_list})'
+  )
+  gt_l <- DBI::dbGetQuery(con, sql_l)
+  rownames(gt_l) <- as.character(gt_l$unique_id)
+
+  if (tbl_r == tbl_l) {
+    gt_r <- gt_l
+  } else {
+    sql_r <- glue::glue(
+      'SELECT unique_id, {labels_col} FROM {tbl_r} WHERE unique_id IN ({id_list})'
+    )
+    gt_r <- DBI::dbGetQuery(con, sql_r)
+    rownames(gt_r) <- as.character(gt_r$unique_id)
+  }
+
+  val_l <- gt_l[id_l, labels_col]
+  val_r <- gt_r[id_r, labels_col]
+  is_match <- as.integer(!is.na(val_l) & !is.na(val_r) & val_l == val_r)
+
+  data.frame(
+    unique_id_l = pairs$unique_id_l,
+    unique_id_r = pairs$unique_id_r,
+    is_match = is_match,
+    stringsAsFactors = FALSE
+  )
+}
+
+#' Resolve labels argument: use labels directly or derive from labels_col
+#' @noRd
+resolve_labels <- function(model, labels, labels_col) {
+  if (!is.null(labels_col)) {
+    if (!is.null(labels)) {
+      cli::cli_warn('Both {.arg labels} and {.arg labels_col} provided; using {.arg labels_col}.')
+    }
+    return(labels_from_column(model, labels_col))
+  }
+  if (is.null(labels)) {
+    cli::cli_abort('Either {.arg labels} or {.arg labels_col} must be provided.')
+  }
+  labels
+}
+
 #' Build canonical pair keys for direction-independent matching
 #'
 #' Ensures pair (A, B) and pair (B, A) produce the same key by placing the

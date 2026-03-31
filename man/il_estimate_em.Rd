@@ -4,7 +4,14 @@
 \alias{il_estimate_em}
 \title{Train Parameters via Expectation-Maximisation}
 \usage{
-il_estimate_em(model, blocking, convergence = 1e-05, ...)
+il_estimate_em(
+  model,
+  blocking,
+  convergence = 1e-05,
+  fix_u = TRUE,
+  fix_m = FALSE,
+  ...
+)
 }
 \arguments{
 \item{model}{An \code{il_model} object (piped in).}
@@ -12,8 +19,15 @@ il_estimate_em(model, blocking, convergence = 1e-05, ...)
 \item{blocking}{A blocking rule created by \code{\link[=block_on]{block_on()}}.}
 
 \item{convergence}{A numeric convergence tolerance. The EM loop stops
-when the largest change in any m parameter is below this value.
+when the largest change in any updated parameter is below this value.
 Defaults to \code{1e-5}.}
+
+\item{fix_u}{Logical. If \code{TRUE} (the default), hold u parameters fixed
+during EM — only m is updated. Set to \code{FALSE} to also estimate u.}
+
+\item{fix_m}{Logical. If \code{TRUE}, hold m parameters fixed during EM.
+Defaults to \code{FALSE}. At least one of \code{fix_u} and \code{fix_m} must be
+\code{FALSE}, otherwise the algorithm cannot learn anything.}
 
 \item{...}{Reserved for future options.}
 }

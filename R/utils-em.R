@@ -382,6 +382,11 @@ compute_gamma_matrix <- function(pairs, comparisons) {
     col <- comp$columns
     val_l <- pairs[[paste0('l_', col)]]
     val_r <- pairs[[paste0('r_', col)]]
+    # Apply transform if specified
+    if (!is.null(comp$transform)) {
+      val_l <- comp$transform(val_l)
+      val_r <- comp$transform(val_r)
+    }
     gamma_mat[, j] <- compute_gamma(val_l, val_r, comp$method)
   }
 

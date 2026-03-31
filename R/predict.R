@@ -18,6 +18,10 @@
 #'   [il_cluster()] can consume directly — avoiding the round-trip of
 #'   collecting millions of rows into R and re-uploading them.
 #'   Requires a DuckDB or PostgreSQL backend.
+#' @param include_fields If `TRUE`, the original column values from both
+#'   records in each pair are included in the output (suffixed `_l` and
+#'   `_r`). Defaults to `FALSE` for performance. Only applies when
+#'   `collect = TRUE`.
 #' @param ... Additional arguments passed to the generic.
 #'
 #' @return When `collect = TRUE`: an `il_compared` tibble with one row
@@ -80,7 +84,8 @@
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 predict.il_model <- function(object, threshold = 0.85,
                              type = c('pairs', 'weights'),
-                             collect = TRUE, ...) {
+                             collect = TRUE,
+                             include_fields = FALSE, ...) {
   type <- match.arg(type)
   validate_il_model(object)
 
@@ -155,6 +160,11 @@ predict.il_model <- function(object, threshold = 0.85,
 
   result <- result[result$match_probability >= threshold, , drop = FALSE]
   result <- tibble::as_tibble(result)
+
+  if (include_fields) {
+    result <- join_original_fields(result, object)
+  }
+
   new_il_compared(result, model = object)
 }
 
@@ -181,4 +191,60 @@ predict_lazy <- function(model, threshold) {
     model = model,
     threshold = threshold
   )
+}
+
+#' Join original field values into predicted pairs
+#'
+#' Fetches column values from the source tables for all IDs appearing
+#' in the result and merges them with `_l` / `_r` suffixes.
+#'
+#' @param result A tibble of predicted pairs (must have unique_id_l/r).
+#' @param model The il_model.
+#' @return The result tibble with additional field columns.
+#' @noRd
+join_original_fields <- function(result, model) {
+  if (nrow(result) == 0L) return(result)
+
+  con <- model$con
+  tbl_l <- model$data$tbl_l
+  tbl_r <- model$data$tbl_r %||% tbl_l
+
+  all_ids <- unique(c(
+    as.character(result$unique_id_l),
+    as.character(result$unique_id_r)
+  ))
+  id_list <- paste(DBI::dbQuoteString(con, all_ids), collapse = ', ')
+
+  # Get all columns from source table (except unique_id which we already have)
+  all_cols <- DBI::dbListFields(con, tbl_l)
+  field_cols <- setdiff(all_cols, 'unique_id')
+  if (length(field_cols) == 0L) return(result)
+
+  col_select <- paste(c('unique_id', field_cols), collapse = ', ')
+  sql_l <- glue::glue('SELECT {col_select} FROM {tbl_l} WHERE unique_id IN ({id_list})')
+  src_l <- DBI::dbGetQuery(con, sql_l)
+  rownames(src_l) <- as.character(src_l$unique_id)
+
+  if (tbl_r == tbl_l) {
+    src_r <- src_l
+  } else {
+    all_cols_r <- DBI::dbListFields(con, tbl_r)
+    field_cols_r <- setdiff(all_cols_r, 'unique_id')
+    col_select_r <- paste(c('unique_id', field_cols_r), collapse = ', ')
+    sql_r <- glue::glue('SELECT {col_select_r} FROM {tbl_r} WHERE unique_id IN ({id_list})')
+    src_r <- DBI::dbGetQuery(con, sql_r)
+    rownames(src_r) <- as.character(src_r$unique_id)
+  }
+
+  id_l <- as.character(result$unique_id_l)
+  id_r <- as.character(result$unique_id_r)
+  for (col in field_cols) {
+    result[[paste0(col, '_l')]] <- src_l[id_l, col]
+  }
+  r_cols <- if (tbl_r == tbl_l) field_cols else setdiff(DBI::dbListFields(con, tbl_r), 'unique_id')
+  for (col in r_cols) {
+    result[[paste0(col, '_r')]] <- src_r[id_r, col]
+  }
+
+  result
 }

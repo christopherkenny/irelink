@@ -4,16 +4,19 @@
 \alias{il_errors}
 \title{Identify Prediction Errors}
 \usage{
-il_errors(model, labels, threshold = 0.85)
+il_errors(model, labels = NULL, threshold = 0.85, labels_col = NULL)
 }
 \arguments{
 \item{model}{A trained \code{il_model} object.}
 
 \item{labels}{A data frame of labelled pairs with a logical or integer
-match indicator.}
+match indicator. Required unless \code{labels_col} is provided.}
 
 \item{threshold}{A numeric value between 0 and 1 for classifying pairs
 as matches. Defaults to \code{0.85}.}
+
+\item{labels_col}{Optional string naming a column in the original data
+containing ground-truth cluster/entity IDs.}
 }
 \value{
 A tibble of misclassified pairs with columns \code{id_l}, \code{id_r},

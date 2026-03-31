@@ -328,18 +328,18 @@ Supporting arbitrary SQL expressions (e.g.,
 
 ## Priority Summary
 
-| Priority | Item | Impact |
-|----------|------|--------|
-| **High** | Multi-level gammas (§1) | Linkage accuracy |
-| **High** | Lazy prediction pipeline (§2) | Memory and speed at scale |
-| **High** | CRAN readiness (§3) | Public release |
-| **Medium** | Blocking optimisation tools (§4) | Large-dataset usability |
-| **Medium** | Column transformers (§5) | Ergonomics |
-| **Medium** | Documentation and website (§8) | Discoverability |
-| **Medium** | CI/CD infrastructure (§9) | Reliability |
-| **Low** | Evaluation convenience (§6) | Ergonomics |
-| **Low** | EM flexibility (§7) | Advanced use |
-| **Low** | Future extensions (§10) | Completeness |
+| Priority | Item | Impact | Status |
+|----------|------|--------|--------|
+| **High** | Multi-level gammas (§1) | Linkage accuracy | ✅ Done |
+| **High** | Lazy prediction pipeline (§2) | Memory and speed at scale | ✅ Done |
+| **High** | CRAN readiness (§3) | Public release | Pending |
+| **Medium** | Blocking optimisation tools (§4) | Large-dataset usability | ✅ Done |
+| **Medium** | Column transformers (§5) | Ergonomics | ✅ Done |
+| **Medium** | Documentation and website (§8) | Discoverability | Pending |
+| **Medium** | CI/CD infrastructure (§9) | Reliability | Pending |
+| **Low** | Evaluation convenience (§6) | Ergonomics | ✅ Done |
+| **Low** | EM flexibility (§7) | Advanced use | ✅ Done |
+| **Low** | Future extensions (§10) | Completeness | Deferred |
 
 ---
 
@@ -448,3 +448,141 @@ clusters <- il_cluster(pairs)   # no R round-trip
 
 **Test impact:** All 506 tests continue to pass (the default
 `collect = TRUE` path is unchanged).
+
+---
+
+### §4 Blocking Optimisation Tools — Implemented
+
+Three new exported functions in `R/il_suggest_blocking.R`:
+
+**`il_suggest_blocking(.data, columns, con, link_type, max_depth)`:**
+Enumerates single-column blocking rules (and optionally two-column
+combinations when `max_depth >= 2`) and ranks them by a heuristic score
+that balances field coverage against pair reduction.  Returns a tibble
+with `rule`, `n_distinct`, `coverage`, `n_pairs`, `pct_of_cartesian`,
+and `score`.
+
+**`il_find_blocking_below(.data, max_pairs, columns, con, link_type, max_depth)`:**
+Thin wrapper around `il_suggest_blocking()` that filters to rules
+producing at most `max_pairs` candidate pairs.  Useful for quickly
+finding workable blocking strategies on large datasets.
+
+**`block_from_labels(.data, labels, columns, con)`:**
+For each column, computes the recall (fraction of true-match pairs
+that share the same value) from a labelled-pairs table.  Returns a
+tibble sorted by descending recall, helping users identify which
+columns make effective blocking keys.
+
+**Files created/changed:**
+
+| File | Change |
+|------|--------|
+| `R/il_suggest_blocking.R` | New file with all three functions + `evaluate_column_combos()` helper |
+| `tests/testthat/test-suggest-blocking.R` | 13 new tests |
+
+**Test impact:** 555 tests pass (13 new).
+
+---
+
+### §5 Column Transformers — Implemented
+
+`il_compare()` gains a `transform` argument that applies a function to
+both left and right column values before comparison.  This translates
+to SQL for the database path and R for the fallback path.
+
+```r
+spec <- il_spec() |>
+  il_compare(name, cl_jaro_winkler(0.9, 0.7), transform = tolower)
+```
+
+**SQL translation:** Known functions (`tolower`→`LOWER`,
+`toupper`→`UPPER`, `trimws`→`TRIM`) are translated into SQL column
+wrappers.  Custom functions work on the R-side path only.
+
+**Serialization:** `il_save()` stores the transform name as a string;
+`il_load()` restores it via `name_to_transform()`.  Custom functions
+that cannot be named produce a warning on save and are lost on load.
+
+**Files changed:**
+
+| File | Change |
+|------|--------|
+| `R/il_compare.R` | Added `transform` parameter, validation, storage in spec entry |
+| `R/utils-sql.R` | Added `sql_transform_col()`, `transform_to_sql_fn()`, `transform_has_sql()`, `transform_to_name()`, `name_to_transform()` |
+| `R/utils-sql.R` | Updated `sql_gamma_case()` and `sql_sublevel_condition()` to apply transforms to column references |
+| `R/utils-em.R` | Updated `compute_gamma_matrix()` to apply transforms in R-side path |
+| `R/il_save.R` | Serialize/deserialize transforms in `il_save()`/`il_load()` |
+| `tests/testthat/test-transform.R` | 12 new tests |
+
+**Test impact:** All tests pass (12 new transform tests).
+
+---
+
+### §6 Evaluation Convenience — Implemented
+
+#### 6a Label-column wrappers
+
+New exported function `labels_from_column(model, labels_col, threshold)`
+derives pairwise labels from a ground-truth column.  For all predicted
+pairs, it looks up the column value and marks pairs as matches when
+both records share the same value.
+
+All four evaluation functions gain a `labels_col` argument:
+
+```r
+il_accuracy(model, labels_col = "cluster")
+il_roc(model, labels_col = "cluster")
+il_precision_recall(model, labels_col = "cluster")
+il_errors(model, labels_col = "cluster", threshold = 0.85)
+```
+
+When `labels_col` is provided, pairwise labels are derived
+automatically.  The original `labels` argument remains fully
+supported for backwards compatibility.
+
+#### 6b Retain original fields in predictions
+
+`predict()` gains an `include_fields = FALSE` argument.  When `TRUE`,
+the original column values from both records in each pair are JOINed
+into the output with `_l` / `_r` suffixes (e.g., `first_name_l`,
+`surname_r`).
+
+**Files changed:**
+
+| File | Change |
+|------|--------|
+| `R/utils-evaluation.R` | Added `labels_from_column()`, `resolve_labels_from_pairs()`, `resolve_labels()` |
+| `R/il_accuracy.R` | Added `labels_col` parameter |
+| `R/il_roc.R` | Added `labels_col` parameter |
+| `R/il_precision_recall.R` | Added `labels_col` parameter |
+| `R/il_errors.R` | Added `labels_col` parameter |
+| `R/predict.R` | Added `include_fields` parameter + `join_original_fields()` helper |
+| `tests/testthat/test-labels-col.R` | 9 new tests |
+| `tests/testthat/test-include-fields.R` | 9 new tests |
+
+**Test impact:** All tests pass (18 new).
+
+---
+
+### §7 EM Flexibility — Implemented
+
+`il_estimate_em()` gains `fix_u` and `fix_m` arguments:
+
+```r
+il_estimate_em(model, block_on(surname), fix_u = TRUE, fix_m = FALSE)  # default
+il_estimate_em(model, block_on(surname), fix_u = FALSE, fix_m = FALSE) # update both
+il_estimate_em(model, block_on(surname), fix_u = FALSE, fix_m = TRUE)  # update u only
+```
+
+The M-step now conditionally updates m and/or u based on the flags.
+Convergence is checked across all updated parameter sets.  Both
+`fix_u = TRUE` and `fix_m = TRUE` is rejected with an error.
+
+**Files changed:**
+
+| File | Change |
+|------|--------|
+| `R/il_estimate_em.R` | Added `fix_u`/`fix_m` parameters; conditional M-step; u-update logic |
+| `tests/testthat/test-em-flex.R` | 6 new tests |
+
+**Test impact:** All tests pass (6 new).

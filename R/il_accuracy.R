@@ -6,7 +6,10 @@
 #'
 #' @param model A trained `il_model` object.
 #' @param labels A data frame of labelled pairs with a logical or integer
-#'   match indicator.
+#'   match indicator. Required unless `labels_col` is provided.
+#' @param labels_col Optional string naming a column in the original data
+#'   containing ground-truth cluster/entity IDs. When provided, pairwise
+#'   labels are derived automatically via [labels_from_column()].
 #'
 #' @return A tibble with one row per threshold, containing columns
 #'   `threshold`, `precision`, `recall`, `f1`, `tp`, `fp`, and `fn`.
@@ -68,7 +71,8 @@
 #'
 #' il_accuracy(model, labels = labels)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_accuracy <- function(model, labels) {
+il_accuracy <- function(model, labels = NULL, labels_col = NULL) {
+  labels <- resolve_labels(model, labels, labels_col)
   scored <- score_labeled_pairs(model, labels)
   label_probs <- scored$label_probs
   actual_positive <- scored$actual_positive

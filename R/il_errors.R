@@ -6,9 +6,11 @@
 #'
 #' @param model A trained `il_model` object.
 #' @param labels A data frame of labelled pairs with a logical or integer
-#'   match indicator.
+#'   match indicator. Required unless `labels_col` is provided.
 #' @param threshold A numeric value between 0 and 1 for classifying pairs
 #'   as matches. Defaults to `0.85`.
+#' @param labels_col Optional string naming a column in the original data
+#'   containing ground-truth cluster/entity IDs.
 #'
 #' @return A tibble of misclassified pairs with columns `id_l`, `id_r`,
 #'   `match_weight`, `match_prob`, `true_label`, and `error_type`.
@@ -70,7 +72,8 @@
 #'
 #' il_errors(model, labels = labels, threshold = 0.85)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_errors <- function(model, labels, threshold = 0.85) {
+il_errors <- function(model, labels = NULL, threshold = 0.85, labels_col = NULL) {
+  labels <- resolve_labels(model, labels, labels_col)
   scored <- score_labeled_pairs(model, labels)
   label_probs <- scored$label_probs
   label_weights <- scored$label_weights

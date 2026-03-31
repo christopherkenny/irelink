@@ -89,10 +89,14 @@ il_save <- function(model, path, overwrite = FALSE) {
   # Serialize spec into plain lists (strip S3 classes for JSON)
   spec_data <- list(
     comparisons = lapply(model$spec$comparisons, function(cmp) {
-      list(
+      entry <- list(
         columns = cmp$columns,
         method = unclass_comparison_level(cmp$method)
       )
+      if (!is.null(cmp$transform)) {
+        entry$transform <- transform_to_name(cmp$transform)
+      }
+      entry
     }),
     blocking_rules = lapply(model$spec$blocking_rules, function(br) {
       unclass(br)
@@ -217,7 +221,11 @@ il_load <- function(path) {
       method_data <- as.list(method_data)
     }
     method <- structure(method_data, class = 'il_comparison_level')
-    list(columns = cmp_data$columns, method = method)
+    entry <- list(columns = cmp_data$columns, method = method)
+    if (!is.null(cmp_data$transform)) {
+      entry$transform <- name_to_transform(cmp_data$transform)
+    }
+    entry
   })
 
   blocking_rules <- lapply(seq_len(NROW(raw$spec$blocking_rules)), function(i) {

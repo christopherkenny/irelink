@@ -25,6 +25,60 @@ dialect_has_fuzzy_sql <- function(dialect) {
   dialect %in% c('duckdb', 'postgres')
 }
 
+#' Wrap a column reference with a SQL-translated transform
+#'
+#' Maps common R functions (tolower, toupper, trimws) to their SQL
+#' equivalents. Returns the column reference unchanged when the transform
+#' is `NULL` or has no known SQL translation.
+#'
+#' @param col_ref Character SQL column reference (e.g. `"l.name"`).
+#' @param transform An R function or `NULL`.
+#' @return A SQL expression string.
+#' @noRd
+sql_transform_col <- function(col_ref, transform) {
+  if (is.null(transform)) return(col_ref)
+  fn_name <- transform_to_sql_fn(transform)
+  if (is.null(fn_name)) return(col_ref)
+  paste0(fn_name, '(', col_ref, ')')
+}
+
+#' Map an R function to its SQL equivalent name
+#' @noRd
+transform_to_sql_fn <- function(transform) {
+  if (identical(transform, tolower)) return('LOWER')
+  if (identical(transform, toupper)) return('UPPER')
+  if (identical(transform, trimws))  return('TRIM')
+  NULL
+}
+
+#' Can this transform be translated to SQL?
+#' @noRd
+transform_has_sql <- function(transform) {
+  !is.null(transform_to_sql_fn(transform))
+}
+
+#' Map an R function to a serializable name
+#' @noRd
+transform_to_name <- function(transform) {
+  if (identical(transform, tolower)) return('tolower')
+  if (identical(transform, toupper)) return('toupper')
+  if (identical(transform, trimws))  return('trimws')
+  cli::cli_warn('Custom transform cannot be serialized; it will be lost on save/load.')
+  NULL
+}
+
+#' Map a serialized name back to an R function
+#' @noRd
+name_to_transform <- function(name) {
+  if (is.null(name)) return(NULL)
+  switch(name,
+    'tolower' = tolower,
+    'toupper' = toupper,
+    'trimws'  = trimws,
+    NULL
+  )
+}
+
 #' Generate a multi-level gamma CASE expression for one comparison
 #'
 #' Used to push gamma computation into SQL for backends that support
@@ -41,6 +95,11 @@ sql_gamma_case <- function(comp, dialect) {
   level <- comp$method
   method <- level$method
   thresholds <- level$thresholds
+  tf <- comp$transform
+
+  # Build column references with optional transforms
+  lcol <- sql_transform_col(glue::glue('l.{col}'), tf)
+  rcol <- sql_transform_col(glue::glue('r.{col}'), tf)
 
   null_guard <- glue::glue(
     'l.{col} IS NOT NULL AND r.{col} IS NOT NULL'
@@ -48,7 +107,7 @@ sql_gamma_case <- function(comp, dialect) {
 
   if (method == 'exact') {
     return(glue::glue(
-      'CASE WHEN {null_guard} AND l.{col} = r.{col} THEN 1 ELSE 0 END'
+      'CASE WHEN {null_guard} AND {lcol} = {rcol} THEN 1 ELSE 0 END'
     ))
   }
 
@@ -60,7 +119,7 @@ sql_gamma_case <- function(comp, dialect) {
   if (method == 'jaro_winkler') {
     n <- length(thresholds)
     whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue('WHEN {null_guard} AND jaro_winkler_similarity(l.{col}, r.{col}) >= {thresholds[i]} THEN {n - i + 1L}')
+      glue::glue('WHEN {null_guard} AND jaro_winkler_similarity({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}')
     }, character(1))
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
@@ -68,7 +127,7 @@ sql_gamma_case <- function(comp, dialect) {
   if (method == 'jaro') {
     n <- length(thresholds)
     whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue('WHEN {null_guard} AND jaro_similarity(l.{col}, r.{col}) >= {thresholds[i]} THEN {n - i + 1L}')
+      glue::glue('WHEN {null_guard} AND jaro_similarity({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}')
     }, character(1))
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
@@ -76,7 +135,7 @@ sql_gamma_case <- function(comp, dialect) {
   if (method == 'levenshtein') {
     n <- length(thresholds)
     whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue('WHEN {null_guard} AND levenshtein(l.{col}, r.{col}) <= {thresholds[i]} THEN {n - i + 1L}')
+      glue::glue('WHEN {null_guard} AND levenshtein({lcol}, {rcol}) <= {thresholds[i]} THEN {n - i + 1L}')
     }, character(1))
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
@@ -84,7 +143,7 @@ sql_gamma_case <- function(comp, dialect) {
   if (method == 'damerau_levenshtein') {
     n <- length(thresholds)
     whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue('WHEN {null_guard} AND damerau_levenshtein(l.{col}, r.{col}) <= {thresholds[i]} THEN {n - i + 1L}')
+      glue::glue('WHEN {null_guard} AND damerau_levenshtein({lcol}, {rcol}) <= {thresholds[i]} THEN {n - i + 1L}')
     }, character(1))
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
@@ -92,7 +151,7 @@ sql_gamma_case <- function(comp, dialect) {
   if (method == 'numeric_diff') {
     n <- length(thresholds)
     whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue('WHEN {null_guard} AND ABS(CAST(l.{col} AS DOUBLE) - CAST(r.{col} AS DOUBLE)) <= {thresholds[i]} THEN {n - i + 1L}')
+      glue::glue('WHEN {null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) <= {thresholds[i]} THEN {n - i + 1L}')
     }, character(1))
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
@@ -101,8 +160,8 @@ sql_gamma_case <- function(comp, dialect) {
     n <- length(thresholds)
     whens <- vapply(seq_along(thresholds), function(i) {
       glue::glue(
-        'WHEN {null_guard} AND ABS(CAST(l.{col} AS DOUBLE) - CAST(r.{col} AS DOUBLE)) / ',
-        'NULLIF(GREATEST(ABS(CAST(l.{col} AS DOUBLE)), ABS(CAST(r.{col} AS DOUBLE))), 0) <= {thresholds[i]} THEN {n - i + 1L}'
+        'WHEN {null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) / ',
+        'NULLIF(GREATEST(ABS(CAST({lcol} AS DOUBLE)), ABS(CAST({rcol} AS DOUBLE))), 0) <= {thresholds[i]} THEN {n - i + 1L}'
       )
     }, character(1))
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
@@ -119,9 +178,9 @@ sql_gamma_case <- function(comp, dialect) {
       )
       days_val <- thresholds[i] * mult
       if (dialect == 'duckdb') {
-        glue::glue('WHEN {null_guard} AND ABS(CAST(l.{col} AS DATE) - CAST(r.{col} AS DATE)) <= {days_val} THEN {n - i + 1L}')
+        glue::glue('WHEN {null_guard} AND ABS(CAST({lcol} AS DATE) - CAST({rcol} AS DATE)) <= {days_val} THEN {n - i + 1L}')
       } else {
-        glue::glue('WHEN {null_guard} AND ABS(JULIANDAY(l.{col}) - JULIANDAY(r.{col})) <= {days_val} THEN {n - i + 1L}')
+        glue::glue('WHEN {null_guard} AND ABS(JULIANDAY({lcol}) - JULIANDAY({rcol})) <= {days_val} THEN {n - i + 1L}')
       }
     }, character(1))
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
@@ -135,12 +194,12 @@ sql_gamma_case <- function(comp, dialect) {
     n <- length(sublevels)
     if (n == 0L) {
       return(glue::glue(
-        'CASE WHEN {null_guard} AND l.{col} = r.{col} THEN 1 ELSE 0 END'
+        'CASE WHEN {null_guard} AND {lcol} = {rcol} THEN 1 ELSE 0 END'
       ))
     }
     whens <- vapply(seq_along(sublevels), function(i) {
       sub <- sublevels[[i]]
-      cond <- sql_sublevel_condition(sub, col, dialect, null_guard)
+      cond <- sql_sublevel_condition(sub, col, dialect, null_guard, lcol, rcol)
       glue::glue('WHEN {cond} THEN {n - i + 1L}')
     }, character(1))
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
@@ -148,58 +207,62 @@ sql_gamma_case <- function(comp, dialect) {
 
   # Fallback: exact match
   glue::glue(
-    'CASE WHEN {null_guard} AND l.{col} = r.{col} THEN 1 ELSE 0 END'
+    'CASE WHEN {null_guard} AND {lcol} = {rcol} THEN 1 ELSE 0 END'
   )
 }
 
 #' Generate a SQL condition for a single sublevel within cl_levels()
 #' @param sub An il_comparison_level sublevel object.
-#' @param col Column name.
+#' @param col Column name (for fallback references).
 #' @param dialect SQL dialect string.
 #' @param null_guard SQL null guard clause.
+#' @param lcol Transformed left column reference.
+#' @param rcol Transformed right column reference.
 #' @return A SQL condition string.
 #' @noRd
-sql_sublevel_condition <- function(sub, col, dialect, null_guard) {
+sql_sublevel_condition <- function(sub, col, dialect, null_guard,
+                                   lcol = paste0('l.', col),
+                                   rcol = paste0('r.', col)) {
   method <- sub$method
 
   if (method == 'exact') {
-    return(glue::glue('{null_guard} AND l.{col} = r.{col}'))
+    return(glue::glue('{null_guard} AND {lcol} = {rcol}'))
   }
   if (method == 'jaro_winkler') {
     t <- sub$thresholds[1]
-    return(glue::glue('{null_guard} AND jaro_winkler_similarity(l.{col}, r.{col}) >= {t}'))
+    return(glue::glue('{null_guard} AND jaro_winkler_similarity({lcol}, {rcol}) >= {t}'))
   }
   if (method == 'jaro') {
     t <- sub$thresholds[1]
-    return(glue::glue('{null_guard} AND jaro_similarity(l.{col}, r.{col}) >= {t}'))
+    return(glue::glue('{null_guard} AND jaro_similarity({lcol}, {rcol}) >= {t}'))
   }
   if (method == 'levenshtein') {
     t <- sub$thresholds[1]
-    return(glue::glue('{null_guard} AND levenshtein(l.{col}, r.{col}) <= {t}'))
+    return(glue::glue('{null_guard} AND levenshtein({lcol}, {rcol}) <= {t}'))
   }
   if (method == 'damerau_levenshtein') {
     t <- sub$thresholds[1]
-    return(glue::glue('{null_guard} AND damerau_levenshtein(l.{col}, r.{col}) <= {t}'))
+    return(glue::glue('{null_guard} AND damerau_levenshtein({lcol}, {rcol}) <= {t}'))
   }
   if (method == 'numeric_diff') {
     t <- sub$thresholds[1]
-    return(glue::glue('{null_guard} AND ABS(CAST(l.{col} AS DOUBLE) - CAST(r.{col} AS DOUBLE)) <= {t}'))
+    return(glue::glue('{null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) <= {t}'))
   }
   if (method == 'date_diff') {
     t <- sub$thresholds[1]
     mult <- switch(sub$units[1], 'days' = 1, 'months' = 30, 'years' = 365, 1)
     days_val <- t * mult
     if (dialect == 'duckdb') {
-      return(glue::glue('{null_guard} AND ABS(CAST(l.{col} AS DATE) - CAST(r.{col} AS DATE)) <= {days_val}'))
+      return(glue::glue('{null_guard} AND ABS(CAST({lcol} AS DATE) - CAST({rcol} AS DATE)) <= {days_val}'))
     }
-    return(glue::glue('{null_guard} AND ABS(JULIANDAY(l.{col}) - JULIANDAY(r.{col})) <= {days_val}'))
+    return(glue::glue('{null_guard} AND ABS(JULIANDAY({lcol}) - JULIANDAY({rcol})) <= {days_val}'))
   }
   if (method == 'custom') {
     sql_expr <- glue::glue(sub$sql_expr, col = col, .open = '{', .close = '}')
     return(glue::glue('{null_guard} AND ({sql_expr})'))
   }
   # Default: exact match
-  glue::glue('{null_guard} AND l.{col} = r.{col}')
+  glue::glue('{null_guard} AND {lcol} = {rcol}')
 }
 
 #' Build a SQL query that returns pairs with gamma columns computed in SQL
