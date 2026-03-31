@@ -51,7 +51,10 @@ RoxygenNote: 7.3.3
 Imports:
     cli,
     DBI,
+    duckdb,
+    ggplot2,
     glue,
+    igraph,
     jsonlite,
     rlang,
     stringdist,
@@ -59,9 +62,6 @@ Imports:
 Suggests:
     dbplyr,
     dplyr,
-    duckdb,
-    ggplot2,
-    igraph,
     knitr,
     rmarkdown,
     RSQLite,
