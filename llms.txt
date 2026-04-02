@@ -238,12 +238,16 @@ Pre-configured multi-level comparisons for common field types.
 
 - [`cl_name()`](http://christophertkenny.com/irelink/reference/cl_name.md)
   : Personal Name Comparison
+- [`cl_first_last_name()`](http://christophertkenny.com/irelink/reference/cl_first_last_name.md)
+  : First Name and Last Name Comparison with Swap Detection
 - [`cl_forename_surname()`](http://christophertkenny.com/irelink/reference/cl_forename_surname.md)
   : Forename and Surname Comparison with Swap Detection
 - [`cl_dob()`](http://christophertkenny.com/irelink/reference/cl_dob.md)
   : Date of Birth Comparison
 - [`cl_email()`](http://christophertkenny.com/irelink/reference/cl_email.md)
   : Email Address Comparison
+- [`cl_zip_code()`](http://christophertkenny.com/irelink/reference/cl_zip_code.md)
+  : ZIP Code Comparison
 - [`cl_postcode()`](http://christophertkenny.com/irelink/reference/cl_postcode.md)
   : Postcode Comparison
 

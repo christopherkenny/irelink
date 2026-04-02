@@ -6,14 +6,15 @@ exact match, username-only match, and domain-only match.
 ## Usage
 
 ``` r
-cl_email(...)
+cl_email(term_frequency = FALSE)
 ```
 
 ## Arguments
 
-- ...:
+- term_frequency:
 
-  Reserved for future options.
+  Logical. If `TRUE`, adjust match weights by email frequency at the
+  highest comparison level. Defaults to `FALSE`.
 
 ## Value
 

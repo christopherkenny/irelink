@@ -8,7 +8,7 @@ chart.
 ## Usage
 
 ``` r
-cl_jaro_winkler(...)
+cl_jaro_winkler(..., term_frequency = FALSE)
 ```
 
 ## Arguments
@@ -17,6 +17,11 @@ cl_jaro_winkler(...)
 
   Numeric thresholds between 0 and 1, ordered from strictest to most
   lenient (e.g., `0.9, 0.7`).
+
+- term_frequency:
+
+  Logical. If `TRUE`, adjust match weights by value frequency at the
+  highest comparison level. Defaults to `FALSE`.
 
 ## Value
 
@@ -28,7 +33,7 @@ A comparison-level object for use in
 ``` r
 il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
-  il_compare(surname, cl_jaro_winkler(0.9))
+  il_compare(surname, cl_jaro_winkler(0.9, term_frequency = TRUE))
 #> Linkage Specification
 #>   Comparisons (2):
 #>     first_name : jaro_winkler

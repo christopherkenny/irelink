@@ -9,7 +9,7 @@ edit.
 ## Usage
 
 ``` r
-cl_damerau_levenshtein(...)
+cl_damerau_levenshtein(..., term_frequency = FALSE)
 ```
 
 ## Arguments
@@ -17,6 +17,11 @@ cl_damerau_levenshtein(...)
 - ...:
 
   Integer distance thresholds, ordered from strictest to most lenient.
+
+- term_frequency:
+
+  Logical. If `TRUE`, adjust match weights by value frequency at the
+  highest comparison level. Defaults to `FALSE`.
 
 ## Value
 

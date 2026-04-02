@@ -65,6 +65,9 @@ cl_levels(cl_null(), cl_exact(), cl_else())
 #> [1] "il_comparison_level"
 #> 
 #> 
+#> $term_frequency
+#> [1] FALSE
+#> 
 #> $is_null_level
 #> [1] FALSE
 #> 

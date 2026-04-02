@@ -10,7 +10,7 @@ layer.
 ## Usage
 
 ``` r
-cl_levels(...)
+cl_levels(..., term_frequency = FALSE)
 ```
 
 ## Arguments
@@ -23,6 +23,11 @@ cl_levels(...)
   [`cl_jaro_winkler()`](http://christophertkenny.com/irelink/reference/cl_jaro_winkler.md),
   [`cl_else()`](http://christophertkenny.com/irelink/reference/cl_else.md),
   and similar helpers.
+
+- term_frequency:
+
+  Logical. If `TRUE`, adjust match weights by value frequency at the
+  highest comparison level. Defaults to `FALSE`.
 
 ## Value
 
@@ -37,10 +42,11 @@ il_spec() |>
     name,
     cl_levels(
       cl_null(),
-      cl_exact(term_frequency = TRUE),
+      cl_exact(),
       cl_jaro_winkler(0.95),
       cl_jaro_winkler(0.88),
-      cl_else()
+      cl_else(),
+      term_frequency = TRUE
     )
   )
 #> Linkage Specification

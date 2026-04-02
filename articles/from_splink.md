@@ -23,7 +23,7 @@ serve the same role and can be passed directly to
 | Step                | splink (Python)                                                           | irelink (R)                                          |
 |---------------------|---------------------------------------------------------------------------|------------------------------------------------------|
 | Load data           | `splink_datasets.fake_1000`                                               | `fake_1000`                                          |
-| Choose backend      | `DuckDBAPI()`                                                             | `DBI::dbConnect(RSQLite::SQLite(), ...)`             |
+| Choose backend      | `DuckDBAPI()`                                                             | `DBI::dbConnect(duckdb::duckdb())`                   |
 | Define settings     | `SettingsCreator(...)`                                                    | `il_spec() \|> il_compare(...) \|> il_block_on(...)` |
 | Create model        | `Linker(df, settings, db_api)`                                            | `il_model(df, spec = spec, con = con)`               |
 | Estimate prior      | `linker.training.estimate_probability_two_random_records_match(...)`      | `il_estimate_prior(model, ...)`                      |

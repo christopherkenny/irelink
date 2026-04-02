@@ -8,7 +8,7 @@ without the prefix bonus.
 ## Usage
 
 ``` r
-cl_jaro(...)
+cl_jaro(..., term_frequency = FALSE)
 ```
 
 ## Arguments
@@ -17,6 +17,11 @@ cl_jaro(...)
 
   Numeric thresholds between 0 and 1, ordered from strictest to most
   lenient.
+
+- term_frequency:
+
+  Logical. If `TRUE`, adjust match weights by value frequency at the
+  highest comparison level. Defaults to `FALSE`.
 
 ## Value
 

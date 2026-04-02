@@ -54,6 +54,14 @@
 <div class="section level3">
 <h3 id="comparison-library-0-0-0-9000">Comparison library<a class="anchor" aria-label="anchor" href="#comparison-library-0-0-0-9000"></a></h3>
 <ul><li>
+<code><a href="../reference/cl_first_last_name.html">cl_first_last_name()</a></code> is a new American-English alias for <code><a href="../reference/cl_forename_surname.html">cl_forename_surname()</a></code>. Both accept a companion column argument (<code>last_name</code> / <code>surname</code>) and a <code>term_frequency</code> flag.</li>
+<li>
+<code><a href="../reference/cl_forename_surname.html">cl_forename_surname()</a></code> now accepts a <code>surname</code> argument (default <code>'surname'</code>) so the companion column name can be specified explicitly. This also fixes a bug where the swap-detection SQL referenced unresolved <code>{col_forename}</code> and <code>{col_surname}</code> variables at runtime.</li>
+<li>
+<code><a href="../reference/cl_zip_code.html">cl_zip_code()</a></code> is a new domain comparison for US ZIP codes with levels for exact match, 5-digit prefix (ZIP+4 normalization), and 3-digit Sectional Center Facility prefix.</li>
+<li>
+<code><a href="../reference/cl_damerau_levenshtein.html">cl_damerau_levenshtein()</a></code>, <code><a href="../reference/cl_dob.html">cl_dob()</a></code>, <code><a href="../reference/cl_email.html">cl_email()</a></code>, <code><a href="../reference/cl_jaro.html">cl_jaro()</a></code>, <code><a href="../reference/cl_jaro_winkler.html">cl_jaro_winkler()</a></code>, <code><a href="../reference/cl_levenshtein.html">cl_levenshtein()</a></code>, <code><a href="../reference/cl_levels.html">cl_levels()</a></code>, <code><a href="../reference/cl_name.html">cl_name()</a></code>, and <code><a href="../reference/cl_postcode.html">cl_postcode()</a></code> now accept <code>term_frequency = TRUE</code> to apply Fellegi-Sunter term-frequency adjustments at the highest comparison level, giving rare values higher match weights than common ones.</li>
+<li>
 <code><a href="../reference/cl_exact.html">cl_exact()</a></code> for exact matches.</li>
 <li>
 <code><a href="../reference/cl_jaro_winkler.html">cl_jaro_winkler()</a></code> and <code><a href="../reference/cl_levenshtein.html">cl_levenshtein()</a></code> for fuzzy strings.</li>

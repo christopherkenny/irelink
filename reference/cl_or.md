@@ -34,6 +34,9 @@ cl_or(cl_jaro_winkler(0.9), cl_levenshtein(1))
 #> $thresholds
 #> [1] 0.9
 #> 
+#> $term_frequency
+#> [1] FALSE
+#> 
 #> $is_null_level
 #> [1] FALSE
 #> 
@@ -49,6 +52,9 @@ cl_or(cl_jaro_winkler(0.9), cl_levenshtein(1))
 #> 
 #> $thresholds
 #> [1] 1
+#> 
+#> $term_frequency
+#> [1] FALSE
 #> 
 #> $is_null_level
 #> [1] FALSE

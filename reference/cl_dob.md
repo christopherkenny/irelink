@@ -7,14 +7,15 @@ common date-of-birth errors (transpositions, partial dates).
 ## Usage
 
 ``` r
-cl_dob(...)
+cl_dob(term_frequency = FALSE)
 ```
 
 ## Arguments
 
-- ...:
+- term_frequency:
 
-  Reserved for future options.
+  Logical. If `TRUE`, adjust match weights by date-of-birth frequency at
+  the highest comparison level. Defaults to `FALSE`.
 
 ## Value
 

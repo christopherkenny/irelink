@@ -6,14 +6,15 @@ with optional geographic-proximity fallback for partial matches.
 ## Usage
 
 ``` r
-cl_postcode(...)
+cl_postcode(term_frequency = FALSE)
 ```
 
 ## Arguments
 
-- ...:
+- term_frequency:
 
-  Reserved for future options (e.g., geographic fallback).
+  Logical. If `TRUE`, adjust match weights by postcode frequency at the
+  highest comparison level. Defaults to `FALSE`.
 
 ## Value
 

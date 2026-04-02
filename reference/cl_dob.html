@@ -50,15 +50,17 @@ handle common date-of-birth errors (transpositions, partial dates).</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">cl_dob</span><span class="op">(</span><span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">cl_dob</span><span class="op">(</span>term_frequency <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
 
 
-<dl><dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>Reserved for future options.</p></dd>
+<dl><dt id="arg-term-frequency">term_frequency<a class="anchor" aria-label="anchor" href="#arg-term-frequency"></a></dt>
+<dd><p>Logical. If <code>TRUE</code>, adjust match weights by
+date-of-birth frequency at the highest comparison level. Defaults
+to <code>FALSE</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

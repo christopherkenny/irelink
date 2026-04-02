@@ -210,11 +210,11 @@ head(clusters)
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
 #> 1 51        cluster_51 
-#> 2 544       cluster_544
-#> 3 938       cluster_851
-#> 4 456       cluster_283
-#> 5 763       cluster_763
-#> 6 753       cluster_678
+#> 2 220       cluster_220
+#> 3 243       cluster_221
+#> 4 300       cluster_300
+#> 5 334       cluster_334
+#> 6 544       cluster_544
 ```
 
 ## Evaluate against ground truth

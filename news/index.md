@@ -24,6 +24,33 @@ probabilistic record linkage engine into idiomatic R.
 
 ### Comparison library
 
+- [`cl_first_last_name()`](http://christophertkenny.com/irelink/reference/cl_first_last_name.md)
+  is a new American-English alias for
+  [`cl_forename_surname()`](http://christophertkenny.com/irelink/reference/cl_forename_surname.md).
+  Both accept a companion column argument (`last_name` / `surname`) and
+  a `term_frequency` flag.
+- [`cl_forename_surname()`](http://christophertkenny.com/irelink/reference/cl_forename_surname.md)
+  now accepts a `surname` argument (default `'surname'`) so the
+  companion column name can be specified explicitly. This also fixes a
+  bug where the swap-detection SQL referenced unresolved
+  `{col_forename}` and `{col_surname}` variables at runtime.
+- [`cl_zip_code()`](http://christophertkenny.com/irelink/reference/cl_zip_code.md)
+  is a new domain comparison for US ZIP codes with levels for exact
+  match, 5-digit prefix (ZIP+4 normalization), and 3-digit Sectional
+  Center Facility prefix.
+- [`cl_damerau_levenshtein()`](http://christophertkenny.com/irelink/reference/cl_damerau_levenshtein.md),
+  [`cl_dob()`](http://christophertkenny.com/irelink/reference/cl_dob.md),
+  [`cl_email()`](http://christophertkenny.com/irelink/reference/cl_email.md),
+  [`cl_jaro()`](http://christophertkenny.com/irelink/reference/cl_jaro.md),
+  [`cl_jaro_winkler()`](http://christophertkenny.com/irelink/reference/cl_jaro_winkler.md),
+  [`cl_levenshtein()`](http://christophertkenny.com/irelink/reference/cl_levenshtein.md),
+  [`cl_levels()`](http://christophertkenny.com/irelink/reference/cl_levels.md),
+  [`cl_name()`](http://christophertkenny.com/irelink/reference/cl_name.md),
+  and
+  [`cl_postcode()`](http://christophertkenny.com/irelink/reference/cl_postcode.md)
+  now accept `term_frequency = TRUE` to apply Fellegi-Sunter
+  term-frequency adjustments at the highest comparison level, giving
+  rare values higher match weights than common ones.
 - [`cl_exact()`](http://christophertkenny.com/irelink/reference/cl_exact.md)
   for exact matches.
 - [`cl_jaro_winkler()`](http://christophertkenny.com/irelink/reference/cl_jaro_winkler.md)

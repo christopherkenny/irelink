@@ -50,6 +50,9 @@ cl_and(cl_exact(), cl_jaro_winkler(0.9))
 #> $thresholds
 #> [1] 0.9
 #> 
+#> $term_frequency
+#> [1] FALSE
+#> 
 #> $is_null_level
 #> [1] FALSE
 #> 
