@@ -511,7 +511,22 @@ Please fix any issues you encounter.
 Can you review all of the vignettes for this new record linking R package?
 Please fix any issues you encounter.
 
-# US-ability (Sonnet 4.6 medium)
+## US-ability (Sonnet 4.6 medium)
 
 Can you scan for non-American terms and flag them, such as postcode.
 We should ensure that US records are treated well.
+
+## Phonetics (Opus 4.6 high)
+
+We are working on a new record linkage package in R, derivative of splink (available at ../splink).
+One feature that we have skipped up to this point is phonetic algorithms.
+
+Can you research which phonetic algorithms are supported by splink?
+These are used for blocking.
+
+Then, implement them here.
+Make sure that they will be handled SQL-side so that we do not have to materialize data.
+
+Add corresponding tests.
+
+Write up your research and a summary of findings in `inst/refs/23-phonetics.md`
