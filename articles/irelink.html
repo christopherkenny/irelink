@@ -205,9 +205,9 @@ above a match-weight threshold:</p>
 <span><span class="co">#&gt;   unique_id_l unique_id_r match_weight match_probability gamma_first_name</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           1          11         9.13             0.967                2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           4          13         9.13             0.967                2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           9          19         9.13             0.967                2</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           8          17         8.26             0.942                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           8          17         8.26             0.942                1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           4          13         9.13             0.967                2</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           9          19         9.13             0.967                2</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>          10          19         8.26             0.942                1</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           3          13         9.13             0.967                2</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: gamma_surname &lt;int&gt;, gamma_dob &lt;int&gt;</span></span></span></code></pre></div>
@@ -226,12 +226,12 @@ clusters using connected-components analysis:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 13        cluster_13</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 8         cluster_17</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 1         cluster_1 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 9         cluster_10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 7         cluster_17</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 10        cluster_10</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 19        cluster_10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 11        cluster_1 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 4         cluster_13</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 13        cluster_13</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 8         cluster_17</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 1         cluster_1</span></span></code></pre></div>
 <p>Each record is assigned a <code>cluster_id</code>. Records sharing
 the same cluster are considered to be the same entity.</p>
 </div>
