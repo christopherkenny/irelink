@@ -39,6 +39,11 @@ reference:
       - cl_or
       - cl_not
 
+  - title: "Phonetic Transforms"
+    desc: "Phonetic encoding functions for blocking and comparison on name fields."
+    contents:
+      - phonetic
+
   - title: "Domain-Specific Comparisons"
     desc: "Pre-configured multi-level comparisons for common field types."
     contents:
