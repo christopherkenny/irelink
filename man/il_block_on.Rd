@@ -4,7 +4,7 @@
 \alias{il_block_on}
 \title{Add a Prediction Blocking Rule}
 \usage{
-il_block_on(spec, ..., .where = NULL)
+il_block_on(spec, ..., .where = NULL, .transform = NULL)
 }
 \arguments{
 \item{spec}{An \code{il_spec} object (piped in).}
@@ -14,6 +14,11 @@ equality blocking (AND-ed within one call).}
 
 \item{.where}{An optional raw SQL string for non-equality blocking
 conditions. Defaults to \code{NULL}.}
+
+\item{.transform}{An optional transform function applied to both
+left and right column values before the equality check. Useful
+for phonetic blocking — see \link{il_soundex}, \link{il_metaphone}, and
+\link{il_dmetaphone}.}
 }
 \value{
 An updated \code{il_spec} (a new copy; the input is not modified).
@@ -34,4 +39,8 @@ spec <- il_spec() |>
 # Block where state AND year both match (one call = AND)
 spec <- il_spec() |>
   il_block_on(state, year)
+
+# Phonetic blocking: group similar-sounding names
+spec <- il_spec() |>
+  il_block_on(first_name, .transform = il_soundex)
 }

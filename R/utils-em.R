@@ -321,7 +321,9 @@ get_blocked_pairs <- function(model, blocking) {
 
   cols <- model$data$columns
   sel <- build_select_aliases(cols)
-  block_where <- build_blocking_condition(blocking$columns, blocking$where)
+  block_where <- build_blocking_condition(blocking$columns, blocking$where,
+                                          transform = blocking$transform,
+                                          dialect = detect_dialect(con))
 
   table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
   parts <- vapply(table_pairs, function(tp) {

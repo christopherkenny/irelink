@@ -81,8 +81,10 @@ il_deterministic_link <- function(.data, ..., spec, con = NULL,
   on.exit(drop_registered(con, tbl_name), add = TRUE)
 
   if (length(blocking_rules) > 0L) {
+    dialect <- detect_dialect(con)
     block_sqls <- vapply(blocking_rules, function(br) {
-      paste0('(', build_blocking_condition(br$columns), ')')
+      paste0('(', build_blocking_condition(br$columns, transform = br$transform,
+                                            dialect = dialect), ')')
     }, character(1))
     block_where <- paste(block_sqls, collapse = ' OR ')
   } else {

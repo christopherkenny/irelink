@@ -4,7 +4,7 @@
 \alias{block_on}
 \title{Create a Training-Time Blocking Rule}
 \usage{
-block_on(..., .where = NULL)
+block_on(..., .where = NULL, .transform = NULL)
 }
 \arguments{
 \item{...}{Unquoted column names. Columns are AND-ed within a single
@@ -14,6 +14,10 @@ block_on(..., .where = NULL)
 conditions (e.g., \code{"levenshtein(l.dob, r.dob) <= 1"}). When
 supplied alongside column names, the column equalities and the SQL
 condition are AND-ed together.}
+
+\item{.transform}{An optional transform function applied to both
+left and right column values before the equality check. See
+\link{il_soundex}, \link{il_metaphone}, and \link{il_dmetaphone}.}
 }
 \value{
 A blocking-rule object for use in training verbs.
@@ -30,4 +34,7 @@ block_on(first_name, surname)
 
 # Fuzzy SQL conditions
 block_on(first_name, .where = 'levenshtein(l.dob, r.dob) <= 1')
+
+# Phonetic blocking
+block_on(first_name, .transform = il_soundex)
 }

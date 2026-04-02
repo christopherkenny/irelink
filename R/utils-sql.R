@@ -27,17 +27,25 @@ dialect_has_fuzzy_sql <- function(dialect) {
 
 #' Wrap a column reference with a SQL-translated transform
 #'
-#' Maps common R functions (tolower, toupper, trimws) to their SQL
-#' equivalents. Returns the column reference unchanged when the transform
-#' is `NULL` or has no known SQL translation.
+#' Maps common R functions (tolower, toupper, trimws) and phonetic
+#' transforms ([il_soundex], [il_metaphone], [il_dmetaphone]) to their
+#' SQL equivalents. Returns the column reference unchanged when the
+#' transform is `NULL` or has no known SQL translation.
 #'
 #' @param col_ref Character SQL column reference (e.g. `"l.name"`).
 #' @param transform An R function or `NULL`.
+#' @param dialect Optional SQL dialect string for phonetic transforms.
 #' @return A SQL expression string.
 #' @noRd
-sql_transform_col <- function(col_ref, transform) {
+sql_transform_col <- function(col_ref, transform, dialect = NULL) {
   if (is.null(transform)) {
     return(col_ref)
+  }
+  # Phonetic transforms need special handling (dialect-dependent, some
+  # have multi-arg SQL signatures)
+  phonetic_sql <- phonetic_transform_sql(transform, col_ref, dialect)
+  if (!is.null(phonetic_sql)) {
+    return(phonetic_sql)
   }
   fn_name <- transform_to_sql_fn(transform)
   if (is.null(fn_name)) {
@@ -64,7 +72,7 @@ transform_to_sql_fn <- function(transform) {
 #' Can this transform be translated to SQL?
 #' @noRd
 transform_has_sql <- function(transform) {
-  !is.null(transform_to_sql_fn(transform))
+  !is.null(transform_to_sql_fn(transform)) || is_phonetic_transform(transform)
 }
 
 #' Map an R function to a serializable name
@@ -78,6 +86,15 @@ transform_to_name <- function(transform) {
   }
   if (identical(transform, trimws)) {
     return('trimws')
+  }
+  if (identical(transform, il_soundex)) {
+    return('il_soundex')
+  }
+  if (identical(transform, il_metaphone)) {
+    return('il_metaphone')
+  }
+  if (identical(transform, il_dmetaphone)) {
+    return('il_dmetaphone')
   }
   cli::cli_warn('Custom transform cannot be serialized; it will be lost on save/load.')
   NULL
@@ -93,8 +110,77 @@ name_to_transform <- function(name) {
     'tolower' = tolower,
     'toupper' = toupper,
     'trimws'  = trimws,
+    'il_soundex'    = il_soundex,
+    'il_metaphone'  = il_metaphone,
+    'il_dmetaphone' = il_dmetaphone,
     NULL
   )
+}
+
+#' Is this a phonetic transform function?
+#' @noRd
+is_phonetic_transform <- function(transform) {
+  identical(transform, il_soundex) ||
+    identical(transform, il_metaphone) ||
+    identical(transform, il_dmetaphone)
+}
+
+#' Generate SQL expression for a phonetic transform
+#'
+#' Returns the dialect-appropriate SQL wrapping `col_ref`, or `NULL` if
+#' `transform` is not a phonetic function.
+#'
+#' @param transform An R function.
+#' @param col_ref Character SQL column reference.
+#' @param dialect Optional SQL dialect string.
+#' @return A SQL expression string, or `NULL`.
+#' @noRd
+phonetic_transform_sql <- function(transform, col_ref, dialect = NULL) {
+  if (identical(transform, il_soundex)) {
+    if (!is.null(dialect)) {
+      validate_phonetic_dialect('il_soundex', dialect)
+    }
+    # DuckDB uses our registered macro; PostgreSQL has native soundex()
+    if (identical(dialect, 'duckdb')) {
+      return(paste0('il_soundex(', col_ref, ')'))
+    }
+    return(paste0('soundex(', col_ref, ')'))
+  }
+  if (identical(transform, il_metaphone)) {
+    if (!is.null(dialect)) {
+      validate_phonetic_dialect('il_metaphone', dialect)
+    }
+    return(paste0('metaphone(', col_ref, ', 10)'))
+  }
+  if (identical(transform, il_dmetaphone)) {
+    if (!is.null(dialect)) {
+      validate_phonetic_dialect('il_dmetaphone', dialect)
+    }
+    return(paste0('dmetaphone(', col_ref, ')'))
+  }
+  NULL
+}
+
+#' Validate that a phonetic function is supported by a SQL dialect
+#' @noRd
+validate_phonetic_dialect <- function(fn_name, dialect) {
+  supported <- switch(fn_name,
+    'il_soundex'    = c('duckdb', 'postgres'),
+    'il_metaphone'  = 'postgres',
+    'il_dmetaphone' = 'postgres',
+    character(0)
+  )
+  if (!dialect %in% supported) {
+    label <- switch(fn_name,
+      'il_soundex'    = 'Soundex',
+      'il_metaphone'  = 'Metaphone',
+      'il_dmetaphone' = 'Double Metaphone'
+    )
+    cli::cli_abort(c(
+      '{label} is not available for the {.val {dialect}} backend.',
+      'i' = 'Supported backend{?s}: {.val {supported}}.'
+    ))
+  }
 }
 
 #' Generate a multi-level gamma CASE expression for one comparison
@@ -116,8 +202,8 @@ sql_gamma_case <- function(comp, dialect) {
   tf <- comp$transform
 
   # Build column references with optional transforms
-  lcol <- sql_transform_col(glue::glue('l.{col}'), tf)
-  rcol <- sql_transform_col(glue::glue('r.{col}'), tf)
+  lcol <- sql_transform_col(glue::glue('l.{col}'), tf, dialect)
+  rcol <- sql_transform_col(glue::glue('r.{col}'), tf, dialect)
 
   null_guard <- glue::glue(
     'l.{col} IS NOT NULL AND r.{col} IS NOT NULL'
@@ -333,7 +419,9 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL) {
   for (tp in table_pairs) {
     if (length(blocking_rules) > 0L) {
       parts <- vapply(blocking_rules, function(br) {
-        cond <- build_blocking_condition(br$columns, br$where)
+        cond <- build_blocking_condition(br$columns, br$where,
+                                          transform = br$transform,
+                                          dialect = dialect)
         glue::glue(
           '{select_prefix}',
           'FROM {tp$from_l} l, {tp$from_r} r ',
@@ -586,13 +674,19 @@ build_select_aliases <- function(cols) {
 #' Build a WHERE clause for blocking on equality
 #'
 #' @param columns Character vector of column names to block on.
+#' @param where Optional raw SQL string for non-equality conditions.
+#' @param transform Optional transform function applied to both sides.
+#' @param dialect Optional SQL dialect string for phonetic transforms.
 #' @return A character string like `"l.col1 = r.col1 AND l.col2 = r.col2"`.
 #' @noRd
-build_blocking_condition <- function(columns, where = NULL) {
+build_blocking_condition <- function(columns, where = NULL, transform = NULL,
+                                     dialect = NULL) {
   parts <- character(0)
   if (length(columns) > 0L) {
     parts <- vapply(columns, function(col) {
-      glue::glue('l.{col} = r.{col}')
+      lcol <- sql_transform_col(glue::glue('l.{col}'), transform, dialect)
+      rcol <- sql_transform_col(glue::glue('r.{col}'), transform, dialect)
+      glue::glue('{lcol} = {rcol}')
     }, character(1))
   }
   if (!is.null(where) && !is.na(where) && nzchar(where)) {

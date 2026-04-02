@@ -50,6 +50,9 @@ il_model <- function(.data, ..., spec, con = NULL,
   reg_l <- register_data(.data, con = con, tbl_name = '__il_data_l')
   con <- reg_l$con
 
+  # Register phonetic SQL macros if any transforms require them
+  register_phonetic_macros(con)
+
   # Validate columns referenced in spec exist in data
   spec_cols <- get_spec_columns(spec)
   missing_cols <- setdiff(spec_cols, reg_l$columns)
@@ -141,6 +144,9 @@ il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
   # Register primary data
   reg_l <- register_data(.data, con = con, tbl_name = '__il_data_l')
   con <- reg_l$con
+
+  # Register phonetic SQL macros if needed
+  register_phonetic_macros(con)
 
   # Validate columns
   spec_cols <- get_spec_columns(model$spec)

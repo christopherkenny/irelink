@@ -86,6 +86,9 @@ il_count_pairs <- function(.data, ..., con = NULL,
   con <- reg_l$con
   on.exit(drop_registered(con, tbl_l), add = TRUE)
 
+  # Register phonetic SQL macros if needed
+  register_phonetic_macros(con)
+
   if (link_type == 'link' && length(extra_inputs) > 0L) {
     tbl_r <- '__il_pairs_r'
     reg_r <- register_data(extra_inputs[[1]],
@@ -119,8 +122,12 @@ il_count_pairs <- function(.data, ..., con = NULL,
     cartesian <- as.numeric(n_l^2)
   }
 
+  dialect <- detect_dialect(con)
+
   results <- lapply(blocking_rules, function(rule) {
-    where <- build_blocking_condition(rule$columns, rule$where)
+    where <- build_blocking_condition(rule$columns, rule$where,
+                                      transform = rule$transform,
+                                      dialect = dialect)
     n <- count_blocked_pairs(con, tbl_l, tbl_r, where,
       dedupe = (link_type == 'dedupe')
     )
@@ -143,7 +150,9 @@ il_count_pairs <- function(.data, ..., con = NULL,
   cum_pairs <- integer(length(blocking_rules))
   for (i in seq_along(blocking_rules)) {
     rule <- blocking_rules[[i]]
-    where <- build_blocking_condition(rule$columns, rule$where)
+    where <- build_blocking_condition(rule$columns, rule$where,
+                                      transform = rule$transform,
+                                      dialect = dialect)
     dedup_cond <- if (link_type == 'dedupe') 'l.unique_id < r.unique_id AND ' else ''
     cum_parts <- c(cum_parts, glue::glue(
       'SELECT l.unique_id AS lid, r.unique_id AS rid ',

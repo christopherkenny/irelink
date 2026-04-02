@@ -54,14 +54,22 @@ print.il_spec <- function(x, ...) {
       rule <- rules[[i]]
       has_cols <- length(rule$columns) > 0L
       has_where <- !is.null(rule$where) && !is.na(rule$where) && nzchar(rule$where)
+      has_tf <- !is.null(rule$transform)
+      tf_label <- if (has_tf) {
+        nm <- transform_to_name(rule$transform)
+        if (!is.null(nm)) paste0(' [', nm, ']') else ''
+      } else {
+        ''
+      }
       rule_label <- if (has_cols && has_where) {
         paste0(
           paste(rule$columns, collapse = ', '),
+          tf_label,
           ' + WHERE ',
           rule$where
         )
       } else if (has_cols) {
-        paste(rule$columns, collapse = ', ')
+        paste0(paste(rule$columns, collapse = ', '), tf_label)
       } else if (has_where) {
         paste0('WHERE ', rule$where)
       } else {

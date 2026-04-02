@@ -99,7 +99,11 @@ il_save <- function(model, path, overwrite = FALSE) {
       entry
     }),
     blocking_rules = lapply(model$spec$blocking_rules, function(br) {
-      unclass(br)
+      out <- list(columns = br$columns, where = br$where)
+      if (!is.null(br$transform)) {
+        out$transform <- transform_to_name(br$transform)
+      }
+      out
     })
   )
 
@@ -237,6 +241,12 @@ il_load <- function(path) {
     # jsonlite turns null → NA for data frame columns; restore to NULL
     if (!is.null(br_data$where) && is.na(br_data$where)) {
       br_data$where <- NULL
+    }
+    # Restore transform function from serialized name
+    if (!is.null(br_data$transform) && is.character(br_data$transform)) {
+      br_data$transform <- name_to_transform(br_data$transform)
+    } else if (!is.null(br_data$transform) && is.na(br_data$transform)) {
+      br_data$transform <- NULL
     }
     structure(br_data, class = 'il_blocking_rule')
   })
