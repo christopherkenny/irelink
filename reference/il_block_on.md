@@ -10,7 +10,7 @@ where multiple conditions inside one call are AND-ed.
 ## Usage
 
 ``` r
-il_block_on(spec, ..., .where = NULL)
+il_block_on(spec, ..., .where = NULL, .transform = NULL)
 ```
 
 ## Arguments
@@ -29,6 +29,15 @@ il_block_on(spec, ..., .where = NULL)
   An optional raw SQL string for non-equality blocking conditions.
   Defaults to `NULL`.
 
+- .transform:
+
+  An optional transform function applied to both left and right column
+  values before the equality check. Useful for phonetic blocking — see
+  [il_soundex](http://christophertkenny.com/irelink/reference/phonetic.md),
+  [il_metaphone](http://christophertkenny.com/irelink/reference/phonetic.md),
+  and
+  [il_dmetaphone](http://christophertkenny.com/irelink/reference/phonetic.md).
+
 ## Value
 
 An updated `il_spec` (a new copy; the input is not modified).
@@ -44,4 +53,8 @@ spec <- il_spec() |>
 # Block where state AND year both match (one call = AND)
 spec <- il_spec() |>
   il_block_on(state, year)
+
+# Phonetic blocking: group similar-sounding names
+spec <- il_spec() |>
+  il_block_on(first_name, .transform = il_soundex)
 ```

@@ -59,6 +59,15 @@ field.
 - [`cl_not()`](http://christophertkenny.com/irelink/reference/cl_not.md)
   : Negate a Comparison Condition
 
+## Phonetic Transforms
+
+Phonetic encoding functions for blocking and comparison on name fields.
+
+- [`il_soundex()`](http://christophertkenny.com/irelink/reference/phonetic.md)
+  [`il_metaphone()`](http://christophertkenny.com/irelink/reference/phonetic.md)
+  [`il_dmetaphone()`](http://christophertkenny.com/irelink/reference/phonetic.md)
+  : Phonetic Transform Functions
+
 ## Domain-Specific Comparisons
 
 Pre-configured multi-level comparisons for common field types.
