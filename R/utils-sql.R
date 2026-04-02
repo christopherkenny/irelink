@@ -36,18 +36,28 @@ dialect_has_fuzzy_sql <- function(dialect) {
 #' @return A SQL expression string.
 #' @noRd
 sql_transform_col <- function(col_ref, transform) {
-  if (is.null(transform)) return(col_ref)
+  if (is.null(transform)) {
+    return(col_ref)
+  }
   fn_name <- transform_to_sql_fn(transform)
-  if (is.null(fn_name)) return(col_ref)
+  if (is.null(fn_name)) {
+    return(col_ref)
+  }
   paste0(fn_name, '(', col_ref, ')')
 }
 
 #' Map an R function to its SQL equivalent name
 #' @noRd
 transform_to_sql_fn <- function(transform) {
-  if (identical(transform, tolower)) return('LOWER')
-  if (identical(transform, toupper)) return('UPPER')
-  if (identical(transform, trimws))  return('TRIM')
+  if (identical(transform, tolower)) {
+    return('LOWER')
+  }
+  if (identical(transform, toupper)) {
+    return('UPPER')
+  }
+  if (identical(transform, trimws)) {
+    return('TRIM')
+  }
   NULL
 }
 
@@ -60,9 +70,15 @@ transform_has_sql <- function(transform) {
 #' Map an R function to a serializable name
 #' @noRd
 transform_to_name <- function(transform) {
-  if (identical(transform, tolower)) return('tolower')
-  if (identical(transform, toupper)) return('toupper')
-  if (identical(transform, trimws))  return('trimws')
+  if (identical(transform, tolower)) {
+    return('tolower')
+  }
+  if (identical(transform, toupper)) {
+    return('toupper')
+  }
+  if (identical(transform, trimws)) {
+    return('trimws')
+  }
   cli::cli_warn('Custom transform cannot be serialized; it will be lost on save/load.')
   NULL
 }
@@ -70,7 +86,9 @@ transform_to_name <- function(transform) {
 #' Map a serialized name back to an R function
 #' @noRd
 name_to_transform <- function(name) {
-  if (is.null(name)) return(NULL)
+  if (is.null(name)) {
+    return(NULL)
+  }
   switch(name,
     'tolower' = tolower,
     'toupper' = toupper,
@@ -250,7 +268,12 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
   }
   if (method == 'date_diff') {
     t <- sub$thresholds[1]
-    mult <- switch(sub$units[1], 'days' = 1, 'months' = 30, 'years' = 365, 1)
+    mult <- switch(sub$units[1],
+      'days' = 1,
+      'months' = 30,
+      'years' = 365,
+      1
+    )
     days_val <- t * mult
     if (dialect == 'duckdb') {
       return(glue::glue('{null_guard} AND ABS(CAST({lcol} AS DATE) - CAST({rcol} AS DATE)) <= {days_val}'))
@@ -661,9 +684,9 @@ sql_tf_adj_expr <- function(col, max_level, u_exact) {
 #' @noRd
 build_scored_query <- function(model, threshold = 0.85) {
   comparisons <- model$spec$comparisons
-  params      <- model$params$comparisons
-  prior       <- model$params$prior %||% 0.05
-  comp_names  <- vapply(comparisons, function(c) c$columns, character(1))
+  params <- model$params$comparisons
+  prior <- model$params$prior %||% 0.05
+  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
   blocking_rules <- model$spec$blocking_rules
 
   mu <- extract_mu_vectors(params, comp_names)

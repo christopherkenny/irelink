@@ -7,6 +7,8 @@
 #'
 #' @param ... Numeric thresholds between 0 and 1, ordered from strictest
 #'   to most lenient (e.g., `0.9, 0.7`).
+#' @param term_frequency Logical. If `TRUE`, adjust match weights by
+#'   value frequency at the highest comparison level. Defaults to `FALSE`.
 #'
 #' @return A comparison-level object for use in [il_compare()].
 #' @export
@@ -14,10 +16,10 @@
 #' @examples
 #' il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
-#'   il_compare(surname, cl_jaro_winkler(0.9))
-cl_jaro_winkler <- function(...) {
+#'   il_compare(surname, cl_jaro_winkler(0.9, term_frequency = TRUE))
+cl_jaro_winkler <- function(..., term_frequency = FALSE) {
   thresholds <- check_similarity_thresholds(c(...), 'cl_jaro_winkler')
-  new_comparison_level('jaro_winkler', thresholds = thresholds)
+  new_comparison_level('jaro_winkler', thresholds = thresholds, term_frequency = term_frequency)
 }
 
 #' Jaro String Similarity Comparison
@@ -27,6 +29,8 @@ cl_jaro_winkler <- function(...) {
 #'
 #' @param ... Numeric thresholds between 0 and 1, ordered from strictest
 #'   to most lenient.
+#' @param term_frequency Logical. If `TRUE`, adjust match weights by
+#'   value frequency at the highest comparison level. Defaults to `FALSE`.
 #'
 #' @return A comparison-level object for use in [il_compare()].
 #' @export
@@ -34,7 +38,7 @@ cl_jaro_winkler <- function(...) {
 #' @examples
 #' il_spec() |>
 #'   il_compare(name, cl_jaro(0.9))
-cl_jaro <- function(...) {
+cl_jaro <- function(..., term_frequency = FALSE) {
   thresholds <- check_similarity_thresholds(c(...), 'cl_jaro')
-  new_comparison_level('jaro', thresholds = thresholds)
+  new_comparison_level('jaro', thresholds = thresholds, term_frequency = term_frequency)
 }

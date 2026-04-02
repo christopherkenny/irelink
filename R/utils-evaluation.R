@@ -22,7 +22,7 @@
 #'
 #' @examples
 #' \dontrun{
-#' labels <- labels_from_column(model, "cluster")
+#' labels <- labels_from_column(model, 'cluster')
 #' il_accuracy(model, labels)
 #' }
 labels_from_column <- function(model, labels_col, threshold = 0) {

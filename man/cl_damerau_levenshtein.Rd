@@ -4,11 +4,14 @@
 \alias{cl_damerau_levenshtein}
 \title{Damerau-Levenshtein Edit-Distance Comparison}
 \usage{
-cl_damerau_levenshtein(...)
+cl_damerau_levenshtein(..., term_frequency = FALSE)
 }
 \arguments{
 \item{...}{Integer distance thresholds, ordered from strictest to most
 lenient.}
+
+\item{term_frequency}{Logical. If \code{TRUE}, adjust match weights by
+value frequency at the highest comparison level. Defaults to \code{FALSE}.}
 }
 \value{
 A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.

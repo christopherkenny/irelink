@@ -154,7 +154,9 @@ new_comparison_level <- function(method, ..., is_null_level = FALSE,
 n_gamma_levels <- function(comp_method) {
   method <- comp_method$method
 
-  if (method == 'exact') return(2L)
+  if (method == 'exact') {
+    return(2L)
+  }
 
   if (!is.null(comp_method$thresholds)) {
     return(length(comp_method$thresholds) + 1L)

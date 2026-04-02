@@ -31,6 +31,11 @@ test_that('cl_levels() nests child levels in order', {
   expect_length(lvls$levels, 5)
 })
 
+test_that('cl_levels() accepts term_frequency flag', {
+  lvls <- cl_levels(cl_null(), cl_exact(), cl_else(), term_frequency = TRUE)
+  expect_true(lvls$term_frequency)
+})
+
 test_that('cl_levels() validates cl_null() is first if present', {
   expect_error(
     cl_levels(cl_exact(), cl_null(), cl_else()),

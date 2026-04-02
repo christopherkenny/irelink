@@ -4,10 +4,11 @@
 \alias{cl_name}
 \title{Personal Name Comparison}
 \usage{
-cl_name(...)
+cl_name(term_frequency = FALSE)
 }
 \arguments{
-\item{...}{Reserved for future options.}
+\item{term_frequency}{Logical. If \code{TRUE}, adjust match weights by
+name frequency at the highest comparison level. Defaults to \code{FALSE}.}
 }
 \value{
 A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
@@ -19,5 +20,6 @@ typical name variation.
 }
 \examples{
 il_spec() |>
-  il_compare(first_name, cl_name())
+  il_compare(first_name, cl_name()) |>
+  il_compare(surname, cl_name(term_frequency = TRUE))
 }

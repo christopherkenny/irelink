@@ -510,3 +510,8 @@ Please fix any issues you encounter.
 
 Can you review all of the vignettes for this new record linking R package?
 Please fix any issues you encounter.
+
+# US-ability (Sonnet 4.6 medium)
+
+Can you scan for non-American terms and flag them, such as postcode.
+We should ensure that US records are treated well.

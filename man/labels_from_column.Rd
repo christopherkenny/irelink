@@ -31,7 +31,7 @@ supply the column name and let irelink derive everything.
 }
 \examples{
 \dontrun{
-labels <- labels_from_column(model, "cluster")
+labels <- labels_from_column(model, 'cluster')
 il_accuracy(model, labels)
 }
 }

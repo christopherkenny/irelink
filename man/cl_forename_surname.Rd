@@ -4,10 +4,14 @@
 \alias{cl_forename_surname}
 \title{Forename and Surname Comparison with Swap Detection}
 \usage{
-cl_forename_surname(...)
+cl_forename_surname(surname = "surname", term_frequency = FALSE)
 }
 \arguments{
-\item{...}{Reserved for future options.}
+\item{surname}{Name of the surname column in the data. Defaults to
+\code{'surname'}.}
+
+\item{term_frequency}{Logical. If \code{TRUE}, adjust match weights by
+name frequency at the highest comparison level. Defaults to \code{FALSE}.}
 }
 \value{
 A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
@@ -15,9 +19,14 @@ A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
 \description{
 A pre-built domain comparison that compares forename and surname
 columns, including a cross-field swap-detection level (where first name
-and surname are accidentally transposed).
+and surname are accidentally transposed). Pass this to
+\code{\link[=il_compare]{il_compare()}} on the forename/first-name column and supply the
+companion surname/last-name column via \code{surname}.
+}
+\details{
+See also \code{\link[=cl_first_last_name]{cl_first_last_name()}} for an American-English alias.
 }
 \examples{
 il_spec() |>
-  il_compare(first_name, cl_forename_surname())
+  il_compare(first_name, cl_forename_surname(surname = 'last_name'))
 }

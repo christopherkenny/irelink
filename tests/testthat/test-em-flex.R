@@ -1,4 +1,4 @@
-test_that("fix_u = TRUE, fix_m = FALSE is the default (current behaviour)", {
+test_that('fix_u = TRUE, fix_m = FALSE is the default (current behaviour)', {
   con <- test_con()
   on.exit(test_discon(con))
 
@@ -19,7 +19,7 @@ test_that("fix_u = TRUE, fix_m = FALSE is the default (current behaviour)", {
   expect_equal(m1$params$comparisons$u, m2$params$comparisons$u)
 })
 
-test_that("fix_u = FALSE also updates u parameters", {
+test_that('fix_u = FALSE also updates u parameters', {
   con <- test_con()
   on.exit(test_discon(con))
 
@@ -41,7 +41,7 @@ test_that("fix_u = FALSE also updates u parameters", {
   expect_false(all(abs(u_after - u_before) < 1e-10))
 })
 
-test_that("fix_m = TRUE keeps m fixed", {
+test_that('fix_m = TRUE keeps m fixed', {
   con <- test_con()
   on.exit(test_discon(con))
 
@@ -68,7 +68,7 @@ test_that("fix_m = TRUE keeps m fixed", {
   expect_false(all(abs(m4$params$comparisons$u - model$params$comparisons$u) < 1e-10))
 })
 
-test_that("both fixed errors", {
+test_that('both fixed errors', {
   con <- test_con()
   on.exit(test_discon(con))
 
@@ -85,6 +85,6 @@ test_that("both fixed errors", {
 
   expect_error(
     il_estimate_em(model, block_on(surname), fix_u = TRUE, fix_m = TRUE),
-    "fix_u.*fix_m"
+    'fix_u.*fix_m'
   )
 })

@@ -203,7 +203,9 @@ predict_lazy <- function(model, threshold) {
 #' @return The result tibble with additional field columns.
 #' @noRd
 join_original_fields <- function(result, model) {
-  if (nrow(result) == 0L) return(result)
+  if (nrow(result) == 0L) {
+    return(result)
+  }
 
   con <- model$con
   tbl_l <- model$data$tbl_l
@@ -218,7 +220,9 @@ join_original_fields <- function(result, model) {
   # Get all columns from source table (except unique_id which we already have)
   all_cols <- DBI::dbListFields(con, tbl_l)
   field_cols <- setdiff(all_cols, 'unique_id')
-  if (length(field_cols) == 0L) return(result)
+  if (length(field_cols) == 0L) {
+    return(result)
+  }
 
   col_select <- paste(c('unique_id', field_cols), collapse = ', ')
   sql_l <- glue::glue('SELECT {col_select} FROM {tbl_l} WHERE unique_id IN ({id_list})')

@@ -32,6 +32,11 @@ test_that('cl_name() produces equivalent structure to manual composition', {
   expect_equal(length(bundle$levels), length(manual$levels))
 })
 
+test_that('cl_name() accepts term_frequency flag', {
+  lev <- cl_name(term_frequency = TRUE)
+  expect_true(lev$term_frequency)
+})
+
 # --- cl_email() -----------------------------------------------------------
 # From: test_email_comparison — levels: exact, exact-username, JW >= 0.88, JW-username
 
@@ -44,6 +49,11 @@ test_that('cl_email() has at least 4 match levels', {
   lev <- cl_email()
   # Expected: null + exact + exact-username + JW + JW-username + else >= 6
   expect_true(length(lev$levels) >= 4)
+})
+
+test_that('cl_email() accepts term_frequency flag', {
+  lev <- cl_email(term_frequency = TRUE)
+  expect_true(lev$term_frequency)
 })
 
 # --- cl_dob() -------------------------------------------------------------
@@ -60,6 +70,11 @@ test_that('cl_dob() has at least 4 match levels', {
   expect_true(length(lev$levels) >= 4)
 })
 
+test_that('cl_dob() accepts term_frequency flag', {
+  lev <- cl_dob(term_frequency = TRUE)
+  expect_true(lev$term_frequency)
+})
+
 # --- cl_postcode() --------------------------------------------------------
 # From: test_postcode_comparison — levels: exact, sector, district, area
 
@@ -74,7 +89,12 @@ test_that('cl_postcode() has at least 4 match levels', {
   expect_true(length(lev$levels) >= 4)
 })
 
-# --- cl_forename_surname() ------------------------------------------------
+test_that('cl_postcode() accepts term_frequency flag', {
+  lev <- cl_postcode(term_frequency = TRUE)
+  expect_true(lev$term_frequency)
+})
+
+# --- cl_forename_surname() / cl_first_last_name() -------------------------
 # From: test_forename_surname_comparison — includes reversed-columns check
 
 test_that('cl_forename_surname() returns a comparison level with correct structure', {
@@ -82,8 +102,57 @@ test_that('cl_forename_surname() returns a comparison level with correct structu
   expect_s3_class(lev, 'il_comparison_level')
 })
 
-test_that('cl_forename_surname() has at least 5 match levels', {
+test_that('cl_forename_surname() has the expected number of levels', {
   lev <- cl_forename_surname()
-  # Expected: null + exact-both + reversed + JW(0.92)-both + JW(0.88) + exact-forename + else >= 7
-  expect_true(length(lev$levels) >= 5)
+  # null + exact + swap + JW(0.92) + JW(0.88) + else = 6
+  expect_equal(length(lev$levels), 6)
+})
+
+test_that('cl_forename_surname() embeds surname column in swap SQL', {
+  lev <- cl_forename_surname(surname = 'last_name')
+  swap_level <- lev$levels[[3]]
+  expect_match(swap_level$sql_expr, 'last_name')
+})
+
+test_that('cl_forename_surname() accepts term_frequency flag', {
+  lev <- cl_forename_surname(term_frequency = TRUE)
+  expect_true(lev$term_frequency)
+})
+
+test_that('cl_first_last_name() is an alias for cl_forename_surname()', {
+  lev_alias <- cl_first_last_name(last_name = 'surname')
+  lev_orig <- cl_forename_surname(surname = 'surname')
+  expect_equal(lev_alias, lev_orig)
+})
+
+test_that('cl_first_last_name() embeds last_name column in swap SQL', {
+  lev <- cl_first_last_name(last_name = 'family_name')
+  swap_level <- lev$levels[[3]]
+  expect_match(swap_level$sql_expr, 'family_name')
+})
+
+# --- cl_zip_code() --------------------------------------------------------
+
+test_that('cl_zip_code() returns a comparison level with correct structure', {
+  lev <- cl_zip_code()
+  expect_s3_class(lev, 'il_comparison_level')
+})
+
+test_that('cl_zip_code() has the expected number of levels', {
+  lev <- cl_zip_code()
+  # null + exact + 5-digit + 3-digit + else = 5
+  expect_equal(length(lev$levels), 5)
+})
+
+test_that('cl_zip_code() uses fixed-width SUBSTR for prefix levels', {
+  lev <- cl_zip_code()
+  five_digit <- lev$levels[[3]]
+  three_digit <- lev$levels[[4]]
+  expect_match(five_digit$sql_expr, 'SUBSTR.*1, 5')
+  expect_match(three_digit$sql_expr, 'SUBSTR.*1, 3')
+})
+
+test_that('cl_zip_code() accepts term_frequency flag', {
+  lev <- cl_zip_code(term_frequency = TRUE)
+  expect_true(lev$term_frequency)
 })

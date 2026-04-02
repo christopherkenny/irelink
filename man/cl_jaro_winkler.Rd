@@ -4,11 +4,14 @@
 \alias{cl_jaro_winkler}
 \title{Jaro-Winkler String Similarity Comparison}
 \usage{
-cl_jaro_winkler(...)
+cl_jaro_winkler(..., term_frequency = FALSE)
 }
 \arguments{
 \item{...}{Numeric thresholds between 0 and 1, ordered from strictest
 to most lenient (e.g., \verb{0.9, 0.7}).}
+
+\item{term_frequency}{Logical. If \code{TRUE}, adjust match weights by
+value frequency at the highest comparison level. Defaults to \code{FALSE}.}
 }
 \value{
 A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
@@ -22,5 +25,5 @@ a waterfall chart.
 \examples{
 il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
-  il_compare(surname, cl_jaro_winkler(0.9))
+  il_compare(surname, cl_jaro_winkler(0.9, term_frequency = TRUE))
 }

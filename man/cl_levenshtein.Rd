@@ -4,11 +4,14 @@
 \alias{cl_levenshtein}
 \title{Levenshtein Edit-Distance Comparison}
 \usage{
-cl_levenshtein(...)
+cl_levenshtein(..., term_frequency = FALSE)
 }
 \arguments{
 \item{...}{Integer distance thresholds, ordered from strictest to most
 lenient (e.g., \verb{1, 2}).}
+
+\item{term_frequency}{Logical. If \code{TRUE}, adjust match weights by
+value frequency at the highest comparison level. Defaults to \code{FALSE}.}
 }
 \value{
 A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.

@@ -7,6 +7,8 @@
 #'
 #' @param ... Level objects created by [cl_null()], [cl_exact()],
 #'   [cl_jaro_winkler()], [cl_else()], and similar helpers.
+#' @param term_frequency Logical. If `TRUE`, adjust match weights by
+#'   value frequency at the highest comparison level. Defaults to `FALSE`.
 #'
 #' @return A comparison-level object for use in [il_compare()].
 #' @export
@@ -17,13 +19,14 @@
 #'     name,
 #'     cl_levels(
 #'       cl_null(),
-#'       cl_exact(term_frequency = TRUE),
+#'       cl_exact(),
 #'       cl_jaro_winkler(0.95),
 #'       cl_jaro_winkler(0.88),
-#'       cl_else()
+#'       cl_else(),
+#'       term_frequency = TRUE
 #'     )
 #'   )
-cl_levels <- function(...) {
+cl_levels <- function(..., term_frequency = FALSE) {
   levels <- list(...)
   if (length(levels) == 0L) {
     cli::cli_abort('{.fn cl_levels} requires at least one level.')
@@ -49,7 +52,7 @@ cl_levels <- function(...) {
       class = 'il_error_validation'
     )
   }
-  new_comparison_level('levels', levels = levels)
+  new_comparison_level('levels', levels = levels, term_frequency = term_frequency)
 }
 
 #' Null / Missing Value Level

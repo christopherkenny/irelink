@@ -147,7 +147,7 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
       # Look up log-probabilities by gamma level
       log_m_vals <- log(m_vec)
       log_u_vals <- log(u_vec)
-      idx <- gamma_mat[, j] + 1L  # R 1-indexed
+      idx <- gamma_mat[, j] + 1L # R 1-indexed
       log_match <- log_match + log_m_vals[idx]
       log_nonmatch <- log_nonmatch + log_u_vals[idx]
     }

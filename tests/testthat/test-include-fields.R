@@ -1,4 +1,4 @@
-test_that("include_fields = TRUE adds original columns to predicted pairs", {
+test_that('include_fields = TRUE adds original columns to predicted pairs', {
   con <- test_con()
   on.exit(test_discon(con))
 
@@ -17,15 +17,15 @@ test_that("include_fields = TRUE adds original columns to predicted pairs", {
   pairs <- predict(model, threshold = 0.5, include_fields = TRUE)
   expect_true(nrow(pairs) > 0)
   # Should have _l and _r suffixed original columns
-  expect_true("first_name_l" %in% names(pairs))
-  expect_true("first_name_r" %in% names(pairs))
-  expect_true("surname_l" %in% names(pairs))
-  expect_true("surname_r" %in% names(pairs))
-  expect_true("dob_l" %in% names(pairs))
-  expect_true("dob_r" %in% names(pairs))
+  expect_true('first_name_l' %in% names(pairs))
+  expect_true('first_name_r' %in% names(pairs))
+  expect_true('surname_l' %in% names(pairs))
+  expect_true('surname_r' %in% names(pairs))
+  expect_true('dob_l' %in% names(pairs))
+  expect_true('dob_r' %in% names(pairs))
 })
 
-test_that("include_fields = FALSE (default) does not add extra columns", {
+test_that('include_fields = FALSE (default) does not add extra columns', {
   con <- test_con()
   on.exit(test_discon(con))
 
@@ -42,6 +42,6 @@ test_that("include_fields = FALSE (default) does not add extra columns", {
   model <- il_estimate_em(model, block_on(surname))
 
   pairs <- predict(model, threshold = 0.5)
-  expect_false("first_name_l" %in% names(pairs))
-  expect_false("surname_l" %in% names(pairs))
+  expect_false('first_name_l' %in% names(pairs))
+  expect_false('surname_l' %in% names(pairs))
 })

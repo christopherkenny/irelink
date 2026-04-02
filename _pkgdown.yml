@@ -43,9 +43,11 @@ reference:
     desc: "Pre-configured multi-level comparisons for common field types."
     contents:
       - cl_name
+      - cl_first_last_name
       - cl_forename_surname
       - cl_dob
       - cl_email
+      - cl_zip_code
       - cl_postcode
 
   - title: "Model Fitting"

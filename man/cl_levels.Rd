@@ -4,11 +4,14 @@
 \alias{cl_levels}
 \title{Compose Custom Comparison Levels}
 \usage{
-cl_levels(...)
+cl_levels(..., term_frequency = FALSE)
 }
 \arguments{
 \item{...}{Level objects created by \code{\link[=cl_null]{cl_null()}}, \code{\link[=cl_exact]{cl_exact()}},
 \code{\link[=cl_jaro_winkler]{cl_jaro_winkler()}}, \code{\link[=cl_else]{cl_else()}}, and similar helpers.}
+
+\item{term_frequency}{Logical. If \code{TRUE}, adjust match weights by
+value frequency at the highest comparison level. Defaults to \code{FALSE}.}
 }
 \value{
 A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
@@ -25,10 +28,11 @@ il_spec() |>
     name,
     cl_levels(
       cl_null(),
-      cl_exact(term_frequency = TRUE),
+      cl_exact(),
       cl_jaro_winkler(0.95),
       cl_jaro_winkler(0.88),
-      cl_else()
+      cl_else(),
+      term_frequency = TRUE
     )
   )
 }

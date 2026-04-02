@@ -4,10 +4,11 @@
 \alias{cl_email}
 \title{Email Address Comparison}
 \usage{
-cl_email(...)
+cl_email(term_frequency = FALSE)
 }
 \arguments{
-\item{...}{Reserved for future options.}
+\item{term_frequency}{Logical. If \code{TRUE}, adjust match weights by
+email frequency at the highest comparison level. Defaults to \code{FALSE}.}
 }
 \value{
 A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.

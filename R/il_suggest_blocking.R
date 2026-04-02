@@ -45,8 +45,10 @@ il_suggest_blocking <- function(.data, columns = NULL, con = NULL,
   max_depth <- as.integer(max_depth)
 
   tbl_name <- '__il_suggest'
-  reg <- register_data(.data, con = con, tbl_name = tbl_name,
-                       add_unique_id = TRUE)
+  reg <- register_data(.data,
+    con = con, tbl_name = tbl_name,
+    add_unique_id = TRUE
+  )
   con <- reg$con
   on.exit(drop_registered(con, tbl_name), add = TRUE)
   n <- reg$n_records
@@ -64,13 +66,15 @@ il_suggest_blocking <- function(.data, columns = NULL, con = NULL,
 
   # Evaluate single-column rules
   candidates <- evaluate_column_combos(
-    con, tbl_name, columns, n, cartesian, link_type, depth = 1L
+    con, tbl_name, columns, n, cartesian, link_type,
+    depth = 1L
   )
 
   # Optionally evaluate two-column combos
   if (max_depth >= 2L && length(columns) >= 2L) {
     combos_2 <- evaluate_column_combos(
-      con, tbl_name, columns, n, cartesian, link_type, depth = 2L
+      con, tbl_name, columns, n, cartesian, link_type,
+      depth = 2L
     )
     candidates <- rbind(candidates, combos_2)
   }
@@ -114,7 +118,8 @@ evaluate_column_combos <- function(con, tbl_name, columns, n, cartesian,
     # pair count
     where <- build_blocking_condition(cols, where = NULL)
     n_pairs <- count_blocked_pairs(con, tbl_name, tbl_name, where,
-                                   dedupe = (link_type == 'dedupe'))
+      dedupe = (link_type == 'dedupe')
+    )
     pct <- if (cartesian > 0) n_pairs / cartesian * 100 else 0
 
     # Score: high coverage × high reduction (low pct)
@@ -161,7 +166,8 @@ il_find_blocking_below <- function(.data, max_pairs, columns = NULL,
                                    link_type = c('dedupe', 'link'),
                                    max_depth = 2L) {
   candidates <- il_suggest_blocking(
-    .data, columns = columns, con = con,
+    .data,
+    columns = columns, con = con,
     link_type = link_type, max_depth = max_depth
   )
   below <- candidates[candidates$n_pairs <= max_pairs, , drop = FALSE]
@@ -191,8 +197,10 @@ il_find_blocking_below <- function(.data, max_pairs, columns = NULL,
 #' }
 block_from_labels <- function(.data, labels, columns = NULL, con = NULL) {
   tbl_name <- '__il_bfl'
-  reg <- register_data(.data, con = con, tbl_name = tbl_name,
-                       add_unique_id = TRUE)
+  reg <- register_data(.data,
+    con = con, tbl_name = tbl_name,
+    add_unique_id = TRUE
+  )
   con <- reg$con
   on.exit(drop_registered(con, tbl_name), add = TRUE)
 

@@ -4,10 +4,12 @@
 \alias{cl_dob}
 \title{Date of Birth Comparison}
 \usage{
-cl_dob(...)
+cl_dob(term_frequency = FALSE)
 }
 \arguments{
-\item{...}{Reserved for future options.}
+\item{term_frequency}{Logical. If \code{TRUE}, adjust match weights by
+date-of-birth frequency at the highest comparison level. Defaults
+to \code{FALSE}.}
 }
 \value{
 A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.

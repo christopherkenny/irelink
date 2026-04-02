@@ -11,6 +11,10 @@ Initial development release, translating Python's [splink](https://github.com/mo
 
 ## Comparison library
 
+- `cl_first_last_name()` is a new American-English alias for `cl_forename_surname()`. Both accept a companion column argument (`last_name` / `surname`) and a `term_frequency` flag.
+- `cl_forename_surname()` now accepts a `surname` argument (default `'surname'`) so the companion column name can be specified explicitly. This also fixes a bug where the swap-detection SQL referenced unresolved `{col_forename}` and `{col_surname}` variables at runtime.
+- `cl_zip_code()` is a new domain comparison for US ZIP codes with levels for exact match, 5-digit prefix (ZIP+4 normalization), and 3-digit Sectional Center Facility prefix.
+- `cl_damerau_levenshtein()`, `cl_dob()`, `cl_email()`, `cl_jaro()`, `cl_jaro_winkler()`, `cl_levenshtein()`, `cl_levels()`, `cl_name()`, and `cl_postcode()` now accept `term_frequency = TRUE` to apply Fellegi-Sunter term-frequency adjustments at the highest comparison level, giving rare values higher match weights than common ones.
 - `cl_exact()` for exact matches.
 - `cl_jaro_winkler()` and `cl_levenshtein()` for fuzzy strings.
 - `cl_date_diff()` for temporal proximity.

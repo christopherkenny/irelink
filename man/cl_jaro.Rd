@@ -4,11 +4,14 @@
 \alias{cl_jaro}
 \title{Jaro String Similarity Comparison}
 \usage{
-cl_jaro(...)
+cl_jaro(..., term_frequency = FALSE)
 }
 \arguments{
 \item{...}{Numeric thresholds between 0 and 1, ordered from strictest
 to most lenient.}
+
+\item{term_frequency}{Logical. If \code{TRUE}, adjust match weights by
+value frequency at the highest comparison level. Defaults to \code{FALSE}.}
 }
 \value{
 A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.

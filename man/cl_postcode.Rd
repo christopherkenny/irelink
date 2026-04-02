@@ -4,10 +4,12 @@
 \alias{cl_postcode}
 \title{Postcode Comparison}
 \usage{
-cl_postcode(...)
+cl_postcode(term_frequency = FALSE)
 }
 \arguments{
-\item{...}{Reserved for future options (e.g., geographic fallback).}
+\item{term_frequency}{Logical. If \code{TRUE}, adjust match weights by
+postcode frequency at the highest comparison level. Defaults to
+\code{FALSE}.}
 }
 \value{
 A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
