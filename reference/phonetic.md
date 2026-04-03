@@ -35,18 +35,23 @@ the computation is pushed into SQL so data is never materialised into R.
 
 ### SQL availability
 
-|                 |           |            |        |
-|-----------------|-----------|------------|--------|
-| Function        | DuckDB    | PostgreSQL | SQLite |
-| `il_soundex`    | ✓ (macro) | ✓ (native) | ✗      |
-| `il_metaphone`  | ✗         | ✓ (native) | ✗      |
-| `il_dmetaphone` | ✗         | ✓ (native) | ✗      |
+|                 |           |            |                           |
+|-----------------|-----------|------------|---------------------------|
+| Function        | DuckDB    | PostgreSQL | SQLite                    |
+| `il_soundex`    | ✓ (macro) | ✓ (native) | comparisons only (R-side) |
+| `il_metaphone`  | ✗         | ✓ (native) | ✗                         |
+| `il_dmetaphone` | ✗         | ✓ (native) | ✗                         |
+
+SQLite does not expose a way to register scalar R functions as SQL UDFs,
+so phonetic transforms cannot be used in **blocking rules** on SQLite.
+They continue to work in **comparisons** on SQLite via the R-side gamma
+computation path.
 
 ## Examples
 
 ``` r
-il_soundex(c("Smith", "Smyth"))
+il_soundex(c('Smith', 'Smyth'))
 #> [1] "S530" "S530"
-il_soundex(c("Robert", "Rupert"))
+il_soundex(c('Robert', 'Rupert'))
 #> [1] "R163" "R163"
 ```

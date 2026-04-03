@@ -96,8 +96,8 @@ Requires a DuckDB or PostgreSQL backend.</p></dd>
 <dt id="arg-include-fields">include_fields<a class="anchor" aria-label="anchor" href="#arg-include-fields"></a></dt>
 <dd><p>If <code>TRUE</code>, the original column values from both
 records in each pair are included in the output (suffixed <code>_l</code> and
-<code>_r</code>). Defaults to <code>FALSE</code> for performance. Only applies when
-<code>collect = TRUE</code>.</p></dd>
+<code>_r</code>). Defaults to <code>FALSE</code> for performance. When <code>collect = FALSE</code>
+the join is performed in-database before the table is created.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>

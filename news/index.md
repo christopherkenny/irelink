@@ -118,6 +118,24 @@ probabilistic record linkage engine into idiomatic R.
 - [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
   methods produce ggplot2 charts from model inspection outputs.
 
+### Data exploration
+
+- [`il_profile()`](http://christophertkenny.com/irelink/reference/il_profile.md)
+  now accepts raw SQL expressions as character strings in addition to
+  bare column names (e.g.,
+  `il_profile(df, "city || left(first_name, 1)", con = con)`). The
+  expression is passed directly to the database `GROUP BY`, matching the
+  behaviour of splink’s `column_expressions` argument.
+
+### Prediction
+
+- [`predict()`](https://rdrr.io/r/stats/predict.html) now supports
+  `include_fields = TRUE` when `collect = FALSE`. The original field
+  values are joined into the in-database scored-pairs table before
+  `__il_predicted` is created, so field columns are available without a
+  separate R-side join. Previously `include_fields` was silently ignored
+  on the lazy path.
+
 ### SQL backends and persistence
 
 - All computation runs inside a DBI-compatible database: DuckDB

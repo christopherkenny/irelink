@@ -171,20 +171,20 @@ il_weights(model)
 #> # A tibble: 14 × 5
 #>    comparison    gamma_level   m_prob  u_prob weight
 #>    <chr>               <int>    <dbl>   <dbl>  <dbl>
-#>  1 given_name              0 0.207    0.973   -2.23 
-#>  2 given_name              1 0.000999 0.0216  -4.44 
-#>  3 given_name              2 0.000999 0.00086  0.217
+#>  1 given_name              0 0.209    0.973   -2.22 
+#>  2 given_name              1 0.000999 0.0216  -4.43 
+#>  3 given_name              2 0.000999 0.00092  0.119
 #>  4 given_name              3 0.188    0.00143  7.04 
-#>  5 given_name              4 0.603    0.00315  7.58 
-#>  6 surname                 0 0.145    0.981   -2.76 
-#>  7 surname                 1 0.0150   0.0138   0.123
-#>  8 surname                 2 0.0149   0.0008   4.22 
-#>  9 surname                 3 0.151    0.0011   7.10 
-#> 10 surname                 4 0.674    0.00324  7.70 
-#> 11 date_of_birth           0 0.0830   1.000   -3.59 
-#> 12 date_of_birth           1 0.917    0.00019 12.2  
-#> 13 postcode                0 0.136    0.999   -2.87 
-#> 14 postcode                1 0.864    0.00103  9.71
+#>  5 given_name              4 0.602    0.00274  7.78 
+#>  6 surname                 0 0.146    0.981   -2.75 
+#>  7 surname                 1 0.0149   0.0137   0.124
+#>  8 surname                 2 0.0148   0.00091  4.03 
+#>  9 surname                 3 0.151    0.00121  6.96 
+#> 10 surname                 4 0.673    0.00303  7.80 
+#> 11 date_of_birth           0 0.0832   1.000   -3.59 
+#> 12 date_of_birth           1 0.917    0.0001  13.2  
+#> 13 postcode                0 0.138    0.999   -2.86 
+#> 14 postcode                1 0.862    0.00105  9.68
 ```
 
 ## Predict and cluster
@@ -192,7 +192,7 @@ il_weights(model)
 ``` r
 predictions <- predict(model, threshold = 0.5)
 nrow(predictions)
-#> [1] 160
+#> [1] 163
 ```
 
 ``` r
@@ -209,12 +209,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 24        cluster_160
-#> 2 49        cluster_201
-#> 3 287       cluster_287
-#> 4 374       cluster_374
-#> 5 482       cluster_482
-#> 6 527       cluster_527
+#> 1 191       cluster_191
+#> 2 287       cluster_287
+#> 3 527       cluster_527
+#> 4 654       cluster_654
+#> 5 667       cluster_655
+#> 6 49        cluster_201
 ```
 
 ## Evaluate against ground truth

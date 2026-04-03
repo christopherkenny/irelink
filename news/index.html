@@ -111,6 +111,16 @@
 <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> methods produce ggplot2 charts from model inspection outputs.</li>
 </ul></div>
 <div class="section level3">
+<h3 id="data-exploration-0-0-0-9000">Data exploration<a class="anchor" aria-label="anchor" href="#data-exploration-0-0-0-9000"></a></h3>
+<ul><li>
+<code><a href="../reference/il_profile.html">il_profile()</a></code> now accepts raw SQL expressions as character strings in addition to bare column names (e.g., <code>il_profile(df, "city || left(first_name, 1)", con = con)</code>). The expression is passed directly to the database <code>GROUP BY</code>, matching the behaviour of splink’s <code>column_expressions</code> argument.</li>
+</ul></div>
+<div class="section level3">
+<h3 id="prediction-0-0-0-9000">Prediction<a class="anchor" aria-label="anchor" href="#prediction-0-0-0-9000"></a></h3>
+<ul><li>
+<code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> now supports <code>include_fields = TRUE</code> when <code>collect = FALSE</code>. The original field values are joined into the in-database scored-pairs table before <code>__il_predicted</code> is created, so field columns are available without a separate R-side join. Previously <code>include_fields</code> was silently ignored on the lazy path.</li>
+</ul></div>
+<div class="section level3">
 <h3 id="sql-backends-and-persistence-0-0-0-9000">SQL backends and persistence<a class="anchor" aria-label="anchor" href="#sql-backends-and-persistence-0-0-0-9000"></a></h3>
 <ul><li>All computation runs inside a DBI-compatible database: DuckDB (recommended), SQLite, or PostgreSQL.</li>
 <li>

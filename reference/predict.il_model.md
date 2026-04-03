@@ -49,7 +49,8 @@ predict(
 
   If `TRUE`, the original column values from both records in each pair
   are included in the output (suffixed `_l` and `_r`). Defaults to
-  `FALSE` for performance. Only applies when `collect = TRUE`.
+  `FALSE` for performance. When `collect = FALSE` the join is performed
+  in-database before the table is created.
 
 - ...:
 

@@ -19,8 +19,9 @@ il_profile(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL)
 
 - ...:
 
-  \<[`tidy-select`](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html)\>
-  Columns to profile. If empty, all columns are profiled.
+  Columns to profile, specified as unquoted names or as character
+  strings containing raw SQL expressions (e.g.,
+  `"city || ' ' || first_name"`). If empty, all columns are profiled.
 
 - con:
 
@@ -86,10 +87,10 @@ il_profile(df, first_name, surname, con = con, top_n = 5)
 #>    column     value     n
 #>    <chr>      <chr> <dbl>
 #>  1 first_name Jane      3
-#>  2 first_name John      2
-#>  3 first_name Alice     2
-#>  4 first_name Tom       2
-#>  5 first_name Jon       2
+#>  2 first_name Jon       2
+#>  3 first_name Bob       2
+#>  4 first_name John      2
+#>  5 first_name Alice     2
 #>  6 surname    Doe       4
 #>  7 surname    Jones     4
 #>  8 surname    White     4

@@ -78,15 +78,19 @@ variation.</p>
 or <code><a href="il_compare.html">il_compare()</a></code>, the computation is pushed into SQL so data is
 never materialised into R.</p><div class="section">
 <h3 id="sql-availability">SQL availability<a class="anchor" aria-label="anchor" href="#sql-availability"></a></h3>
-<table class="table table"><tr><td>Function</td><td>DuckDB</td><td>PostgreSQL</td><td>SQLite</td></tr><tr><td><code>il_soundex</code></td><td>✓ (macro)</td><td>✓ (native)</td><td>✗</td></tr><tr><td><code>il_metaphone</code></td><td>✗</td><td>✓ (native)</td><td>✗</td></tr><tr><td><code>il_dmetaphone</code></td><td>✗</td><td>✓ (native)</td><td>✗</td></tr></table></div>
+<table class="table table"><tr><td>Function</td><td>DuckDB</td><td>PostgreSQL</td><td>SQLite</td></tr><tr><td><code>il_soundex</code></td><td>✓ (macro)</td><td>✓ (native)</td><td>comparisons only (R-side)</td></tr><tr><td><code>il_metaphone</code></td><td>✗</td><td>✓ (native)</td><td>✗</td></tr><tr><td><code>il_dmetaphone</code></td><td>✗</td><td>✓ (native)</td><td>✗</td></tr></table><p>SQLite does not expose a way to register scalar R functions as SQL UDFs,
+so phonetic transforms cannot be used in <strong>blocking rules</strong> on SQLite.
+They continue to work in <strong>comparisons</strong> on SQLite via the R-side gamma
+computation path.</p>
+</div>
 
     </div>
 
     <div class="section level2">
     <h2 id="ref-examples">Examples<a class="anchor" aria-label="anchor" href="#ref-examples"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">il_soundex</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Smith"</span>, <span class="st">"Smyth"</span><span class="op">)</span><span class="op">)</span></span></span>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu">il_soundex</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Smith'</span>, <span class="st">'Smyth'</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "S530" "S530"</span>
-<span class="r-in"><span><span class="fu">il_soundex</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"Robert"</span>, <span class="st">"Rupert"</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span><span class="fu">il_soundex</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'Robert'</span>, <span class="st">'Rupert'</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "R163" "R163"</span>
 </code></pre></div>
     </div>
