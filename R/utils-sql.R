@@ -109,9 +109,9 @@ name_to_transform <- function(name) {
   switch(name,
     'tolower' = tolower,
     'toupper' = toupper,
-    'trimws'  = trimws,
-    'il_soundex'    = il_soundex,
-    'il_metaphone'  = il_metaphone,
+    'trimws' = trimws,
+    'il_soundex' = il_soundex,
+    'il_metaphone' = il_metaphone,
     'il_dmetaphone' = il_dmetaphone,
     NULL
   )
@@ -420,8 +420,9 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL) {
     if (length(blocking_rules) > 0L) {
       parts <- vapply(blocking_rules, function(br) {
         cond <- build_blocking_condition(br$columns, br$where,
-                                          transform = br$transform,
-                                          dialect = dialect)
+          transform = br$transform,
+          dialect = dialect
+        )
         glue::glue(
           '{select_prefix}',
           'FROM {tp$from_l} l, {tp$from_r} r ',
@@ -845,5 +846,57 @@ build_scored_query <- function(model, threshold = 0.85) {
     'FROM ({gamma_sql}) AS gamma_pairs',
     ') AS weighted_pairs ',
     'WHERE 1.0 / (1.0 + EXP(-({log_prior_odds} + match_weight * {ln2}))) >= {threshold}'
+  )
+}
+
+#' Wrap a scored-pairs query with LEFT JOINs to the source tables
+#'
+#' Produces a SQL query that augments the scored-pairs output with the
+#' original field values from the left and right source tables, using
+#' `_l` / `_r` suffixes.  Used by [predict_lazy()] when
+#' `include_fields = TRUE`.
+#'
+#' @param model A trained `il_model`.
+#' @param inner_sql Character scalar: the scored-pairs SQL query to wrap.
+#' @return A SQL query string with field columns appended.
+#' @noRd
+build_fields_join_query <- function(model, inner_sql) {
+  con <- model$con
+  tbl_l <- model$data$tbl_l
+  tbl_r <- model$data$tbl_r %||% tbl_l
+
+  all_cols_l <- DBI::dbListFields(con, tbl_l)
+  field_cols_l <- setdiff(all_cols_l, 'unique_id')
+
+  if (length(field_cols_l) == 0L) {
+    return(inner_sql)
+  }
+
+  field_cols_r <- if (tbl_r == tbl_l) {
+    field_cols_l
+  } else {
+    setdiff(DBI::dbListFields(con, tbl_r), 'unique_id')
+  }
+
+  l_cols <- paste(vapply(field_cols_l, function(col) {
+    qcol <- DBI::dbQuoteIdentifier(con, col)
+    qalias <- DBI::dbQuoteIdentifier(con, paste0(col, '_l'))
+    glue::glue('l.{qcol} AS {qalias}')
+  }, character(1)), collapse = ', ')
+
+  r_cols <- paste(vapply(field_cols_r, function(col) {
+    qcol <- DBI::dbQuoteIdentifier(con, col)
+    qalias <- DBI::dbQuoteIdentifier(con, paste0(col, '_r'))
+    glue::glue('r.{qcol} AS {qalias}')
+  }, character(1)), collapse = ', ')
+
+  qtbl_l <- DBI::dbQuoteIdentifier(con, tbl_l)
+  qtbl_r <- DBI::dbQuoteIdentifier(con, tbl_r)
+
+  glue::glue(
+    'SELECT s.*, {l_cols}, {r_cols} ',
+    'FROM ({inner_sql}) AS s ',
+    'LEFT JOIN {qtbl_l} AS l ON s.unique_id_l = l.unique_id ',
+    'LEFT JOIN {qtbl_r} AS r ON s.unique_id_r = r.unique_id'
   )
 }

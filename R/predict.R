@@ -20,8 +20,8 @@
 #'   Requires a DuckDB or PostgreSQL backend.
 #' @param include_fields If `TRUE`, the original column values from both
 #'   records in each pair are included in the output (suffixed `_l` and
-#'   `_r`). Defaults to `FALSE` for performance. Only applies when
-#'   `collect = TRUE`.
+#'   `_r`). Defaults to `FALSE` for performance. When `collect = FALSE`
+#'   the join is performed in-database before the table is created.
 #' @param ... Additional arguments passed to the generic.
 #'
 #' @return When `collect = TRUE`: an `il_compared` tibble with one row
@@ -101,7 +101,7 @@ predict.il_model <- function(object, threshold = 0.85,
         '{.arg collect = FALSE} requires a DuckDB or PostgreSQL backend.'
       )
     }
-    return(predict_lazy(object, threshold))
+    return(predict_lazy(object, threshold, include_fields = include_fields))
   }
 
   comparisons <- object$spec$comparisons
@@ -177,10 +177,13 @@ predict.il_model <- function(object, threshold = 0.85,
 #' @param threshold Numeric match-probability threshold.
 #' @return An `il_compared_lazy` object.
 #' @noRd
-predict_lazy <- function(model, threshold) {
+predict_lazy <- function(model, threshold, include_fields = FALSE) {
   con <- model$con
   predicted_tbl <- '__il_predicted'
   scored_sql <- build_scored_query(model, threshold)
+  if (include_fields) {
+    scored_sql <- build_fields_join_query(model, scored_sql)
+  }
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {predicted_tbl}'))
   DBI::dbExecute(con, glue::glue(
     'CREATE TABLE {predicted_tbl} AS {scored_sql}'

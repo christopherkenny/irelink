@@ -6,8 +6,9 @@
 #' table references, or character table names.
 #'
 #' @param .data A data frame, dbplyr `tbl_lazy`, or character table name.
-#' @param ... <[`tidy-select`][dplyr::dplyr_tidy_select]> Columns to
-#'   profile. If empty, all columns are profiled.
+#' @param ... Columns to profile, specified as unquoted names or as
+#'   character strings containing raw SQL expressions (e.g.,
+#'   `"city || ' ' || first_name"`). If empty, all columns are profiled.
 #' @param con A DBI connection object. Optional when `.data` is a
 #'   `tbl_lazy`.
 #' @param top_n Integer. Number of most-frequent values to return per
@@ -61,9 +62,6 @@
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_profile <- function(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL) {
   col_exprs <- rlang::enquos(...)
-  col_names <- vapply(col_exprs, function(q) {
-    as.character(rlang::quo_get_expr(q))
-  }, character(1))
 
   tbl_name <- '__il_profile_tmp'
   reg <- register_data(.data,
@@ -73,19 +71,34 @@ il_profile <- function(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL) {
   con <- reg$con
   on.exit(drop_registered(con, tbl_name), add = TRUE)
 
-  if (length(col_names) == 0L) {
-    col_names <- reg$columns
+  # Build a list of (label, sql_expr) pairs.
+  # A character literal like "city || left(name,1)" is used as raw SQL;
+  # a bare name like `first_name` is quoted as an identifier.
+  col_specs <- if (length(col_exprs) == 0L) {
+    lapply(reg$columns, function(nm) {
+      list(label = nm, sql_expr = as.character(DBI::dbQuoteIdentifier(con, nm)))
+    })
+  } else {
+    lapply(col_exprs, function(q) {
+      expr <- rlang::quo_get_expr(q)
+      if (is.character(expr)) {
+        list(label = expr, sql_expr = expr)
+      } else {
+        nm <- as.character(expr)
+        list(label = nm, sql_expr = as.character(DBI::dbQuoteIdentifier(con, nm)))
+      }
+    })
   }
 
-  results <- lapply(col_names, function(col_nm) {
-    quoted_col <- DBI::dbQuoteIdentifier(con, col_nm)
-    quoted_tbl <- DBI::dbQuoteIdentifier(con, tbl_name)
+  quoted_tbl <- DBI::dbQuoteIdentifier(con, tbl_name)
+
+  results <- lapply(col_specs, function(spec) {
     sql <- glue::glue(
-      'SELECT {quoted_col} AS value, COUNT(*) AS n FROM {quoted_tbl} ',
-      'GROUP BY {quoted_col} ORDER BY n DESC'
+      'SELECT {spec$sql_expr} AS value, COUNT(*) AS n FROM {quoted_tbl} ',
+      'GROUP BY {spec$sql_expr} ORDER BY n DESC'
     )
     res <- DBI::dbGetQuery(con, sql)
-    res$column <- col_nm
+    res$column <- spec$label
     out <- tibble::as_tibble(res[, c('column', 'value', 'n')])
 
     if (!is.null(top_n) || !is.null(bottom_n)) {

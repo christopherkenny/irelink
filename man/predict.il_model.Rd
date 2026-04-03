@@ -33,8 +33,8 @@ Requires a DuckDB or PostgreSQL backend.}
 
 \item{include_fields}{If \code{TRUE}, the original column values from both
 records in each pair are included in the output (suffixed \verb{_l} and
-\verb{_r}). Defaults to \code{FALSE} for performance. Only applies when
-\code{collect = TRUE}.}
+\verb{_r}). Defaults to \code{FALSE} for performance. When \code{collect = FALSE}
+the join is performed in-database before the table is created.}
 
 \item{...}{Additional arguments passed to the generic.}
 }

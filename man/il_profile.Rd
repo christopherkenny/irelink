@@ -9,8 +9,9 @@ il_profile(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL)
 \arguments{
 \item{.data}{A data frame, dbplyr \code{tbl_lazy}, or character table name.}
 
-\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Columns to
-profile. If empty, all columns are profiled.}
+\item{...}{Columns to profile, specified as unquoted names or as
+character strings containing raw SQL expressions (e.g.,
+\code{"city || ' ' || first_name"}). If empty, all columns are profiled.}
 
 \item{con}{A DBI connection object. Optional when \code{.data} is a
 \code{tbl_lazy}.}

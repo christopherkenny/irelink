@@ -14,17 +14,22 @@
 #' @details
 #' ## SQL availability
 #'
-#' | Function        | DuckDB        | PostgreSQL      | SQLite |
-#' |-----------------|---------------|-----------------|--------|
-#' | `il_soundex`    | ✓ (macro)     | ✓ (native)      | ✗      |
-#' | `il_metaphone`  | ✗             | ✓ (native)      | ✗      |
-#' | `il_dmetaphone` | ✗             | ✓ (native)      | ✗      |
+#' | Function        | DuckDB        | PostgreSQL      | SQLite                    |
+#' |-----------------|---------------|-----------------|---------------------------|
+#' | `il_soundex`    | ✓ (macro)     | ✓ (native)      | comparisons only (R-side) |
+#' | `il_metaphone`  | ✗             | ✓ (native)      | ✗                         |
+#' | `il_dmetaphone` | ✗             | ✓ (native)      | ✗                         |
+#'
+#' SQLite does not expose a way to register scalar R functions as SQL UDFs,
+#' so phonetic transforms cannot be used in **blocking rules** on SQLite.
+#' They continue to work in **comparisons** on SQLite via the R-side gamma
+#' computation path.
 #'
 #' @return A character vector of phonetic codes (same length as `x`).
 #' @name phonetic
 #' @examples
-#' il_soundex(c("Smith", "Smyth"))
-#' il_soundex(c("Robert", "Rupert"))
+#' il_soundex(c('Smith', 'Smyth'))
+#' il_soundex(c('Robert', 'Rupert'))
 NULL
 
 #' @rdname phonetic
@@ -55,7 +60,9 @@ il_dmetaphone <- function(x) {
 # Follows the standard algorithm: retain first letter, map consonants to
 # digits, collapse adjacent duplicates, pad/truncate to 4 characters.
 soundex_one <- function(s) {
-  if (is.na(s) || nchar(s) == 0L) return(NA_character_)
+  if (is.na(s) || nchar(s) == 0L) {
+    return(NA_character_)
+  }
   s <- toupper(s)
   first <- substr(s, 1L, 1L)
   chars <- strsplit(s, '')[[1L]]
@@ -97,20 +104,22 @@ soundex_one <- function(s) {
 #' @noRd
 register_phonetic_macros <- function(con) {
   dialect <- detect_dialect(con)
-  if (dialect != 'duckdb') return(invisible(NULL))
+  if (dialect != 'duckdb') {
+    return(invisible(NULL))
+  }
 
   # Build the nested dedup expression once in R
   coded <- paste0(
-    "translate(upper(CAST(s AS VARCHAR)[2:]), ",
+    'translate(upper(CAST(s AS VARCHAR)[2:]), ',
     "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '01230120022455012623010202')"
   )
   dedup <- dedup_adjacent(dedup_adjacent(coded))
 
   macro_sql <- paste0(
-    "CREATE OR REPLACE MACRO il_soundex(s) AS (",
-    "CASE WHEN s IS NULL OR length(CAST(s AS VARCHAR)) = 0 THEN NULL ELSE ",
-    "left(upper(CAST(s AS VARCHAR)[1]) || replace((", dedup, "), '0', '') || '000', 4) ",
-    "END)"
+    'CREATE OR REPLACE MACRO il_soundex(s) AS (',
+    'CASE WHEN s IS NULL OR length(CAST(s AS VARCHAR)) = 0 THEN NULL ELSE ',
+    'left(upper(CAST(s AS VARCHAR)[1]) || replace((', dedup, "), '0', '') || '000', 4) ",
+    'END)'
   )
   DBI::dbExecute(con, macro_sql)
   invisible(NULL)
@@ -121,7 +130,7 @@ register_phonetic_macros <- function(con) {
 dedup_adjacent <- function(expr) {
   for (d in as.character(0:6)) {
     dd <- paste0(d, d)
-    expr <- paste0("replace(", expr, ", '", dd, "', '", d, "')")
+    expr <- paste0('replace(', expr, ", '", dd, "', '", d, "')")
   }
   expr
 }

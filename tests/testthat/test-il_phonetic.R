@@ -5,10 +5,10 @@
 test_that('il_soundex produces correct codes for known inputs', {
   expect_equal(il_soundex('Robert'), 'R163')
   expect_equal(il_soundex('Rupert'), 'R163')
-  expect_equal(il_soundex('Smith'),  'S530')
-  expect_equal(il_soundex('Smyth'),  'S530')
+  expect_equal(il_soundex('Smith'), 'S530')
+  expect_equal(il_soundex('Smyth'), 'S530')
   expect_equal(il_soundex('Johnson'), 'J525')
-  expect_equal(il_soundex('Jonson'),  'J525')
+  expect_equal(il_soundex('Jonson'), 'J525')
 })
 
 test_that('il_soundex is case-insensitive', {
@@ -121,12 +121,12 @@ test_that('validate_phonetic_dialect accepts supported backends', {
 # --- Serialization (transform_to_name / name_to_transform) -------------------
 
 test_that('phonetic transforms serialize and deserialize correctly', {
-  expect_equal(irelink:::transform_to_name(il_soundex),    'il_soundex')
-  expect_equal(irelink:::transform_to_name(il_metaphone),  'il_metaphone')
+  expect_equal(irelink:::transform_to_name(il_soundex), 'il_soundex')
+  expect_equal(irelink:::transform_to_name(il_metaphone), 'il_metaphone')
   expect_equal(irelink:::transform_to_name(il_dmetaphone), 'il_dmetaphone')
 
-  expect_identical(irelink:::name_to_transform('il_soundex'),    il_soundex)
-  expect_identical(irelink:::name_to_transform('il_metaphone'),  il_metaphone)
+  expect_identical(irelink:::name_to_transform('il_soundex'), il_soundex)
+  expect_identical(irelink:::name_to_transform('il_metaphone'), il_metaphone)
   expect_identical(irelink:::name_to_transform('il_dmetaphone'), il_dmetaphone)
 })
 
@@ -221,8 +221,10 @@ test_that('DuckDB il_soundex macro matches R-side for known pairs', {
 
   irelink:::register_phonetic_macros(con)
 
-  pairs <- data.frame(name = c('Smith', 'Smyth', 'Robert', 'Rupert',
-                                'Johnson', 'Jonson', 'Lee', 'Stephen', 'Steven'))
+  pairs <- data.frame(name = c(
+    'Smith', 'Smyth', 'Robert', 'Rupert',
+    'Johnson', 'Jonson', 'Lee', 'Stephen', 'Steven'
+  ))
   DBI::dbWriteTable(con, '__test_names', pairs, overwrite = TRUE)
 
   result <- DBI::dbGetQuery(con, 'SELECT name, il_soundex(name) AS code FROM __test_names')
@@ -237,7 +239,7 @@ test_that('DuckDB il_soundex macro handles NULL', {
 
   irelink:::register_phonetic_macros(con)
 
-  result <- DBI::dbGetQuery(con, "SELECT il_soundex(NULL) AS code")
+  result <- DBI::dbGetQuery(con, 'SELECT il_soundex(NULL) AS code')
   expect_true(is.na(result$code))
 })
 
@@ -283,6 +285,8 @@ test_that('block_on with il_soundex works in il_estimate_em', {
   model <- il_estimate_em(model, block_on(first_name, .transform = il_soundex))
   expect_s3_class(model, 'il_model')
 })
+
+# --- Save/load round-trip for phonetic blocking transforms -------------------
 
 # --- Save/load round-trip for phonetic blocking transforms -------------------
 

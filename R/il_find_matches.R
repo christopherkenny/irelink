@@ -121,8 +121,9 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     if (length(blocking_rules) > 0L) {
       block_parts <- vapply(blocking_rules, function(br) {
         cond <- build_blocking_condition(br$columns, br$where,
-                                          transform = br$transform,
-                                          dialect = dialect)
+          transform = br$transform,
+          dialect = dialect
+        )
         glue::glue(
           'SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ',
           '{gamma_select} ',
@@ -192,8 +193,9 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     if (length(blocking_rules) > 0L) {
       for (br in blocking_rules) {
         block_where <- build_blocking_condition(br$columns, br$where,
-                                                transform = br$transform,
-                                                dialect = dialect)
+          transform = br$transform,
+          dialect = dialect
+        )
         sql <- glue::glue(
           'SELECT {sel_l}, {sel_r} FROM {tbl_new} l, {tbl_existing} r ',
           'WHERE {block_where}'

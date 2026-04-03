@@ -126,8 +126,9 @@ il_count_pairs <- function(.data, ..., con = NULL,
 
   results <- lapply(blocking_rules, function(rule) {
     where <- build_blocking_condition(rule$columns, rule$where,
-                                      transform = rule$transform,
-                                      dialect = dialect)
+      transform = rule$transform,
+      dialect = dialect
+    )
     n <- count_blocked_pairs(con, tbl_l, tbl_r, where,
       dedupe = (link_type == 'dedupe')
     )
@@ -151,8 +152,9 @@ il_count_pairs <- function(.data, ..., con = NULL,
   for (i in seq_along(blocking_rules)) {
     rule <- blocking_rules[[i]]
     where <- build_blocking_condition(rule$columns, rule$where,
-                                      transform = rule$transform,
-                                      dialect = dialect)
+      transform = rule$transform,
+      dialect = dialect
+    )
     dedup_cond <- if (link_type == 'dedupe') 'l.unique_id < r.unique_id AND ' else ''
     cum_parts <- c(cum_parts, glue::glue(
       'SELECT l.unique_id AS lid, r.unique_id AS rid ',

@@ -34,6 +34,40 @@ test_that('il_profile() handles all-null columns gracefully', {
   expect_true(nrow(result) == 0 || all(is.na(result$value)))
 })
 
+test_that('il_profile() accepts raw SQL expressions as character strings', {
+  skip_if_not_installed('duckdb')
+
+  con <- DBI::dbConnect(duckdb::duckdb())
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+
+  df <- data.frame(
+    id = 1:4,
+    first_name = c('Alice', 'Alice', 'Bob', 'Bob'),
+    city = c('London', 'Paris', 'London', 'Paris')
+  )
+
+  result <- il_profile(df, "first_name || ' ' || city", con = con)
+  expect_s3_class(result, 'tbl_df')
+  expect_true(nrow(result) > 0)
+  expect_identical(result$column[[1L]], "first_name || ' ' || city")
+})
+
+test_that('il_profile() mixes bare column names and SQL expressions', {
+  skip_if_not_installed('duckdb')
+
+  con <- DBI::dbConnect(duckdb::duckdb())
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+
+  df <- data.frame(
+    id = 1:4,
+    first_name = c('Alice', 'Alice', 'Bob', 'Bob'),
+    city = c('London', 'Paris', 'London', 'Paris')
+  )
+
+  result <- il_profile(df, first_name, 'city || first_name', con = con)
+  expect_identical(sort(unique(result$column)), sort(c('first_name', 'city || first_name')))
+})
+
 test_that('il_profile() works with multiple columns', {
   skip_if_not_installed('RSQLite')
 
