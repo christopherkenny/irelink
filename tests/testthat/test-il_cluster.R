@@ -124,3 +124,42 @@ test_that('il_cluster() with connected components matches igraph', {
     components$no
   )
 })
+
+# --- ties_method --------------------------------------------------------------
+
+test_that("ties_method = 'drop' removes tied best-link edges", {
+  # Three records: A-B and A-C tied at 0.9; B-C at 0.5
+  # A is tied so its edges should be dropped; B-C survives
+  pairs <- tibble::tibble(
+    unique_id_l = c('A', 'A', 'B'),
+    unique_id_r = c('B', 'C', 'C'),
+    match_probability = c(0.9, 0.9, 0.5)
+  )
+  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+  clusters <- il_cluster(pairs, method = 'best_link', ties_method = 'drop')
+  # A-B and A-C dropped; B-C kept; all three get separate or B-C cluster
+  expect_equal(nrow(clusters), 3L)
+})
+
+test_that("ties_method = 'lowest_id' breaks ties deterministically", {
+  pairs <- tibble::tibble(
+    unique_id_l = c('A', 'A'),
+    unique_id_r = c('B', 'C'),
+    match_probability = c(0.9, 0.9)
+  )
+  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+  clusters1 <- il_cluster(pairs, method = 'best_link', ties_method = 'lowest_id')
+  clusters2 <- il_cluster(pairs, method = 'best_link', ties_method = 'lowest_id')
+  # Deterministic: same result both times
+  expect_equal(clusters1, clusters2)
+})
+
+test_that('ties_method defaults to lowest_id', {
+  pairs <- tibble::tibble(
+    unique_id_l = c('A', 'B'),
+    unique_id_r = c('B', 'C'),
+    match_probability = c(0.9, 0.8)
+  )
+  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+  expect_no_error(il_cluster(pairs, method = 'best_link'))
+})

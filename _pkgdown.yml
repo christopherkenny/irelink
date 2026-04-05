@@ -31,7 +31,9 @@ reference:
       - cl_date_diff
       - cl_distance_km
       - cl_array_intersect
+      - cl_array_subset
       - cl_custom
+      - cl_literal
       - cl_null
       - cl_else
       - cl_levels

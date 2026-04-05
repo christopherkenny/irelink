@@ -4,7 +4,12 @@
 \alias{il_cluster}
 \title{Cluster Scored Pairs into Entities}
 \usage{
-il_cluster(pairs, threshold = NULL, method = c("connected", "best_link"))
+il_cluster(
+  pairs,
+  threshold = NULL,
+  method = c("connected", "best_link"),
+  ties_method = c("lowest_id", "drop")
+)
 }
 \arguments{
 \item{pairs}{An \code{il_compared} tibble from \code{\link[=predict.il_model]{predict.il_model()}}.}
@@ -14,6 +19,11 @@ If \code{NULL} (the default), the threshold from prediction is used.}
 
 \item{method}{One of \code{"connected"} (default) for connected-components
 clustering, or \code{"best_link"} for single-best-link clustering.}
+
+\item{ties_method}{How to handle tied best-link probabilities when
+\code{method = "best_link"}. \code{"lowest_id"} (default) keeps the edge to
+the record with the smaller \code{unique_id}; \code{"drop"} removes all edges
+where the best-link probability is tied.}
 }
 \value{
 A tibble with one row per input record, including a

@@ -377,6 +377,12 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
     soundex_fn <- if (identical(dialect, 'duckdb')) 'il_soundex' else 'soundex'
     return(glue::glue('{null_guard} AND {soundex_fn}({lcol}) = {soundex_fn}({rcol})'))
   }
+  if (method == 'array_subset') {
+    return(glue::glue(
+      '{null_guard} AND ARRAY_LENGTH(ARRAY_INTERSECT(l.{col}, r.{col})) = ',
+      'LEAST(ARRAY_LENGTH(l.{col}), ARRAY_LENGTH(r.{col}))'
+    ))
+  }
   if (method == 'custom') {
     sql_expr <- glue::glue(sub$sql_expr, col = col, .open = '{', .close = '}')
     return(glue::glue('{null_guard} AND ({sql_expr})'))
@@ -613,6 +619,13 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
       glue::glue('WHEN array_intersect_count(l.{col}, r.{col}) >= {t} THEN {t}')
     }, character(1))
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
+  }
+
+  if (method == 'array_subset') {
+    return(glue::glue(
+      'CASE WHEN ARRAY_LENGTH(ARRAY_INTERSECT(l.{col}, r.{col})) = ',
+      'LEAST(ARRAY_LENGTH(l.{col}), ARRAY_LENGTH(r.{col})) THEN 1 ELSE 0 END'
+    ))
   }
 
   if (method == 'custom') {

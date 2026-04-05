@@ -261,44 +261,77 @@ cc_cleanup <- function(con) {
 #'   unique_id_r, match_probability).
 #' @return Name of the filtered edges table.
 #' @noRd
-sql_best_link_filter <- function(con, edges_tbl) {
+sql_best_link_filter <- function(con, edges_tbl, ties_method = 'lowest_id') {
   filtered_tbl <- cc_tbl('best_link')
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {filtered_tbl}'))
 
-  # Bidirectional view: each edge seen from both endpoints
-  # Then rank by probability per node, keep rank=1
-  # Edge survives only if it's the best link for BOTH endpoints
-  DBI::dbExecute(con, glue::glue(
-    'CREATE TABLE {filtered_tbl} AS ',
-    'WITH bidir AS (',
-    '  SELECT unique_id_l AS node, unique_id_r AS partner, ',
-    '         match_probability AS prob ',
-    '  FROM {edges_tbl} ',
-    '  UNION ALL ',
-    '  SELECT unique_id_r AS node, unique_id_l AS partner, ',
-    '         match_probability AS prob ',
-    '  FROM {edges_tbl}',
-    '), ',
-    'ranked AS (',
-    '  SELECT *, ROW_NUMBER() OVER (',
-    '    PARTITION BY node ORDER BY prob DESC, partner',
-    '  ) AS rn ',
-    '  FROM bidir',
-    '), ',
-    'best AS (',
-    '  SELECT node, partner FROM ranked WHERE rn = 1',
-    ') ',
-    'SELECT e.unique_id_l, e.unique_id_r, e.match_probability ',
-    'FROM {edges_tbl} e ',
-    'WHERE EXISTS (',
-    '  SELECT 1 FROM best b1 ',
-    '  WHERE b1.node = e.unique_id_l AND b1.partner = e.unique_id_r',
-    ') ',
-    'AND EXISTS (',
-    '  SELECT 1 FROM best b2 ',
-    '  WHERE b2.node = e.unique_id_r AND b2.partner = e.unique_id_l',
-    ')'
-  ))
+  if (ties_method == 'drop') {
+    # Identify nodes with more than one edge tied at their maximum probability,
+    # then exclude all edges touching those tied nodes.
+    DBI::dbExecute(con, glue::glue(
+      'CREATE TABLE {filtered_tbl} AS ',
+      'WITH bidir AS (',
+      '  SELECT unique_id_l AS node, unique_id_r AS partner, match_probability AS prob ',
+      '  FROM {edges_tbl} ',
+      '  UNION ALL ',
+      '  SELECT unique_id_r AS node, unique_id_l AS partner, match_probability AS prob ',
+      '  FROM {edges_tbl}',
+      '), ',
+      'max_prob AS (',
+      '  SELECT node, MAX(prob) AS best_prob FROM bidir GROUP BY node',
+      '), ',
+      'best_edges AS (',
+      '  SELECT b.node, b.partner ',
+      '  FROM bidir b JOIN max_prob m ON b.node = m.node AND b.prob = m.best_prob',
+      '), ',
+      'unique_best AS (',
+      '  SELECT node, partner FROM best_edges GROUP BY node HAVING COUNT(*) = 1',
+      ') ',
+      'SELECT e.unique_id_l, e.unique_id_r, e.match_probability ',
+      'FROM {edges_tbl} e ',
+      'WHERE EXISTS (',
+      '  SELECT 1 FROM unique_best u1 ',
+      '  WHERE u1.node = e.unique_id_l AND u1.partner = e.unique_id_r',
+      ') ',
+      'AND EXISTS (',
+      '  SELECT 1 FROM unique_best u2 ',
+      '  WHERE u2.node = e.unique_id_r AND u2.partner = e.unique_id_l',
+      ')'
+    ))
+  } else {
+    # 'lowest_id': break ties by keeping the edge to the smaller partner id.
+    DBI::dbExecute(con, glue::glue(
+      'CREATE TABLE {filtered_tbl} AS ',
+      'WITH bidir AS (',
+      '  SELECT unique_id_l AS node, unique_id_r AS partner, ',
+      '         match_probability AS prob ',
+      '  FROM {edges_tbl} ',
+      '  UNION ALL ',
+      '  SELECT unique_id_r AS node, unique_id_l AS partner, ',
+      '         match_probability AS prob ',
+      '  FROM {edges_tbl}',
+      '), ',
+      'ranked AS (',
+      '  SELECT *, ROW_NUMBER() OVER (',
+      '    PARTITION BY node ORDER BY prob DESC, partner',
+      '  ) AS rn ',
+      '  FROM bidir',
+      '), ',
+      'best AS (',
+      '  SELECT node, partner FROM ranked WHERE rn = 1',
+      ') ',
+      'SELECT e.unique_id_l, e.unique_id_r, e.match_probability ',
+      'FROM {edges_tbl} e ',
+      'WHERE EXISTS (',
+      '  SELECT 1 FROM best b1 ',
+      '  WHERE b1.node = e.unique_id_l AND b1.partner = e.unique_id_r',
+      ') ',
+      'AND EXISTS (',
+      '  SELECT 1 FROM best b2 ',
+      '  WHERE b2.node = e.unique_id_r AND b2.partner = e.unique_id_l',
+      ')'
+    ))
+  }
 
   filtered_tbl
 }

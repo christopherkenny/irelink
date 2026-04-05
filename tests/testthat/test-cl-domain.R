@@ -98,6 +98,25 @@ test_that('cl_dob() accepts term_frequency flag', {
   expect_true(lev$term_frequency)
 })
 
+test_that('cl_dob() accepts custom thresholds', {
+  lev <- cl_dob(thresholds = list(days(7), months(6)))
+  date_methods <- vapply(lev$levels, `[[`, character(1), 'method')
+  expect_equal(sum(date_methods == 'date_diff'), 2L)
+})
+
+test_that('cl_dob() custom thresholds change level count', {
+  default_lev <- cl_dob()
+  custom_lev <- cl_dob(thresholds = list(days(7), months(6), years(1), years(5)))
+  expect_equal(
+    length(custom_lev$levels),
+    length(default_lev$levels) + 1L
+  )
+})
+
+test_that('cl_dob() rejects empty thresholds', {
+  expect_snapshot(error = TRUE, cl_dob(thresholds = list()))
+})
+
 # --- cl_postcode() --------------------------------------------------------
 # From: test_postcode_comparison — levels: exact, sector, district, area
 
@@ -115,6 +134,23 @@ test_that('cl_postcode() has at least 4 match levels', {
 test_that('cl_postcode() accepts term_frequency flag', {
   lev <- cl_postcode(term_frequency = TRUE)
   expect_true(lev$term_frequency)
+})
+
+test_that('cl_postcode() appends geo levels when lat/lon supplied', {
+  lev <- cl_postcode(lat_col = 'lat', long_col = 'lon', km_thresholds = c(5, 50))
+  methods <- vapply(lev$levels, `[[`, character(1), 'method')
+  # Two extra custom levels before else
+  expect_equal(sum(methods == 'custom'), 5L) # 3 prefix + 2 geo
+  expect_equal(methods[length(methods)], 'else')
+})
+
+test_that('cl_postcode() geo SQL embeds lat/lon column names', {
+  lev <- cl_postcode(lat_col = 'latitude', long_col = 'longitude', km_thresholds = 10)
+  custom_levels <- Filter(function(l) l$method == 'custom', lev$levels)
+  geo_sqls <- vapply(custom_levels, `[[`, character(1), 'sql_expr')
+  geo_sql <- geo_sqls[grepl('ASIN', geo_sqls)][1]
+  expect_match(geo_sql, 'latitude')
+  expect_match(geo_sql, 'longitude')
 })
 
 # --- cl_forename_surname() / cl_first_last_name() -------------------------
@@ -178,4 +214,42 @@ test_that('cl_zip_code() uses fixed-width SUBSTR for prefix levels', {
 test_that('cl_zip_code() accepts term_frequency flag', {
   lev <- cl_zip_code(term_frequency = TRUE)
   expect_true(lev$term_frequency)
+})
+
+test_that('cl_zip_code() appends geo levels when lat/lon supplied', {
+  lev <- cl_zip_code(lat_col = 'lat', long_col = 'lon', km_thresholds = c(1, 10))
+  methods <- vapply(lev$levels, `[[`, character(1), 'method')
+  expect_equal(sum(methods == 'custom'), 4L) # 2 prefix + 2 geo
+})
+
+# --- cl_array_subset() --------------------------------------------------------
+
+test_that('cl_array_subset() returns a comparison level', {
+  lev <- cl_array_subset()
+  expect_s3_class(lev, 'il_comparison_level')
+  expect_equal(lev$method, 'array_subset')
+})
+
+test_that('cl_array_subset() is distinct from cl_array_intersect()', {
+  expect_false(identical(cl_array_subset(), cl_array_intersect(1)))
+})
+
+# --- cl_literal() -------------------------------------------------------------
+
+test_that('cl_literal() generates both-side SQL by default', {
+  lev <- cl_literal('US')
+  expect_s3_class(lev, 'il_comparison_level')
+  expect_match(lev$sql_expr, "l\\.\\{col\\} = 'US'")
+  expect_match(lev$sql_expr, "r\\.\\{col\\} = 'US'")
+})
+
+test_that('cl_literal() left side only', {
+  lev <- cl_literal('US', side = 'left')
+  expect_match(lev$sql_expr, 'l\\.\\{col\\}')
+  expect_false(grepl('r\\.\\{col\\}', lev$sql_expr))
+})
+
+test_that('cl_literal() numeric values are not quoted', {
+  lev <- cl_literal(1L)
+  expect_false(grepl("'", lev$sql_expr))
 })

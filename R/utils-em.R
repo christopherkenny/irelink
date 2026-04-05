@@ -291,6 +291,18 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     return(ifelse(both_present & !is.na(sx_l) & !is.na(sx_r) & sx_l == sx_r, 1L, 0L))
   }
 
+  if (method == 'array_subset') {
+    result <- mapply(function(a, b) {
+      if (is.na(a) || is.na(b)) {
+        return(0L)
+      }
+      a_set <- unique(unlist(strsplit(as.character(a), ',\\s*')))
+      b_set <- unique(unlist(strsplit(as.character(b), ',\\s*')))
+      if (all(a_set %in% b_set) || all(b_set %in% a_set)) 1L else 0L
+    }, val_l, val_r)
+    return(as.integer(result))
+  }
+
   if (method == 'levels') {
     # Check sublevels from best to worst (skip null/else)
     sublevels <- Filter(function(l) {

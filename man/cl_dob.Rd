@@ -4,9 +4,16 @@
 \alias{cl_dob}
 \title{Date of Birth Comparison}
 \usage{
-cl_dob(term_frequency = FALSE)
+cl_dob(
+  thresholds = list(months(1), years(1), years(10)),
+  term_frequency = FALSE
+)
 }
 \arguments{
+\item{thresholds}{A list of unit-tagged threshold values created by
+\code{\link[=days]{days()}}, \code{\link[=months]{months()}}, or \code{\link[=years]{years()}}, ordered from strictest to most
+lenient. Defaults to \code{list(months(1), years(1), years(10))}.}
+
 \item{term_frequency}{Logical. If \code{TRUE}, adjust match weights by
 date-of-birth frequency at the highest comparison level. Defaults
 to \code{FALSE}.}
@@ -15,11 +22,15 @@ to \code{FALSE}.}
 A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
 }
 \description{
-A pre-built domain comparison for dates of birth. Combines
-string-parsing, date-difference, and component-matching levels to
-handle common date-of-birth errors (transpositions, partial dates).
+A pre-built domain comparison for dates of birth. Combines exact
+matching, a Damerau-Levenshtein string check for transposed digits,
+and configurable date-difference levels to handle common errors.
 }
 \examples{
 il_spec() |>
   il_compare(dob, cl_dob())
+
+# Custom thresholds: within 7 days, 6 months, 2 years
+il_spec() |>
+  il_compare(dob, cl_dob(thresholds = list(days(7), months(6), years(2))))
 }

@@ -21,3 +21,42 @@ cl_custom <- function(sql_expr, ...) {
   }
   new_comparison_level('custom', sql_expr = sql_expr)
 }
+
+#' Literal Value Comparison
+#'
+#' Creates a comparison level that checks whether a column equals a
+#' fixed literal value on the left record, right record, or both.
+#' Equivalent to splink's `LiteralMatchLevel`. Useful as a gate inside
+#' [cl_levels()] to restrict a comparison to records with a known value
+#' (e.g., only compare names when `country = 'US'`).
+#'
+#' @param value A scalar value to compare against. Character values are
+#'   quoted in the generated SQL; numerics are not.
+#' @param side Which record to check: `'both'` (default), `'left'`, or
+#'   `'right'`.
+#'
+#' @return A comparison-level object for use in [il_compare()] or
+#'   [cl_levels()].
+#' @export
+#'
+#' @examples
+#' il_spec() |>
+#'   il_compare(
+#'     country,
+#'     cl_levels(
+#'       cl_null(),
+#'       cl_literal('US', side = 'both'),
+#'       cl_exact(),
+#'       cl_else()
+#'     )
+#'   )
+cl_literal <- function(value, side = c('both', 'left', 'right')) {
+  side <- match.arg(side)
+  val_sql <- if (is.character(value)) paste0("'", value, "'") else as.character(value)
+  sql_expr <- switch(side,
+    'both'  = paste0('l.{col} = ', val_sql, ' AND r.{col} = ', val_sql),
+    'left'  = paste0('l.{col} = ', val_sql),
+    'right' = paste0('r.{col} = ', val_sql)
+  )
+  cl_custom(sql_expr)
+}

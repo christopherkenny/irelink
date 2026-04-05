@@ -4,21 +4,40 @@
 \alias{cl_postcode}
 \title{Postcode Comparison}
 \usage{
-cl_postcode(term_frequency = FALSE)
+cl_postcode(
+  term_frequency = FALSE,
+  lat_col = NULL,
+  long_col = NULL,
+  km_thresholds = c(1, 10, 100)
+)
 }
 \arguments{
 \item{term_frequency}{Logical. If \code{TRUE}, adjust match weights by
 postcode frequency at the highest comparison level. Defaults to
 \code{FALSE}.}
+
+\item{lat_col, long_col}{Character. Names of latitude and longitude
+columns. Both must be supplied together. When provided, geographic
+distance levels are appended before \code{cl_else()}.}
+
+\item{km_thresholds}{Numeric vector of distance thresholds in
+kilometres, ordered from strictest to most lenient. Only used when
+\code{lat_col} and \code{long_col} are supplied. Defaults to \code{c(1, 10, 100)}.}
 }
 \value{
 A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
 }
 \description{
 A pre-built domain comparison for postcodes. Supports exact matching
-with optional geographic-proximity fallback for partial matches.
+and prefix-based partial matching. Optionally appends geographic
+distance fallback levels when latitude and longitude columns are
+available.
 }
 \examples{
 il_spec() |>
   il_compare(postcode, cl_postcode())
+
+# With geographic fallback (requires lat/lon columns in the data)
+il_spec() |>
+  il_compare(postcode, cl_postcode(lat_col = 'lat', long_col = 'lon'))
 }

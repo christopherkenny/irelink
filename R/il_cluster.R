@@ -10,6 +10,10 @@
 #'   If `NULL` (the default), the threshold from prediction is used.
 #' @param method One of `"connected"` (default) for connected-components
 #'   clustering, or `"best_link"` for single-best-link clustering.
+#' @param ties_method How to handle tied best-link probabilities when
+#'   `method = "best_link"`. `"lowest_id"` (default) keeps the edge to
+#'   the record with the smaller `unique_id`; `"drop"` removes all edges
+#'   where the best-link probability is tied.
 #'
 #' @return A tibble with one row per input record, including a
 #'   `cluster_id` column.
@@ -68,13 +72,14 @@
 #' clusters <- il_cluster(pairs)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_cluster <- function(pairs, threshold = NULL,
-                       method = c('connected', 'best_link')) {
+                       method = c('connected', 'best_link'),
+                       ties_method = c('lowest_id', 'drop')) {
   method <- match.arg(method)
+  ties_method <- match.arg(ties_method)
 
   # Lazy path: pairs are still in the database
-
   if (inherits(pairs, 'il_compared_lazy')) {
-    return(cluster_lazy(pairs, threshold, method))
+    return(cluster_lazy(pairs, threshold, method, ties_method))
   }
 
   if (nrow(pairs) == 0L) {
@@ -88,20 +93,20 @@ il_cluster <- function(pairs, threshold = NULL,
     detect_dialect(con) %in% c('duckdb', 'postgres')
 
   if (use_sql) {
-    return(cluster_sql(con, pairs, threshold, method))
+    return(cluster_sql(con, pairs, threshold, method, ties_method))
   }
 
   # Fallback: igraph (works for SQLite or when no connection available)
-  cluster_igraph(pairs, threshold, method)
+  cluster_igraph(pairs, threshold, method, ties_method)
 }
 
 #' SQL-path clustering (DuckDB/PostgreSQL)
 #' @noRd
-cluster_sql <- function(con, pairs, threshold, method) {
+cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id') {
   edges_tbl <- cc_upload_edges(con, pairs, threshold = threshold)
 
   if (method == 'best_link') {
-    filtered_tbl <- sql_best_link_filter(con, edges_tbl)
+    filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method)
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
     DBI::dbExecute(con, glue::glue(
       'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
@@ -137,7 +142,7 @@ cluster_sql <- function(con, pairs, threshold, method) {
 
 #' igraph-path clustering (fallback for SQLite or no DB connection)
 #' @noRd
-cluster_igraph <- function(pairs, threshold, method) {
+cluster_igraph <- function(pairs, threshold, method, ties_method = 'lowest_id') {
   rlang::check_installed('igraph', reason = 'for clustering without a DuckDB or PostgreSQL connection.')
 
   all_ids <- unique(c(
@@ -150,7 +155,7 @@ cluster_igraph <- function(pairs, threshold, method) {
   }
 
   if (method == 'best_link') {
-    pairs <- best_link_filter(pairs)
+    pairs <- best_link_filter(pairs, ties_method)
   }
 
   edges <- data.frame(
@@ -174,7 +179,7 @@ cluster_igraph <- function(pairs, threshold, method) {
 
 # Filter edges to keep only mutual best links
 # @noRd
-best_link_filter <- function(pairs) {
+best_link_filter <- function(pairs, ties_method = 'lowest_id') {
   if (nrow(pairs) == 0L) {
     return(pairs)
   }
@@ -182,23 +187,66 @@ best_link_filter <- function(pairs) {
   id_r <- as.character(pairs$unique_id_r)
   prob <- pairs$match_probability
 
-  # For each node, find the index of its highest-probability edge
   all_nodes <- unique(c(id_l, id_r))
-  best_idx <- setNames(rep(NA_integer_, length(all_nodes)), all_nodes)
   best_prob <- setNames(rep(-Inf, length(all_nodes)), all_nodes)
 
   for (i in seq_len(nrow(pairs))) {
-    if (prob[i] > best_prob[id_l[i]]) {
-      best_prob[id_l[i]] <- prob[i]
-      best_idx[id_l[i]] <- i
+    if (prob[i] > best_prob[id_l[i]]) best_prob[id_l[i]] <- prob[i]
+    if (prob[i] > best_prob[id_r[i]]) best_prob[id_r[i]] <- prob[i]
+  }
+
+  if (ties_method == 'drop') {
+    # A node is tied if more than one edge shares its best probability.
+    # Drop all edges where either endpoint is tied.
+    tied_nodes <- character(0)
+    for (nd in all_nodes) {
+      cnt <- sum(
+        (id_l == nd | id_r == nd) & prob == best_prob[nd]
+      )
+      if (cnt > 1L) tied_nodes <- c(tied_nodes, nd)
     }
-    if (prob[i] > best_prob[id_r[i]]) {
-      best_prob[id_r[i]] <- prob[i]
-      best_idx[id_r[i]] <- i
+    untied <- !((id_l %in% tied_nodes) | (id_r %in% tied_nodes))
+    pairs <- pairs[untied, , drop = FALSE]
+    if (nrow(pairs) == 0L) {
+      return(pairs)
+    }
+    id_l <- as.character(pairs$unique_id_l)
+    id_r <- as.character(pairs$unique_id_r)
+    prob <- pairs$match_probability
+    # Recompute best_prob on untied pairs
+    all_nodes2 <- unique(c(id_l, id_r))
+    best_prob2 <- setNames(rep(-Inf, length(all_nodes2)), all_nodes2)
+    for (i in seq_len(nrow(pairs))) {
+      if (prob[i] > best_prob2[id_l[i]]) best_prob2[id_l[i]] <- prob[i]
+      if (prob[i] > best_prob2[id_r[i]]) best_prob2[id_r[i]] <- prob[i]
+    }
+    keep <- vapply(seq_len(nrow(pairs)), function(i) {
+      prob[i] == best_prob2[id_l[i]] && prob[i] == best_prob2[id_r[i]]
+    }, logical(1))
+    return(pairs[keep, , drop = FALSE])
+  }
+
+  # 'lowest_id': break ties by keeping the edge to the lower unique_id.
+  # For each node track the best edge index; on tie, prefer smaller partner id.
+  best_idx <- setNames(rep(NA_integer_, length(all_nodes)), all_nodes)
+
+  for (i in seq_len(nrow(pairs))) {
+    for (nd in c(id_l[i], id_r[i])) {
+      partner <- if (nd == id_l[i]) id_r[i] else id_l[i]
+      prev <- best_idx[nd]
+      if (is.na(prev)) {
+        best_idx[nd] <- i
+      } else {
+        prev_prob <- prob[prev]
+        prev_partner <- if (nd == id_l[prev]) id_r[prev] else id_l[prev]
+        if (prob[i] > prev_prob ||
+          (prob[i] == prev_prob && partner < prev_partner)) {
+          best_idx[nd] <- i
+        }
+      }
     }
   }
 
-  # Keep edges where both endpoints agree
   keep <- vapply(seq_len(nrow(pairs)), function(i) {
     isTRUE(best_idx[id_l[i]] == i) && isTRUE(best_idx[id_r[i]] == i)
   }, logical(1))
@@ -208,7 +256,7 @@ best_link_filter <- function(pairs) {
 
 #' Cluster directly from a lazy prediction table (no round-trip)
 #' @noRd
-cluster_lazy <- function(pairs, threshold, method) {
+cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id') {
   con <- pairs$con
   predicted_tbl <- pairs$predicted_tbl
 
@@ -228,7 +276,7 @@ cluster_lazy <- function(pairs, threshold, method) {
   ))
 
   if (method == 'best_link') {
-    filtered_tbl <- sql_best_link_filter(con, edges_tbl)
+    filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method)
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
     DBI::dbExecute(con, glue::glue(
       'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
