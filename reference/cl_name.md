@@ -2,12 +2,14 @@
 
 A pre-built domain comparison for personal names. Combines exact
 matching, Jaro-Winkler, and Jaro levels with thresholds tuned for
-typical name variation.
+typical name variation. Optionally adds a Soundex phonetic level as a
+final fallback before the else level, which helps catch names that sound
+similar but are spelled differently (e.g., Smith/Smyth).
 
 ## Usage
 
 ``` r
-cl_name(term_frequency = FALSE)
+cl_name(term_frequency = FALSE, phonetic = FALSE)
 ```
 
 ## Arguments
@@ -16,6 +18,12 @@ cl_name(term_frequency = FALSE)
 
   Logical. If `TRUE`, adjust match weights by name frequency at the
   highest comparison level. Defaults to `FALSE`.
+
+- phonetic:
+
+  Logical. If `TRUE`, add a
+  [`cl_soundex()`](http://christophertkenny.com/irelink/reference/cl_soundex.md)
+  level as a fallback before the else level. Defaults to `FALSE`.
 
 ## Value
 
@@ -32,5 +40,12 @@ il_spec() |>
 #>   Comparisons (2):
 #>     first_name : levels
 #>     surname : levels
+#>   Blocking rules: (none)
+
+il_spec() |>
+  il_compare(first_name, cl_name(phonetic = TRUE))
+#> Linkage Specification
+#>   Comparisons (1):
+#>     first_name : levels
 #>   Blocking rules: (none)
 ```

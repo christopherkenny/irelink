@@ -67,6 +67,8 @@ Phonetic encoding functions for blocking and comparison on name fields.
   [`il_metaphone()`](http://christophertkenny.com/irelink/reference/phonetic.md)
   [`il_dmetaphone()`](http://christophertkenny.com/irelink/reference/phonetic.md)
   : Phonetic Transform Functions
+- [`cl_soundex()`](http://christophertkenny.com/irelink/reference/cl_soundex.md)
+  : Soundex Phonetic Comparison
 
 ## Domain-Specific Comparisons
 
