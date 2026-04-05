@@ -43,6 +43,7 @@ reference:
     desc: "Phonetic encoding functions for blocking and comparison on name fields."
     contents:
       - phonetic
+      - cl_soundex
 
   - title: "Domain-Specific Comparisons"
     desc: "Pre-configured multi-level comparisons for common field types."
