@@ -1,11 +1,50 @@
+#' Soundex Phonetic Comparison
+#'
+#' Creates a comparison level based on the Soundex phonetic algorithm.
+#' Two strings match if their Soundex codes are identical — useful as a
+#' fallback level within [cl_levels()] or [cl_name()] to catch names
+#' that sound similar but are spelled differently (e.g., Smith/Smyth,
+#' Robert/Rupert).
+#'
+#' On DuckDB, Soundex runs via a registered SQL MACRO.
+#' On PostgreSQL, it uses the native `soundex()` function.
+#' On SQLite, it falls back to an R-side implementation.
+#'
+#' @return A comparison-level object for use in [il_compare()] or
+#'   [cl_levels()].
+#' @export
+#'
+#' @examples
+#' il_spec() |>
+#'   il_compare(first_name, cl_soundex())
+#'
+#' il_spec() |>
+#'   il_compare(
+#'     first_name,
+#'     cl_levels(
+#'       cl_null(),
+#'       cl_exact(),
+#'       cl_jaro_winkler(0.9),
+#'       cl_soundex(),
+#'       cl_else()
+#'     )
+#'   )
+cl_soundex <- function() {
+  new_comparison_level('soundex')
+}
+
 #' Personal Name Comparison
 #'
 #' A pre-built domain comparison for personal names. Combines exact
 #' matching, Jaro-Winkler, and Jaro levels with thresholds tuned for
-#' typical name variation.
+#' typical name variation. Optionally adds a Soundex phonetic level as
+#' a final fallback before the else level, which helps catch names that
+#' sound similar but are spelled differently (e.g., Smith/Smyth).
 #'
 #' @param term_frequency Logical. If `TRUE`, adjust match weights by
 #'   name frequency at the highest comparison level. Defaults to `FALSE`.
+#' @param phonetic Logical. If `TRUE`, add a [cl_soundex()] level as a
+#'   fallback before the else level. Defaults to `FALSE`.
 #'
 #' @return A comparison-level object for use in [il_compare()].
 #' @export
@@ -14,16 +53,22 @@
 #' il_spec() |>
 #'   il_compare(first_name, cl_name()) |>
 #'   il_compare(surname, cl_name(term_frequency = TRUE))
-cl_name <- function(term_frequency = FALSE) {
-  cl_levels(
+#'
+#' il_spec() |>
+#'   il_compare(first_name, cl_name(phonetic = TRUE))
+cl_name <- function(term_frequency = FALSE, phonetic = FALSE) {
+  base_levels <- list(
     cl_null(),
     cl_exact(),
     cl_jaro_winkler(0.92),
     cl_jaro_winkler(0.88),
-    cl_jaro_winkler(0.7),
-    cl_else(),
-    term_frequency = term_frequency
+    cl_jaro_winkler(0.7)
   )
+  if (phonetic) {
+    base_levels <- c(base_levels, list(cl_soundex()))
+  }
+  base_levels <- c(base_levels, list(cl_else()))
+  do.call(cl_levels, c(base_levels, list(term_frequency = term_frequency)))
 }
 
 #' Date of Birth Comparison

@@ -530,3 +530,8 @@ Make sure that they will be handled SQL-side so that we do not have to materiali
 Add corresponding tests.
 
 Write up your research and a summary of findings in `inst/refs/23-phonetics.md`
+
+## Polish (Sonnet 4.6 medium)
+
+Can you examine the stage updates in inst/ for this project and identify points of weakness relative to splink?
+Please identify and fix the biggest gaps.

@@ -37,6 +37,29 @@ test_that('cl_name() accepts term_frequency flag', {
   expect_true(lev$term_frequency)
 })
 
+# --- cl_soundex() ---------------------------------------------------------
+
+test_that('cl_soundex() returns a comparison level with soundex method', {
+  lev <- cl_soundex()
+  expect_s3_class(lev, 'il_comparison_level')
+  expect_equal(lev$method, 'soundex')
+})
+
+test_that('cl_name(phonetic = TRUE) adds a soundex level', {
+  without <- cl_name()
+  with_phonetic <- cl_name(phonetic = TRUE)
+  expect_equal(length(with_phonetic$levels), length(without$levels) + 1L)
+  methods <- vapply(with_phonetic$levels, `[[`, character(1), 'method')
+  expect_true('soundex' %in% methods)
+})
+
+test_that('cl_name(phonetic = TRUE) places soundex before else', {
+  lev <- cl_name(phonetic = TRUE)
+  n <- length(lev$levels)
+  expect_equal(lev$levels[[n]]$method, 'else')
+  expect_equal(lev$levels[[n - 1L]]$method, 'soundex')
+})
+
 # --- cl_email() -----------------------------------------------------------
 # From: test_email_comparison — levels: exact, exact-username, JW >= 0.88, JW-username
 

@@ -290,6 +290,13 @@ sql_gamma_case <- function(comp, dialect) {
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
+  if (method == 'soundex') {
+    soundex_fn <- if (identical(dialect, 'duckdb')) 'il_soundex' else 'soundex'
+    return(glue::glue(
+      'CASE WHEN {null_guard} AND {soundex_fn}({lcol}) = {soundex_fn}({rcol}) THEN 1 ELSE 0 END'
+    ))
+  }
+
   if (method == 'levels') {
     # Build multi-level CASE from sublevels (skip null and else)
     sublevels <- Filter(function(l) {
@@ -365,6 +372,10 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
       return(glue::glue('{null_guard} AND ABS(CAST({lcol} AS DATE) - CAST({rcol} AS DATE)) <= {days_val}'))
     }
     return(glue::glue('{null_guard} AND ABS(JULIANDAY({lcol}) - JULIANDAY({rcol})) <= {days_val}'))
+  }
+  if (method == 'soundex') {
+    soundex_fn <- if (identical(dialect, 'duckdb')) 'il_soundex' else 'soundex'
+    return(glue::glue('{null_guard} AND {soundex_fn}({lcol}) = {soundex_fn}({rcol})'))
   }
   if (method == 'custom') {
     sql_expr <- glue::glue(sub$sql_expr, col = col, .open = '{', .close = '}')

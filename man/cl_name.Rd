@@ -4,11 +4,14 @@
 \alias{cl_name}
 \title{Personal Name Comparison}
 \usage{
-cl_name(term_frequency = FALSE)
+cl_name(term_frequency = FALSE, phonetic = FALSE)
 }
 \arguments{
 \item{term_frequency}{Logical. If \code{TRUE}, adjust match weights by
 name frequency at the highest comparison level. Defaults to \code{FALSE}.}
+
+\item{phonetic}{Logical. If \code{TRUE}, add a \code{\link[=cl_soundex]{cl_soundex()}} level as a
+fallback before the else level. Defaults to \code{FALSE}.}
 }
 \value{
 A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
@@ -16,10 +19,15 @@ A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
 \description{
 A pre-built domain comparison for personal names. Combines exact
 matching, Jaro-Winkler, and Jaro levels with thresholds tuned for
-typical name variation.
+typical name variation. Optionally adds a Soundex phonetic level as
+a final fallback before the else level, which helps catch names that
+sound similar but are spelled differently (e.g., Smith/Smyth).
 }
 \examples{
 il_spec() |>
   il_compare(first_name, cl_name()) |>
   il_compare(surname, cl_name(term_frequency = TRUE))
+
+il_spec() |>
+  il_compare(first_name, cl_name(phonetic = TRUE))
 }

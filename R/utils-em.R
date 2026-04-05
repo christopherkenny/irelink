@@ -285,6 +285,12 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     return(gamma)
   }
 
+  if (method == 'soundex') {
+    sx_l <- il_soundex(as.character(val_l))
+    sx_r <- il_soundex(as.character(val_r))
+    return(ifelse(both_present & !is.na(sx_l) & !is.na(sx_r) & sx_l == sx_r, 1L, 0L))
+  }
+
   if (method == 'levels') {
     # Check sublevels from best to worst (skip null/else)
     sublevels <- Filter(function(l) {

@@ -340,6 +340,7 @@ Supporting arbitrary SQL expressions (e.g.,
 | **Low** | Evaluation convenience (§6) | Ergonomics | ✅ Done |
 | **Low** | EM flexibility (§7) | Advanced use | ✅ Done |
 | **Low** | Future extensions (§10) | Completeness | Deferred |
+| **Medium** | Phonetic comparison level (§11) | Name matching accuracy | ✅ Done |
 
 ---
 
@@ -586,3 +587,40 @@ Convergence is checked across all updated parameter sets.  Both
 | `tests/testthat/test-em-flex.R` | 6 new tests |
 
 **Test impact:** All tests pass (6 new).
+
+---
+
+### §11 Phonetic Comparison Level — Implemented
+
+Added `cl_soundex()` as a standalone comparison level and a `phonetic`
+argument to `cl_name()`.
+This closes the gap between irelink and splink's `NameComparison`, which
+includes a phonetic fallback level.
+
+**`cl_soundex()`** returns a comparison level with method `'soundex'`.
+On DuckDB, it renders as `il_soundex(l.col) = il_soundex(r.col)` (using
+the registered MACRO).
+On PostgreSQL, it uses the native `soundex()` function.
+On SQLite, it falls back to the R-side `il_soundex()` implementation, so
+phonetic comparisons work on all backends.
+
+**`cl_name(phonetic = TRUE)`** inserts `cl_soundex()` as the penultimate
+level (before `cl_else()`), matching splink's `NameComparison` pattern of
+including a phonetic fallback after all fuzzy-similarity levels.
+
+The `'soundex'` method is now handled in:
+
+- `sql_sublevel_condition()` — dialect-appropriate SQL for use in `cl_levels()`
+- `sql_gamma_case()` — dialect-appropriate SQL for standalone use
+- `compute_gamma()` — R-side implementation for SQLite fallback
+
+**Files changed:**
+
+| File | Change |
+|------|--------|
+| `R/cl_domain.R` | Added `cl_soundex()`; added `phonetic` arg to `cl_name()` |
+| `R/utils-sql.R` | Added `'soundex'` to `sql_sublevel_condition()` and `sql_gamma_case()` |
+| `R/utils-em.R` | Added `'soundex'` to `compute_gamma()` |
+| `tests/testthat/test-cl-domain.R` | 3 new tests for `cl_soundex()` and `cl_name(phonetic = TRUE)` |
+
+**Test impact:** All 652 tests pass (3 new).
