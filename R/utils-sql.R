@@ -297,6 +297,10 @@ sql_gamma_case <- function(comp, dialect) {
     ))
   }
 
+  if (method == 'array_min_distance') {
+    return(sql_array_min_distance_case(level, col, null_guard))
+  }
+
   if (method == 'levels') {
     # Build multi-level CASE from sublevels (skip null and else)
     sublevels <- Filter(function(l) {
@@ -383,12 +387,61 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
       'LEAST(ARRAY_LENGTH(l.{col}), ARRAY_LENGTH(r.{col}))'
     ))
   }
+  if (method == 'array_min_distance') {
+    t <- sub$thresholds[1]
+    inner <- sql_array_min_distance_inner(sub$fn, col)
+    op <- if (sub$fn == 'jaro_winkler') '>=' else '<='
+    return(glue::glue('{null_guard} AND ({inner}) {op} {t}'))
+  }
   if (method == 'custom') {
     sql_expr <- glue::glue(sub$sql_expr, col = col, .open = '{', .close = '}')
     return(glue::glue('{null_guard} AND ({sql_expr})'))
   }
   # Default: exact match
   glue::glue('{null_guard} AND {lcol} = {rcol}')
+}
+
+# Build the inner scalar expression that yields the best pairwise score
+# for array_min_distance: MAX similarity (jaro_winkler) or MIN distance
+# (levenshtein) across all element pairs via UNNEST cross-join.
+# Returns a SQL fragment suitable for embedding in a scalar subquery.
+sql_array_min_distance_inner <- function(fn, col) {
+  agg <- if (fn == 'jaro_winkler') 'MAX' else 'MIN'
+  dist_fn <- if (fn == 'jaro_winkler') {
+    'jaro_winkler_similarity(lv, rv)'
+  } else {
+    'levenshtein(lv, rv)'
+  }
+  paste0(
+    '(SELECT ', agg, '(', dist_fn, ') ',
+    'FROM UNNEST(l.', col, ') AS t1(lv), UNNEST(r.', col, ') AS t2(rv))'
+  )
+}
+
+# Build the full multi-threshold CASE expression for array_min_distance.
+# Wraps sql_array_min_distance_inner in an outer CASE that maps the best
+# score to an integer gamma level (0 = else, K = strictest match).
+sql_array_min_distance_case <- function(level, col, null_guard) {
+  fn <- level$fn
+  thresholds <- level$thresholds
+  n <- length(thresholds)
+  op <- if (fn == 'jaro_winkler') '>=' else '<='
+  inner <- sql_array_min_distance_inner(fn, col)
+
+  when_clauses <- vapply(seq_along(thresholds), function(i) {
+    paste0('WHEN m ', op, ' ', thresholds[i], ' THEN ', n - i + 1L)
+  }, character(1))
+
+  inner_case <- paste0(
+    'SELECT CASE ', paste(when_clauses, collapse = ' '), ' ELSE 0 END ',
+    'FROM (SELECT ', if (fn == 'jaro_winkler') 'MAX' else 'MIN',
+    '(', if (fn == 'jaro_winkler') 'jaro_winkler_similarity(lv, rv)' else 'levenshtein(lv, rv)',
+    ') AS m FROM UNNEST(l.', col, ') AS t1(lv), UNNEST(r.', col, ') AS t2(rv)) sub_m'
+  )
+
+  glue::glue(
+    'CASE WHEN {null_guard} THEN COALESCE(({inner_case}), 0) ELSE 0 END'
+  )
 }
 
 #' Build a SQL query that returns pairs with gamma columns computed in SQL

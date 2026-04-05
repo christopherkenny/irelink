@@ -32,6 +32,7 @@ reference:
       - cl_distance_km
       - cl_array_intersect
       - cl_array_subset
+      - cl_array_min_distance
       - cl_custom
       - cl_literal
       - cl_null

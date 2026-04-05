@@ -170,6 +170,51 @@ test_that('cl_array_intersect() rejects negative thresholds', {
   expect_error(cl_array_intersect(-1, 2))
 })
 
+# --- cl_array_min_distance() ----------------------------------------------
+
+test_that('cl_array_min_distance() creates a comparison level', {
+  lev <- cl_array_min_distance('jaro_winkler', 0.9, 0.7)
+  expect_s3_class(lev, 'il_comparison_level')
+  expect_equal(lev$method, 'array_min_distance')
+  expect_equal(lev$fn, 'jaro_winkler')
+  expect_equal(lev$thresholds, c(0.9, 0.7))
+})
+
+test_that('cl_array_min_distance() stores levenshtein thresholds', {
+  lev <- cl_array_min_distance('levenshtein', 1, 2)
+  expect_equal(lev$fn, 'levenshtein')
+  expect_equal(lev$thresholds, c(1, 2))
+})
+
+test_that('cl_array_min_distance() rejects out-of-range jaro_winkler thresholds', {
+  expect_snapshot(error = TRUE, cl_array_min_distance('jaro_winkler', 1.5))
+})
+
+test_that('cl_array_min_distance() rejects negative levenshtein thresholds', {
+  expect_snapshot(error = TRUE, cl_array_min_distance('levenshtein', -1))
+})
+
+test_that('cl_array_min_distance() rejects empty thresholds', {
+  expect_snapshot(error = TRUE, cl_array_min_distance('jaro_winkler'))
+})
+
+test_that('cl_array_min_distance() R fallback computes correct gamma', {
+  lev <- cl_array_min_distance('jaro_winkler', 0.9, 0.7)
+  # "john" vs "jon" jaro-winkler ~ 0.93: should score 2
+  gamma <- compute_gamma('john', 'jon', lev)
+  expect_equal(gamma, 2L)
+  # "abc" vs "xyz": very low similarity, should score 0
+  gamma_no <- compute_gamma('abc', 'xyz', lev)
+  expect_equal(gamma_no, 0L)
+})
+
+test_that('cl_array_min_distance() R fallback uses best pair across arrays', {
+  lev <- cl_array_min_distance('jaro_winkler', 0.9)
+  # comma-separated arrays: best pair is "john"/"john" = 1.0
+  gamma <- compute_gamma('alice,john', 'bob,john', lev)
+  expect_equal(gamma, 1L)
+})
+
 # --- cl_custom() ----------------------------------------------------------
 
 test_that('cl_custom() stores a raw SQL expression', {

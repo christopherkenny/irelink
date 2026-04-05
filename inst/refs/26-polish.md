@@ -76,9 +76,7 @@ distances.
 generates SQL computing the minimum pairwise string distance (Jaro-Winkler
 or Levenshtein) across two array columns.
 
-**Status:** ⬜ Deferred — requires UNNEST cross-join SQL that is
-DuckDB-specific and has no clean SQLite fallback.
-Users can approximate with `cl_custom()` and explicit UNNEST SQL.
+**Status:** ✅ Implemented — see implementation log.
 
 ---
 
@@ -149,6 +147,50 @@ the lower unique ID. `'drop'` removes all tied edges.
 ---
 
 ## Implementation Log
+
+### §3 `cl_array_min_distance()` — pairwise array string distance
+
+`cl_array_min_distance(fn, ...)` compares the best-matching pair across
+two array columns using Jaro-Winkler similarity or Levenshtein distance.
+
+- `fn = 'jaro_winkler'` (default): thresholds are similarity scores
+  (0–1, descending). Best score = `MAX(jaro_winkler_similarity(a, b))`
+  across all element pairs.
+- `fn = 'levenshtein'`: thresholds are edit distances (ascending). Best
+  score = `MIN(levenshtein(a, b))` across all element pairs.
+
+On DuckDB the best score is computed via a scalar UNNEST cross-join
+subquery:
+
+```sql
+CASE WHEN l.col IS NOT NULL AND r.col IS NOT NULL THEN
+  COALESCE((
+    SELECT CASE WHEN m >= 0.9 THEN 2 WHEN m >= 0.7 THEN 1 ELSE 0 END
+    FROM (SELECT MAX(jaro_winkler_similarity(lv, rv)) AS m
+          FROM UNNEST(l.col) AS t1(lv), UNNEST(r.col) AS t2(rv)) sub_m
+  ), 0)
+ELSE 0 END
+```
+
+On SQLite the R fallback parses comma-separated values and applies
+`stringdist::stringdist()` across all element pairs, taking the best
+score and applying the same threshold logic.
+
+**Files changed:**
+
+| File | Change |
+|------|--------|
+| `R/cl_array_intersect.R` | Added `cl_array_min_distance()` |
+| `R/utils-sql.R` | Added `sql_array_min_distance_inner()`, `sql_array_min_distance_case()`, and dispatch in `sql_gamma_case()` and `sql_sublevel_condition()` |
+| `R/utils-em.R` | Added `'array_min_distance'` to `compute_gamma()` |
+| `_pkgdown.yml` | Added `cl_array_min_distance` |
+| `tests/testthat/test-cl-similarity.R` | 6 new tests |
+
+**Test count:** 684 passing.
+
+---
+
+
 
 ### §1 `cl_dob()` configurable thresholds
 

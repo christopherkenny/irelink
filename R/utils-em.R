@@ -291,6 +291,40 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     return(ifelse(both_present & !is.na(sx_l) & !is.na(sx_r) & sx_l == sx_r, 1L, 0L))
   }
 
+  if (method == 'array_min_distance') {
+    fn <- comp_level$fn
+    thresholds <- comp_level$thresholds
+    n <- length(thresholds)
+    sd_method <- if (fn == 'jaro_winkler') 'jw' else 'lv'
+    sd_p <- if (fn == 'jaro_winkler') 0.1 else 0
+
+    gamma <- rep(0L, length(val_l))
+    for (k in seq_len(length(val_l))) {
+      if (is.na(val_l[k]) || is.na(val_r[k])) next
+      a <- unique(trimws(unlist(strsplit(as.character(val_l[k]), ',', fixed = TRUE))))
+      b <- unique(trimws(unlist(strsplit(as.character(val_r[k]), ',', fixed = TRUE))))
+      pairs_a <- rep(a, each = length(b))
+      pairs_b <- rep(b, times = length(a))
+      dists <- stringdist::stringdist(pairs_a, pairs_b, method = sd_method, p = sd_p)
+      best <- if (fn == 'jaro_winkler') max(1 - dists) else min(dists)
+      # Iterate most-lenient to strictest; overwrite with higher gamma each time
+      # a stricter threshold is also satisfied. Matches the pattern in jaro_winkler
+      # and levenshtein handling above.
+      for (i in rev(seq_along(thresholds))) {
+        level_code <- n - i + 1L
+        passes <- if (fn == 'jaro_winkler') {
+          best >= thresholds[i]
+        } else {
+          best <= thresholds[i]
+        }
+        if (passes) {
+          gamma[k] <- level_code
+        }
+      }
+    }
+    return(gamma)
+  }
+
   if (method == 'array_subset') {
     result <- mapply(function(a, b) {
       if (is.na(a) || is.na(b)) {
