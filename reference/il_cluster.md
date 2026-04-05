@@ -9,7 +9,12 @@ cluster IDs to records that represent the same real-world entity.
 ## Usage
 
 ``` r
-il_cluster(pairs, threshold = NULL, method = c("connected", "best_link"))
+il_cluster(
+  pairs,
+  threshold = NULL,
+  method = c("connected", "best_link"),
+  ties_method = c("lowest_id", "drop")
+)
 ```
 
 ## Arguments
@@ -28,6 +33,13 @@ il_cluster(pairs, threshold = NULL, method = c("connected", "best_link"))
 
   One of `"connected"` (default) for connected-components clustering, or
   `"best_link"` for single-best-link clustering.
+
+- ties_method:
+
+  How to handle tied best-link probabilities when
+  `method = "best_link"`. `"lowest_id"` (default) keeps the edge to the
+  record with the smaller `unique_id`; `"drop"` removes all edges where
+  the best-link probability is tied.
 
 ## Value
 

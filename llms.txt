@@ -217,8 +217,12 @@ field.
   : Geographic Distance Comparison
 - [`cl_array_intersect()`](http://christophertkenny.com/irelink/reference/cl_array_intersect.md)
   : Array Intersection Comparison
+- [`cl_array_subset()`](http://christophertkenny.com/irelink/reference/cl_array_subset.md)
+  : Array Subset Comparison
 - [`cl_custom()`](http://christophertkenny.com/irelink/reference/cl_custom.md)
   : Custom SQL Comparison
+- [`cl_literal()`](http://christophertkenny.com/irelink/reference/cl_literal.md)
+  : Literal Value Comparison
 - [`cl_null()`](http://christophertkenny.com/irelink/reference/cl_null.md)
   : Null / Missing Value Level
 - [`cl_else()`](http://christophertkenny.com/irelink/reference/cl_else.md)
