@@ -46,6 +46,8 @@ field.
   : Array Intersection Comparison
 - [`cl_array_subset()`](http://christophertkenny.com/irelink/reference/cl_array_subset.md)
   : Array Subset Comparison
+- [`cl_array_min_distance()`](http://christophertkenny.com/irelink/reference/cl_array_min_distance.md)
+  : Pairwise Array Minimum Distance Comparison
 - [`cl_custom()`](http://christophertkenny.com/irelink/reference/cl_custom.md)
   : Custom SQL Comparison
 - [`cl_literal()`](http://christophertkenny.com/irelink/reference/cl_literal.md)
