@@ -90,7 +90,7 @@ block_on(first_name, .transform = il_soundex)
 #> {
 #>     vapply(x, soundex_one, character(1), USE.NAMES = FALSE)
 #> }
-#> <bytecode: 0x558d15467628>
+#> <bytecode: 0x558167ff8170>
 #> <environment: namespace:irelink>
 #> 
 #> attr(,"class")
