@@ -475,6 +475,21 @@ Be critical and delete tests that do not need to be there.
 
 The sprints for testing purposes should also be entirely eliminated.
 
+## Scaling
+
+Right now, it looks like a lot of the functions take in-memory data and work with that.
+That works well for testing and maybe for some cases.
+However, that will not scale into huge data.
+We need to figure out a clean way to accept in memory data e.g., tibbles or data.frames and ALSO accept dbplyr or DBI database connections.
+
+I suspect, the interface we want is to accept database references and avoid doing things like converting them to data frames in memory.
+
+To be clear, we should support both in memory and database connections.
+
+Identify how splink (../splink) handles this type of constraint, make a plan for us to do it well in R, and then expand our behavior.
+
+Write a summary of your findings, plan, and edits to `insts/refs/20-connections.md`
+
 ## Update notes (Opus 4.6 high)
 
 Can you write a summary of files 15--20 as `stage-08-notes.md`. This should be described as the polishing stage." Include references and format the file similar to the stage 7 notes.
