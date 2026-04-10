@@ -9,7 +9,7 @@ check_similarity_thresholds <- function(thresholds, fn_name) {
   if (length(thresholds) == 0L) {
     cli::cli_abort('{.fn {fn_name}} requires at least one threshold.')
   }
-  if (!is.numeric(thresholds) || any(is.na(thresholds))) {
+  if (!is.numeric(thresholds) || anyNA(thresholds)) {
     cli::cli_abort('Thresholds for {.fn {fn_name}} must be numeric.')
   }
   if (any(thresholds < 0 | thresholds > 1)) {
@@ -33,7 +33,7 @@ check_distance_thresholds <- function(thresholds, fn_name) {
   if (length(thresholds) == 0L) {
     cli::cli_abort('{.fn {fn_name}} requires at least one threshold.')
   }
-  if (!is.numeric(thresholds) || any(is.na(thresholds))) {
+  if (!is.numeric(thresholds) || anyNA(thresholds)) {
     cli::cli_abort('Thresholds for {.fn {fn_name}} must be numeric.')
   }
   if (any(thresholds < 0)) {

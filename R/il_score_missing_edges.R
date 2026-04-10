@@ -29,12 +29,7 @@ il_score_missing_edges <- function(model, pairs, clusters,
   con <- model$con
 
   # Build set of existing scored pairs (normalised: smaller id first)
-  existing <- paste0(
-    pmin(as.character(pairs$unique_id_l), as.character(pairs$unique_id_r)),
-    '|',
-    pmax(as.character(pairs$unique_id_l), as.character(pairs$unique_id_r))
-  )
-  existing_set <- unique(existing)
+  existing_set <- unique(canonical_pair_key(pairs$unique_id_l, pairs$unique_id_r))
 
   # Enumerate all within-cluster pairs
   cluster_list <- split(as.character(clusters$unique_id), clusters$cluster_id)
@@ -44,7 +39,7 @@ il_score_missing_edges <- function(model, pairs, clusters,
   for (members in cluster_list) {
     if (length(members) < 2L) next
     combos <- utils::combn(sort(members), 2)
-    keys <- paste0(combos[1, ], '|', combos[2, ])
+    keys <- canonical_pair_key(combos[1, ], combos[2, ])
     new_mask <- !(keys %in% existing_set)
     if (any(new_mask)) {
       missing_l <- c(missing_l, combos[1, new_mask])

@@ -100,16 +100,6 @@ transform_to_sql_fn <- function(transform) {
   NULL
 }
 
-#' Can this transform be translated to SQL?
-#' @noRd
-transform_has_sql <- function(transform) {
-  if (is_transform_chain(transform)) {
-    return(all(vapply(attr(transform, 'transforms'), transform_has_sql, logical(1))))
-  }
-  !is.null(transform_to_sql_fn(transform)) ||
-    is_phonetic_transform(transform) ||
-    is_column_transform(transform)
-}
 
 #' Map an R function to a serializable name
 #' @noRd
@@ -119,7 +109,7 @@ transform_to_name <- function(transform) {
       attr(transform, 'transforms'), transform_to_name,
       character(1)
     )
-    if (any(is.na(names))) {
+    if (anyNA(names)) {
       cli::cli_warn('Custom transform in chain cannot be serialized; it will be lost on save/load.')
       return(NA_character_)
     }
@@ -812,42 +802,6 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
   }
 
   glue::glue('l.{col} = r.{col}')
-}
-
-#' Generate SQL for a single blocking rule
-#' @param rule An il_blocking_rule object.
-#' @param dialect SQL dialect.
-#' @return A character SQL fragment.
-#' @noRd
-sql_for_blocking_rule <- function(rule, dialect = 'duckdb') {
-  columns <- rule$columns
-  conditions <- vapply(columns, function(col) {
-    glue::glue('l.{col} = r.{col}')
-  }, character(1))
-  paste(conditions, collapse = ' AND ')
-}
-
-#' Generate SQL for multiple blocking rules (OR-ed)
-#' @param rules A list of il_blocking_rule objects.
-#' @param dialect SQL dialect.
-#' @return A character SQL fragment.
-#' @noRd
-sql_for_blocking_rules <- function(rules, dialect = 'duckdb') {
-  parts <- vapply(rules, function(r) {
-    paste0('(', sql_for_blocking_rule(r, dialect = dialect), ')')
-  }, character(1))
-  paste(parts, collapse = ' OR ')
-}
-
-#' Generate the join condition for dedupe vs link
-#' @param link_type "dedupe" or "link".
-#' @return A character SQL fragment.
-#' @noRd
-sql_join_condition <- function(link_type = 'dedupe') {
-  if (link_type == 'dedupe') {
-    return('l.unique_id < r.unique_id')
-  }
-  'l.__source_table <> r.__source_table'
 }
 
 #' Build aliased SELECT clauses for left/right tables

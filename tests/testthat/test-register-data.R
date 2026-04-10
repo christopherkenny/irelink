@@ -4,8 +4,8 @@ test_that('register_data handles data.frame input', {
   con <- test_con()
   on.exit(test_discon(con))
 
-  reg <- irelink:::register_data(fake_20, con = con, tbl_name = '__test_df')
-  on.exit(irelink:::drop_registered(con, '__test_df'), add = TRUE, after = FALSE)
+  reg <- register_data(fake_20, con = con, tbl_name = '__test_df')
+  on.exit(drop_registered(con, '__test_df'), add = TRUE, after = FALSE)
 
 
   expect_equal(reg$tbl_name, '__test_df')
@@ -20,8 +20,8 @@ test_that('register_data handles character table name', {
   on.exit(test_discon(con))
 
   DBI::dbWriteTable(con, 'src_table', fake_20, overwrite = TRUE)
-  reg <- irelink:::register_data('src_table', con = con, tbl_name = '__test_char')
-  on.exit(irelink:::drop_registered(con, '__test_char'), add = TRUE, after = FALSE)
+  reg <- register_data('src_table', con = con, tbl_name = '__test_char')
+  on.exit(drop_registered(con, '__test_char'), add = TRUE, after = FALSE)
 
   expect_equal(reg$tbl_name, '__test_char')
   expect_equal(reg$n_records, 20L)
@@ -41,8 +41,8 @@ test_that('register_data handles tbl_lazy input', {
   DBI::dbWriteTable(con, 'lazy_src', fake_20, overwrite = TRUE)
   tbl_ref <- dplyr::tbl(con, 'lazy_src')
 
-  reg <- irelink:::register_data(tbl_ref, tbl_name = '__test_lazy')
-  on.exit(irelink:::drop_registered(con, '__test_lazy'), add = TRUE, after = FALSE)
+  reg <- register_data(tbl_ref, tbl_name = '__test_lazy')
+  on.exit(drop_registered(con, '__test_lazy'), add = TRUE, after = FALSE)
 
   expect_equal(reg$tbl_name, '__test_lazy')
   expect_identical(reg$con, con)
@@ -57,16 +57,16 @@ test_that('register_data replaces table with view without error', {
   on.exit(test_discon(con))
 
   # First create as TABLE (data.frame path)
-  reg1 <- irelink:::register_data(fake_20, con = con, tbl_name = '__test_replace')
+  reg1 <- register_data(fake_20, con = con, tbl_name = '__test_replace')
 
   # Now create as VIEW (tbl_lazy path) — should not error
 
   DBI::dbWriteTable(con, 'replace_src', fake_20, overwrite = TRUE)
   tbl_ref <- dplyr::tbl(con, 'replace_src')
-  reg2 <- irelink:::register_data(tbl_ref, tbl_name = '__test_replace')
+  reg2 <- register_data(tbl_ref, tbl_name = '__test_replace')
 
   expect_equal(reg2$n_records, 20L)
-  irelink:::drop_registered(con, '__test_replace')
+  drop_registered(con, '__test_replace')
 })
 
 test_that('il_model works with tbl_lazy input', {
@@ -111,7 +111,7 @@ test_that('register_data errors on unsupported input', {
   on.exit(test_discon(con))
 
   expect_error(
-    irelink:::register_data(42, con = con),
+    register_data(42, con = con),
     'data frame'
   )
 })
@@ -121,7 +121,7 @@ test_that('register_data errors on zero-row data.frame', {
   on.exit(test_discon(con))
 
   expect_error(
-    irelink:::register_data(data.frame(), con = con),
+    register_data(data.frame(), con = con),
     'zero-row'
   )
 })

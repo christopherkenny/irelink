@@ -54,7 +54,7 @@ test_that('tf_columns() identifies TF-enabled comparisons', {
     il_compare(city, cl_exact(term_frequency = TRUE)) |>
     il_compare(name, cl_exact())
 
-  cols <- irelink:::tf_columns(spec_tf$comparisons)
+  cols <- tf_columns(spec_tf$comparisons)
   expect_equal(cols, 'city')
 })
 
@@ -63,7 +63,7 @@ test_that('tf_columns() returns empty for no TF comparisons', {
     il_compare(city, cl_exact()) |>
     il_compare(name, cl_exact())
 
-  cols <- irelink:::tf_columns(spec_no_tf$comparisons)
+  cols <- tf_columns(spec_no_tf$comparisons)
   expect_length(cols, 0)
 })
 
@@ -90,7 +90,7 @@ test_that('compute_tf_adjustment() produces correct adjustments', {
     u_levels = list(city = c(0.90, 0.10))
   )
 
-  adj <- irelink:::compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
+  adj <- compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
 
   # Pair 1: gamma=1, tf_max = max(0.80, 0.80) = 0.80
   # adj = log2(0.10 / 0.80) = log2(0.125) = -3
@@ -115,7 +115,7 @@ test_that('TF adjustment is zero when term_frequency is FALSE', {
   tf_data <- data.frame(tf_city_l = c(0.5, 0.5), tf_city_r = c(0.5, 0.5))
   mu <- list(m_levels = list(city = c(0.1, 0.9)), u_levels = list(city = c(0.9, 0.1)))
 
-  adj <- irelink:::compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
+  adj <- compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
   expect_equal(adj, c(0, 0))
 })
 
@@ -247,7 +247,7 @@ test_that('No TF tables created when no comparisons use TF', {
 # --- SQL TF select expressions -----------------------------------------------
 
 test_that('sql_tf_select_exprs() generates correct SQL fragments', {
-  exprs <- irelink:::sql_tf_select_exprs(c('city', 'name'))
+  exprs <- sql_tf_select_exprs(c('city', 'name'))
   expect_true(grepl('tf_city_l', exprs))
   expect_true(grepl('tf_city_r', exprs))
   expect_true(grepl('tf_name_l', exprs))
@@ -257,5 +257,5 @@ test_that('sql_tf_select_exprs() generates correct SQL fragments', {
 })
 
 test_that('sql_tf_select_exprs() returns NULL for empty input', {
-  expect_null(irelink:::sql_tf_select_exprs(character(0)))
+  expect_null(sql_tf_select_exprs(character(0)))
 })

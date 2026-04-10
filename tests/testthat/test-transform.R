@@ -33,7 +33,7 @@ test_that('transform = tolower produces LOWER() in SQL gamma', {
     method = structure(list(method = 'exact'), class = 'il_comparison_level'),
     transform = tolower
   )
-  sql <- irelink:::sql_gamma_case(comp, 'duckdb')
+  sql <- sql_gamma_case(comp, 'duckdb')
   expect_true(grepl('LOWER', sql))
   expect_true(grepl('LOWER\\(l\\.name\\)', sql))
   expect_true(grepl('LOWER\\(r\\.name\\)', sql))
@@ -47,7 +47,7 @@ test_that('transform = toupper produces UPPER() in SQL gamma', {
     ),
     transform = toupper
   )
-  sql <- irelink:::sql_gamma_case(comp, 'duckdb')
+  sql <- sql_gamma_case(comp, 'duckdb')
   expect_true(grepl('UPPER', sql))
 })
 
@@ -57,7 +57,7 @@ test_that('NULL transform leaves SQL unchanged', {
     method = structure(list(method = 'exact'), class = 'il_comparison_level'),
     transform = NULL
   )
-  sql <- irelink:::sql_gamma_case(comp, 'duckdb')
+  sql <- sql_gamma_case(comp, 'duckdb')
   expect_false(grepl('LOWER|UPPER|TRIM', sql))
   expect_true(grepl('l\\.name', sql))
 })
@@ -71,7 +71,7 @@ test_that('transform applied R-side in compute_gamma_matrix', {
     )
   )
   pairs <- data.frame(l_name = c('Alice', 'BOB'), r_name = c('ALICE', 'bob'))
-  gamma_mat <- irelink:::compute_gamma_matrix(pairs, comparisons)
+  gamma_mat <- compute_gamma_matrix(pairs, comparisons)
 
   # Both should be gamma = 1 (exact match after tolower)
   expect_equal(gamma_mat[1, 1], 1L, ignore_attr = TRUE)

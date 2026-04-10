@@ -76,7 +76,7 @@ il_estimate_m_from_labels <- function(model, labels) {
   comparisons <- model$spec$comparisons
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
 
-  match_pairs <- labels[labels$is_match == TRUE, ]
+  match_pairs <- labels[labels$is_match, ]
   if (nrow(match_pairs) == 0L) {
     cli::cli_abort('No matching pairs found in labels.')
   }

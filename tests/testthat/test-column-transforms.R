@@ -78,15 +78,6 @@ test_that('il_array_element SQL generation', {
   expect_equal(sql_transform_col('l.arr', tf_last), 'l.arr[-1]')
 })
 
-test_that('column transforms report SQL availability', {
-  expect_true(transform_has_sql(il_substr(1, 3)))
-  expect_true(transform_has_sql(il_nullif('')))
-  expect_true(transform_has_sql(il_cast_to_string()))
-  expect_true(transform_has_sql(il_try_parse_date()))
-  expect_true(transform_has_sql(il_regex_extract('[0-9]+')))
-  expect_true(transform_has_sql(il_array_element('first')))
-})
-
 test_that('column transforms serialize to name', {
   expect_equal(transform_to_name(il_substr(1, 3)), 'il_substr(1,3)')
   expect_equal(transform_to_name(il_nullif('')), 'il_nullif("")')
@@ -96,7 +87,6 @@ test_that('column transforms serialize to name', {
 test_that('column transforms compose with il_transform', {
   tf <- il_transform(il_substr(1, 5), tolower)
   expect_s3_class(tf, 'il_transform_chain')
-  expect_true(transform_has_sql(tf))
   sql <- sql_transform_col('l.name', tf, 'duckdb')
   expect_equal(sql, 'LOWER(SUBSTRING(l.name, 1, 5))')
 })

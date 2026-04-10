@@ -64,11 +64,11 @@ test_that('cl_time_diff() errors with no arguments', {
 # --- time_diff_to_seconds() internal helper -----------------------------
 
 test_that('time_diff_to_seconds converts units correctly', {
-  expect_equal(irelink:::time_diff_to_seconds(1, 'seconds'), 1)
-  expect_equal(irelink:::time_diff_to_seconds(1, 'minutes'), 60)
-  expect_equal(irelink:::time_diff_to_seconds(1, 'hours'), 3600)
-  expect_equal(irelink:::time_diff_to_seconds(1, 'days'), 86400)
-  expect_equal(irelink:::time_diff_to_seconds(2, 'hours'), 7200)
+  expect_equal(time_diff_to_seconds(1, 'seconds'), 1)
+  expect_equal(time_diff_to_seconds(1, 'minutes'), 60)
+  expect_equal(time_diff_to_seconds(1, 'hours'), 3600)
+  expect_equal(time_diff_to_seconds(1, 'days'), 86400)
+  expect_equal(time_diff_to_seconds(2, 'hours'), 7200)
 })
 
 # --- R-side gamma computation -------------------------------------------
@@ -104,7 +104,7 @@ test_that('cl_time_diff computes correct gammas for timestamps', {
 test_that('cl_time_diff SQL generation uses EPOCH for DuckDB', {
   td <- cl_time_diff(minutes(5))
   comp <- list(columns = 'ts', method = td, transform = NULL)
-  sql <- irelink:::sql_gamma_case(comp, 'duckdb')
+  sql <- sql_gamma_case(comp, 'duckdb')
   expect_match(sql, 'EPOCH', fixed = TRUE)
   expect_match(sql, '300', fixed = TRUE) # 5 * 60 seconds
 })
@@ -112,7 +112,7 @@ test_that('cl_time_diff SQL generation uses EPOCH for DuckDB', {
 test_that('cl_time_diff SQL generation uses EXTRACT for postgres', {
   td <- cl_time_diff(hours(1))
   comp <- list(columns = 'ts', method = td, transform = NULL)
-  sql <- irelink:::sql_gamma_case(comp, 'postgres')
+  sql <- sql_gamma_case(comp, 'postgres')
   expect_match(sql, 'EXTRACT', fixed = TRUE)
   expect_match(sql, '3600', fixed = TRUE) # 1 * 3600 seconds
 })

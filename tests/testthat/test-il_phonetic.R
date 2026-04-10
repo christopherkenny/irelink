@@ -46,50 +46,50 @@ test_that('il_dmetaphone errors when called on an R vector', {
 # --- is_phonetic_transform ---------------------------------------------------
 
 test_that('is_phonetic_transform identifies phonetic functions', {
-  expect_true(irelink:::is_phonetic_transform(il_soundex))
-  expect_true(irelink:::is_phonetic_transform(il_metaphone))
-  expect_true(irelink:::is_phonetic_transform(il_dmetaphone))
-  expect_false(irelink:::is_phonetic_transform(tolower))
-  expect_false(irelink:::is_phonetic_transform(toupper))
-  expect_false(irelink:::is_phonetic_transform(NULL))
+  expect_true(is_phonetic_transform(il_soundex))
+  expect_true(is_phonetic_transform(il_metaphone))
+  expect_true(is_phonetic_transform(il_dmetaphone))
+  expect_false(is_phonetic_transform(tolower))
+  expect_false(is_phonetic_transform(toupper))
+  expect_false(is_phonetic_transform(NULL))
 })
 
 # --- SQL generation -----------------------------------------------------------
 
 test_that('phonetic_transform_sql generates DuckDB soundex macro call', {
-  sql <- irelink:::phonetic_transform_sql(il_soundex, 'l.name', 'duckdb')
+  sql <- phonetic_transform_sql(il_soundex, 'l.name', 'duckdb')
   expect_equal(sql, 'il_soundex(l.name)')
 })
 
 test_that('phonetic_transform_sql generates PostgreSQL soundex call', {
-  sql <- irelink:::phonetic_transform_sql(il_soundex, 'l.name', 'postgres')
+  sql <- phonetic_transform_sql(il_soundex, 'l.name', 'postgres')
   expect_equal(sql, 'soundex(l.name)')
 })
 
 test_that('phonetic_transform_sql generates PostgreSQL metaphone call', {
-  sql <- irelink:::phonetic_transform_sql(il_metaphone, 'l.name', 'postgres')
+  sql <- phonetic_transform_sql(il_metaphone, 'l.name', 'postgres')
   expect_equal(sql, 'metaphone(l.name, 10)')
 })
 
 test_that('phonetic_transform_sql generates PostgreSQL dmetaphone call', {
-  sql <- irelink:::phonetic_transform_sql(il_dmetaphone, 'l.name', 'postgres')
+  sql <- phonetic_transform_sql(il_dmetaphone, 'l.name', 'postgres')
   expect_equal(sql, 'dmetaphone(l.name)')
 })
 
 test_that('phonetic_transform_sql returns NULL for non-phonetic transforms', {
-  expect_null(irelink:::phonetic_transform_sql(tolower, 'l.name', 'duckdb'))
-  expect_null(irelink:::phonetic_transform_sql(NULL, 'l.name', 'duckdb'))
+  expect_null(phonetic_transform_sql(tolower, 'l.name', 'duckdb'))
+  expect_null(phonetic_transform_sql(NULL, 'l.name', 'duckdb'))
 })
 
 # --- sql_transform_col with phonetic transforms ------------------------------
 
 test_that('sql_transform_col wraps column with phonetic SQL', {
   expect_equal(
-    irelink:::sql_transform_col('l.name', il_soundex, 'duckdb'),
+    sql_transform_col('l.name', il_soundex, 'duckdb'),
     'il_soundex(l.name)'
   )
   expect_equal(
-    irelink:::sql_transform_col('r.name', il_soundex, 'postgres'),
+    sql_transform_col('r.name', il_soundex, 'postgres'),
     'soundex(r.name)'
   )
 })
@@ -98,32 +98,32 @@ test_that('sql_transform_col wraps column with phonetic SQL', {
 
 test_that('validate_phonetic_dialect rejects unsupported backends', {
   expect_error(
-    irelink:::validate_phonetic_dialect('il_soundex', 'sqlite'),
+    validate_phonetic_dialect('il_soundex', 'sqlite'),
     'sqlite'
   )
   expect_error(
-    irelink:::validate_phonetic_dialect('il_metaphone', 'duckdb'),
+    validate_phonetic_dialect('il_metaphone', 'duckdb'),
     'duckdb'
   )
   expect_error(
-    irelink:::validate_phonetic_dialect('il_dmetaphone', 'duckdb'),
+    validate_phonetic_dialect('il_dmetaphone', 'duckdb'),
     'duckdb'
   )
 })
 
 test_that('validate_phonetic_dialect accepts supported backends', {
-  expect_silent(irelink:::validate_phonetic_dialect('il_soundex', 'duckdb'))
-  expect_silent(irelink:::validate_phonetic_dialect('il_soundex', 'postgres'))
-  expect_silent(irelink:::validate_phonetic_dialect('il_metaphone', 'postgres'))
-  expect_silent(irelink:::validate_phonetic_dialect('il_dmetaphone', 'postgres'))
+  expect_silent(validate_phonetic_dialect('il_soundex', 'duckdb'))
+  expect_silent(validate_phonetic_dialect('il_soundex', 'postgres'))
+  expect_silent(validate_phonetic_dialect('il_metaphone', 'postgres'))
+  expect_silent(validate_phonetic_dialect('il_dmetaphone', 'postgres'))
 })
 
 # --- Serialization (transform_to_name) ---------------------------------------
 
 test_that('phonetic transforms serialize correctly', {
-  expect_equal(irelink:::transform_to_name(il_soundex), 'il_soundex')
-  expect_equal(irelink:::transform_to_name(il_metaphone), 'il_metaphone')
-  expect_equal(irelink:::transform_to_name(il_dmetaphone), 'il_dmetaphone')
+  expect_equal(transform_to_name(il_soundex), 'il_soundex')
+  expect_equal(transform_to_name(il_metaphone), 'il_metaphone')
+  expect_equal(transform_to_name(il_dmetaphone), 'il_dmetaphone')
 })
 
 # --- il_block_on / block_on with .transform -----------------------------------
@@ -159,7 +159,7 @@ test_that('block_on rejects non-function .transform', {
 # --- build_blocking_condition with phonetic transform -------------------------
 
 test_that('build_blocking_condition applies soundex transform (DuckDB)', {
-  sql <- irelink:::build_blocking_condition(
+  sql <- build_blocking_condition(
     columns = c('first_name', 'surname'),
     transform = il_soundex,
     dialect = 'duckdb'
@@ -172,7 +172,7 @@ test_that('build_blocking_condition applies soundex transform (DuckDB)', {
 })
 
 test_that('build_blocking_condition applies soundex transform (PostgreSQL)', {
-  sql <- irelink:::build_blocking_condition(
+  sql <- build_blocking_condition(
     columns = 'first_name',
     transform = il_soundex,
     dialect = 'postgres'
@@ -182,7 +182,7 @@ test_that('build_blocking_condition applies soundex transform (PostgreSQL)', {
 })
 
 test_that('build_blocking_condition without transform leaves columns bare', {
-  sql <- irelink:::build_blocking_condition(columns = 'first_name')
+  sql <- build_blocking_condition(columns = 'first_name')
   expect_equal(sql, 'l.first_name = r.first_name')
 })
 
@@ -204,7 +204,7 @@ test_that('register_phonetic_macros creates il_soundex in DuckDB', {
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 
-  irelink:::register_phonetic_macros(con)
+  register_phonetic_macros(con)
 
   # Confirm the macro works
   result <- DBI::dbGetQuery(con, "SELECT il_soundex('Smith') AS code")
@@ -215,7 +215,7 @@ test_that('DuckDB il_soundex macro matches R-side for known pairs', {
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 
-  irelink:::register_phonetic_macros(con)
+  register_phonetic_macros(con)
 
   pairs <- data.frame(name = c(
     'Smith', 'Smyth', 'Robert', 'Rupert',
@@ -233,7 +233,7 @@ test_that('DuckDB il_soundex macro handles NULL', {
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 
-  irelink:::register_phonetic_macros(con)
+  register_phonetic_macros(con)
 
   result <- DBI::dbGetQuery(con, 'SELECT il_soundex(NULL) AS code')
   expect_true(is.na(result$code))

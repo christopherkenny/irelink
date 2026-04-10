@@ -238,16 +238,6 @@ solve_cc_sql <- function(con, edges_tbl, max_iterations = 100L) {
   tibble::as_tibble(result)
 }
 
-#' Clean up all CC intermediate tables from the database
-#' @param con DBI connection.
-#' @noRd
-cc_cleanup <- function(con) {
-  tables <- DBI::dbListTables(con)
-  cc_tables <- tables[grepl('^__il_cc_', tables)]
-  for (tbl in cc_tables) {
-    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
-  }
-}
 
 # --- SQL best-link filter ---------------------------------------------------
 

@@ -52,24 +52,6 @@ format_unit_helper <- function(x) {
   paste0(x$value, ' ', x$unit)
 }
 
-#' Extract Numeric Value from a Unit Helper or Bare Numeric
-#'
-#' @param x A unit helper object or bare numeric.
-#' @param expected_unit Optional expected unit string for validation.
-#' @return A single numeric value.
-#' @noRd
-extract_numeric <- function(x, expected_unit = NULL) {
-  if (is.numeric(x) && length(x) == 1L) {
-    return(x)
-  }
-  if (is.list(x) && !is.null(x$value) && !is.null(x$unit)) {
-    if (!is.null(expected_unit) && x$unit != expected_unit) {
-      cli::cli_abort('Expected unit {.val {expected_unit}}, got {.val {x$unit}}.')
-    }
-    return(x$value)
-  }
-  cli::cli_abort('Expected a numeric value or unit helper, not {.obj_type_friendly {x}}.')
-}
 
 #' Create a Duration in Days
 #'

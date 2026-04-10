@@ -22,24 +22,19 @@ test_that('il_transform chain prints nicely', {
 
 test_that('sql_transform_col handles chains', {
   tf <- il_transform(tolower, trimws)
-  result <- irelink:::sql_transform_col('my_col', tf, 'duckdb')
+  result <- sql_transform_col('my_col', tf, 'duckdb')
   expect_equal(result, 'TRIM(LOWER(my_col))')
 })
 
 test_that('sql_transform_col handles chain with 3 steps', {
   tf <- il_transform(tolower, trimws, toupper)
-  result <- irelink:::sql_transform_col('x', tf, 'duckdb')
+  result <- sql_transform_col('x', tf, 'duckdb')
   expect_equal(result, 'UPPER(TRIM(LOWER(x)))')
-})
-
-test_that('transform_has_sql works for chains', {
-  tf <- il_transform(tolower, trimws)
-  expect_true(irelink:::transform_has_sql(tf))
 })
 
 test_that('transform_to_name works for chains', {
   tf <- il_transform(tolower, trimws)
-  nm <- irelink:::transform_to_name(tf)
+  nm <- transform_to_name(tf)
   expect_equal(nm, 'tolower -> trimws')
 })
 
@@ -76,6 +71,6 @@ test_that('transform chain works end-to-end with DuckDB', {
 
   model <- il_model(fake_1000[1:20, ], spec = spec, con = con)
   # If it runs without error and produces SQL, the chain is working
-  sql <- irelink:::build_gamma_query(model, model$spec$blocking_rules)
+  sql <- build_gamma_query(model, model$spec$blocking_rules)
   expect_match(sql, 'TRIM\\(LOWER')
 })
