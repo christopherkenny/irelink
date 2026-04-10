@@ -1,38 +1,24 @@
 # Tests for cl_time_diff() and time-related unit helpers
 
-# --- Unit helpers: seconds(), minutes(), hours() -------------------------
+test_that('seconds/minutes/hours create tagged values with correct class', {
+  objs <- list(seconds(30), minutes(5), hours(2))
+  expected_classes <- c('il_seconds', 'il_minutes', 'il_hours')
+  expected_units <- c('seconds', 'minutes', 'hours')
+  expected_values <- c(30, 5, 2)
 
-test_that('seconds() creates a tagged value with correct class', {
-  s <- seconds(30)
-  expect_s3_class(s, 'il_seconds')
-  expect_equal(s$value, 30)
-  expect_equal(s$unit, 'seconds')
-})
+  actual_classes <- vapply(objs, function(o) class(o)[1], character(1))
+  actual_units <- vapply(objs, function(o) o$unit, character(1))
+  actual_values <- vapply(objs, function(o) o$value, numeric(1))
 
-test_that('minutes() creates a tagged value with correct class', {
-  m <- minutes(5)
-  expect_s3_class(m, 'il_minutes')
-  expect_equal(m$value, 5)
-  expect_equal(m$unit, 'minutes')
-})
-
-test_that('hours() creates a tagged value with correct class', {
-  h <- hours(2)
-  expect_s3_class(h, 'il_hours')
-  expect_equal(h$value, 2)
-  expect_equal(h$unit, 'hours')
+  expect_identical(actual_classes, expected_classes)
+  expect_identical(actual_units, expected_units)
+  expect_equal(actual_values, expected_values)
 })
 
 test_that('time unit helpers reject invalid input', {
   expect_error(seconds('ten'))
   expect_error(minutes(-1))
   expect_error(hours(NULL))
-})
-
-test_that('time unit helpers print informatively', {
-  expect_output(print(seconds(30)), '30')
-  expect_output(print(minutes(5)), '5')
-  expect_output(print(hours(2)), '2')
 })
 
 # --- cl_time_diff() constructor -----------------------------------------

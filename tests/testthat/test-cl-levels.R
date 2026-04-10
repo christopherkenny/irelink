@@ -59,22 +59,15 @@ test_that('cl_levels() works without cl_null() and cl_else()', {
 # --- cl_and() / cl_or() / cl_not() ----------------------------------------
 # From: test_comparison_level_composition.py
 
-test_that('cl_and() creates a boolean AND node', {
-  node <- cl_and(cl_exact(), cl_jaro_winkler(0.9))
-  expect_s3_class(node, 'il_comparison_level')
-  expect_equal(node$method, 'and')
-})
+test_that('cl_and/cl_or/cl_not create boolean nodes', {
+  and_node <- cl_and(cl_exact(), cl_jaro_winkler(0.9))
+  or_node <- cl_or(cl_exact(), cl_jaro_winkler(0.9))
+  not_node <- cl_not(cl_exact())
 
-test_that('cl_or() creates a boolean OR node', {
-  node <- cl_or(cl_exact(), cl_jaro_winkler(0.9))
-  expect_s3_class(node, 'il_comparison_level')
-  expect_equal(node$method, 'or')
-})
-
-test_that('cl_not() negates a comparison level', {
-  node <- cl_not(cl_exact())
-  expect_s3_class(node, 'il_comparison_level')
-  expect_equal(node$method, 'not')
+  expect_identical(
+    vapply(list(and_node, or_node, not_node), `[[`, character(1), 'method'),
+    c('and', 'or', 'not')
+  )
 })
 
 test_that('cl_and() of two null levels is still a null level', {
@@ -99,15 +92,9 @@ test_that('cl_and() of exact + null is not a null level', {
   expect_false(node$is_null_level)
 })
 
-test_that('cl_or() with no arguments errors', {
-  expect_error(cl_or())
-})
-
-test_that('cl_and() with no arguments errors', {
+test_that('cl_and/cl_or/cl_not error with no arguments', {
   expect_error(cl_and())
-})
-
-test_that('cl_not() with no arguments errors', {
+  expect_error(cl_or())
   expect_error(cl_not())
 })
 

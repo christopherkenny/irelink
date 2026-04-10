@@ -10,9 +10,7 @@ test_that('il_string_similarity() returns a tibble', {
 test_that('il_string_similarity() has expected metric columns', {
   result <- il_string_similarity('hello', 'helo')
   expected_cols <- c('jaro_winkler', 'jaro', 'levenshtein', 'jaccard', 'cosine')
-  for (col in expected_cols) {
-    expect_true(col %in% names(result), info = paste('Missing column:', col))
-  }
+  expect_true(all(expected_cols %in% names(result)))
 })
 
 test_that('identical strings return 1.0 for similarity metrics', {

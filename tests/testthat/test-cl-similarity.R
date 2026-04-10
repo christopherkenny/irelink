@@ -11,17 +11,19 @@ test_that('cl_exact() creates a comparison level object', {
   expect_equal(lev$method, 'exact')
 })
 
-test_that('cl_exact() accepts term_frequency flag', {
-  lev <- cl_exact(term_frequency = TRUE)
-  expect_true(lev$term_frequency)
+test_that('comparison level constructors accept term_frequency flag', {
+  constructors <- list(
+    cl_exact(term_frequency = TRUE),
+    cl_jaro_winkler(0.9, term_frequency = TRUE),
+    cl_jaro(0.85, term_frequency = TRUE),
+    cl_levenshtein(1, term_frequency = TRUE),
+    cl_damerau_levenshtein(1, term_frequency = TRUE)
+  )
+  tf_flags <- vapply(constructors, function(lev) lev$term_frequency, logical(1))
+  expect_true(all(tf_flags))
 })
 
 # --- cl_jaro_winkler() / cl_jaro() ----------------------------------------
-
-test_that('cl_jaro_winkler() accepts term_frequency flag', {
-  lev <- cl_jaro_winkler(0.9, 0.7, term_frequency = TRUE)
-  expect_true(lev$term_frequency)
-})
 
 test_that('cl_jaro_winkler() stores thresholds in descending order', {
   lev <- cl_jaro_winkler(0.9, 0.7)
@@ -45,11 +47,6 @@ test_that('cl_jaro() creates a jaro-only comparison level', {
   expect_equal(lev$method, 'jaro')
 })
 
-test_that('cl_jaro() accepts term_frequency flag', {
-  lev <- cl_jaro(0.85, term_frequency = TRUE)
-  expect_true(lev$term_frequency)
-})
-
 # --- cl_levenshtein() / cl_damerau_levenshtein() --------------------------
 # From: test_comparison_level_lib.py::test_levenshtein_level,
 # test_damerau_levenshtein_level
@@ -65,16 +62,6 @@ test_that('cl_damerau_levenshtein() creates a damerau-levenshtein level', {
   lev <- cl_damerau_levenshtein(1, 2)
   expect_s3_class(lev, 'il_comparison_level')
   expect_equal(lev$method, 'damerau_levenshtein')
-})
-
-test_that('cl_levenshtein() accepts term_frequency flag', {
-  lev <- cl_levenshtein(1, term_frequency = TRUE)
-  expect_true(lev$term_frequency)
-})
-
-test_that('cl_damerau_levenshtein() accepts term_frequency flag', {
-  lev <- cl_damerau_levenshtein(1, term_frequency = TRUE)
-  expect_true(lev$term_frequency)
 })
 
 # --- cl_jaccard() / cl_cosine() -------------------------------------------

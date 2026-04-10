@@ -42,9 +42,7 @@ test_that('predict() output has required columns', {
   pairs <- predict(model)
 
   required_cols <- c('unique_id_l', 'unique_id_r', 'match_weight', 'match_probability')
-  for (col in required_cols) {
-    expect_true(col %in% names(pairs), info = paste('Missing column:', col))
-  }
+  expect_true(all(required_cols %in% names(pairs)))
 })
 
 test_that('predict() threshold filters out low-probability pairs', {

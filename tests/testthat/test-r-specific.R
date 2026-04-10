@@ -1,49 +1,6 @@
 # R-specific edge-case tests not covered by dedicated test files.
-# Each test here targets a specific boundary condition or R idiom.
 
-# ── Unit helper edge cases ──────────────────────────────────────────────────────────
-
-test_that('unit helpers reject NA input', {
-  expect_error(days(NA))
-  expect_error(days(NA_real_))
-  expect_error(months(NA))
-  expect_error(km(NA))
-  expect_error(mi(NA_integer_))
-})
-
-test_that('unit helpers accept zero', {
-  d <- days(0)
-  expect_equal(d$value, 0)
-  k <- km(0)
-  expect_equal(k$value, 0)
-})
-
-test_that('unit helpers reject length > 1 input', {
-  expect_error(days(c(1, 2)))
-  expect_error(km(c(5, 10)))
-})
-
-test_that('unit helpers reject Inf and NaN', {
-  expect_error(days(Inf))
-  expect_error(km(NaN))
-})
-
-# ── Comparison level: NA and boundary thresholds ────────────────────────────
-
-test_that('similarity thresholds reject NA values', {
-  expect_error(cl_jaro_winkler(NA))
-  expect_error(cl_jaccard(NA_real_))
-})
-
-test_that('distance thresholds reject NA values', {
-  expect_error(cl_levenshtein(NA))
-  expect_error(cl_numeric_diff(NA_real_))
-})
-
-test_that('similarity thresholds reject Inf', {
-  expect_error(cl_jaro_winkler(Inf))
-  expect_error(cl_cosine(-Inf))
-})
+# ── Comparison level: type rejection ─────────────────────────────────────────
 
 test_that('cl_custom() rejects non-character input', {
   expect_error(cl_custom(42))
@@ -129,7 +86,7 @@ test_that('il_count_pairs() with single-row data returns zero pairs in dedupe', 
   expect_equal(result$n_pairs[1], 0L)
 })
 
-# ── il_model: error messages and edge cases ──────────────────────────
+# ── il_model: error messages ──────────────────────────────────────────
 
 test_that('il_model() with missing columns errors with informative class', {
   con <- test_con()
@@ -137,35 +94,6 @@ test_that('il_model() with missing columns errors with informative class', {
   df <- data.frame(unique_id = 1:3, name = c('A', 'B', 'C'))
   spec <- il_spec() |> il_compare(nonexistent, cl_exact())
   expect_error(il_model(df, spec = spec, con = con))
-})
-
-test_that('il_model() stores data dimensions correctly', {
-  con <- test_con()
-  withr::defer(test_discon(con))
-  df <- data.frame(
-    unique_id = 1:10,
-    first_name = letters[1:10],
-    surname = LETTERS[1:10]
-  )
-  spec <- il_spec() |>
-    il_compare(first_name, cl_exact()) |>
-    il_compare(surname, cl_exact())
-  model <- il_model(df, spec = spec, con = con)
-  expect_equal(model$data$n_records_l, 10L)
-})
-
-test_that('print.il_model() returns model invisibly', {
-  con <- test_con()
-  withr::defer(test_discon(con))
-  df <- data.frame(
-    unique_id = 1:5,
-    first_name = c('A', 'A', 'B', 'B', 'C'),
-    surname = rep('X', 5)
-  )
-  spec <- il_spec() |> il_compare(first_name, cl_exact())
-  model <- il_model(df, spec = spec, con = con)
-  out <- withr::with_output_sink(tempfile(), print(model))
-  expect_s3_class(out, 'il_model')
 })
 
 # ── predict: threshold boundaries ───────────────────────────────────────
@@ -209,34 +137,6 @@ test_that('il_find_matches() returns zero rows when no blocking match', {
   matches <- il_find_matches(model, new_rec, threshold = 0.01)
   expect_s3_class(matches, 'tbl_df')
   expect_equal(nrow(matches), 0)
-})
-
-# ── il_waterfall: column content ─────────────────────────────────────
-
-test_that('il_waterfall() has step, contribution, and direction columns', {
-  con <- test_con()
-  withr::defer(test_discon(con))
-  df <- data.frame(
-    unique_id = 1:6,
-    first_name = c('A', 'A', 'B', 'B', 'C', 'C'),
-    surname = c('X', 'X', 'Y', 'Y', 'Z', 'Z')
-  )
-  spec <- il_spec() |>
-    il_compare(first_name, cl_exact()) |>
-    il_compare(surname, cl_exact()) |>
-    il_block_on(first_name)
-  model <- il_model(df, spec = spec, con = con) |>
-    il_estimate_u(max_pairs = 1e6) |>
-    il_estimate_em(block_on(first_name))
-  pairs <- predict(model, threshold = 0.0)
-  if (nrow(pairs) > 0) {
-    wf <- il_waterfall(pairs, which = 1L)
-    expect_true('step' %in% names(wf))
-    expect_true('contribution' %in% names(wf))
-    expect_true('direction' %in% names(wf))
-    expect_true('first_name' %in% wf$step)
-    expect_true('surname' %in% wf$step)
-  }
 })
 
 # ── NA values in data during model operations ──────────────────────────

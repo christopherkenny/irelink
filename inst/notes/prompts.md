@@ -656,3 +656,18 @@ If it should be removed, do so but only hesistantly.
 Be very sure before removal.
 
 Then provide a detailed writeup with notes in `inst/refs/29-linting.md`.
+
+
+## Tests (Opus 4.6 high)
+
+Now, let's do a targeted pass on the tests.
+The number of tests has drastically ballooned and that doesn't represent better testing.
+There are many tests that test NOTHING about the package.
+Remove things that test features of R rather than the package.
+
+Scrutinize every single test and ask if it is testing a feature of the package or is just a test with no purpose.
+Be critical and delete tests that do not need to be there.
+
+If there are blocks of tests that are near identical code and could be combined into a cleaner set of expectations, combine them.
+Never put any expectations within a for-loop.
+Always make use of R's vectorized approach to ensure that tests get their money's worth.

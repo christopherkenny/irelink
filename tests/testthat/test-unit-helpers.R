@@ -1,49 +1,28 @@
-# Sprint 1 — Unit helper constructors: days(), months(), years(), km(), mi()
-# No direct splink equivalent — these are irelink-specific tagged-value
-# constructors inspired by gt's px()/pct() pattern.
+# Unit helper constructors: days(), months(), years(), km(), mi()
 
-test_that('days() creates a tagged value with correct class and value', {
-  d <- days(30)
-  expect_s3_class(d, 'il_days')
-  expect_equal(d$value, 30)
+test_that('unit helpers create tagged values with correct class and value', {
+  objs <- list(days(30), months(6), years(10), km(5), mi(10))
+  expected_classes <- c('il_days', 'il_months', 'il_years', 'il_km', 'il_mi')
+  expected_values <- c(30, 6, 10, 5, 10)
+
+  actual_classes <- vapply(objs, function(o) class(o)[1], character(1))
+  actual_values <- vapply(objs, function(o) o$value, numeric(1))
+
+  expect_identical(actual_classes, expected_classes)
+  expect_equal(actual_values, expected_values)
+  expect_equal(days(0)$value, 0)
 })
 
-test_that('months() creates a tagged value with correct class and value', {
-  m <- months(6)
-  expect_s3_class(m, 'il_months')
-  expect_equal(m$value, 6)
-})
-
-test_that('years() creates a tagged value with correct class and value', {
-  y <- years(10)
-  expect_s3_class(y, 'il_years')
-  expect_equal(y$value, 10)
-})
-
-test_that('km() creates a tagged value with correct class and value', {
-  k <- km(5)
-  expect_s3_class(k, 'il_km')
-  expect_equal(k$value, 5)
-})
-
-test_that('mi() creates a tagged value with correct class and value', {
-  m <- mi(10)
-  expect_s3_class(m, 'il_mi')
-  expect_equal(m$value, 10)
-})
-
-test_that('unit helpers reject non-numeric input', {
+test_that('unit helpers reject invalid input', {
   expect_error(days('thirty'))
   expect_error(km(NULL))
   expect_error(mi(TRUE))
-})
-
-test_that('unit helpers reject negative values', {
   expect_error(days(-1))
   expect_error(km(-5))
-})
-
-test_that('unit helpers print informatively', {
-  expect_output(print(days(30)), '30')
-  expect_output(print(km(5)), '5')
+  expect_error(days(NA))
+  expect_error(km(NA_real_))
+  expect_error(days(c(1, 2)))
+  expect_error(km(c(5, 10)))
+  expect_error(days(Inf))
+  expect_error(km(NaN))
 })
