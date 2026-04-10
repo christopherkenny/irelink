@@ -10,7 +10,7 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = '#>'
 )
 ```
 
@@ -61,7 +61,7 @@ Check column value distributions to inform blocking and comparison
 choices:
 
 ```{r profile}
-il_profile(df[, c("first_name", "surname", "city")], con = con, top_n = 5)
+il_profile(df[, c('first_name', 'surname', 'city')], con = con, top_n = 5)
 ```
 
 ## Choose blocking rules
@@ -151,7 +151,7 @@ autoplot(model)
 The parameter chart shows the raw m and u probabilities:
 
 ```{r params-plot, fig.width = 7, fig.height = 4}
-autoplot(model, type = "parameters")
+autoplot(model, type = 'parameters')
 ```
 
 ## Save and reuse the model

@@ -3,8 +3,10 @@
 # --- Vectorized structure and term_frequency tests ---
 
 test_that('domain bundles return il_comparison_level objects', {
-  bundles <- list(cl_name(), cl_email(), cl_dob(), cl_postcode(),
-                  cl_forename_surname(), cl_zip_code())
+  bundles <- list(
+    cl_name(), cl_email(), cl_dob(), cl_postcode(),
+    cl_forename_surname(), cl_zip_code()
+  )
   classes <- vapply(bundles, function(b) inherits(b, 'il_comparison_level'), logical(1))
   expect_true(all(classes))
 })

@@ -671,3 +671,32 @@ Be critical and delete tests that do not need to be there.
 If there are blocks of tests that are near identical code and could be combined into a cleaner set of expectations, combine them.
 Never put any expectations within a for-loop.
 Always make use of R's vectorized approach to ensure that tests get their money's worth.
+
+## Vignette (Opus 4.6 high)
+
+Create a new vignette, based on: https://moj-analytical-services.github.io/splink/demos/examples/duckdb/deduplicate_50k_synthetic.html.
+Copy the format and make sure we can replicate each of the pieces of the analysis.
+
+Indicate explicitly at the top that it is based on the Splink demo that we are working from.
+
+The data can be read from: https://raw.githubusercontent.com/moj-analytical-services/splink_datasets/master/data/historical_figures_with_errors_50k.parquet.
+
+Make compilation of the vignette dependent on succesful reading of the file.
+You may use a suggests for a parquet reading file, likely nanoparquet.
+Compilation should also be dependent on that package being available.
+
+
+## Vignette (Opus 4.6 high)
+
+Create a new vignette, based on: https://moj-analytical-services.github.io/splink/demos/examples/duckdb/transactions.html.
+Copy the format and make sure we can replicate each of the pieces of the analysis.
+
+Indicate explicitly at the top that it is based on the Splink demo that we are working from.
+
+The data can be read from:
+- https://raw.githubusercontent.com/moj-analytical-services/splink_datasets/master/data/transactions_origin.parquet
+- https://raw.githubusercontent.com/moj-analytical-services/splink_datasets/master/data/transactions_destination.parquet
+
+Make compilation of the vignette dependent on succesful reading of the files.
+You may use a suggests for a parquet reading file, likely nanoparquet.
+Compilation should also be dependent on that package being available.

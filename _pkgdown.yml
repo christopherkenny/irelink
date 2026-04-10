@@ -12,7 +12,9 @@ articles:
     contents:
       - irelink
       - deduplication
+      - deduplicate-50k
       - record-linkage
+      - transactions
       - from_splink
       - advanced
 

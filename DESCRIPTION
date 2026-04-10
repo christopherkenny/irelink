@@ -62,6 +62,7 @@ Suggests:
     dplyr,
     igraph,
     knitr,
+    nanoparquet,
     rmarkdown,
     RSQLite,
     testthat (>= 3.0.0),

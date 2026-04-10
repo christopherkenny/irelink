@@ -10,7 +10,7 @@ vignette: >
 ```{r, include = FALSE}
 knitr::opts_chunk$set(
   collapse = TRUE,
-  comment = "#>"
+  comment = '#>'
 )
 ```
 
@@ -89,7 +89,7 @@ model <- il_model(
   df_a, df_b,
   spec = spec,
   con = con,
-  link_type = "link"
+  link_type = 'link'
 )
 
 model
@@ -117,7 +117,7 @@ autoplot(model)
 ```
 
 ```{r params, fig.width = 7, fig.height = 4}
-autoplot(model, type = "parameters")
+autoplot(model, type = 'parameters')
 ```
 
 ```{r weights-table}

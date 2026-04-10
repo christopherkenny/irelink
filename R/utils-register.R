@@ -170,12 +170,6 @@ count_tbl_lazy <- function(tbl, con) {
 #' @param tbl_name The name of the view/table to drop.
 #' @noRd
 drop_registered <- function(con, tbl_name) {
-  tryCatch(
-    DBI::dbExecute(con, glue::glue('DROP VIEW IF EXISTS {tbl_name}')),
-    error = function(e) NULL
-  )
-  tryCatch(
-    DBI::dbRemoveTable(con, tbl_name, fail_if_missing = FALSE),
-    error = function(e) NULL
-  )
+  try(DBI::dbExecute(con, glue::glue('DROP VIEW IF EXISTS {tbl_name}')), silent = TRUE)
+  try(DBI::dbRemoveTable(con, tbl_name, fail_if_missing = FALSE), silent = TRUE)
 }
