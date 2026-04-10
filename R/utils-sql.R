@@ -68,6 +68,10 @@ sql_transform_col <- function(col_ref, transform, dialect = NULL) {
     }
     return(result)
   }
+  # Parameterized column transforms (il_substr, il_nullif, etc.)
+  if (is_column_transform(transform)) {
+    return(column_transform_sql(transform, col_ref, dialect))
+  }
   # Phonetic transforms need special handling (dialect-dependent, some
   # have multi-arg SQL signatures)
   phonetic_sql <- phonetic_transform_sql(transform, col_ref, dialect)
@@ -102,15 +106,19 @@ transform_has_sql <- function(transform) {
   if (is_transform_chain(transform)) {
     return(all(vapply(attr(transform, 'transforms'), transform_has_sql, logical(1))))
   }
-  !is.null(transform_to_sql_fn(transform)) || is_phonetic_transform(transform)
+  !is.null(transform_to_sql_fn(transform)) ||
+    is_phonetic_transform(transform) ||
+    is_column_transform(transform)
 }
 
 #' Map an R function to a serializable name
 #' @noRd
 transform_to_name <- function(transform) {
   if (is_transform_chain(transform)) {
-    names <- vapply(attr(transform, 'transforms'), transform_to_name,
-                    character(1))
+    names <- vapply(
+      attr(transform, 'transforms'), transform_to_name,
+      character(1)
+    )
     if (any(is.na(names))) {
       cli::cli_warn('Custom transform in chain cannot be serialized; it will be lost on save/load.')
       return(NA_character_)
@@ -134,6 +142,9 @@ transform_to_name <- function(transform) {
   }
   if (identical(transform, il_dmetaphone)) {
     return('il_dmetaphone')
+  }
+  if (is_column_transform(transform)) {
+    return(column_transform_to_name(transform))
   }
   cli::cli_warn('Custom transform cannot be serialized; it will be lost on save/load.')
   NULL
@@ -595,7 +606,8 @@ sql_explode_from <- function(tbl, explode_cols, dialect) {
   if (dialect == 'duckdb') {
     exclude_clause <- paste0(explode_cols, collapse = ', ')
     unnest_exprs <- paste0('UNNEST(', explode_cols, ') AS ', explode_cols,
-                           collapse = ', ')
+      collapse = ', '
+    )
     return(glue::glue(
       '(SELECT * EXCLUDE ({exclude_clause}), {unnest_exprs} FROM {tbl})'
     ))
@@ -958,7 +970,7 @@ sql_tf_adj_expr <- function(col, max_level, u_exact) {
 #' @return A SQL query string.
 #' @noRd
 build_scored_query <- function(model, threshold = 0.85,
-                              threshold_match_weight = NULL) {
+                               threshold_match_weight = NULL) {
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
   prior <- model$params$prior %||% 0.05

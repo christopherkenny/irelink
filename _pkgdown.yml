@@ -24,6 +24,13 @@ reference:
       - il_compare
       - il_block_on
       - block_on
+      - il_transform
+      - il_substr
+      - il_regex_extract
+      - il_nullif
+      - il_cast_to_string
+      - il_try_parse_date
+      - il_array_element
       - is_il_spec
 
   - title: "Comparison Levels"
@@ -39,10 +46,12 @@ reference:
       - cl_numeric_diff
       - cl_pct_diff
       - cl_date_diff
+      - cl_time_diff
       - cl_distance_km
       - cl_array_intersect
       - cl_array_subset
       - cl_array_min_distance
+      - cl_columns_reversed
       - cl_custom
       - cl_literal
       - cl_null
@@ -87,6 +96,7 @@ reference:
       - il_cluster
       - il_deterministic_link
       - il_find_matches
+      - il_score_missing_edges
 
   - title: "Model Inspection"
     desc: "Examine parameters, weights, and training diagnostics."
@@ -98,6 +108,10 @@ reference:
       - il_waterfall
       - il_compare_records
       - il_string_similarity
+      - autoplot.il_string_similarity
+      - il_tf_chart
+      - il_comparison_vectors
+      - autoplot.il_comparison_vectors
       - print.il_model
       - print.il_spec
       - summary.il_model
@@ -136,6 +150,11 @@ reference:
       - il_largest_blocks
       - il_profile
       - autoplot.il_profile
+      - il_comparator_score
+      - autoplot.il_comparator_score
+      - il_comparator_threshold_chart
+      - il_phonetic_chart
+      - il_register_tf
 
   - title: "Persistence and Utilities"
     desc: "Save, load, and manage linkage models and resources."
@@ -144,6 +163,7 @@ reference:
       - il_load
       - il_attach
       - il_cleanup
+      - irelink-package
 
   - title: "Datasets"
     desc: "Bundled benchmark datasets from the splink ecosystem."
@@ -160,5 +180,8 @@ reference:
       - days
       - months
       - years
+      - hours
+      - minutes
+      - seconds
       - km
       - mi

@@ -120,7 +120,7 @@ il_cluster <- function(pairs, threshold = NULL,
 #' SQL-path clustering (DuckDB/PostgreSQL)
 #' @noRd
 cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id',
-                       source_dataset = NULL) {
+                        source_dataset = NULL) {
   edges_tbl <- cc_upload_edges(con, pairs, threshold = threshold)
 
   if (method == 'best_link') {
@@ -165,7 +165,7 @@ cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id'
 #' igraph-path clustering (fallback for SQLite or no DB connection)
 #' @noRd
 cluster_igraph <- function(pairs, threshold, method, ties_method = 'lowest_id',
-                          source_dataset = NULL) {
+                           source_dataset = NULL) {
   rlang::check_installed('igraph', reason = 'for clustering without a DuckDB or PostgreSQL connection.')
 
   all_ids <- unique(c(
@@ -283,7 +283,7 @@ best_link_filter <- function(pairs, ties_method = 'lowest_id') {
 #' Cluster directly from a lazy prediction table (no round-trip)
 #' @noRd
 cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
-                        source_dataset = NULL) {
+                         source_dataset = NULL) {
   con <- pairs$con
   predicted_tbl <- pairs$predicted_tbl
 
@@ -346,7 +346,9 @@ cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
 #' Normalise source_dataset argument to a named character vector
 #' @noRd
 normalise_source_dataset <- function(sd) {
-  if (is.null(sd)) return(NULL)
+  if (is.null(sd)) {
+    return(NULL)
+  }
   if (is.data.frame(sd)) {
     if (!all(c('unique_id', 'source_dataset') %in% names(sd))) {
       cli::cli_abort(

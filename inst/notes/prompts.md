@@ -573,9 +573,72 @@ Include relevant paths and links to the source of the differences.
 ### Follow-up (Opus 4.6 high)
 
 Implement all high priority gaps.
+Then, give 5, 6, 7, 9 and 10 a go.
 
 Update the `inst/refs/28-comparison.md` document with notes on how it was resolved.
 Mark the tables as resolved once they are fixed, too.
+
+### Follow-up (Opus 4.6 high)
+
+Continue going through the remaining gaps.
+Proceed in the order of the sections.
+
+If things are marked as out of scope, do not attempt them.
+Skip dataset parity for now.
+
+For all updates, ensure that as much as possible is done on the SQL side and that data should nearly never be materialized from SQL to R.
+
+Update the `inst/refs/28-comparison.md` document with notes on things being resolved.
+
+### Wrap-up (Opus 4.6 high)
+
+I see some failures on the CI for building the pkgdown.
+Make sure the pkgdown is updated to include al of the Rd updates from the changes covered in `inst/refs/28-comparison.md`
+
+I have not yet pushed your most recent changes, but the prior set failed with:
+
+
+```
+Error in `build_reference_index()`:
+! In _pkgdown.yml, 9 topics missing from index:
+  "autoplot.il_string_similarity", "cl_columns_reversed", "cl_time_diff",
+  "hours", "il_score_missing_edges", "il_tf_chart", "il_transform", "minutes",
+  and "seconds".
+ℹ Either add to the reference index, or use `@keywords internal` to drop from
+  the index.
+```
+
+Then, update the NEWS.md to include the features that we just added, where applicable.
+Note that this is still a first release and is not public yet, so it should be more about feature coverage rather than updates.
+Avoid framing like "new", "now", "fixed", etc that imply change, rather than a first release.
+
+Finally, write a stage-09-notes.md summary doc, on this new "Coverage and Polish" stage.
+It should cover `inst/refs/21`--`inst/refs/28` with links.
+Keep the style very close to an executive summary with references for easy searching later, like how the other stage notes are written.
+
+### Wrap-up (Opus 4.6 high)
+
+Ensure devtools::check() returns cleanly.
+Further, do a dive on all of the changes from today and verify that everything is pushed into SQL as much as possible.
+Fallbacks to R should be a worst case scenario and extremely rare
+
+## linting (Opus 4.6 high)
+
+Can you scan all ggplot calls for the following INCORRECT AND NEVER ALLOWED patterns:
+
+Never do:
+ggplot(df)
+
+Always should be:
+df |>
+  ggplot()
+
+Never do:
+ggplot(aes(x = ...))
+
+Always should be:
+ggplot() +
+  geom_SOMELAYER(aes(x = ...))
 
 ## linting (Opus 4.6 high)
 

@@ -27,6 +27,6 @@ adjustment (rare values boost the weight; common values penalise it).
 \examples{
 \dontrun{
 model <- il_model(fake_1000, spec = spec, con = con)
-il_tf_chart(model, "first_name")
+il_tf_chart(model, 'first_name')
 }
 }

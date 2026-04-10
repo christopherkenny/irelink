@@ -173,3 +173,47 @@ test_that('il_graph_metrics() non-bridges in fully connected cluster', {
   metrics <- il_graph_metrics(pairs, clusters)
   expect_true(!any(metrics$edges$is_bridge))
 })
+
+test_that('il_graph_metrics() computes node centrality', {
+  # Star: 1 connects to 2, 3, 4 — node 1 has degree 3, centrality 1.0
+  pairs <- tibble::tibble(
+    unique_id_l = c('1', '1', '1'),
+    unique_id_r = c('2', '3', '4'),
+    match_probability = rep(0.9, 3),
+    match_weight = rep(3.0, 3)
+  )
+  clusters <- tibble::tibble(
+    unique_id = as.character(1:4),
+    cluster_id = rep('A', 4)
+  )
+
+  metrics <- il_graph_metrics(pairs, clusters)
+  expect_true('node_centrality' %in% names(metrics$nodes))
+
+  hub <- metrics$nodes[metrics$nodes$unique_id == '1', ]
+  # degree 3, cluster_size 4, centrality = 3/(4-1) = 1.0
+  expect_equal(hub$node_centrality, 1.0, tolerance = 0.01)
+
+  leaf <- metrics$nodes[metrics$nodes$unique_id == '2', ]
+  # degree 1, centrality = 1/3
+  expect_equal(leaf$node_centrality, 1 / 3, tolerance = 0.01)
+})
+
+test_that('il_graph_metrics() includes cluster_centralisation', {
+  # Triangle: fully connected — all nodes degree 2 — centralisation = 0
+  pairs <- tibble::tibble(
+    unique_id_l = c('1', '2', '1'),
+    unique_id_r = c('2', '3', '3'),
+    match_probability = rep(0.95, 3),
+    match_weight = rep(4.25, 3)
+  )
+  clusters <- tibble::tibble(
+    unique_id = c('1', '2', '3'),
+    cluster_id = rep('A', 3)
+  )
+
+  metrics <- il_graph_metrics(pairs, clusters)
+  expect_true('cluster_centralisation' %in% names(metrics$clusters))
+  # 3 nodes, all degree 2 → (3*2 - 6) / (2*1) = 0
+  expect_equal(metrics$clusters$cluster_centralisation, 0, tolerance = 0.01)
+})

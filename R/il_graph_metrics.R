@@ -112,10 +112,17 @@ graph_metrics_sql <- function(con, pairs, clusters) {
   # Node metrics via SQL
   nm_tbl <- sql_node_metrics(con, cc_tbl_name, edges_tbl)
   nodes_raw <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {nm_tbl}'))
+  cluster_size <- as.integer(nodes_raw$cluster_size)
+  node_degree <- as.integer(nodes_raw$node_degree)
   nodes <- tibble::tibble(
     unique_id = nodes_raw$node_id,
     cluster_id = nodes_raw$cluster_id,
-    degree = as.integer(nodes_raw$node_degree)
+    degree = node_degree,
+    node_centrality = ifelse(
+      cluster_size > 1L,
+      node_degree / (cluster_size - 1L),
+      0
+    )
   )
 
   # Cluster metrics via SQL
@@ -125,7 +132,8 @@ graph_metrics_sql <- function(con, pairs, clusters) {
     cluster_id = clusters_raw$cluster_id,
     n_nodes = as.integer(clusters_raw$n_nodes),
     n_edges = as.integer(clusters_raw$n_edges),
-    density = clusters_raw$density
+    density = clusters_raw$density,
+    cluster_centralisation = clusters_raw$cluster_centralisation
   )
 
   # Edge-level (compute bridges via igraph, merge back)
@@ -165,6 +173,15 @@ graph_metrics_r <- function(pairs, clusters) {
     degree = as.integer(degree_tbl[as.character(all_ids)])
   )
 
+  # Compute cluster sizes for node centrality
+  cluster_sizes <- table(clusters$cluster_id)
+  node_cluster_size <- as.integer(cluster_sizes[nodes$cluster_id])
+  nodes$node_centrality <- ifelse(
+    node_cluster_size > 1L,
+    nodes$degree / (node_cluster_size - 1L),
+    0
+  )
+
   # Edge-level metrics
   edges <- tibble::tibble(
     unique_id_l = edge_ids_l,
@@ -196,7 +213,17 @@ graph_metrics_r <- function(pairs, clusters) {
     cluster_id = cluster_ids,
     n_nodes = n_nodes_vec,
     n_edges = n_edges_vec,
-    density = density_vec
+    density = density_vec,
+    cluster_centralisation = vapply(seq_along(cluster_ids), function(i) {
+      n <- n_nodes_vec[i]
+      if (n <= 2L) {
+        return(NA_real_)
+      }
+      cid <- cluster_ids[i]
+      member_degrees <- nodes$degree[nodes$cluster_id == cid]
+      max_deg <- max(member_degrees)
+      (n * max_deg - sum(member_degrees)) / ((n - 1) * (n - 2))
+    }, numeric(1))
   )
 
   list(nodes = nodes, edges = edges, clusters = cluster_tbl)
@@ -212,7 +239,9 @@ graph_metrics_r <- function(pairs, clusters) {
 #' @noRd
 compute_bridges <- function(id_l, id_r) {
   n <- length(id_l)
-  if (n == 0L) return(logical(0))
+  if (n == 0L) {
+    return(logical(0))
+  }
 
   if (!requireNamespace('igraph', quietly = TRUE)) {
     cli::cli_warn(

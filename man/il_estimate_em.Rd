@@ -10,6 +10,10 @@ il_estimate_em(
   convergence = 1e-05,
   fix_u = TRUE,
   fix_m = FALSE,
+  max_iterations = 25L,
+  fix_prior = TRUE,
+  estimate_without_tf = TRUE,
+  derive_prior = FALSE,
   ...
 )
 }
@@ -28,6 +32,22 @@ during EM — only m is updated. Set to \code{FALSE} to also estimate u.}
 \item{fix_m}{Logical. If \code{TRUE}, hold m parameters fixed during EM.
 Defaults to \code{FALSE}. At least one of \code{fix_u} and \code{fix_m} must be
 \code{FALSE}, otherwise the algorithm cannot learn anything.}
+
+\item{max_iterations}{Maximum number of EM iterations. Defaults to
+\code{25L}. The loop stops early when convergence is reached.}
+
+\item{fix_prior}{Logical. If \code{TRUE}, hold the prior (probability that
+two random records match) fixed during EM iterations.
+Defaults to \code{TRUE}.}
+
+\item{estimate_without_tf}{Logical. Accepted for API compatibility with
+splink. In irelink, term frequency adjustments are always applied at
+scoring time rather than during EM, so this parameter has no effect.
+Defaults to \code{TRUE}.}
+
+\item{derive_prior}{Logical. If \code{TRUE}, derive the prior from the
+trained parameter values after EM completes and store it in the
+model. Defaults to \code{FALSE}.}
 
 \item{...}{Reserved for future options.}
 }

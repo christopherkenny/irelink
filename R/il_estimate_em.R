@@ -15,6 +15,18 @@
 #' @param fix_m Logical. If `TRUE`, hold m parameters fixed during EM.
 #'   Defaults to `FALSE`. At least one of `fix_u` and `fix_m` must be
 #'   `FALSE`, otherwise the algorithm cannot learn anything.
+#' @param max_iterations Maximum number of EM iterations. Defaults to
+#'   `25L`. The loop stops early when convergence is reached.
+#' @param fix_prior Logical. If `TRUE`, hold the prior (probability that
+#'   two random records match) fixed during EM iterations.
+#'   Defaults to `TRUE`.
+#' @param estimate_without_tf Logical. Accepted for API compatibility with
+#'   splink. In irelink, term frequency adjustments are always applied at
+#'   scoring time rather than during EM, so this parameter has no effect.
+#'   Defaults to `TRUE`.
+#' @param derive_prior Logical. If `TRUE`, derive the prior from the
+#'   trained parameter values after EM completes and store it in the
+#'   model. Defaults to `FALSE`.
 #' @param ... Reserved for future options.
 #'
 #' @return An updated `il_model` with trained m and u parameters.
@@ -71,8 +83,17 @@
 #' model <- il_estimate_em(model, block_on(surname))
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_estimate_em <- function(model, blocking, convergence = 1e-5,
-                           fix_u = TRUE, fix_m = FALSE, ...) {
+                           fix_u = TRUE, fix_m = FALSE,
+                           max_iterations = 25L,
+                           fix_prior = TRUE,
+                           estimate_without_tf = TRUE,
+                           derive_prior = FALSE, ...) {
   validate_il_model(model)
+  if (!is.numeric(max_iterations) || length(max_iterations) != 1L ||
+    max_iterations < 1L || max_iterations != as.integer(max_iterations)) {
+    cli::cli_abort('{.arg max_iterations} must be a positive integer.')
+  }
+  max_iterations <- as.integer(max_iterations)
   if (fix_u && fix_m) {
     cli::cli_abort('At least one of {.arg fix_u} and {.arg fix_m} must be {.code FALSE}.')
   }
@@ -132,7 +153,7 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
   }
 
   prior <- model$params$prior %||% 0.05
-  max_iter <- 25L
+  max_iter <- max_iterations
   tol <- convergence
   history <- list()
 
@@ -161,6 +182,13 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
     sum_nw <- sum(1 - weights)
     old_m_list <- m_list
     old_u_list <- u_list
+    old_prior <- prior
+
+    # Update prior unless fixed
+    if (!fix_prior) {
+      prior <- sum_w / n_pairs
+      prior <- max(min(prior, 1 - 1e-6), 1e-6)
+    }
 
     if (!fix_m) {
       for (j in seq_len(n_comp)) {
@@ -209,6 +237,9 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
         max(abs(u_list[[j]] - old_u_list[[j]]))
       }, numeric(1)))
     }
+    if (!fix_prior) {
+      changes <- c(changes, abs(prior - old_prior))
+    }
     max_change <- max(changes)
     if (max_change < tol) break
   }
@@ -230,7 +261,44 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
   }
   model$params$comparisons <- tibble::as_tibble(do.call(rbind, rows))
 
+  # Store updated prior if it was estimated
+  if (!fix_prior) {
+    model$params$prior <- prior
+  }
+
+  # Derive prior from trained parameter values
+  if (derive_prior) {
+    model$params$prior <- derive_prior_from_params(
+      m_list, u_list, gamma_mat, n_pairs
+    )
+  }
+
   model$params$history <- c(model$params$history, history)
   model$trained <- TRUE
   model
+}
+
+#' Derive the prior from trained EM parameters
+#'
+#' After EM converges, the proportion of expected matches gives an
+#' estimate of the prior probability that two random records match.
+#'
+#' @param m_list List of m probability vectors per comparison.
+#' @param u_list List of u probability vectors per comparison.
+#' @param gamma_mat Integer gamma matrix.
+#' @param n_pairs Number of pairs.
+#' @return Numeric scalar — the derived prior.
+#' @noRd
+derive_prior_from_params <- function(m_list, u_list, gamma_mat, n_pairs) {
+  n_comp <- ncol(gamma_mat)
+  log_bf <- numeric(n_pairs)
+  for (j in seq_len(n_comp)) {
+    m_vec <- pmax(m_list[[j]], 1e-10)
+    u_vec <- pmax(u_list[[j]], 1e-10)
+    idx <- gamma_mat[, j] + 1L
+    log_bf <- log_bf + log(m_vec[idx]) - log(u_vec[idx])
+  }
+  bf <- exp(log_bf)
+  # Average posterior match probability with a flat 0.5 prior
+  mean(bf / (1 + bf))
 }

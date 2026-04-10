@@ -71,8 +71,10 @@ il_block_on <- function(spec, ..., .where = NULL, .transform = NULL,
     }
   }, character(1))
   rule <- structure(
-    list(columns = columns, where = .where, transform = .transform,
-         explode = .explode),
+    list(
+      columns = columns, where = .where, transform = .transform,
+      explode = .explode
+    ),
     class = 'il_blocking_rule'
   )
   spec$blocking_rules <- c(spec$blocking_rules, list(rule))
@@ -137,8 +139,10 @@ block_on <- function(..., .where = NULL, .transform = NULL, .explode = NULL) {
     }
   }, character(1))
   structure(
-    list(columns = columns, where = .where, transform = .transform,
-         explode = .explode),
+    list(
+      columns = columns, where = .where, transform = .transform,
+      explode = .explode
+    ),
     class = 'il_blocking_rule'
   )
 }

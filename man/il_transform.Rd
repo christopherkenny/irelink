@@ -29,7 +29,7 @@ On the SQL side, the transforms are nested inside-out:
 \examples{
 # Lower-case then trim whitespace
 tf <- il_transform(tolower, trimws)
-tf("  Hello  ")
+tf('  Hello  ')
 
 # Use in a specification
 spec <- il_spec() |>

@@ -54,7 +54,7 @@ test_that('cl_columns_reversed() works end-to-end in model', {
   df <- data.frame(
     unique_id = 1:4,
     first_name = c('John', 'Smith', 'Jane', 'Jane'),
-    last_name  = c('Smith', 'John', 'Doe', 'Doe'),
+    last_name = c('Smith', 'John', 'Doe', 'Doe'),
     stringsAsFactors = FALSE
   )
 

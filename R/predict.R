@@ -107,8 +107,9 @@ predict.il_model <- function(object, threshold = 0.85,
       )
     }
     return(predict_lazy(object, threshold,
-                        threshold_match_weight = threshold_match_weight,
-                        include_fields = include_fields))
+      threshold_match_weight = threshold_match_weight,
+      include_fields = include_fields
+    ))
   }
 
   comparisons <- object$spec$comparisons
@@ -194,7 +195,8 @@ predict_lazy <- function(model, threshold, threshold_match_weight = NULL,
   con <- model$con
   predicted_tbl <- '__il_predicted'
   scored_sql <- build_scored_query(model, threshold,
-                                   threshold_match_weight = threshold_match_weight)
+    threshold_match_weight = threshold_match_weight
+  )
   if (include_fields) {
     scored_sql <- build_fields_join_query(model, scored_sql)
   }

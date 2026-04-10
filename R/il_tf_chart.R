@@ -16,7 +16,7 @@
 #' @examples
 #' \dontrun{
 #' model <- il_model(fake_1000, spec = spec, con = con)
-#' il_tf_chart(model, "first_name")
+#' il_tf_chart(model, 'first_name')
 #' }
 il_tf_chart <- function(model, col, n_most_freq = 10L, n_least_freq = 5L) {
   if (!inherits(model, 'il_model')) {
@@ -73,14 +73,15 @@ il_tf_chart <- function(model, col, n_most_freq = 10L, n_least_freq = 5L) {
 
   tf_data$rank <- seq_len(n_rows)
 
-  ggplot2::ggplot(tf_data, ggplot2::aes(x = .data[['rank']], y = .data[['tf']])) +
-    ggplot2::geom_col(fill = '#4682B4') +
+  tf_data |>
+    ggplot2::ggplot() +
+    ggplot2::geom_col(ggplot2::aes(x = .data[['rank']], y = .data[['tf']]), fill = '#4682B4') +
     ggplot2::geom_text(
       data = tf_data[tf_data$label != '', ],
-      ggplot2::aes(label = .data[['label']]),
+      ggplot2::aes(x = .data[['rank']], y = .data[['tf']], label = .data[['label']]),
       angle = 45, hjust = -0.1, vjust = 0, size = 2.5
     ) +
-    ggplot2::scale_y_continuous(labels = scales::percent_format(accuracy = 0.1)) +
+    ggplot2::scale_y_continuous(labels = function(x) paste0(round(x * 100, 1), '%')) +
     ggplot2::labs(
       title = paste('Term Frequency Distribution:', col),
       x = paste('Values of', col, '(ranked by frequency)'),
@@ -105,7 +106,7 @@ il_tf_chart <- function(model, col, n_most_freq = 10L, n_least_freq = 5L) {
 #' @examples
 #' \dontrun{
 #' library(ggplot2)
-#' autoplot(il_string_similarity("John", "Jon"))
+#' autoplot(il_string_similarity('John', 'Jon'))
 #' }
 autoplot.il_string_similarity <- function(object, ...) {
   # Pivot to long form
@@ -123,14 +124,15 @@ autoplot.il_string_similarity <- function(object, ...) {
 
   long$metric <- factor(long$metric, levels = rev(long$metric))
 
-  ggplot2::ggplot(long, ggplot2::aes(
-    x = .data[['score']], y = .data[['metric']], fill = .data[['score']]
-  )) +
-    ggplot2::geom_col(show.legend = FALSE) +
-    ggplot2::geom_text(
-      ggplot2::aes(label = round(.data[['score']], 3)),
-      hjust = -0.1, size = 3.5
-    ) +
+  long |>
+    ggplot2::ggplot() +
+    ggplot2::geom_col(ggplot2::aes(
+      x = .data[['score']], y = .data[['metric']], fill = .data[['score']]
+    ), show.legend = FALSE) +
+    ggplot2::geom_text(ggplot2::aes(
+      x = .data[['score']], y = .data[['metric']],
+      label = round(.data[['score']], 3)
+    ), hjust = -0.1, size = 3.5) +
     ggplot2::scale_fill_gradient(low = '#B22222', high = '#228B22') +
     ggplot2::scale_x_continuous(limits = c(0, 1.15)) +
     ggplot2::labs(

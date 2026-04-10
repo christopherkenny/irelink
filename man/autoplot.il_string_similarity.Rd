@@ -23,6 +23,6 @@ glance.
 \examples{
 \dontrun{
 library(ggplot2)
-autoplot(il_string_similarity("John", "Jon"))
+autoplot(il_string_similarity('John', 'Jon'))
 }
 }

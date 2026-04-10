@@ -34,15 +34,16 @@ autoplot.il_model <- function(object, type = c('weights', 'parameters'), ...) {
       )
     )
     return(
-      ggplot2::ggplot(
-        long,
-        ggplot2::aes(
-          x = .data[['comparison']],
-          y = .data[['probability']],
-          fill = .data[['parameter']]
-        )
-      ) +
-        ggplot2::geom_col(position = 'dodge') +
+      long |>
+        ggplot2::ggplot() +
+        ggplot2::geom_col(
+          ggplot2::aes(
+            x = .data[['comparison']],
+            y = .data[['probability']],
+            fill = .data[['parameter']]
+          ),
+          position = 'dodge'
+        ) +
         ggplot2::facet_wrap(~ .data[['gamma_level']]) +
         ggplot2::labs(
           title = 'Model Parameters',
@@ -55,15 +56,16 @@ autoplot.il_model <- function(object, type = c('weights', 'parameters'), ...) {
   }
 
   wt <- il_weights(object)
-  ggplot2::ggplot(
-    wt,
-    ggplot2::aes(
-      x = .data[['comparison']],
-      y = .data[['weight']],
-      fill = factor(.data[['gamma_level']])
-    )
-  ) +
-    ggplot2::geom_col(position = 'dodge') +
+  wt |>
+    ggplot2::ggplot() +
+    ggplot2::geom_col(
+      ggplot2::aes(
+        x = .data[['comparison']],
+        y = .data[['weight']],
+        fill = factor(.data[['gamma_level']])
+      ),
+      position = 'dodge'
+    ) +
     ggplot2::labs(
       title = 'Match Weights',
       x = 'Comparison',
@@ -92,17 +94,15 @@ autoplot.il_compared <- function(object, which = NULL, ...) {
   if (!is.null(which)) {
     wf <- il_waterfall(object, which = which)
     return(
-      ggplot2::ggplot(
-        wf,
-        ggplot2::aes(
+      wf |>
+        ggplot2::ggplot() +
+        ggplot2::geom_rect(ggplot2::aes(
           xmin = pmin(.data[['start']], .data[['end']]),
           xmax = pmax(.data[['start']], .data[['end']]),
           ymin = .data[['order']] - 0.4,
           ymax = .data[['order']] + 0.4,
           fill = .data[['direction']]
-        )
-      ) +
-        ggplot2::geom_rect() +
+        )) +
         ggplot2::geom_vline(
           xintercept = 0,
           linewidth = 0.3,
@@ -121,8 +121,9 @@ autoplot.il_compared <- function(object, which = NULL, ...) {
         ggplot2::theme_minimal()
     )
   }
-  ggplot2::ggplot(object, ggplot2::aes(x = .data[['match_weight']])) +
-    ggplot2::geom_histogram(binwidth = 1) +
+  object |>
+    ggplot2::ggplot() +
+    ggplot2::geom_histogram(ggplot2::aes(x = .data[['match_weight']]), binwidth = 1) +
     ggplot2::labs(
       title = 'Match Weight Distribution',
       x = 'Match Weight (log2)',
@@ -164,15 +165,13 @@ autoplot.il_accuracy <- function(object, ...) {
       metric = 'F1'
     )
   )
-  ggplot2::ggplot(
-    long,
-    ggplot2::aes(
+  long |>
+    ggplot2::ggplot() +
+    ggplot2::geom_line(ggplot2::aes(
       x = .data[['threshold']],
       y = .data[['value']],
       colour = .data[['metric']]
-    )
-  ) +
-    ggplot2::geom_line() +
+    )) +
     ggplot2::labs(
       title = 'Accuracy Metrics by Threshold',
       x = 'Match Probability Threshold',
@@ -194,14 +193,12 @@ autoplot.il_accuracy <- function(object, ...) {
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_roc <- function(object, ...) {
   object <- object[order(object$fpr, -object$tpr), ]
-  ggplot2::ggplot(
-    object,
-    ggplot2::aes(
+  object |>
+    ggplot2::ggplot() +
+    ggplot2::geom_line(ggplot2::aes(
       x = .data[['fpr']],
       y = .data[['tpr']]
-    )
-  ) +
-    ggplot2::geom_line() +
+    )) +
     ggplot2::geom_abline(
       intercept = 0,
       slope = 1,
@@ -229,15 +226,16 @@ autoplot.il_roc <- function(object, ...) {
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_precision_recall <- function(object, ...) {
   object <- object[order(object$recall, -object$precision), ]
-  ggplot2::ggplot(
-    object,
-    ggplot2::aes(
+  object |>
+    ggplot2::ggplot() +
+    ggplot2::geom_line(ggplot2::aes(
       x = .data[['recall']],
       y = .data[['precision']]
-    )
-  ) +
-    ggplot2::geom_line() +
-    ggplot2::geom_point() +
+    )) +
+    ggplot2::geom_point(ggplot2::aes(
+      x = .data[['recall']],
+      y = .data[['precision']]
+    )) +
     ggplot2::labs(
       title = 'Precision\u2013Recall Curve',
       x = 'Recall',
@@ -259,14 +257,12 @@ autoplot.il_precision_recall <- function(object, ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_unlinkables <- function(object, ...) {
-  ggplot2::ggplot(
-    object,
-    ggplot2::aes(
+  object |>
+    ggplot2::ggplot() +
+    ggplot2::geom_line(ggplot2::aes(
       x = .data[['threshold']],
       y = .data[['pct_unlinkable']]
-    )
-  ) +
-    ggplot2::geom_line() +
+    )) +
     ggplot2::labs(
       title = 'Unlinkable Records by Threshold',
       x = 'Match Probability Threshold',
@@ -287,14 +283,12 @@ autoplot.il_unlinkables <- function(object, ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_count_pairs <- function(object, ...) {
-  ggplot2::ggplot(
-    object,
-    ggplot2::aes(
+  object |>
+    ggplot2::ggplot() +
+    ggplot2::geom_col(ggplot2::aes(
       x = stats::reorder(.data[['rule']], .data[['n_pairs']]),
       y = .data[['n_pairs']]
-    )
-  ) +
-    ggplot2::geom_col() +
+    )) +
     ggplot2::coord_flip() +
     ggplot2::labs(
       title = 'Candidate Pairs per Blocking Rule',
@@ -316,14 +310,12 @@ autoplot.il_count_pairs <- function(object, ...) {
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_profile <- function(object, ...) {
   object$facet_value <- paste(object$column, object$value, sep = '___')
-  ggplot2::ggplot(
-    object,
-    ggplot2::aes(
+  object |>
+    ggplot2::ggplot() +
+    ggplot2::geom_col(ggplot2::aes(
       x = stats::reorder(.data[['facet_value']], .data[['n']]),
       y = .data[['n']]
-    )
-  ) +
-    ggplot2::geom_col() +
+    )) +
     ggplot2::coord_flip() +
     ggplot2::facet_wrap(~ .data[['column']], scales = 'free') +
     ggplot2::scale_x_discrete(labels = \(x) sub('^.*___', '', x)) +
@@ -346,17 +338,20 @@ autoplot.il_profile <- function(object, ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_training_history <- function(object, ...) {
-  ggplot2::ggplot(
-    object,
-    ggplot2::aes(
+  object |>
+    ggplot2::ggplot() +
+    ggplot2::geom_line(ggplot2::aes(
       x = .data[['iteration']],
       y = .data[['value']],
       colour = factor(.data[['session']]),
       group = interaction(.data[['session']], .data[['gamma_level']])
-    )
-  ) +
-    ggplot2::geom_line() +
-    ggplot2::geom_point() +
+    )) +
+    ggplot2::geom_point(ggplot2::aes(
+      x = .data[['iteration']],
+      y = .data[['value']],
+      colour = factor(.data[['session']]),
+      group = interaction(.data[['session']], .data[['gamma_level']])
+    )) +
     ggplot2::facet_wrap(~ .data[['comparison']], scales = 'free_y') +
     ggplot2::labs(
       title = 'EM Training History',
@@ -378,15 +373,16 @@ autoplot.il_training_history <- function(object, ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_completeness <- function(object, ...) {
-  ggplot2::ggplot(
-    object,
-    ggplot2::aes(
-      x = .data[['column']],
-      y = .data[['pct_non_null']],
-      fill = .data[['table']]
-    )
-  ) +
-    ggplot2::geom_col(position = 'dodge') +
+  object |>
+    ggplot2::ggplot() +
+    ggplot2::geom_col(
+      ggplot2::aes(
+        x = .data[['column']],
+        y = .data[['pct_non_null']],
+        fill = .data[['table']]
+      ),
+      position = 'dodge'
+    ) +
     ggplot2::labs(
       title = 'Column Completeness',
       x = 'Column',
