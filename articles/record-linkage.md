@@ -124,7 +124,7 @@ model <- il_model(
   df_a, df_b,
   spec = spec,
   con = con,
-  link_type = "link"
+  link_type = 'link'
 )
 
 model
@@ -161,7 +161,7 @@ autoplot(model)
 ![](record-linkage_files/figure-html/weights-1.png)
 
 ``` r
-autoplot(model, type = "parameters")
+autoplot(model, type = 'parameters')
 ```
 
 ![](record-linkage_files/figure-html/params-1.png)
@@ -209,12 +209,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 389       cluster_361
-#> 2 104       cluster_104
-#> 3 165       cluster_165
-#> 4 357       cluster_357
-#> 5 483       cluster_33 
-#> 6 925       cluster_729
+#> 1 909       cluster_492
+#> 2 564       cluster_564
+#> 3 658       cluster_301
+#> 4 97        cluster_573
+#> 5 311       cluster_311
+#> 6 903       cluster_568
 ```
 
 ## Evaluate against ground truth

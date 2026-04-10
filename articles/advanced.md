@@ -106,7 +106,7 @@ materialising millions of rows would exhaust memory.
 ``` r
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 1,899 pairs in table __il_predicted (threshold = 0.5)
+#> <il_compared_lazy> 1,900 pairs in table __il_predicted (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -141,7 +141,7 @@ maximum possible edges for a cluster of that size):
 
 ``` r
 metrics$clusters
-#> # A tibble: 201 × 5
+#> # A tibble: 200 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralisation
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
 #>  1 cluster_10        7      12   0.571                 0.367 
@@ -154,7 +154,7 @@ metrics$clusters
 #>  8 cluster_550       8      25   0.893                 0.143 
 #>  9 cluster_581       8      26   0.929                 0.0952
 #> 10 cluster_684       2       1   1                    NA     
-#> # ℹ 191 more rows
+#> # ℹ 190 more rows
 ```
 
 A high maximum cluster size combined with low density often indicates
@@ -172,12 +172,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 164       cluster_164      7           1    
-#> 2 168       cluster_164      7           1    
-#> 3 165       cluster_164      7           1    
-#> 4 166       cluster_164      6           0.857
-#> 5 171       cluster_164      6           0.857
-#> 6 167       cluster_164      7           1
+#> 1 168       cluster_164      7           1    
+#> 2 165       cluster_164      7           1    
+#> 3 171       cluster_164      6           0.857
+#> 4 167       cluster_164      7           1    
+#> 5 169       cluster_164      4           0.571
+#> 6 166       cluster_164      6           0.857
 ```
 
 Records with unusually high degree relative to their cluster size may be

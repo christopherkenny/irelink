@@ -37,7 +37,9 @@
 <li><hr class="dropdown-divider"></li>
     <li><h6 class="dropdown-header" data-toc-skip>Vignettes</h6></li>
     <li><a class="dropdown-item" href="../articles/deduplication.html">Deduplication with Evaluation</a></li>
+    <li><a class="dropdown-item" href="../articles/deduplicate-50k.html">Deduplicating 50k Synthetic Records</a></li>
     <li><a class="dropdown-item" href="../articles/record-linkage.html">Record Linkage Across Datasets</a></li>
+    <li><a class="dropdown-item" href="../articles/transactions.html">Linking Banking Transactions</a></li>
     <li><a class="dropdown-item" href="../articles/from_splink.html">Translating from Splink</a></li>
     <li><a class="dropdown-item" href="../articles/advanced.html">Advanced Workflows</a></li>
   </ul>
@@ -187,7 +189,7 @@ matching:</p>
 <span>  <span class="va">df_a</span>, <span class="va">df_b</span>,</span>
 <span>  spec <span class="op">=</span> <span class="va">spec</span>,</span>
 <span>  con <span class="op">=</span> <span class="va">con</span>,</span>
-<span>  link_type <span class="op">=</span> <span class="st">"link"</span></span>
+<span>  link_type <span class="op">=</span> <span class="st">'link'</span></span>
 <span><span class="op">)</span></span>
 <span></span>
 <span><span class="va">model</span></span>
@@ -218,7 +220,7 @@ matching:</p>
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></code></pre></div>
 <p><img src="record-linkage_files/figure-html/weights-1.png" class="r-plt" alt="" width="576"></p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">model</span>, type <span class="op">=</span> <span class="st">"parameters"</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">model</span>, type <span class="op">=</span> <span class="st">'parameters'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="record-linkage_files/figure-html/params-1.png" class="r-plt" alt="" width="672"></p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_weights.html">il_weights</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
@@ -257,12 +259,12 @@ matching:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 389       cluster_361</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 104       cluster_104</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 165       cluster_165</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 357       cluster_357</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 483       cluster_33 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 925       cluster_729</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 909       cluster_492</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 564       cluster_564</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 658       cluster_301</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 97        cluster_573</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 311       cluster_311</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 903       cluster_568</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>
