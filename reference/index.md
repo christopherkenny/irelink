@@ -12,6 +12,20 @@ Define the comparisons and blocking rules that drive the model.
   : Add a Prediction Blocking Rule
 - [`block_on()`](http://christophertkenny.com/irelink/reference/block_on.md)
   : Create a Training-Time Blocking Rule
+- [`il_transform()`](http://christophertkenny.com/irelink/reference/il_transform.md)
+  : Compose Multiple Transforms into a Chain
+- [`il_substr()`](http://christophertkenny.com/irelink/reference/il_substr.md)
+  : Extract a Substring Column Transform
+- [`il_regex_extract()`](http://christophertkenny.com/irelink/reference/il_regex_extract.md)
+  : Regex Extraction Column Transform
+- [`il_nullif()`](http://christophertkenny.com/irelink/reference/il_nullif.md)
+  : Replace a Value with NA Column Transform
+- [`il_cast_to_string()`](http://christophertkenny.com/irelink/reference/il_cast_to_string.md)
+  : Cast to String Column Transform
+- [`il_try_parse_date()`](http://christophertkenny.com/irelink/reference/il_try_parse_date.md)
+  : Try-Parse Date Column Transform
+- [`il_array_element()`](http://christophertkenny.com/irelink/reference/il_array_element.md)
+  : Array Element Column Transform
 - [`is_il_spec()`](http://christophertkenny.com/irelink/reference/is_il_spec.md)
   : Test if an Object is an irelink Specification
 
@@ -40,6 +54,8 @@ field.
   : Numeric Percentage Difference Comparison
 - [`cl_date_diff()`](http://christophertkenny.com/irelink/reference/cl_date_diff.md)
   : Date Difference Comparison
+- [`cl_time_diff()`](http://christophertkenny.com/irelink/reference/cl_time_diff.md)
+  : Time Difference Comparison
 - [`cl_distance_km()`](http://christophertkenny.com/irelink/reference/cl_distance_km.md)
   : Geographic Distance Comparison
 - [`cl_array_intersect()`](http://christophertkenny.com/irelink/reference/cl_array_intersect.md)
@@ -48,6 +64,8 @@ field.
   : Array Subset Comparison
 - [`cl_array_min_distance()`](http://christophertkenny.com/irelink/reference/cl_array_min_distance.md)
   : Pairwise Array Minimum Distance Comparison
+- [`cl_columns_reversed()`](http://christophertkenny.com/irelink/reference/cl_columns_reversed.md)
+  : Swap Detection for Two Columns
 - [`cl_custom()`](http://christophertkenny.com/irelink/reference/cl_custom.md)
   : Custom SQL Comparison
 - [`cl_literal()`](http://christophertkenny.com/irelink/reference/cl_literal.md)
@@ -126,6 +144,8 @@ Score record pairs and resolve them into linked entities.
   : Deterministic Record Linkage
 - [`il_find_matches()`](http://christophertkenny.com/irelink/reference/il_find_matches.md)
   : Find Matches for New Records
+- [`il_score_missing_edges()`](http://christophertkenny.com/irelink/reference/il_score_missing_edges.md)
+  : Score Missing Edges Within Clusters
 
 ## Model Inspection
 
@@ -145,6 +165,14 @@ Examine parameters, weights, and training diagnostics.
   : Compare Two Individual Records
 - [`il_string_similarity()`](http://christophertkenny.com/irelink/reference/il_string_similarity.md)
   : Compute String Similarity Scores
+- [`autoplot(`*`<il_string_similarity>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_string_similarity.md)
+  : Comparator Score Bar Chart
+- [`il_tf_chart()`](http://christophertkenny.com/irelink/reference/il_tf_chart.md)
+  : Term Frequency Adjustment Chart
+- [`il_comparison_vectors()`](http://christophertkenny.com/irelink/reference/il_comparison_vectors.md)
+  : Comparison Vector Distribution
+- [`autoplot(`*`<il_comparison_vectors>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_comparison_vectors.md)
+  : Plot comparison vector distribution
 - [`print(`*`<il_model>`*`)`](http://christophertkenny.com/irelink/reference/print.il_model.md)
   : Print an irelink Model
 - [`print(`*`<il_spec>`*`)`](http://christophertkenny.com/irelink/reference/print.il_spec.md)
@@ -212,6 +240,16 @@ Explore and summarise input data before linkage.
   : Profile Column Value Distributions
 - [`autoplot(`*`<il_profile>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_profile.md)
   : Plot Column Value Profiles
+- [`il_comparator_score()`](http://christophertkenny.com/irelink/reference/il_comparator_score.md)
+  : Batch String Similarity Scores
+- [`autoplot(`*`<il_comparator_score>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_comparator_score.md)
+  : Plot batch comparator scores
+- [`il_comparator_threshold_chart()`](http://christophertkenny.com/irelink/reference/il_comparator_threshold_chart.md)
+  : Comparator Score Threshold Chart
+- [`il_phonetic_chart()`](http://christophertkenny.com/irelink/reference/il_phonetic_chart.md)
+  : Phonetic Match Chart
+- [`il_register_tf()`](http://christophertkenny.com/irelink/reference/il_register_tf.md)
+  : Register Pre-Computed Term Frequency Tables
 
 ## Persistence and Utilities
 
@@ -225,6 +263,9 @@ Save, load, and manage linkage models and resources.
   : Attach a Saved Model to Fresh Data
 - [`il_cleanup()`](http://christophertkenny.com/irelink/reference/il_cleanup.md)
   : Remove Temporary Tables from Database
+- [`irelink`](http://christophertkenny.com/irelink/reference/irelink-package.md)
+  [`irelink-package`](http://christophertkenny.com/irelink/reference/irelink-package.md)
+  : irelink: Fast Probabilistic Record Linkage
 
 ## Datasets
 
@@ -251,6 +292,12 @@ Lightweight constructors for physical and temporal units.
   : Create a Duration in Months
 - [`years()`](http://christophertkenny.com/irelink/reference/years.md) :
   Create a Duration in Years
+- [`hours()`](http://christophertkenny.com/irelink/reference/hours.md) :
+  Create a Duration in Hours
+- [`minutes()`](http://christophertkenny.com/irelink/reference/minutes.md)
+  : Create a Duration in Minutes
+- [`seconds()`](http://christophertkenny.com/irelink/reference/seconds.md)
+  : Create a Duration in Seconds
 - [`km()`](http://christophertkenny.com/irelink/reference/km.md) :
   Create a Distance in Kilometres
 - [`mi()`](http://christophertkenny.com/irelink/reference/mi.md) :

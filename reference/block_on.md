@@ -14,7 +14,7 @@ training.
 ## Usage
 
 ``` r
-block_on(..., .where = NULL, .transform = NULL)
+block_on(..., .where = NULL, .transform = NULL, .explode = NULL)
 ```
 
 ## Arguments
@@ -40,6 +40,13 @@ block_on(..., .where = NULL, .transform = NULL)
   and
   [il_dmetaphone](http://christophertkenny.com/irelink/reference/phonetic.md).
 
+- .explode:
+
+  An optional character vector of array column names to unnest before
+  blocking. See
+  [`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md)
+  for details.
+
 ## Value
 
 A blocking-rule object for use in training verbs.
@@ -58,6 +65,9 @@ block_on(first_name, surname)
 #> $transform
 #> NULL
 #> 
+#> $explode
+#> NULL
+#> 
 #> attr(,"class")
 #> [1] "il_blocking_rule"
 
@@ -71,6 +81,9 @@ block_on(first_name, .where = 'levenshtein(l.dob, r.dob) <= 1')
 #> [1] "levenshtein(l.dob, r.dob) <= 1"
 #> 
 #> $transform
+#> NULL
+#> 
+#> $explode
 #> NULL
 #> 
 #> attr(,"class")
@@ -90,8 +103,11 @@ block_on(first_name, .transform = il_soundex)
 #> {
 #>     vapply(x, soundex_one, character(1), USE.NAMES = FALSE)
 #> }
-#> <bytecode: 0x564f7f84e0e8>
+#> <bytecode: 0x55aa7cfb0710>
 #> <environment: namespace:irelink>
+#> 
+#> $explode
+#> NULL
 #> 
 #> attr(,"class")
 #> [1] "il_blocking_rule"

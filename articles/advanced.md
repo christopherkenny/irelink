@@ -106,7 +106,7 @@ materialising millions of rows would exhaust memory.
 ``` r
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 1,914 pairs in table __il_predicted (threshold = 0.5)
+#> <il_compared_lazy> 1,900 pairs in table __il_predicted (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -115,7 +115,7 @@ Pass the lazy reference directly to
 ``` r
 clusters_lazy <- il_cluster(pairs_lazy, threshold = 0.85)
 nrow(clusters_lazy)
-#> [1] 894
+#> [1] 888
 ```
 
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
@@ -141,20 +141,20 @@ maximum possible edges for a cluster of that size):
 
 ``` r
 metrics$clusters
-#> # A tibble: 197 × 4
-#>    cluster_id  n_nodes n_edges density
-#>    <chr>         <int>   <int>   <dbl>
-#>  1 cluster_10        7      12   0.571
-#>  2 cluster_142       7      13   0.619
-#>  3 cluster_15        5       8   0.8  
-#>  4 cluster_252       9      30   0.833
-#>  5 cluster_38        5      10   1    
-#>  6 cluster_409       4       6   1    
-#>  7 cluster_517       9      36   0.986
-#>  8 cluster_550       8      25   0.893
-#>  9 cluster_581       8      26   0.929
-#> 10 cluster_684       2       1   1    
-#> # ℹ 187 more rows
+#> # A tibble: 200 × 5
+#>    cluster_id  n_nodes n_edges density cluster_centralisation
+#>    <chr>         <int>   <int>   <dbl>                  <dbl>
+#>  1 cluster_164       8      25   0.893                  0.143
+#>  2 cluster_172       4       6   1                      0    
+#>  3 cluster_186       2       1   1                     NA    
+#>  4 cluster_244       7      18   0.833                  0.233
+#>  5 cluster_428       3       2   0.667                  1    
+#>  6 cluster_440       2       1   1                     NA    
+#>  7 cluster_50        8      28   1.02                   0.167
+#>  8 cluster_58        2       2   1.5                   NA    
+#>  9 cluster_612       2       1   1                     NA    
+#> 10 cluster_871       2       1   1                     NA    
+#> # ℹ 190 more rows
 ```
 
 A high maximum cluster size combined with low density often indicates
@@ -169,15 +169,15 @@ The node table shows how many links each record participates in
 
 ``` r
 head(metrics$nodes)
-#> # A tibble: 6 × 3
-#>   unique_id cluster_id  degree
-#>   <chr>     <chr>        <int>
-#> 1 140       cluster_133      5
-#> 2 133       cluster_133      7
-#> 3 141       cluster_133      4
-#> 4 136       cluster_133      1
-#> 5 134       cluster_133      6
-#> 6 135       cluster_133      3
+#> # A tibble: 6 × 4
+#>   unique_id cluster_id  degree node_centrality
+#>   <chr>     <chr>        <int>           <dbl>
+#> 1 167       cluster_164      7           1    
+#> 2 171       cluster_164      6           0.857
+#> 3 164       cluster_164      7           1    
+#> 4 166       cluster_164      6           0.857
+#> 5 169       cluster_164      4           0.571
+#> 6 170       cluster_164      6           0.857
 ```
 
 Records with unusually high degree relative to their cluster size may be

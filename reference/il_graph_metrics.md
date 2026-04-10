@@ -94,13 +94,13 @@ clusters <- il_cluster(pairs)
 
 metrics <- il_graph_metrics(pairs, clusters)
 metrics$clusters
-#> # A tibble: 5 × 4
-#>   cluster_id n_nodes n_edges density
-#>   <chr>        <int>   <int>   <dbl>
-#> 1 cluster_10       3       3       1
-#> 2 cluster_15       3       3       1
-#> 3 cluster_17       3       3       1
-#> 4 cluster_1        3       3       1
-#> 5 cluster_13       3       3       1
+#> # A tibble: 5 × 5
+#>   cluster_id n_nodes n_edges density cluster_centralisation
+#>   <chr>        <int>   <int>   <dbl>                  <dbl>
+#> 1 cluster_10       3       3       1                      0
+#> 2 cluster_15       3       3       1                      0
+#> 3 cluster_17       3       3       1                      0
+#> 4 cluster_1        3       3       1                      0
+#> 5 cluster_13       3       3       1                      0
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

@@ -14,6 +14,10 @@ il_estimate_em(
   convergence = 1e-05,
   fix_u = TRUE,
   fix_m = FALSE,
+  max_iterations = 25L,
+  fix_prior = TRUE,
+  estimate_without_tf = TRUE,
+  derive_prior = FALSE,
   ...
 )
 ```
@@ -45,6 +49,27 @@ il_estimate_em(
   Logical. If `TRUE`, hold m parameters fixed during EM. Defaults to
   `FALSE`. At least one of `fix_u` and `fix_m` must be `FALSE`,
   otherwise the algorithm cannot learn anything.
+
+- max_iterations:
+
+  Maximum number of EM iterations. Defaults to `25L`. The loop stops
+  early when convergence is reached.
+
+- fix_prior:
+
+  Logical. If `TRUE`, hold the prior (probability that two random
+  records match) fixed during EM iterations. Defaults to `TRUE`.
+
+- estimate_without_tf:
+
+  Logical. Accepted for API compatibility with splink. In irelink, term
+  frequency adjustments are always applied at scoring time rather than
+  during EM, so this parameter has no effect. Defaults to `TRUE`.
+
+- derive_prior:
+
+  Logical. If `TRUE`, derive the prior from the trained parameter values
+  after EM completes and store it in the model. Defaults to `FALSE`.
 
 - ...:
 

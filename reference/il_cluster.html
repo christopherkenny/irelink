@@ -60,7 +60,8 @@ that represent the same real-world entity.</p>
 <span>  <span class="va">pairs</span>,</span>
 <span>  threshold <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"connected"</span>, <span class="st">"best_link"</span><span class="op">)</span>,</span>
-<span>  ties_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lowest_id"</span>, <span class="st">"drop"</span><span class="op">)</span></span>
+<span>  ties_method <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"lowest_id"</span>, <span class="st">"drop"</span><span class="op">)</span>,</span>
+<span>  source_dataset <span class="op">=</span> <span class="cn">NULL</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
 
@@ -87,6 +88,14 @@ clustering, or <code>"best_link"</code> for single-best-link clustering.</p></dd
 <code>method = "best_link"</code>. <code>"lowest_id"</code> (default) keeps the edge to
 the record with the smaller <code>unique_id</code>; <code>"drop"</code> removes all edges
 where the best-link probability is tied.</p></dd>
+
+
+<dt id="arg-source-dataset">source_dataset<a class="anchor" aria-label="anchor" href="#arg-source-dataset"></a></dt>
+<dd><p>An optional named character vector or data frame
+mapping <code>unique_id</code> values to their source dataset name. Used with
+<code>method = "best_link"</code> to enforce at-most-one-record per source
+dataset per cluster (splink's <code>duplicate_free_datasets</code> constraint).
+If a data frame, must contain columns <code>unique_id</code> and <code>source_dataset</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

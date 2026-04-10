@@ -59,7 +59,7 @@ how to partition pairs during training.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">block_on</span><span class="op">(</span><span class="va">...</span>, .where <span class="op">=</span> <span class="cn">NULL</span>, .transform <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">block_on</span><span class="op">(</span><span class="va">...</span>, .where <span class="op">=</span> <span class="cn">NULL</span>, .transform <span class="op">=</span> <span class="cn">NULL</span>, .explode <span class="op">=</span> <span class="cn">NULL</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -83,6 +83,11 @@ condition are AND-ed together.</p></dd>
 left and right column values before the equality check. See
 <a href="phonetic.html">il_soundex</a>, <a href="phonetic.html">il_metaphone</a>, and <a href="phonetic.html">il_dmetaphone</a>.</p></dd>
 
+
+<dt id="arg--explode">.explode<a class="anchor" aria-label="anchor" href="#arg--explode"></a></dt>
+<dd><p>An optional character vector of array column names to
+unnest before blocking. See <code><a href="il_block_on.html">il_block_on()</a></code> for details.</p></dd>
+
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
@@ -102,6 +107,9 @@ left and right column values before the equality check. See
 <span class="r-out co"><span class="r-pr">#&gt;</span> $transform</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $explode</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "il_blocking_rule"</span>
 <span class="r-in"><span></span></span>
@@ -115,6 +123,9 @@ left and right column values before the equality check. See
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "levenshtein(l.dob, r.dob) &lt;= 1"</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> $transform</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $explode</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
@@ -134,8 +145,11 @@ left and right column values before the equality check. See
 <span class="r-out co"><span class="r-pr">#&gt;</span> {</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>     vapply(x, soundex_one, character(1), USE.NAMES = FALSE)</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> }</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x564f7f84e0e8&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> &lt;bytecode: 0x55aa7cfb0710&gt;</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> &lt;environment: namespace:irelink&gt;</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> $explode</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> NULL</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> </span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> attr(,"class")</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> [1] "il_blocking_rule"</span>

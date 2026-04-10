@@ -12,6 +12,7 @@ S3 method for [`stats::predict()`](https://rdrr.io/r/stats/predict.html)
 predict(
   object,
   threshold = 0.85,
+  threshold_match_weight = NULL,
   type = c("pairs", "weights"),
   collect = TRUE,
   include_fields = FALSE,
@@ -28,7 +29,14 @@ predict(
 - threshold:
 
   A numeric value between 0 and 1. Only pairs with a match probability
-  at or above this threshold are returned. Defaults to `0.85`.
+  at or above this threshold are returned. Defaults to `0.85`. Ignored
+  when `threshold_match_weight` is set.
+
+- threshold_match_weight:
+
+  Optional numeric value. When set, pairs are filtered on match weight
+  (log₂ Bayes factor) instead of probability. Typical values range from
+  about −5 to +30. Overrides `threshold`.
 
 - type:
 

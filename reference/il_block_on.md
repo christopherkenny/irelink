@@ -10,7 +10,7 @@ where multiple conditions inside one call are AND-ed.
 ## Usage
 
 ``` r
-il_block_on(spec, ..., .where = NULL, .transform = NULL)
+il_block_on(spec, ..., .where = NULL, .transform = NULL, .explode = NULL)
 ```
 
 ## Arguments
@@ -38,6 +38,13 @@ il_block_on(spec, ..., .where = NULL, .transform = NULL)
   and
   [il_dmetaphone](http://christophertkenny.com/irelink/reference/phonetic.md).
 
+- .explode:
+
+  An optional character vector of column names containing arrays (list
+  columns) to unnest before blocking. Each array element becomes a
+  separate row for the blocking join. Requires a DuckDB or PostgreSQL
+  backend. Defaults to `NULL`.
+
 ## Value
 
 An updated `il_spec` (a new copy; the input is not modified).
@@ -57,4 +64,8 @@ spec <- il_spec() |>
 # Phonetic blocking: group similar-sounding names
 spec <- il_spec() |>
   il_block_on(first_name, .transform = il_soundex)
+
+# Explode array columns before blocking
+spec <- il_spec() |>
+  il_block_on(email, .explode = 'email')
 ```

@@ -13,7 +13,8 @@ il_cluster(
   pairs,
   threshold = NULL,
   method = c("connected", "best_link"),
-  ties_method = c("lowest_id", "drop")
+  ties_method = c("lowest_id", "drop"),
+  source_dataset = NULL
 )
 ```
 
@@ -40,6 +41,14 @@ il_cluster(
   `method = "best_link"`. `"lowest_id"` (default) keeps the edge to the
   record with the smaller `unique_id`; `"drop"` removes all edges where
   the best-link probability is tied.
+
+- source_dataset:
+
+  An optional named character vector or data frame mapping `unique_id`
+  values to their source dataset name. Used with `method = "best_link"`
+  to enforce at-most-one-record per source dataset per cluster (splink's
+  `duplicate_free_datasets` constraint). If a data frame, must contain
+  columns `unique_id` and `source_dataset`.
 
 ## Value
 
