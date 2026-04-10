@@ -118,16 +118,12 @@ test_that('validate_phonetic_dialect accepts supported backends', {
   expect_silent(irelink:::validate_phonetic_dialect('il_dmetaphone', 'postgres'))
 })
 
-# --- Serialization (transform_to_name / name_to_transform) -------------------
+# --- Serialization (transform_to_name) ---------------------------------------
 
-test_that('phonetic transforms serialize and deserialize correctly', {
+test_that('phonetic transforms serialize correctly', {
   expect_equal(irelink:::transform_to_name(il_soundex), 'il_soundex')
   expect_equal(irelink:::transform_to_name(il_metaphone), 'il_metaphone')
   expect_equal(irelink:::transform_to_name(il_dmetaphone), 'il_dmetaphone')
-
-  expect_identical(irelink:::name_to_transform('il_soundex'), il_soundex)
-  expect_identical(irelink:::name_to_transform('il_metaphone'), il_metaphone)
-  expect_identical(irelink:::name_to_transform('il_dmetaphone'), il_dmetaphone)
 })
 
 # --- il_block_on / block_on with .transform -----------------------------------

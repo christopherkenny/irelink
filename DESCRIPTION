@@ -54,7 +54,6 @@ Imports:
     duckdb,
     ggplot2,
     glue,
-    jsonlite,
     rlang,
     stringdist,
     tibble

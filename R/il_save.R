@@ -1,21 +1,9 @@
-unclass_comparison_level <- function(x) {
-  x <- unclass(x)
-  if (!is.null(x$levels)) {
-    x$levels <- lapply(x$levels, unclass_comparison_level)
-  }
-  if (!is.null(x$children)) {
-    x$children <- lapply(x$children, unclass_comparison_level)
-  }
-  if (!is.null(x$child)) {
-    x$child <- unclass_comparison_level(x$child)
-  }
-  x
-}
-
-#' Save a model to disk
+#' Save a Model to Disk
 #'
-#' Serialises a trained `il_model` object to a file so that it can be
-#' loaded later without re-training.
+#' Serialises a trained `il_model` object to an RDS file so that it can be
+#' loaded later without re-training. The database connection and any
+#' in-database tables are not stored; supply a fresh connection with
+#' [il_attach()] after loading.
 #'
 #' @param model A trained `il_model` object.
 #' @param path A file path (character string) where the model will be
@@ -47,21 +35,6 @@ unclass_comparison_level <- function(x) {
 #'     '1988-07-04', '1988-07-04', '1990-01-01', '1990-01-02',
 #'     '1985-06-15', '1985-06-16', '2000-12-01', '2000-12-02',
 #'     '1975-03-22', '1975-03-23', '1988-07-04', '1988-07-05'
-#'   ),
-#'   city = c(
-#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
-#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid',
-#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
-#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
-#'   ),
-#'   email = c(
-#'     'john@example.com', 'jon@example.com', 'jane@example.com',
-#'     'jane@example.com', 'bob@example.com', 'bobby@example.com',
-#'     'alice@example.com', 'alicia@example.com', 'tom@example.com',
-#'     'thomas@example.com', 'john@example.com', 'jon@example.com',
-#'     'jane@example.com', 'janet@example.com', 'bob@example.com',
-#'     'robert@example.com', 'alice@example.com', 'alison@example.com',
-#'     'tom@example.com', 'tomas@example.com'
 #'   )
 #' )
 #' con <- DBI::dbConnect(duckdb::duckdb())
@@ -74,7 +47,7 @@ unclass_comparison_level <- function(x) {
 #' model <- il_model(df, spec = spec, con = con)
 #' model <- il_estimate_u(model)
 #' model <- il_estimate_em(model, block_on(surname))
-#' tmp <- tempfile(fileext = '.json')
+#' tmp <- tempfile(fileext = '.rds')
 #'
 #' il_save(model, tmp)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
@@ -86,42 +59,9 @@ il_save <- function(model, path, overwrite = FALSE) {
     )
   }
 
-  # Serialize spec into plain lists (strip S3 classes for JSON)
-  spec_data <- list(
-    comparisons = lapply(model$spec$comparisons, function(cmp) {
-      entry <- list(
-        columns = cmp$columns,
-        method = unclass_comparison_level(cmp$method)
-      )
-      if (!is.null(cmp$transform)) {
-        entry$transform <- transform_to_name(cmp$transform)
-      }
-      entry
-    }),
-    blocking_rules = lapply(model$spec$blocking_rules, function(br) {
-      out <- list(columns = br$columns, where = br$where)
-      if (!is.null(br$transform)) {
-        out$transform <- transform_to_name(br$transform)
-      }
-      out
-    })
-  )
-
-  # Serialize params (tibbles become data frames, which jsonlite handles)
-  params_data <- model$params
-  if (inherits(params_data$comparisons, 'tbl_df')) {
-    params_data$comparisons <- as.data.frame(params_data$comparisons)
-  }
-  # Strip any tibbles from history entries
-  if (!is.null(params_data$history) && is.list(params_data$history)) {
-    params_data$history <- lapply(params_data$history, function(h) {
-      if (inherits(h, 'tbl_df')) as.data.frame(h) else h
-    })
-  }
-
-  data_out <- list(
-    spec = spec_data,
-    params = params_data,
+  saveable <- list(
+    spec = model$spec,
+    params = model$params,
     trained = model$trained,
     link_type = model$link_type,
     data_info = list(
@@ -131,14 +71,7 @@ il_save <- function(model, path, overwrite = FALSE) {
     )
   )
 
-  jsonlite::write_json(
-    data_out,
-    path,
-    auto_unbox = TRUE,
-    pretty = TRUE,
-    null = 'null',
-    digits = NA
-  )
+  saveRDS(saveable, path)
   invisible(model)
 }
 
@@ -146,7 +79,7 @@ il_save <- function(model, path, overwrite = FALSE) {
 #'
 #' Reads a previously saved `il_model` object from disk. The loaded model
 #' is ready for prediction without re-training, though a fresh database
-#' connection may need to be supplied.
+#' connection may need to be supplied via [il_attach()].
 #'
 #' @param path A file path (character string) to a saved model.
 #'
@@ -174,21 +107,6 @@ il_save <- function(model, path, overwrite = FALSE) {
 #'     '1988-07-04', '1988-07-04', '1990-01-01', '1990-01-02',
 #'     '1985-06-15', '1985-06-16', '2000-12-01', '2000-12-02',
 #'     '1975-03-22', '1975-03-23', '1988-07-04', '1988-07-05'
-#'   ),
-#'   city = c(
-#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
-#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid',
-#'     'London', 'London', 'Paris', 'Paris', 'Berlin',
-#'     'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
-#'   ),
-#'   email = c(
-#'     'john@example.com', 'jon@example.com', 'jane@example.com',
-#'     'jane@example.com', 'bob@example.com', 'bobby@example.com',
-#'     'alice@example.com', 'alicia@example.com', 'tom@example.com',
-#'     'thomas@example.com', 'john@example.com', 'jon@example.com',
-#'     'jane@example.com', 'janet@example.com', 'bob@example.com',
-#'     'robert@example.com', 'alice@example.com', 'alison@example.com',
-#'     'tom@example.com', 'tomas@example.com'
 #'   )
 #' )
 #' con <- DBI::dbConnect(duckdb::duckdb())
@@ -201,7 +119,7 @@ il_save <- function(model, path, overwrite = FALSE) {
 #' model <- il_model(df, spec = spec, con = con)
 #' model <- il_estimate_u(model)
 #' model <- il_estimate_em(model, block_on(surname))
-#' tmp <- tempfile(fileext = '.json')
+#' tmp <- tempfile(fileext = '.rds')
 #' il_save(model, tmp)
 #'
 #' loaded <- il_load(tmp)
@@ -211,80 +129,18 @@ il_load <- function(path) {
     cli::cli_abort('File {.file {path}} does not exist.')
   }
 
-  raw <- jsonlite::read_json(path, simplifyVector = TRUE)
-
-  # Reconstruct spec
-  comparisons <- lapply(seq_len(NROW(raw$spec$comparisons)), function(i) {
-    cmp_data <- if (is.data.frame(raw$spec$comparisons)) {
-      as.list(raw$spec$comparisons[i, ])
-    } else {
-      raw$spec$comparisons[[i]]
-    }
-    method_data <- cmp_data$method
-    if (is.character(method_data) || is.list(method_data)) {
-      method_data <- as.list(method_data)
-    }
-    method <- structure(method_data, class = 'il_comparison_level')
-    entry <- list(columns = cmp_data$columns, method = method)
-    if (!is.null(cmp_data$transform)) {
-      entry$transform <- name_to_transform(cmp_data$transform)
-    }
-    entry
-  })
-
-  blocking_rules <- lapply(seq_len(NROW(raw$spec$blocking_rules)), function(i) {
-    br_data <- if (is.data.frame(raw$spec$blocking_rules)) {
-      as.list(raw$spec$blocking_rules[i, ])
-    } else {
-      raw$spec$blocking_rules[[i]]
-    }
-    # jsonlite turns null → NA for data frame columns; restore to NULL
-    if (!is.null(br_data$where) && is.na(br_data$where)) {
-      br_data$where <- NULL
-    }
-    # Restore transform function from serialized name
-    if (!is.null(br_data$transform) && is.character(br_data$transform)) {
-      br_data$transform <- name_to_transform(br_data$transform)
-    } else if (!is.null(br_data$transform) && is.na(br_data$transform)) {
-      br_data$transform <- NULL
-    }
-    structure(br_data, class = 'il_blocking_rule')
-  })
-
-  spec <- new_il_spec(
-    comparisons = comparisons,
-    blocking_rules = blocking_rules
-  )
-
-  # Reconstruct params
-  params <- raw$params
-  if (!is.null(params$comparisons)) {
-    params$comparisons <- tibble::as_tibble(as.data.frame(params$comparisons))
-    # Migrate legacy level → gamma_level format
-    if ('level' %in% names(params$comparisons) && !'gamma_level' %in% names(params$comparisons)) {
-      params$comparisons <- migrate_params_to_gamma_level(params$comparisons)
-    }
-    if ('gamma_level' %in% names(params$comparisons)) {
-      params$comparisons$gamma_level <- as.integer(params$comparisons$gamma_level)
-    }
-  }
-  if (!is.null(params$prior) && length(params$prior) == 1L) {
-    params$prior <- as.numeric(params$prior)
-  }
-
-  data_info <- raw$data_info
-  if (!is.null(data_info)) {
-    data_info <- as.list(data_info)
-  } else {
-    data_info <- list()
-  }
+  raw <- readRDS(path)
 
   new_il_model(
-    spec = spec,
-    data = data_info,
+    spec = raw$spec,
+    data = list(
+      n_records_l = raw$data_info$n_records_l,
+      n_records_r = raw$data_info$n_records_r,
+      columns = raw$data_info$columns
+    ),
     con = NULL,
     link_type = raw$link_type %||% 'dedupe',
-    params = params,
+    params = raw$params,
     trained = isTRUE(raw$trained)
   )
 }

@@ -64,6 +64,20 @@ choices:
 il_profile(df[, c("first_name", "surname", "city")], con = con, top_n = 5)
 ```
 
+## Choose blocking rules
+
+`il_suggest_blocking()` enumerates columns and ranks them as blocking
+keys.
+A good blocking key has high `n_distinct` (narrow blocks, fewer pairs)
+and high `coverage` (few missing values):
+
+```{r suggest-blocking}
+il_suggest_blocking(df, con = con)
+```
+
+The spec below uses `first_name`, `surname`, and `city`, which rank
+among the top columns here.
+
 ## Define the specification
 
 Choose comparisons and blocking rules.
@@ -139,6 +153,33 @@ The parameter chart shows the raw m and u probabilities:
 ```{r params-plot, fig.width = 7, fig.height = 4}
 autoplot(model, type = "parameters")
 ```
+
+## Save and reuse the model
+
+Once you are satisfied with the parameters, save the model to a JSON
+file.
+The file stores the spec, trained parameters, and all metadata needed
+to re-apply the model without retraining:
+
+```{r save}
+path <- tempfile(fileext = '.rds')
+il_save(model, path)
+```
+
+Load and attach the saved model to the same or different data with
+`il_load()` and `il_attach()`:
+
+```{r attach}
+con2 <- DBI::dbConnect(duckdb::duckdb())
+loaded <- il_load(path)
+model2 <- il_attach(loaded, fake_1000, con = con2)
+head(predict(model2, threshold = 0.85))
+DBI::dbDisconnect(con2, shutdown = TRUE)
+```
+
+This pattern supports the common production workflow: train once on a
+representative sample, save the model, and re-apply as new data
+arrives.
 
 ## Predict and cluster
 

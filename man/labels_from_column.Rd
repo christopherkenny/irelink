@@ -30,8 +30,15 @@ data frame with \code{unique_id_l}, \code{unique_id_r}, and \code{is_match}, you
 supply the column name and let irelink derive everything.
 }
 \examples{
-\dontrun{
-labels <- labels_from_column(model, 'cluster')
-il_accuracy(model, labels)
+\donttest{
+con <- DBI::dbConnect(duckdb::duckdb())
+spec <- il_spec() |>
+  il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
+  il_block_on(surname)
+model <- il_model(fake_1000, spec = spec, con = con)
+model <- il_estimate_u(model)
+model <- il_estimate_em(model, block_on(surname))
+labels_from_column(model, 'cluster')
+DBI::dbDisconnect(con, shutdown = TRUE)
 }
 }

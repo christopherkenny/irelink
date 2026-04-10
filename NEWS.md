@@ -11,10 +11,10 @@ Initial development release, translating Python's [splink](https://github.com/mo
 
 ## Comparison library
 
-- `cl_first_last_name()` is a new American-English alias for `cl_forename_surname()`. Both accept a companion column argument (`last_name` / `surname`) and a `term_frequency` flag.
-- `cl_forename_surname()` now accepts a `surname` argument (default `'surname'`) so the companion column name can be specified explicitly. This also fixes a bug where the swap-detection SQL referenced unresolved `{col_forename}` and `{col_surname}` variables at runtime.
-- `cl_zip_code()` is a new domain comparison for US ZIP codes with levels for exact match, 5-digit prefix (ZIP+4 normalization), and 3-digit Sectional Center Facility prefix.
-- `cl_damerau_levenshtein()`, `cl_dob()`, `cl_email()`, `cl_jaro()`, `cl_jaro_winkler()`, `cl_levenshtein()`, `cl_levels()`, `cl_name()`, and `cl_postcode()` now accept `term_frequency = TRUE` to apply Fellegi-Sunter term-frequency adjustments at the highest comparison level, giving rare values higher match weights than common ones.
+- `cl_first_last_name()` is an American-English alias for `cl_forename_surname()`. Both accept a companion column argument (`last_name` / `surname`) and a `term_frequency` flag.
+- `cl_forename_surname()` accepts a `surname` argument (default `'surname'`) so the companion column name can be specified explicitly. This also fixes a bug where the swap-detection SQL referenced unresolved `{col_forename}` and `{col_surname}` variables at runtime.
+- `cl_zip_code()` is a domain comparison for US ZIP codes with levels for exact match, 5-digit prefix (ZIP+4 normalization), and 3-digit Sectional Center Facility prefix.
+- `cl_damerau_levenshtein()`, `cl_dob()`, `cl_email()`, `cl_jaro()`, `cl_jaro_winkler()`, `cl_levenshtein()`, `cl_levels()`, `cl_name()`, and `cl_postcode()` accept `term_frequency = TRUE` to apply Fellegi-Sunter term-frequency adjustments at the highest comparison level, giving rare values higher match weights than common ones.
 - `cl_exact()` for exact matches.
 - `cl_jaro_winkler()` and `cl_levenshtein()` for fuzzy strings.
 - `cl_date_diff()` for temporal proximity.
@@ -45,17 +45,17 @@ Initial development release, translating Python's [splink](https://github.com/mo
 
 ## Data exploration
 
-- `il_profile()` now accepts raw SQL expressions as character strings in addition to bare column names (e.g., `il_profile(df, "city || left(first_name, 1)", con = con)`). The expression is passed directly to the database `GROUP BY`, matching the behaviour of splink's `column_expressions` argument.
+- `il_profile()` accepts raw SQL expressions as character strings in addition to bare column names (e.g., `il_profile(df, "city || left(first_name, 1)", con = con)`). The expression is passed directly to the database `GROUP BY`, matching the behaviour of splink's `column_expressions` argument.
 
 ## Prediction
 
-- `predict()` now supports `include_fields = TRUE` when `collect = FALSE`. The original field values are joined into the in-database scored-pairs table before `__il_predicted` is created, so field columns are available without a separate R-side join. Previously `include_fields` was silently ignored on the lazy path.
+- `predict()` supports `include_fields = TRUE` when `collect = FALSE`. The original field values are joined into the in-database scored-pairs table before `__il_predicted` is created, so field columns are available without a separate R-side join.
 
 ## SQL backends and persistence
 
 - All computation runs inside a DBI-compatible database: DuckDB (recommended), SQLite, or PostgreSQL.
 - `il_deterministic_link()` performs exact-match linking without training.
-- `il_save()` serialises a trained model to JSON for later reuse.
+- `il_save()` and `il_load()` use R's native RDS format instead of JSON. RDS handles nested R objects (comparison levels, transforms, tibble params) without any lossy type coercion, removing the reconstruction code that was required for JSON round-trips.
 - `il_cleanup()` removes temporary tables from the database.
 
 ## Performance

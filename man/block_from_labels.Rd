@@ -27,7 +27,7 @@ the same value (recall). Helps identify which columns make effective
 blocking keys.
 }
 \examples{
-\dontrun{
-block_from_labels(df, labels, con = con)
-}
+con <- DBI::dbConnect(duckdb::duckdb())
+block_from_labels(fake_1000, fake_1000_labels, con = con)
+DBI::dbDisconnect(con, shutdown = TRUE)
 }

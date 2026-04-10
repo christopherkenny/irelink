@@ -188,7 +188,7 @@ best_link_filter <- function(pairs, ties_method = 'lowest_id') {
   prob <- pairs$match_probability
 
   all_nodes <- unique(c(id_l, id_r))
-  best_prob <- setNames(rep(-Inf, length(all_nodes)), all_nodes)
+  best_prob <- stats::setNames(rep(-Inf, length(all_nodes)), all_nodes)
 
   for (i in seq_len(nrow(pairs))) {
     if (prob[i] > best_prob[id_l[i]]) best_prob[id_l[i]] <- prob[i]
@@ -215,7 +215,7 @@ best_link_filter <- function(pairs, ties_method = 'lowest_id') {
     prob <- pairs$match_probability
     # Recompute best_prob on untied pairs
     all_nodes2 <- unique(c(id_l, id_r))
-    best_prob2 <- setNames(rep(-Inf, length(all_nodes2)), all_nodes2)
+    best_prob2 <- stats::setNames(rep(-Inf, length(all_nodes2)), all_nodes2)
     for (i in seq_len(nrow(pairs))) {
       if (prob[i] > best_prob2[id_l[i]]) best_prob2[id_l[i]] <- prob[i]
       if (prob[i] > best_prob2[id_r[i]]) best_prob2[id_r[i]] <- prob[i]
@@ -228,7 +228,7 @@ best_link_filter <- function(pairs, ties_method = 'lowest_id') {
 
   # 'lowest_id': break ties by keeping the edge to the lower unique_id.
   # For each node track the best edge index; on tie, prefer smaller partner id.
-  best_idx <- setNames(rep(NA_integer_, length(all_nodes)), all_nodes)
+  best_idx <- stats::setNames(rep(NA_integer_, length(all_nodes)), all_nodes)
 
   for (i in seq_len(nrow(pairs))) {
     for (nd in c(id_l[i], id_r[i])) {

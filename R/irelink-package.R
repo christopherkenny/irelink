@@ -1,5 +1,5 @@
 #' @keywords internal
 #' @aliases irelink-package
 #' @importFrom rlang .data
-#' @importFrom stats predict setNames
+#' @importFrom stats predict
 '_PACKAGE'

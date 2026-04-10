@@ -17,7 +17,7 @@ test_that('il_save() and il_load() round-trip preserves model parameters', {
     il_estimate_u(max_pairs = 1e6) |>
     il_estimate_em(block_on(first_name))
 
-  tmp <- withr::local_tempfile(fileext = '.json')
+  tmp <- withr::local_tempfile(fileext = '.rds')
   il_save(model, tmp)
 
   expect_true(file.exists(tmp))
@@ -33,7 +33,7 @@ test_that('il_save() and il_load() round-trip preserves model parameters', {
   expect_equal(p1$u, p2$u, tolerance = 1e-6)
 })
 
-test_that('il_save() creates a valid JSON file', {
+test_that('il_save() creates a valid RDS file', {
   skip_if_not_installed('RSQLite')
 
   con <- test_con()
@@ -53,16 +53,16 @@ test_that('il_save() creates a valid JSON file', {
     il_estimate_u(max_pairs = 1e6) |>
     il_estimate_em(block_on(first_name))
 
-  tmp <- withr::local_tempfile(fileext = '.json')
+  tmp <- withr::local_tempfile(fileext = '.rds')
   il_save(model, tmp)
 
-  # Should be valid JSON
-  json <- jsonlite::read_json(tmp)
-  expect_type(json, 'list')
+  raw <- readRDS(tmp)
+  expect_type(raw, 'list')
+  expect_named(raw, c('spec', 'params', 'trained', 'link_type', 'data_info'))
 })
 
 test_that('il_load() errors on non-existent file', {
-  expect_error(il_load('nonexistent_file.json'))
+  expect_error(il_load('nonexistent_file.rds'))
 })
 
 test_that('il_save() with untrained model still works', {
@@ -83,7 +83,7 @@ test_that('il_save() with untrained model still works', {
 
   model <- il_model(df, spec = spec, con = con)
 
-  tmp <- withr::local_tempfile(fileext = '.json')
+  tmp <- withr::local_tempfile(fileext = '.rds')
   il_save(model, tmp)
   model2 <- il_load(tmp)
   expect_s3_class(model2, 'il_model')

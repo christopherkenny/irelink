@@ -105,7 +105,7 @@ il_waterfall <- function(pairs, which = 1L) {
   step <- c('Prior', comp_names, 'Final')
   contribution <- c(prior_weight, contributions, final_weight)
   cumulative <- cumsum(c(prior_weight, contributions))
-  start <- c(0, head(cumulative, -1), 0)
+  start <- c(0, utils::head(cumulative, -1), 0)
   end <- c(cumulative, final_weight)
 
   tibble::tibble(

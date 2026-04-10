@@ -41,12 +41,20 @@ continue training with \code{\link[=il_estimate_em]{il_estimate_em()}} using the
 parameters as a warm start.
 }
 \examples{
-\dontrun{
-# Production workflow: load a pre-trained model, attach to new data
-loaded <- il_load('trained_model.json')
+\donttest{
 con <- DBI::dbConnect(duckdb::duckdb())
-model <- il_attach(loaded, new_data, con = con)
-pairs <- predict(model)
+spec <- il_spec() |>
+  il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
+  il_block_on(surname)
+model <- il_model(fake_1000, spec = spec, con = con)
+model <- il_estimate_u(model)
+model <- il_estimate_em(model, block_on(surname))
+path <- tempfile(fileext = '.rds')
+il_save(model, path)
 DBI::dbDisconnect(con, shutdown = TRUE)
+con2 <- DBI::dbConnect(duckdb::duckdb())
+loaded <- il_load(path)
+model2 <- il_attach(loaded, fake_1000, con = con2)
+DBI::dbDisconnect(con2, shutdown = TRUE)
 }
 }

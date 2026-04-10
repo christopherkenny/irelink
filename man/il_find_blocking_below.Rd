@@ -35,9 +35,7 @@ Searches for single-column (and optionally two-column) blocking rules
 that keep the total number of candidate pairs below a given ceiling.
 }
 \examples{
-\dontrun{
 con <- DBI::dbConnect(duckdb::duckdb())
-il_find_blocking_below(df, max_pairs = 1000, con = con)
+il_find_blocking_below(fake_1000, max_pairs = 100000, con = con)
 DBI::dbDisconnect(con, shutdown = TRUE)
-}
 }

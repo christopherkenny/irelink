@@ -171,7 +171,7 @@ predict.il_model <- function(object, threshold = 0.85,
 #' SQL-side prediction (lazy path)
 #'
 #' Pushes gamma computation, scoring, TF adjustment, and threshold
-#' filtering entirely into SQL.  Returns an [il_compared_lazy] reference.
+#' filtering entirely into SQL.  Returns an `il_compared_lazy` reference.
 #'
 #' @param model A trained il_model.
 #' @param threshold Numeric match-probability threshold.

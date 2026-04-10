@@ -100,23 +100,6 @@ transform_to_name <- function(transform) {
   NULL
 }
 
-#' Map a serialized name back to an R function
-#' @noRd
-name_to_transform <- function(name) {
-  if (is.null(name)) {
-    return(NULL)
-  }
-  switch(name,
-    'tolower' = tolower,
-    'toupper' = toupper,
-    'trimws' = trimws,
-    'il_soundex' = il_soundex,
-    'il_metaphone' = il_metaphone,
-    'il_dmetaphone' = il_dmetaphone,
-    NULL
-  )
-}
-
 #' Is this a phonetic transform function?
 #' @noRd
 is_phonetic_transform <- function(transform) {
@@ -846,7 +829,7 @@ sql_tf_adj_expr <- function(col, max_level, u_exact) {
 
 #' Build a complete SQL query that scores and filters pairs
 #'
-#' Wraps [build_gamma_query()] with per-comparison weight CASE expressions,
+#' Wraps `build_gamma_query()` with per-comparison weight CASE expressions,
 #' TF adjustments, and a match-probability logistic transform.  The result
 #' is a query whose output columns match [predict.il_model()].
 #'
@@ -930,7 +913,7 @@ build_scored_query <- function(model, threshold = 0.85) {
 #'
 #' Produces a SQL query that augments the scored-pairs output with the
 #' original field values from the left and right source tables, using
-#' `_l` / `_r` suffixes.  Used by [predict_lazy()] when
+#' `_l` / `_r` suffixes.  Used by `predict_lazy()` when
 #' `include_fields = TRUE`.
 #'
 #' @param model A trained `il_model`.

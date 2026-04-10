@@ -156,11 +156,9 @@ evaluate_column_combos <- function(con, tbl_name, columns, n, cartesian,
 #' @export
 #'
 #' @examples
-#' \dontrun{
 #' con <- DBI::dbConnect(duckdb::duckdb())
-#' il_find_blocking_below(df, max_pairs = 1000, con = con)
+#' il_find_blocking_below(fake_1000, max_pairs = 100000, con = con)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-#' }
 il_find_blocking_below <- function(.data, max_pairs, columns = NULL,
                                    con = NULL,
                                    link_type = c('dedupe', 'link'),
@@ -192,9 +190,9 @@ il_find_blocking_below <- function(.data, max_pairs, columns = NULL,
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' block_from_labels(df, labels, con = con)
-#' }
+#' con <- DBI::dbConnect(duckdb::duckdb())
+#' block_from_labels(fake_1000, fake_1000_labels, con = con)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
 block_from_labels <- function(.data, labels, columns = NULL, con = NULL) {
   tbl_name <- '__il_bfl'
   reg <- register_data(.data,

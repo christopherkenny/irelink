@@ -6,6 +6,16 @@ home:
   sidebar:
     structure: [links, license, citation, authors]
 
+articles:
+  - title: "Vignettes"
+    navbar: Vignettes
+    contents:
+      - irelink
+      - deduplication
+      - record-linkage
+      - from_splink
+      - advanced
+
 reference:
   - title: "Linkage Specification"
     desc: "Define the comparisons and blocking rules that drive the model."
