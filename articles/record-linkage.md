@@ -211,10 +211,10 @@ head(clusters)
 #>   <chr>     <chr>      
 #> 1 20        cluster_20 
 #> 2 419       cluster_330
-#> 3 661       cluster_192
-#> 4 98        cluster_707
-#> 5 722       cluster_393
-#> 6 640       cluster_640
+#> 3 520       cluster_520
+#> 4 568       cluster_568
+#> 5 661       cluster_192
+#> 6 708       cluster_708
 ```
 
 ## Evaluate against ground truth
