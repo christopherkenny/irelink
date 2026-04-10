@@ -25,19 +25,19 @@ probabilistic record linkage engine into idiomatic R.
 ### Comparison library
 
 - [`cl_first_last_name()`](http://christophertkenny.com/irelink/reference/cl_first_last_name.md)
-  is a new American-English alias for
+  is an American-English alias for
   [`cl_forename_surname()`](http://christophertkenny.com/irelink/reference/cl_forename_surname.md).
   Both accept a companion column argument (`last_name` / `surname`) and
   a `term_frequency` flag.
 - [`cl_forename_surname()`](http://christophertkenny.com/irelink/reference/cl_forename_surname.md)
-  now accepts a `surname` argument (default `'surname'`) so the
-  companion column name can be specified explicitly. This also fixes a
-  bug where the swap-detection SQL referenced unresolved
-  `{col_forename}` and `{col_surname}` variables at runtime.
+  accepts a `surname` argument (default `'surname'`) so the companion
+  column name can be specified explicitly. This also fixes a bug where
+  the swap-detection SQL referenced unresolved `{col_forename}` and
+  `{col_surname}` variables at runtime.
 - [`cl_zip_code()`](http://christophertkenny.com/irelink/reference/cl_zip_code.md)
-  is a new domain comparison for US ZIP codes with levels for exact
-  match, 5-digit prefix (ZIP+4 normalization), and 3-digit Sectional
-  Center Facility prefix.
+  is a domain comparison for US ZIP codes with levels for exact match,
+  5-digit prefix (ZIP+4 normalization), and 3-digit Sectional Center
+  Facility prefix.
 - [`cl_damerau_levenshtein()`](http://christophertkenny.com/irelink/reference/cl_damerau_levenshtein.md),
   [`cl_dob()`](http://christophertkenny.com/irelink/reference/cl_dob.md),
   [`cl_email()`](http://christophertkenny.com/irelink/reference/cl_email.md),
@@ -48,9 +48,9 @@ probabilistic record linkage engine into idiomatic R.
   [`cl_name()`](http://christophertkenny.com/irelink/reference/cl_name.md),
   and
   [`cl_postcode()`](http://christophertkenny.com/irelink/reference/cl_postcode.md)
-  now accept `term_frequency = TRUE` to apply Fellegi-Sunter
-  term-frequency adjustments at the highest comparison level, giving
-  rare values higher match weights than common ones.
+  accept `term_frequency = TRUE` to apply Fellegi-Sunter term-frequency
+  adjustments at the highest comparison level, giving rare values higher
+  match weights than common ones.
 - [`cl_exact()`](http://christophertkenny.com/irelink/reference/cl_exact.md)
   for exact matches.
 - [`cl_jaro_winkler()`](http://christophertkenny.com/irelink/reference/cl_jaro_winkler.md)
@@ -121,20 +121,19 @@ probabilistic record linkage engine into idiomatic R.
 ### Data exploration
 
 - [`il_profile()`](http://christophertkenny.com/irelink/reference/il_profile.md)
-  now accepts raw SQL expressions as character strings in addition to
-  bare column names (e.g.,
+  accepts raw SQL expressions as character strings in addition to bare
+  column names (e.g.,
   `il_profile(df, "city || left(first_name, 1)", con = con)`). The
   expression is passed directly to the database `GROUP BY`, matching the
   behaviour of splink’s `column_expressions` argument.
 
 ### Prediction
 
-- [`predict()`](https://rdrr.io/r/stats/predict.html) now supports
+- [`predict()`](https://rdrr.io/r/stats/predict.html) supports
   `include_fields = TRUE` when `collect = FALSE`. The original field
   values are joined into the in-database scored-pairs table before
   `__il_predicted` is created, so field columns are available without a
-  separate R-side join. Previously `include_fields` was silently ignored
-  on the lazy path.
+  separate R-side join.
 
 ### SQL backends and persistence
 
@@ -143,7 +142,12 @@ probabilistic record linkage engine into idiomatic R.
 - [`il_deterministic_link()`](http://christophertkenny.com/irelink/reference/il_deterministic_link.md)
   performs exact-match linking without training.
 - [`il_save()`](http://christophertkenny.com/irelink/reference/il_save.md)
-  serialises a trained model to JSON for later reuse.
+  and
+  [`il_load()`](http://christophertkenny.com/irelink/reference/il_load.md)
+  use R’s native RDS format instead of JSON. RDS handles nested R
+  objects (comparison levels, transforms, tibble params) without any
+  lossy type coercion, removing the reconstruction code that was
+  required for JSON round-trips.
 - [`il_cleanup()`](http://christophertkenny.com/irelink/reference/il_cleanup.md)
   removes temporary tables from the database.
 

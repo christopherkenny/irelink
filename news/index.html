@@ -19,9 +19,12 @@
 <li class="nav-item"><a class="nav-link" href="../reference/index.html">Reference</a></li>
 <li class="nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
-  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><a class="dropdown-item" href="../articles/deduplication.html">Deduplication with Evaluation</a></li>
-    <li><a class="dropdown-item" href="../articles/from_splink.html">Translating from Splink</a></li>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles"><li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Vignettes</h6></li>
+    <li><a class="dropdown-item" href="../articles/deduplication.html">Deduplication with Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/record-linkage.html">Record Linkage Across Datasets</a></li>
+    <li><a class="dropdown-item" href="../articles/from_splink.html">Translating from Splink</a></li>
+    <li><a class="dropdown-item" href="../articles/advanced.html">Advanced Workflows</a></li>
   </ul></li>
 <li class="active nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
       </ul><ul class="navbar-nav"><li class="nav-item"><form class="form-inline" role="search">
@@ -54,13 +57,13 @@
 <div class="section level3">
 <h3 id="comparison-library-0-0-0-9000">Comparison library<a class="anchor" aria-label="anchor" href="#comparison-library-0-0-0-9000"></a></h3>
 <ul><li>
-<code><a href="../reference/cl_first_last_name.html">cl_first_last_name()</a></code> is a new American-English alias for <code><a href="../reference/cl_forename_surname.html">cl_forename_surname()</a></code>. Both accept a companion column argument (<code>last_name</code> / <code>surname</code>) and a <code>term_frequency</code> flag.</li>
+<code><a href="../reference/cl_first_last_name.html">cl_first_last_name()</a></code> is an American-English alias for <code><a href="../reference/cl_forename_surname.html">cl_forename_surname()</a></code>. Both accept a companion column argument (<code>last_name</code> / <code>surname</code>) and a <code>term_frequency</code> flag.</li>
 <li>
-<code><a href="../reference/cl_forename_surname.html">cl_forename_surname()</a></code> now accepts a <code>surname</code> argument (default <code>'surname'</code>) so the companion column name can be specified explicitly. This also fixes a bug where the swap-detection SQL referenced unresolved <code>{col_forename}</code> and <code>{col_surname}</code> variables at runtime.</li>
+<code><a href="../reference/cl_forename_surname.html">cl_forename_surname()</a></code> accepts a <code>surname</code> argument (default <code>'surname'</code>) so the companion column name can be specified explicitly. This also fixes a bug where the swap-detection SQL referenced unresolved <code>{col_forename}</code> and <code>{col_surname}</code> variables at runtime.</li>
 <li>
-<code><a href="../reference/cl_zip_code.html">cl_zip_code()</a></code> is a new domain comparison for US ZIP codes with levels for exact match, 5-digit prefix (ZIP+4 normalization), and 3-digit Sectional Center Facility prefix.</li>
+<code><a href="../reference/cl_zip_code.html">cl_zip_code()</a></code> is a domain comparison for US ZIP codes with levels for exact match, 5-digit prefix (ZIP+4 normalization), and 3-digit Sectional Center Facility prefix.</li>
 <li>
-<code><a href="../reference/cl_damerau_levenshtein.html">cl_damerau_levenshtein()</a></code>, <code><a href="../reference/cl_dob.html">cl_dob()</a></code>, <code><a href="../reference/cl_email.html">cl_email()</a></code>, <code><a href="../reference/cl_jaro.html">cl_jaro()</a></code>, <code><a href="../reference/cl_jaro_winkler.html">cl_jaro_winkler()</a></code>, <code><a href="../reference/cl_levenshtein.html">cl_levenshtein()</a></code>, <code><a href="../reference/cl_levels.html">cl_levels()</a></code>, <code><a href="../reference/cl_name.html">cl_name()</a></code>, and <code><a href="../reference/cl_postcode.html">cl_postcode()</a></code> now accept <code>term_frequency = TRUE</code> to apply Fellegi-Sunter term-frequency adjustments at the highest comparison level, giving rare values higher match weights than common ones.</li>
+<code><a href="../reference/cl_damerau_levenshtein.html">cl_damerau_levenshtein()</a></code>, <code><a href="../reference/cl_dob.html">cl_dob()</a></code>, <code><a href="../reference/cl_email.html">cl_email()</a></code>, <code><a href="../reference/cl_jaro.html">cl_jaro()</a></code>, <code><a href="../reference/cl_jaro_winkler.html">cl_jaro_winkler()</a></code>, <code><a href="../reference/cl_levenshtein.html">cl_levenshtein()</a></code>, <code><a href="../reference/cl_levels.html">cl_levels()</a></code>, <code><a href="../reference/cl_name.html">cl_name()</a></code>, and <code><a href="../reference/cl_postcode.html">cl_postcode()</a></code> accept <code>term_frequency = TRUE</code> to apply Fellegi-Sunter term-frequency adjustments at the highest comparison level, giving rare values higher match weights than common ones.</li>
 <li>
 <code><a href="../reference/cl_exact.html">cl_exact()</a></code> for exact matches.</li>
 <li>
@@ -113,12 +116,12 @@
 <div class="section level3">
 <h3 id="data-exploration-0-0-0-9000">Data exploration<a class="anchor" aria-label="anchor" href="#data-exploration-0-0-0-9000"></a></h3>
 <ul><li>
-<code><a href="../reference/il_profile.html">il_profile()</a></code> now accepts raw SQL expressions as character strings in addition to bare column names (e.g., <code>il_profile(df, "city || left(first_name, 1)", con = con)</code>). The expression is passed directly to the database <code>GROUP BY</code>, matching the behaviour of splink’s <code>column_expressions</code> argument.</li>
+<code><a href="../reference/il_profile.html">il_profile()</a></code> accepts raw SQL expressions as character strings in addition to bare column names (e.g., <code>il_profile(df, "city || left(first_name, 1)", con = con)</code>). The expression is passed directly to the database <code>GROUP BY</code>, matching the behaviour of splink’s <code>column_expressions</code> argument.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="prediction-0-0-0-9000">Prediction<a class="anchor" aria-label="anchor" href="#prediction-0-0-0-9000"></a></h3>
 <ul><li>
-<code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> now supports <code>include_fields = TRUE</code> when <code>collect = FALSE</code>. The original field values are joined into the in-database scored-pairs table before <code>__il_predicted</code> is created, so field columns are available without a separate R-side join. Previously <code>include_fields</code> was silently ignored on the lazy path.</li>
+<code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> supports <code>include_fields = TRUE</code> when <code>collect = FALSE</code>. The original field values are joined into the in-database scored-pairs table before <code>__il_predicted</code> is created, so field columns are available without a separate R-side join.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="sql-backends-and-persistence-0-0-0-9000">SQL backends and persistence<a class="anchor" aria-label="anchor" href="#sql-backends-and-persistence-0-0-0-9000"></a></h3>
@@ -126,7 +129,7 @@
 <li>
 <code><a href="../reference/il_deterministic_link.html">il_deterministic_link()</a></code> performs exact-match linking without training.</li>
 <li>
-<code><a href="../reference/il_save.html">il_save()</a></code> serialises a trained model to JSON for later reuse.</li>
+<code><a href="../reference/il_save.html">il_save()</a></code> and <code><a href="../reference/il_load.html">il_load()</a></code> use R’s native RDS format instead of JSON. RDS handles nested R objects (comparison levels, transforms, tibble params) without any lossy type coercion, removing the reconstruction code that was required for JSON round-trips.</li>
 <li>
 <code><a href="../reference/il_cleanup.html">il_cleanup()</a></code> removes temporary tables from the database.</li>
 </ul></div>

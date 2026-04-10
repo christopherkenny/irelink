@@ -218,7 +218,7 @@ Explore and summarise input data before linkage.
 Save, load, and manage linkage models and resources.
 
 - [`il_save()`](http://christophertkenny.com/irelink/reference/il_save.md)
-  : Save a model to disk
+  : Save a Model to Disk
 - [`il_load()`](http://christophertkenny.com/irelink/reference/il_load.md)
   : Load a Saved Model
 - [`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md)

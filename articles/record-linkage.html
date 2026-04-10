@@ -34,9 +34,12 @@
 <li class="active nav-item dropdown">
   <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
   <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
-<li><a class="dropdown-item" href="../articles/deduplication.html">Deduplication with Evaluation</a></li>
-    <li><a class="dropdown-item" href="../articles/from_splink.html">Translating from Splink</a></li>
+<li><hr class="dropdown-divider"></li>
+    <li><h6 class="dropdown-header" data-toc-skip>Vignettes</h6></li>
+    <li><a class="dropdown-item" href="../articles/deduplication.html">Deduplication with Evaluation</a></li>
     <li><a class="dropdown-item" href="../articles/record-linkage.html">Record Linkage Across Datasets</a></li>
+    <li><a class="dropdown-item" href="../articles/from_splink.html">Translating from Splink</a></li>
+    <li><a class="dropdown-item" href="../articles/advanced.html">Advanced Workflows</a></li>
   </ul>
 </li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -254,12 +257,12 @@ matching:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 43        cluster_43 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 218       cluster_218</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 299       cluster_299</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 488       cluster_488</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 595       cluster_348</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 606       cluster_606</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 20        cluster_20 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 419       cluster_330</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 661       cluster_192</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 98        cluster_707</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 722       cluster_393</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 640       cluster_640</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>

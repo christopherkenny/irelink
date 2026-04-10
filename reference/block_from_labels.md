@@ -37,7 +37,10 @@ caught), and `n_matches_caught`.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-block_from_labels(df, labels, con = con)
-} # }
+con <- DBI::dbConnect(duckdb::duckdb())
+block_from_labels(fake_1000, fake_1000_labels, con = con)
+#> Warning: Unknown or uninitialised column: `is_match`.
+#> Error in labels[as.logical(labels$is_match), , drop = FALSE]: Can't subset rows with `as.logical(labels$is_match)`.
+#> ✖ Logical subscript `as.logical(labels$is_match)` must be size 1 or 3176, not 0.
+DBI::dbDisconnect(con, shutdown = TRUE)
 ```
