@@ -4,7 +4,7 @@
 \alias{block_on}
 \title{Create a Training-Time Blocking Rule}
 \usage{
-block_on(..., .where = NULL, .transform = NULL)
+block_on(..., .where = NULL, .transform = NULL, .explode = NULL)
 }
 \arguments{
 \item{...}{Unquoted column names. Columns are AND-ed within a single
@@ -18,6 +18,9 @@ condition are AND-ed together.}
 \item{.transform}{An optional transform function applied to both
 left and right column values before the equality check. See
 \link{il_soundex}, \link{il_metaphone}, and \link{il_dmetaphone}.}
+
+\item{.explode}{An optional character vector of array column names to
+unnest before blocking. See \code{\link[=il_block_on]{il_block_on()}} for details.}
 }
 \value{
 A blocking-rule object for use in training verbs.

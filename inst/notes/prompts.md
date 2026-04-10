@@ -550,3 +550,46 @@ Write up your research and a summary of findings in `inst/refs/23-phonetics.md`
 
 Can you examine the stage updates in inst/ for this project and identify points of weakness relative to splink?
 Please identify and fix the biggest gaps.
+
+
+## ggplot2 polish (Sonnet 4.6 medium)
+
+We are working on an R package.
+I want you to scan the autoplot functions (don't worry about the rest of the package) and identify places where we've set scales or themes.
+We need to standardize this into a light touch.
+Strip things which change from defaults without a clear purpose.
+Keep theming as minimal.
+
+## Comparison check (Opus 4.6 high)
+
+Perform a deep dive comparison between this package (irelink) and splink (../splink).
+This package is a derivative.
+We want to ensure that all features of splink are incorporated here.
+If there are improvements here that are not in splink, note those.
+
+Prepare a detailed writeup with notes on any missing features in `inst/refs/28-comparison.md`.
+Include relevant paths and links to the source of the differences.
+
+### Follow-up (Opus 4.6 high)
+
+Implement all high priority gaps.
+
+Update the `inst/refs/28-comparison.md` document with notes on how it was resolved.
+Mark the tables as resolved once they are fixed, too.
+
+## linting (Opus 4.6 high)
+
+Run `jarl check .` to use the jarl linter.
+A large number of lints indicate the unnecessary use of `:::`.
+Drop those, as `testthat` makes internal functions available for testing.
+
+Then, for each remaining piece, identify what the best course of action is.
+Fix small lints first.
+
+Next, refer back to the `inst/refs` folder for functions which are defined but unused.
+Identify what their purpose is and why they were written.
+If a function should be used, find out where it is missing.
+If it should be removed, do so but only hesistantly.
+Be very sure before removal.
+
+Then provide a detailed writeup with notes in `inst/refs/29-linting.md`.

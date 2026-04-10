@@ -7,6 +7,7 @@
 \method{predict}{il_model}(
   object,
   threshold = 0.85,
+  threshold_match_weight = NULL,
   type = c("pairs", "weights"),
   collect = TRUE,
   include_fields = FALSE,
@@ -18,7 +19,12 @@
 
 \item{threshold}{A numeric value between 0 and 1. Only pairs with a
 match probability at or above this threshold are returned. Defaults
-to \code{0.85}.}
+to \code{0.85}. Ignored when \code{threshold_match_weight} is set.}
+
+\item{threshold_match_weight}{Optional numeric value. When set, pairs
+are filtered on match weight (log₂ Bayes factor) instead of
+probability. Typical values range from about −5 to +30. Overrides
+\code{threshold}.}
 
 \item{type}{One of \code{"pairs"} (default) to return scored pairs, or
 \code{"weights"} to return match weights on a log-2 Bayes-factor scale.}

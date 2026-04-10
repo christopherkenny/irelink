@@ -128,12 +128,16 @@ graph_metrics_sql <- function(con, pairs, clusters) {
     density = clusters_raw$density
   )
 
-  # Edge-level (just pass through)
+  # Edge-level (compute bridges via igraph, merge back)
   edges <- tibble::tibble(
     unique_id_l = as.character(pairs$unique_id_l),
     unique_id_r = as.character(pairs$unique_id_r),
     match_probability = pairs$match_probability,
-    match_weight = pairs$match_weight
+    match_weight = pairs$match_weight,
+    is_bridge = compute_bridges(
+      as.character(pairs$unique_id_l),
+      as.character(pairs$unique_id_r)
+    )
   )
 
   # Clean up
@@ -166,10 +170,9 @@ graph_metrics_r <- function(pairs, clusters) {
     unique_id_l = edge_ids_l,
     unique_id_r = edge_ids_r,
     match_probability = pairs$match_probability,
-    match_weight = pairs$match_weight
+    match_weight = pairs$match_weight,
+    is_bridge = compute_bridges(edge_ids_l, edge_ids_r)
   )
-
-  # Cluster-level metrics
   cluster_ids <- unique(clusters$cluster_id)
   n_nodes_vec <- integer(length(cluster_ids))
   n_edges_vec <- integer(length(cluster_ids))
@@ -197,4 +200,32 @@ graph_metrics_r <- function(pairs, clusters) {
   )
 
   list(nodes = nodes, edges = edges, clusters = cluster_tbl)
+}
+
+#' Compute bridge flags for edges
+#'
+#' Uses igraph to identify bridge edges — edges whose removal would
+#' disconnect the graph.
+#'
+#' @param id_l,id_r Character vectors of edge endpoints.
+#' @return Logical vector of the same length, TRUE for bridge edges.
+#' @noRd
+compute_bridges <- function(id_l, id_r) {
+  n <- length(id_l)
+  if (n == 0L) return(logical(0))
+
+  if (!requireNamespace('igraph', quietly = TRUE)) {
+    cli::cli_warn(
+      'Package {.pkg igraph} is needed for bridge detection. Returning {.val FALSE} for all edges.'
+    )
+    return(rep(FALSE, n))
+  }
+
+  el <- data.frame(from = id_l, to = id_r, stringsAsFactors = FALSE)
+  g <- igraph::graph_from_data_frame(el, directed = FALSE)
+  bridge_ids <- igraph::bridges(g)
+
+  is_bridge <- rep(FALSE, n)
+  is_bridge[bridge_ids] <- TRUE
+  is_bridge
 }

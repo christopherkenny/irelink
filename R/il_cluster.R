@@ -15,6 +15,12 @@
 #'   the record with the smaller `unique_id`; `"drop"` removes all edges
 #'   where the best-link probability is tied.
 #'
+#' @param source_dataset An optional named character vector or data frame
+#'   mapping `unique_id` values to their source dataset name. Used with
+#'   `method = "best_link"` to enforce at-most-one-record per source
+#'   dataset per cluster (splink's `duplicate_free_datasets` constraint).
+#'   If a data frame, must contain columns `unique_id` and `source_dataset`.
+#'
 #' @return A tibble with one row per input record, including a
 #'   `cluster_id` column.
 #' @export
@@ -73,13 +79,24 @@
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_cluster <- function(pairs, threshold = NULL,
                        method = c('connected', 'best_link'),
-                       ties_method = c('lowest_id', 'drop')) {
+                       ties_method = c('lowest_id', 'drop'),
+                       source_dataset = NULL) {
   method <- match.arg(method)
   ties_method <- match.arg(ties_method)
 
+  # Normalise source_dataset to a named character vector
+  source_dataset <- normalise_source_dataset(source_dataset)
+
+  if (!is.null(source_dataset) && method != 'best_link') {
+    cli::cli_warn(
+      '{.arg source_dataset} is only used with {.code method = "best_link"}. Ignoring.'
+    )
+    source_dataset <- NULL
+  }
+
   # Lazy path: pairs are still in the database
   if (inherits(pairs, 'il_compared_lazy')) {
-    return(cluster_lazy(pairs, threshold, method, ties_method))
+    return(cluster_lazy(pairs, threshold, method, ties_method, source_dataset))
   }
 
   if (nrow(pairs) == 0L) {
@@ -93,19 +110,24 @@ il_cluster <- function(pairs, threshold = NULL,
     detect_dialect(con) %in% c('duckdb', 'postgres')
 
   if (use_sql) {
-    return(cluster_sql(con, pairs, threshold, method, ties_method))
+    return(cluster_sql(con, pairs, threshold, method, ties_method, source_dataset))
   }
 
   # Fallback: igraph (works for SQLite or when no connection available)
-  cluster_igraph(pairs, threshold, method, ties_method)
+  cluster_igraph(pairs, threshold, method, ties_method, source_dataset)
 }
 
 #' SQL-path clustering (DuckDB/PostgreSQL)
 #' @noRd
-cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id') {
+cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id',
+                       source_dataset = NULL) {
   edges_tbl <- cc_upload_edges(con, pairs, threshold = threshold)
 
   if (method == 'best_link') {
+    if (!is.null(source_dataset)) {
+      # Remove edges where both endpoints are from the same source dataset
+      edges_tbl <- sql_filter_same_source(con, edges_tbl, source_dataset)
+    }
     filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method)
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
     DBI::dbExecute(con, glue::glue(
@@ -142,7 +164,8 @@ cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id'
 
 #' igraph-path clustering (fallback for SQLite or no DB connection)
 #' @noRd
-cluster_igraph <- function(pairs, threshold, method, ties_method = 'lowest_id') {
+cluster_igraph <- function(pairs, threshold, method, ties_method = 'lowest_id',
+                          source_dataset = NULL) {
   rlang::check_installed('igraph', reason = 'for clustering without a DuckDB or PostgreSQL connection.')
 
   all_ids <- unique(c(
@@ -155,6 +178,9 @@ cluster_igraph <- function(pairs, threshold, method, ties_method = 'lowest_id') 
   }
 
   if (method == 'best_link') {
+    if (!is.null(source_dataset)) {
+      pairs <- filter_same_source(pairs, source_dataset)
+    }
     pairs <- best_link_filter(pairs, ties_method)
   }
 
@@ -256,7 +282,8 @@ best_link_filter <- function(pairs, ties_method = 'lowest_id') {
 
 #' Cluster directly from a lazy prediction table (no round-trip)
 #' @noRd
-cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id') {
+cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
+                        source_dataset = NULL) {
   con <- pairs$con
   predicted_tbl <- pairs$predicted_tbl
 
@@ -276,6 +303,9 @@ cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id') {
   ))
 
   if (method == 'best_link') {
+    if (!is.null(source_dataset)) {
+      edges_tbl <- sql_filter_same_source(con, edges_tbl, source_dataset)
+    }
     filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method)
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
     DBI::dbExecute(con, glue::glue(
@@ -311,4 +341,70 @@ cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id') {
     unique_id = result$node_id,
     cluster_id = result$cluster_id
   )
+}
+
+#' Normalise source_dataset argument to a named character vector
+#' @noRd
+normalise_source_dataset <- function(sd) {
+  if (is.null(sd)) return(NULL)
+  if (is.data.frame(sd)) {
+    if (!all(c('unique_id', 'source_dataset') %in% names(sd))) {
+      cli::cli_abort(
+        '{.arg source_dataset} data frame must contain columns {.val unique_id} and {.val source_dataset}.'
+      )
+    }
+    out <- as.character(sd$source_dataset)
+    names(out) <- as.character(sd$unique_id)
+    return(out)
+  }
+  if (is.character(sd) && !is.null(names(sd))) {
+    return(sd)
+  }
+  cli::cli_abort(
+    '{.arg source_dataset} must be a named character vector or a data frame with columns {.val unique_id} and {.val source_dataset}.'
+  )
+}
+
+#' R-path: filter edges where both endpoints are from the same source dataset
+#' @noRd
+filter_same_source <- function(pairs, source_dataset) {
+  id_l <- as.character(pairs$unique_id_l)
+  id_r <- as.character(pairs$unique_id_r)
+  src_l <- source_dataset[id_l]
+  src_r <- source_dataset[id_r]
+  keep <- is.na(src_l) | is.na(src_r) | src_l != src_r
+  pairs[keep, , drop = FALSE]
+}
+
+#' SQL-path: filter edges where both endpoints are from the same source
+#' @noRd
+sql_filter_same_source <- function(con, edges_tbl, source_dataset) {
+  sd_tbl <- cc_tbl('source_ds')
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {sd_tbl}'))
+  sd_df <- data.frame(
+    unique_id = names(source_dataset),
+    source_dataset = unname(source_dataset),
+    stringsAsFactors = FALSE
+  )
+  DBI::dbWriteTable(con, sd_tbl, sd_df)
+
+  filtered_tbl <- cc_tbl('edges_ds_filtered')
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {filtered_tbl}'))
+  DBI::dbExecute(con, glue::glue(
+    'CREATE TABLE {filtered_tbl} AS ',
+    'SELECT e.unique_id_l, e.unique_id_r, e.match_probability ',
+    'FROM {edges_tbl} e ',
+    'LEFT JOIN {sd_tbl} sl ON e.unique_id_l = sl.unique_id ',
+    'LEFT JOIN {sd_tbl} sr ON e.unique_id_r = sr.unique_id ',
+    'WHERE sl.source_dataset IS NULL OR sr.source_dataset IS NULL ',
+    'OR sl.source_dataset != sr.source_dataset'
+  ))
+
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {sd_tbl}'))
+  DBI::dbExecute(con, glue::glue(
+    'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
+  ))
+
+  edges_tbl
 }

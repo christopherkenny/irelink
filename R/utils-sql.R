@@ -1,6 +1,24 @@
 # Internal SQL generation functions for comparison levels, blocking rules,
 # and join conditions. Not exported.
 
+#' Convert a time-diff threshold + unit to total seconds
+#' @param value Numeric threshold value.
+#' @param unit Character unit (seconds, minutes, hours, days, months, years).
+#' @return Numeric value in seconds.
+#' @noRd
+time_diff_to_seconds <- function(value, unit) {
+  mult <- switch(unit,
+    'seconds' = 1,
+    'minutes' = 60,
+    'hours'   = 3600,
+    'days'    = 86400,
+    'months'  = 86400 * 30,
+    'years'   = 86400 * 365,
+    1
+  )
+  value * mult
+}
+
 #' Detect the SQL dialect from a DBI connection
 #' @param con A DBI connection object.
 #' @return A character string: "duckdb", "sqlite", or "generic".
@@ -41,6 +59,15 @@ sql_transform_col <- function(col_ref, transform, dialect = NULL) {
   if (is.null(transform)) {
     return(col_ref)
   }
+  # Transform chains: apply each step, nesting inside-out
+  if (is_transform_chain(transform)) {
+    fns <- attr(transform, 'transforms')
+    result <- col_ref
+    for (fn in fns) {
+      result <- sql_transform_col(result, fn, dialect)
+    }
+    return(result)
+  }
   # Phonetic transforms need special handling (dialect-dependent, some
   # have multi-arg SQL signatures)
   phonetic_sql <- phonetic_transform_sql(transform, col_ref, dialect)
@@ -72,12 +99,24 @@ transform_to_sql_fn <- function(transform) {
 #' Can this transform be translated to SQL?
 #' @noRd
 transform_has_sql <- function(transform) {
+  if (is_transform_chain(transform)) {
+    return(all(vapply(attr(transform, 'transforms'), transform_has_sql, logical(1))))
+  }
   !is.null(transform_to_sql_fn(transform)) || is_phonetic_transform(transform)
 }
 
 #' Map an R function to a serializable name
 #' @noRd
 transform_to_name <- function(transform) {
+  if (is_transform_chain(transform)) {
+    names <- vapply(attr(transform, 'transforms'), transform_to_name,
+                    character(1))
+    if (any(is.na(names))) {
+      cli::cli_warn('Custom transform in chain cannot be serialized; it will be lost on save/load.')
+      return(NA_character_)
+    }
+    return(paste(names, collapse = ' -> '))
+  }
   if (identical(transform, tolower)) {
     return('tolower')
   }
@@ -273,6 +312,23 @@ sql_gamma_case <- function(comp, dialect) {
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
+  if (method == 'time_diff') {
+    n <- length(thresholds)
+    whens <- vapply(seq_along(thresholds), function(i) {
+      secs_val <- time_diff_to_seconds(thresholds[i], level$units[i])
+      if (dialect == 'duckdb') {
+        glue::glue(
+          'WHEN {null_guard} AND ABS(EPOCH(CAST({lcol} AS TIMESTAMP)) - EPOCH(CAST({rcol} AS TIMESTAMP))) <= {secs_val} THEN {n - i + 1L}'
+        )
+      } else {
+        glue::glue(
+          'WHEN {null_guard} AND ABS(EXTRACT(EPOCH FROM (CAST({lcol} AS TIMESTAMP) - CAST({rcol} AS TIMESTAMP)))) <= {secs_val} THEN {n - i + 1L}'
+        )
+      }
+    }, character(1))
+    return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
+  }
+
   if (method == 'soundex') {
     soundex_fn <- if (identical(dialect, 'duckdb')) 'il_soundex' else 'soundex'
     return(glue::glue(
@@ -359,6 +415,14 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
       return(glue::glue('{null_guard} AND ABS(CAST({lcol} AS DATE) - CAST({rcol} AS DATE)) <= {days_val}'))
     }
     return(glue::glue('{null_guard} AND ABS(JULIANDAY({lcol}) - JULIANDAY({rcol})) <= {days_val}'))
+  }
+  if (method == 'time_diff') {
+    t <- sub$thresholds[1]
+    secs_val <- time_diff_to_seconds(t, sub$units[1])
+    if (dialect == 'duckdb') {
+      return(glue::glue('{null_guard} AND ABS(EPOCH(CAST({lcol} AS TIMESTAMP)) - EPOCH(CAST({rcol} AS TIMESTAMP))) <= {secs_val}'))
+    }
+    return(glue::glue('{null_guard} AND ABS(EXTRACT(EPOCH FROM (CAST({lcol} AS TIMESTAMP) - CAST({rcol} AS TIMESTAMP)))) <= {secs_val}'))
   }
   if (method == 'soundex') {
     soundex_fn <- if (identical(dialect, 'duckdb')) 'il_soundex' else 'soundex'
@@ -476,9 +540,11 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL) {
           transform = br$transform,
           dialect = dialect
         )
+        from_l <- sql_explode_from(tp$from_l, br$explode, dialect)
+        from_r <- sql_explode_from(tp$from_r, br$explode, dialect)
         glue::glue(
           '{select_prefix}',
-          'FROM {tp$from_l} l, {tp$from_r} r ',
+          'FROM {from_l} l, {from_r} r ',
           'WHERE {tp$join_cond} AND {cond}'
         )
       }, character(1))
@@ -511,6 +577,47 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL) {
 #' For dedupe: one combo (tbl × tbl with id inequality).
 #' For link: one combo (tbl_l × tbl_r, no dedup guard needed).
 #' For link_and_dedupe: three combos (cross + within-left + within-right).
+#'
+#' Wrap a table reference with UNNEST for exploding array columns
+#'
+#' When `explode_cols` is NULL or empty, returns the table name unchanged.
+#' Otherwise returns a subquery that unnests the specified array columns.
+#'
+#' @param tbl Table name.
+#' @param explode_cols Character vector of array column names, or NULL.
+#' @param dialect SQL dialect string.
+#' @return A SQL FROM fragment (either a table name or a parenthesised subquery).
+#' @noRd
+sql_explode_from <- function(tbl, explode_cols, dialect) {
+  if (is.null(explode_cols) || length(explode_cols) == 0L) {
+    return(tbl)
+  }
+  if (dialect == 'duckdb') {
+    exclude_clause <- paste0(explode_cols, collapse = ', ')
+    unnest_exprs <- paste0('UNNEST(', explode_cols, ') AS ', explode_cols,
+                           collapse = ', ')
+    return(glue::glue(
+      '(SELECT * EXCLUDE ({exclude_clause}), {unnest_exprs} FROM {tbl})'
+    ))
+  }
+  if (dialect == 'postgres') {
+    # PostgreSQL: CROSS JOIN LATERAL UNNEST for each array column
+    laterals <- vapply(explode_cols, function(col) {
+      glue::glue(
+        'CROSS JOIN LATERAL UNNEST({col}) AS _unnest_{col}({col})'
+      )
+    }, character(1))
+    return(glue::glue(
+      '(SELECT * FROM {tbl} {paste(laterals, collapse = " ")})'
+    ))
+  }
+  cli::cli_warn(
+    '{.arg .explode} is not supported for SQLite; ignoring array explosion.'
+  )
+  tbl
+}
+
+#' Build the set of (left_table, right_table, join_condition) combos
 #'
 #' @param tbl_l Left table name.
 #' @param tbl_r Right table name.
@@ -636,6 +743,19 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
       )
       parts[i] <- glue::glue(
         'WHEN ABS(JULIANDAY(l.{col}) - JULIANDAY(r.{col})) <= {days_val} THEN {i}'
+      )
+    }
+    return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
+  }
+
+  if (method == 'time_diff') {
+    thresholds <- level$thresholds
+    units <- level$units
+    parts <- character(length(thresholds))
+    for (i in seq_along(thresholds)) {
+      secs_val <- time_diff_to_seconds(thresholds[i], units[i])
+      parts[i] <- glue::glue(
+        'WHEN ABS(EPOCH(CAST(l.{col} AS TIMESTAMP)) - EPOCH(CAST(r.{col} AS TIMESTAMP))) <= {secs_val} THEN {i}'
       )
     }
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
@@ -837,7 +957,8 @@ sql_tf_adj_expr <- function(col, max_level, u_exact) {
 #' @param threshold Numeric match-probability threshold.
 #' @return A SQL query string.
 #' @noRd
-build_scored_query <- function(model, threshold = 0.85) {
+build_scored_query <- function(model, threshold = 0.85,
+                              threshold_match_weight = NULL) {
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
   prior <- model$params$prior %||% 0.05
@@ -891,6 +1012,15 @@ build_scored_query <- function(model, threshold = 0.85) {
     outer_tf_adj <- paste0(', ', paste0('tf_adj_', tf_col_names, collapse = ', '))
   }
 
+  # Choose filter: match_weight threshold or match_probability threshold
+  if (!is.null(threshold_match_weight)) {
+    where_clause <- glue::glue('WHERE match_weight >= {threshold_match_weight}')
+  } else {
+    where_clause <- glue::glue(
+      'WHERE 1.0 / (1.0 + EXP(-({log_prior_odds} + match_weight * {ln2}))) >= {threshold}'
+    )
+  }
+
   # Two-level nesting:
   #   Inner: gamma query + match_weight + tf_adj columns
   #   Outer: match_probability + threshold filter
@@ -905,7 +1035,7 @@ build_scored_query <- function(model, threshold = 0.85) {
     '({weight_expr}) AS match_weight ',
     'FROM ({gamma_sql}) AS gamma_pairs',
     ') AS weighted_pairs ',
-    'WHERE 1.0 / (1.0 + EXP(-({log_prior_odds} + match_weight * {ln2}))) >= {threshold}'
+    '{where_clause}'
   )
 }
 

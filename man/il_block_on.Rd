@@ -4,7 +4,7 @@
 \alias{il_block_on}
 \title{Add a Prediction Blocking Rule}
 \usage{
-il_block_on(spec, ..., .where = NULL, .transform = NULL)
+il_block_on(spec, ..., .where = NULL, .transform = NULL, .explode = NULL)
 }
 \arguments{
 \item{spec}{An \code{il_spec} object (piped in).}
@@ -19,6 +19,11 @@ conditions. Defaults to \code{NULL}.}
 left and right column values before the equality check. Useful
 for phonetic blocking — see \link{il_soundex}, \link{il_metaphone}, and
 \link{il_dmetaphone}.}
+
+\item{.explode}{An optional character vector of column names containing
+arrays (list columns) to unnest before blocking. Each array element
+becomes a separate row for the blocking join. Requires a DuckDB or
+PostgreSQL backend. Defaults to \code{NULL}.}
 }
 \value{
 An updated \code{il_spec} (a new copy; the input is not modified).
@@ -43,4 +48,8 @@ spec <- il_spec() |>
 # Phonetic blocking: group similar-sounding names
 spec <- il_spec() |>
   il_block_on(first_name, .transform = il_soundex)
+
+# Explode array columns before blocking
+spec <- il_spec() |>
+  il_block_on(email, .explode = 'email')
 }

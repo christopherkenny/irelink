@@ -119,3 +119,57 @@ test_that('il_graph_metrics() computes cluster density', {
   cluster_a <- metrics$clusters[metrics$clusters$cluster_id == 'A', ]
   expect_equal(cluster_a$density, 1.0, tolerance = 0.01)
 })
+
+test_that('il_graph_metrics() edges tibble contains is_bridge column', {
+  pairs <- tibble::tibble(
+    unique_id_l = c('1'),
+    unique_id_r = c('2'),
+    match_probability = 0.95,
+    match_weight = 4.25
+  )
+
+  clusters <- tibble::tibble(
+    unique_id = c('1', '2'),
+    cluster_id = c('A', 'A')
+  )
+
+  metrics <- il_graph_metrics(pairs, clusters)
+  expect_true('is_bridge' %in% names(metrics$edges))
+  expect_type(metrics$edges$is_bridge, 'logical')
+})
+
+test_that('il_graph_metrics() identifies bridge edges correctly', {
+  # Chain: 1-2-3 (edges 1-2 and 2-3 are both bridges)
+  pairs <- tibble::tibble(
+    unique_id_l = c('1', '2'),
+    unique_id_r = c('2', '3'),
+    match_probability = c(0.95, 0.90),
+    match_weight = c(4.25, 3.5)
+  )
+
+  clusters <- tibble::tibble(
+    unique_id = c('1', '2', '3'),
+    cluster_id = rep('A', 3)
+  )
+
+  metrics <- il_graph_metrics(pairs, clusters)
+  expect_true(all(metrics$edges$is_bridge))
+})
+
+test_that('il_graph_metrics() non-bridges in fully connected cluster', {
+  # Triangle: 1-2, 2-3, 1-3 — no bridges
+  pairs <- tibble::tibble(
+    unique_id_l = c('1', '2', '1'),
+    unique_id_r = c('2', '3', '3'),
+    match_probability = rep(0.95, 3),
+    match_weight = rep(4.25, 3)
+  )
+
+  clusters <- tibble::tibble(
+    unique_id = c('1', '2', '3'),
+    cluster_id = rep('A', 3)
+  )
+
+  metrics <- il_graph_metrics(pairs, clusters)
+  expect_true(!any(metrics$edges$is_bridge))
+})

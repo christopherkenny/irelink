@@ -22,13 +22,15 @@ il_string_similarity <- function(a, b) {
   }
 
   if (is.na(a) || is.na(b)) {
-    return(tibble::tibble(
+    result <- tibble::tibble(
       jaro_winkler = NA_real_,
       jaro = NA_real_,
       levenshtein = NA_integer_,
       jaccard = NA_real_,
       cosine = NA_real_
-    ))
+    )
+    class(result) <- c('il_string_similarity', class(result))
+    return(result)
   }
 
   jw <- 1 - stringdist::stringdist(a, b, method = 'jw', p = 0.1)
@@ -37,11 +39,13 @@ il_string_similarity <- function(a, b) {
   jac <- 1 - stringdist::stringdist(a, b, method = 'jaccard', q = 2)
   cos <- 1 - stringdist::stringdist(a, b, method = 'cosine', q = 2)
 
-  tibble::tibble(
+  result <- tibble::tibble(
     jaro_winkler = jw,
     jaro = j,
     levenshtein = lv,
     jaccard = jac,
     cosine = cos
   )
+  class(result) <- c('il_string_similarity', class(result))
+  result
 }

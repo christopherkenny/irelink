@@ -8,7 +8,8 @@ il_cluster(
   pairs,
   threshold = NULL,
   method = c("connected", "best_link"),
-  ties_method = c("lowest_id", "drop")
+  ties_method = c("lowest_id", "drop"),
+  source_dataset = NULL
 )
 }
 \arguments{
@@ -24,6 +25,12 @@ clustering, or \code{"best_link"} for single-best-link clustering.}
 \code{method = "best_link"}. \code{"lowest_id"} (default) keeps the edge to
 the record with the smaller \code{unique_id}; \code{"drop"} removes all edges
 where the best-link probability is tied.}
+
+\item{source_dataset}{An optional named character vector or data frame
+mapping \code{unique_id} values to their source dataset name. Used with
+\code{method = "best_link"} to enforce at-most-one-record per source
+dataset per cluster (splink's \code{duplicate_free_datasets} constraint).
+If a data frame, must contain columns \code{unique_id} and \code{source_dataset}.}
 }
 \value{
 A tibble with one row per input record, including a

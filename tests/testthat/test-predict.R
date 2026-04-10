@@ -134,3 +134,33 @@ test_that('il_compared supports dplyr verbs', {
   summary <- dplyr::summarise(pairs, n = dplyr::n(), mean_prob = mean(match_probability))
   expect_true('mean_prob' %in% names(summary))
 })
+
+test_that('predict() threshold_match_weight filters on weight', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  model <- make_trained_model(con)
+
+  pairs_all <- predict(model, threshold = 0.0)
+  # Use a weight threshold that should return fewer pairs
+  pairs_mw <- predict(model, threshold_match_weight = 0)
+
+  expect_true(nrow(pairs_all) >= nrow(pairs_mw))
+  if (nrow(pairs_mw) > 0) {
+    expect_true(all(pairs_mw$match_weight >= 0))
+  }
+})
+
+test_that('threshold_match_weight overrides probability threshold', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  model <- make_trained_model(con)
+
+  # Even with probability threshold of 0.99, weight threshold takes priority
+  pairs <- predict(model, threshold = 0.99, threshold_match_weight = -100)
+  pairs_prob <- predict(model, threshold = 0.0)
+
+  # weight threshold of -100 should include everything
+  expect_equal(nrow(pairs), nrow(pairs_prob))
+})

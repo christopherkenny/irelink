@@ -8,7 +8,11 @@
 #' @param object A trained `il_model` object.
 #' @param threshold A numeric value between 0 and 1. Only pairs with a
 #'   match probability at or above this threshold are returned. Defaults
-#'   to `0.85`.
+#'   to `0.85`. Ignored when `threshold_match_weight` is set.
+#' @param threshold_match_weight Optional numeric value. When set, pairs
+#'   are filtered on match weight (log₂ Bayes factor) instead of
+#'   probability. Typical values range from about −5 to +30. Overrides
+#'   `threshold`.
 #' @param type One of `"pairs"` (default) to return scored pairs, or
 #'   `"weights"` to return match weights on a log-2 Bayes-factor scale.
 #' @param collect If `TRUE` (the default), scored pairs are collected
@@ -83,6 +87,7 @@
 #' pairs <- predict(model, threshold = 0.5)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 predict.il_model <- function(object, threshold = 0.85,
+                             threshold_match_weight = NULL,
                              type = c('pairs', 'weights'),
                              collect = TRUE,
                              include_fields = FALSE, ...) {
@@ -101,7 +106,9 @@ predict.il_model <- function(object, threshold = 0.85,
         '{.arg collect = FALSE} requires a DuckDB or PostgreSQL backend.'
       )
     }
-    return(predict_lazy(object, threshold, include_fields = include_fields))
+    return(predict_lazy(object, threshold,
+                        threshold_match_weight = threshold_match_weight,
+                        include_fields = include_fields))
   }
 
   comparisons <- object$spec$comparisons
@@ -158,7 +165,11 @@ predict.il_model <- function(object, threshold = 0.85,
     }
   }
 
-  result <- result[result$match_probability >= threshold, , drop = FALSE]
+  if (!is.null(threshold_match_weight)) {
+    result <- result[result$match_weight >= threshold_match_weight, , drop = FALSE]
+  } else {
+    result <- result[result$match_probability >= threshold, , drop = FALSE]
+  }
   result <- tibble::as_tibble(result)
 
   if (include_fields) {
@@ -175,12 +186,15 @@ predict.il_model <- function(object, threshold = 0.85,
 #'
 #' @param model A trained il_model.
 #' @param threshold Numeric match-probability threshold.
+#' @param threshold_match_weight Optional numeric match-weight threshold.
 #' @return An `il_compared_lazy` object.
 #' @noRd
-predict_lazy <- function(model, threshold, include_fields = FALSE) {
+predict_lazy <- function(model, threshold, threshold_match_weight = NULL,
+                         include_fields = FALSE) {
   con <- model$con
   predicted_tbl <- '__il_predicted'
-  scored_sql <- build_scored_query(model, threshold)
+  scored_sql <- build_scored_query(model, threshold,
+                                   threshold_match_weight = threshold_match_weight)
   if (include_fields) {
     scored_sql <- build_fields_join_query(model, scored_sql)
   }

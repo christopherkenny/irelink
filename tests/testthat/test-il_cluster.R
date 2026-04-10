@@ -163,3 +163,60 @@ test_that('ties_method defaults to lowest_id', {
   pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
   expect_no_error(il_cluster(pairs, method = 'best_link'))
 })
+
+# --- source_dataset (duplicate_free_datasets constraint) ----------------
+
+test_that('source_dataset filters same-source edges in best_link', {
+  # A→B (cross-dataset, keep), A→C (same dataset, drop)
+  pairs <- tibble::tibble(
+    unique_id_l = c('A', 'A'),
+    unique_id_r = c('B', 'C'),
+    match_probability = c(0.9, 0.95)
+  )
+  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+
+  sd <- c(A = 'ds1', B = 'ds2', C = 'ds1')
+  clusters <- il_cluster(pairs, method = 'best_link', source_dataset = sd)
+
+  # A and C are from the same dataset, so A-C edge is dropped
+
+  # A-B should be linked, C should be in its own cluster
+  cluster_a <- clusters$cluster_id[clusters$unique_id == 'A']
+  cluster_b <- clusters$cluster_id[clusters$unique_id == 'B']
+  cluster_c <- clusters$cluster_id[clusters$unique_id == 'C']
+  expect_equal(cluster_a, cluster_b)
+  expect_false(cluster_a == cluster_c)
+})
+
+test_that('source_dataset accepts data frame input', {
+  pairs <- tibble::tibble(
+    unique_id_l = c('A'),
+    unique_id_r = c('B'),
+    match_probability = c(0.9)
+  )
+  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+
+  sd_df <- data.frame(
+    unique_id = c('A', 'B'),
+    source_dataset = c('ds1', 'ds2'),
+    stringsAsFactors = FALSE
+  )
+  clusters <- il_cluster(pairs, method = 'best_link', source_dataset = sd_df)
+  # Cross-dataset edge is kept
+  expect_equal(length(unique(clusters$cluster_id)), 1)
+})
+
+test_that('source_dataset warns when used with connected method', {
+  pairs <- tibble::tibble(
+    unique_id_l = c('A'),
+    unique_id_r = c('B'),
+    match_probability = c(0.9)
+  )
+  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+
+  sd <- c(A = 'ds1', B = 'ds2')
+  expect_warning(
+    il_cluster(pairs, method = 'connected', source_dataset = sd),
+    'source_dataset'
+  )
+})

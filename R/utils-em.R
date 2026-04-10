@@ -285,6 +285,21 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     return(gamma)
   }
 
+  if (method == 'time_diff') {
+    ts_l <- suppressWarnings(as.POSIXct(val_l))
+    ts_r <- suppressWarnings(as.POSIXct(val_r))
+    bp <- !is.na(ts_l) & !is.na(ts_r)
+    diff_secs <- abs(as.numeric(difftime(ts_l, ts_r, units = 'secs')))
+    gamma <- rep(0L, n)
+    nt <- length(thresholds)
+    for (i in rev(seq_along(thresholds))) {
+      secs_thresh <- time_diff_to_seconds(thresholds[i], comp_level$units[i])
+      level_code <- nt - i + 1L
+      gamma[bp & !is.na(diff_secs) & diff_secs <= secs_thresh] <- level_code
+    }
+    return(gamma)
+  }
+
   if (method == 'soundex') {
     sx_l <- il_soundex(as.character(val_l))
     sx_r <- il_soundex(as.character(val_r))

@@ -127,6 +127,81 @@ years <- function(n) {
   structure(list(value = n, unit = 'years'), class = 'il_years')
 }
 
+#' Create a Duration in Hours
+#'
+#' A tagged-value constructor that marks a numeric threshold as a number
+#' of hours. Use inside [cl_time_diff()] for self-documenting,
+#' unit-safe thresholds.
+#'
+#' @param n A positive numeric value.
+#'
+#' @return A tagged numeric with class `il_hours`.
+#' @export
+#'
+#' @examples
+#' il_spec() |>
+#'   il_compare(timestamp, cl_time_diff(hours(2), hours(24)))
+hours <- function(n) {
+  check_unit_input(n, 'hours')
+  structure(list(value = n, unit = 'hours'), class = 'il_hours')
+}
+
+#' Create a Duration in Minutes
+#'
+#' A tagged-value constructor that marks a numeric threshold as a number
+#' of minutes. Use inside [cl_time_diff()] for self-documenting
+#' thresholds.
+#'
+#' @param n A positive numeric value.
+#'
+#' @return A tagged numeric with class `il_minutes`.
+#' @export
+#'
+#' @examples
+#' il_spec() |>
+#'   il_compare(timestamp, cl_time_diff(minutes(5), minutes(60)))
+minutes <- function(n) {
+  check_unit_input(n, 'minutes')
+  structure(list(value = n, unit = 'minutes'), class = 'il_minutes')
+}
+
+#' Create a Duration in Seconds
+#'
+#' A tagged-value constructor that marks a numeric threshold as a number
+#' of seconds. Use inside [cl_time_diff()] for self-documenting
+#' thresholds.
+#'
+#' @param n A positive numeric value.
+#'
+#' @return A tagged numeric with class `il_seconds`.
+#' @export
+#'
+#' @examples
+#' il_spec() |>
+#'   il_compare(timestamp, cl_time_diff(seconds(30), seconds(300)))
+seconds <- function(n) {
+  check_unit_input(n, 'seconds')
+  structure(list(value = n, unit = 'seconds'), class = 'il_seconds')
+}
+
+#' @export
+print.il_hours <- function(x, ...) {
+  cat(format_unit_helper(x), '\n')
+  invisible(x)
+}
+
+#' @export
+print.il_minutes <- function(x, ...) {
+  cat(format_unit_helper(x), '\n')
+  invisible(x)
+}
+
+#' @export
+print.il_seconds <- function(x, ...) {
+  cat(format_unit_helper(x), '\n')
+  invisible(x)
+}
+
 #' Create a Distance in Kilometres
 #'
 #' A tagged-value constructor that marks a numeric threshold as a distance

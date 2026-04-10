@@ -16,6 +16,11 @@
 #'   for phonetic blocking — see [il_soundex], [il_metaphone], and
 #'   [il_dmetaphone].
 #'
+#' @param .explode An optional character vector of column names containing
+#'   arrays (list columns) to unnest before blocking. Each array element
+#'   becomes a separate row for the blocking join. Requires a DuckDB or
+#'   PostgreSQL backend. Defaults to `NULL`.
+#'
 #' @return An updated `il_spec` (a new copy; the input is not modified).
 #' @export
 #'
@@ -32,7 +37,12 @@
 #' # Phonetic blocking: group similar-sounding names
 #' spec <- il_spec() |>
 #'   il_block_on(first_name, .transform = il_soundex)
-il_block_on <- function(spec, ..., .where = NULL, .transform = NULL) {
+#'
+#' # Explode array columns before blocking
+#' spec <- il_spec() |>
+#'   il_block_on(email, .explode = 'email')
+il_block_on <- function(spec, ..., .where = NULL, .transform = NULL,
+                        .explode = NULL) {
   if (!inherits(spec, 'il_spec')) {
     cli::cli_abort(
       '{.arg spec} must be an {.cls il_spec} object, not {.obj_type_friendly {spec}}.',
@@ -42,6 +52,12 @@ il_block_on <- function(spec, ..., .where = NULL, .transform = NULL) {
   if (!is.null(.transform) && !is.function(.transform)) {
     cli::cli_abort(
       '{.arg .transform} must be a function or {.code NULL}, not {.obj_type_friendly {(.transform)}}.',
+      class = 'il_error_type'
+    )
+  }
+  if (!is.null(.explode) && !is.character(.explode)) {
+    cli::cli_abort(
+      '{.arg .explode} must be a character vector or {.code NULL}, not {.obj_type_friendly {(.explode)}}.',
       class = 'il_error_type'
     )
   }
@@ -55,7 +71,8 @@ il_block_on <- function(spec, ..., .where = NULL, .transform = NULL) {
     }
   }, character(1))
   rule <- structure(
-    list(columns = columns, where = .where, transform = .transform),
+    list(columns = columns, where = .where, transform = .transform,
+         explode = .explode),
     class = 'il_blocking_rule'
   )
   spec$blocking_rules <- c(spec$blocking_rules, list(rule))
@@ -80,6 +97,9 @@ il_block_on <- function(spec, ..., .where = NULL, .transform = NULL) {
 #'   left and right column values before the equality check. See
 #'   [il_soundex], [il_metaphone], and [il_dmetaphone].
 #'
+#' @param .explode An optional character vector of array column names to
+#'   unnest before blocking. See [il_block_on()] for details.
+#'
 #' @return A blocking-rule object for use in training verbs.
 #' @export
 #'
@@ -91,7 +111,7 @@ il_block_on <- function(spec, ..., .where = NULL, .transform = NULL) {
 #'
 #' # Phonetic blocking
 #' block_on(first_name, .transform = il_soundex)
-block_on <- function(..., .where = NULL, .transform = NULL) {
+block_on <- function(..., .where = NULL, .transform = NULL, .explode = NULL) {
   col_exprs <- rlang::enquos(...)
   if (length(col_exprs) == 0L && is.null(.where)) {
     cli::cli_abort('{.fn block_on} requires at least one column or a {.arg .where} condition.')
@@ -99,6 +119,12 @@ block_on <- function(..., .where = NULL, .transform = NULL) {
   if (!is.null(.transform) && !is.function(.transform)) {
     cli::cli_abort(
       '{.arg .transform} must be a function or {.code NULL}, not {.obj_type_friendly {(.transform)}}.',
+      class = 'il_error_type'
+    )
+  }
+  if (!is.null(.explode) && !is.character(.explode)) {
+    cli::cli_abort(
+      '{.arg .explode} must be a character vector or {.code NULL}, not {.obj_type_friendly {(.explode)}}.',
       class = 'il_error_type'
     )
   }
@@ -111,7 +137,8 @@ block_on <- function(..., .where = NULL, .transform = NULL) {
     }
   }, character(1))
   structure(
-    list(columns = columns, where = .where, transform = .transform),
+    list(columns = columns, where = .where, transform = .transform,
+         explode = .explode),
     class = 'il_blocking_rule'
   )
 }

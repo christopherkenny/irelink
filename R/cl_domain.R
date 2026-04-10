@@ -162,13 +162,10 @@ cl_email <- function(term_frequency = FALSE) {
 #' il_spec() |>
 #'   il_compare(first_name, cl_forename_surname(surname = 'last_name'))
 cl_forename_surname <- function(surname = 'surname', term_frequency = FALSE) {
-  swap_sql <- paste0(
-    'l.{col} = r.', surname, ' AND l.', surname, ' = r.{col}'
-  )
   cl_levels(
     cl_null(),
     cl_exact(),
-    cl_custom(swap_sql),
+    cl_columns_reversed(surname, symmetrical = TRUE),
     cl_jaro_winkler(0.92),
     cl_jaro_winkler(0.88),
     cl_else(),
