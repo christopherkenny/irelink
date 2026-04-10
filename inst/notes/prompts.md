@@ -700,3 +700,23 @@ The data can be read from:
 Make compilation of the vignette dependent on succesful reading of the files.
 You may use a suggests for a parquet reading file, likely nanoparquet.
 Compilation should also be dependent on that package being available.
+
+## SQL materialisation audit (Opus 4.6 high)
+
+We recently fixed a performance bug in `il_estimate_u()`.
+`get_random_pairs_with_gammas()` was building a SQL query that computed gamma values in DuckDB correctly, but then pulling the entire result into R via `DBI::dbGetQuery()` and counting level frequencies in R loops.
+For 5 million pairs that meant materialising a large matrix in R — work that DuckDB could do in a single `GROUP BY COUNT(*)`.
+The fix was to wrap the sampled pairs in an outer `SELECT ... GROUP BY` so only a tiny aggregated table crosses the boundary.
+
+Audit every `DBI::dbGetQuery()` call in `R/`.
+For each one, look at what R does with the returned data frame immediately after.
+If R aggregates, counts, filters, or reduces the rows, that work belongs in SQL.
+If the result is stored and passed around, trace how it is eventually consumed and apply the same test.
+
+Pay particular attention to `utils-em.R`, `utils-scoring.R`, `predict.R`, `il_cluster.R`, and `utils-evaluation.R`.
+Cross-check against `../splink` to see whether splink keeps the equivalent step in SQL and note any place where splink uses a SQL aggregate that we do not.
+
+Implement fixes for any site where moving to SQL is clearly correct and safe.
+Do not fix sites where the R-side processing is genuinely non-trivial (e.g. stringdist comparisons with no SQL equivalent in the current dialect).
+
+Write your findings and any fixes to `inst/refs/30-sql-audit.md`.

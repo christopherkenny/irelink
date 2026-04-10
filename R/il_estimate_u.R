@@ -64,25 +64,24 @@
 il_estimate_u <- function(model, max_pairs = 1e6) {
   validate_il_model(model)
   result <- get_random_pairs_with_gammas(model, max_pairs = max_pairs)
-  gamma_mat <- result$gamma_mat
 
-  if (nrow(gamma_mat) == 0L) {
+  if (result$n_pairs == 0L) {
     cli::cli_abort('No pairs available for u estimation.')
   }
 
   comparisons <- model$spec$comparisons
-  comp_names <- colnames(gamma_mat)
-  n_pairs <- nrow(gamma_mat)
+  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  counts <- result$counts
+  n_pairs <- result$n_pairs
 
-  # Build per-level u frequencies: for each comparison, count fraction at
-  # each gamma level
   rows <- list()
   for (j in seq_along(comp_names)) {
     cn <- comp_names[j]
+    gcol <- paste0('gamma_', cn)
     n_levels <- n_gamma_levels(comparisons[[j]]$method)
-    gammas_j <- gamma_mat[, j]
     for (k in seq(0L, n_levels - 1L)) {
-      u_k <- sum(gammas_j == k) / n_pairs
+      count_k <- sum(counts$n[counts[[gcol]] == k], na.rm = TRUE)
+      u_k <- count_k / n_pairs
       rows <- c(rows, list(data.frame(
         comparison = cn,
         gamma_level = k,

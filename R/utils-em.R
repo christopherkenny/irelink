@@ -96,15 +96,20 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
 
 #' Get random pairs with gammas (for u estimation)
 #'
+#' Returns gamma-level counts aggregated across a random sample of pairs,
+#' rather than the full pair matrix, to keep data transfer small.
+#'
 #' @param model An il_model object.
 #' @param max_pairs Maximum pairs to sample.
-#' @return Same structure as get_pairs_with_gammas().
+#' @return A list with `counts` (data frame of gamma columns + `n`) and
+#'   `n_pairs` (total sampled pairs).
 #' @noRd
 get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
   con <- model$con
   dialect <- detect_dialect(con)
   comparisons <- model$spec$comparisons
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  gamma_cols <- paste0('gamma_', comp_names)
 
   if (dialect_has_fuzzy_sql(dialect)) {
     tbl_l <- model$data$tbl_l
@@ -118,6 +123,7 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
       glue::glue('{expr} AS gamma_{comp$columns}')
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
+    group_by_clause <- paste(gamma_cols, collapse = ', ')
 
     table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
     parts <- vapply(table_pairs, function(tp) {
@@ -131,47 +137,32 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
     inner <- paste(parts, collapse = ' UNION ')
 
     sql <- glue::glue(
-      'SELECT DISTINCT * FROM ({inner}) AS pairs LIMIT {max_pairs}'
+      'SELECT {group_by_clause}, COUNT(*) AS n FROM (',
+      'SELECT DISTINCT * FROM ({inner}) AS pairs LIMIT {max_pairs}',
+      ') AS sampled GROUP BY {group_by_clause}'
     )
     result <- DBI::dbGetQuery(con, sql)
     if (nrow(result) == 0L) {
-      return(list(
-        ids = data.frame(
-          l_unique_id = integer(0), r_unique_id = integer(0)
-        ),
-        gamma_mat = matrix(0L,
-          nrow = 0, ncol = length(comp_names),
-          dimnames = list(NULL, comp_names)
-        )
-      ))
+      return(list(counts = result, n_pairs = 0L))
     }
-    ids <- result[, c('l_unique_id', 'r_unique_id'), drop = FALSE]
-    gamma_cols <- paste0('gamma_', comp_names)
-    gamma_mat <- as.matrix(result[, gamma_cols, drop = FALSE])
-    storage.mode(gamma_mat) <- 'integer'
-    colnames(gamma_mat) <- comp_names
-    return(list(ids = ids, gamma_mat = gamma_mat))
+    return(list(counts = result, n_pairs = sum(result$n)))
   }
 
-  # Fallback: R-side
+  # Fallback: R-side — pull pairs, compute gammas, aggregate counts in R
   pairs <- get_all_pairs(model, max_pairs = max_pairs)
   if (nrow(pairs) == 0L) {
-    return(list(
-      ids = data.frame(
-        l_unique_id = integer(0), r_unique_id = integer(0)
-      ),
-      gamma_mat = matrix(0L,
-        nrow = 0, ncol = length(comp_names),
-        dimnames = list(NULL, comp_names)
-      )
+    empty <- as.data.frame(matrix(
+      integer(0), nrow = 0, ncol = length(gamma_cols) + 1L,
+      dimnames = list(NULL, c(gamma_cols, 'n'))
     ))
+    return(list(counts = empty, n_pairs = 0L))
   }
-  ids <- data.frame(
-    l_unique_id = pairs$l_unique_id,
-    r_unique_id = pairs$r_unique_id
-  )
   gamma_mat <- compute_gamma_matrix(pairs, comparisons)
-  list(ids = ids, gamma_mat = gamma_mat)
+  n_pairs <- nrow(gamma_mat)
+  counts_df <- as.data.frame(gamma_mat)
+  names(counts_df) <- gamma_cols
+  counts <- aggregate(list(n = rep(1L, n_pairs)), by = counts_df, FUN = sum)
+  list(counts = counts, n_pairs = n_pairs)
 }
 
 #' Compute multi-level gamma for a pair of values
