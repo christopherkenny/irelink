@@ -110,8 +110,7 @@ autoplot.il_compared <- function(object, which = NULL, ...) {
         ) +
         ggplot2::scale_y_continuous(
           breaks = wf$order,
-          labels = wf$step,
-          expand = ggplot2::expansion(mult = c(0.02, 0.02))
+          labels = wf$step
         ) +
         ggplot2::labs(
           title = 'Waterfall',
@@ -123,7 +122,7 @@ autoplot.il_compared <- function(object, which = NULL, ...) {
     )
   }
   ggplot2::ggplot(object, ggplot2::aes(x = .data[['match_weight']])) +
-    ggplot2::geom_histogram(binwidth = 1, fill = 'steelblue') +
+    ggplot2::geom_histogram(binwidth = 1) +
     ggplot2::labs(
       title = 'Match Weight Distribution',
       x = 'Match Weight (log2)',
@@ -173,7 +172,7 @@ autoplot.il_accuracy <- function(object, ...) {
       colour = .data[['metric']]
     )
   ) +
-    ggplot2::geom_line(linewidth = 0.8) +
+    ggplot2::geom_line() +
     ggplot2::labs(
       title = 'Accuracy Metrics by Threshold',
       x = 'Match Probability Threshold',
@@ -202,7 +201,7 @@ autoplot.il_roc <- function(object, ...) {
       y = .data[['tpr']]
     )
   ) +
-    ggplot2::geom_line(linewidth = 0.8, colour = 'steelblue') +
+    ggplot2::geom_line() +
     ggplot2::geom_abline(
       intercept = 0,
       slope = 1,
@@ -237,8 +236,8 @@ autoplot.il_precision_recall <- function(object, ...) {
       y = .data[['precision']]
     )
   ) +
-    ggplot2::geom_line(linewidth = 0.8, colour = 'steelblue') +
-    ggplot2::geom_point(size = 1.5, colour = 'steelblue') +
+    ggplot2::geom_line() +
+    ggplot2::geom_point() +
     ggplot2::labs(
       title = 'Precision\u2013Recall Curve',
       x = 'Recall',
@@ -267,16 +266,13 @@ autoplot.il_unlinkables <- function(object, ...) {
       y = .data[['pct_unlinkable']]
     )
   ) +
-    ggplot2::geom_line(linewidth = 0.8, colour = 'steelblue') +
-    ggplot2::geom_area(alpha = 0.15, fill = 'steelblue') +
+    ggplot2::geom_line() +
     ggplot2::labs(
       title = 'Unlinkable Records by Threshold',
       x = 'Match Probability Threshold',
       y = 'Proportion Unlinkable'
     ) +
-    ggplot2::scale_y_continuous(labels = function(x) {
-      paste0(round(x * 100), '%')
-    }) +
+    ggplot2::scale_y_continuous(labels = \(x) paste0(round(x * 100), '%')) +
     ggplot2::theme_minimal()
 }
 
@@ -298,7 +294,7 @@ autoplot.il_count_pairs <- function(object, ...) {
       y = .data[['n_pairs']]
     )
   ) +
-    ggplot2::geom_col(fill = 'steelblue') +
+    ggplot2::geom_col() +
     ggplot2::coord_flip() +
     ggplot2::labs(
       title = 'Candidate Pairs per Blocking Rule',
@@ -327,10 +323,10 @@ autoplot.il_profile <- function(object, ...) {
       y = .data[['n']]
     )
   ) +
-    ggplot2::geom_col(fill = 'steelblue') +
+    ggplot2::geom_col() +
     ggplot2::coord_flip() +
     ggplot2::facet_wrap(~ .data[['column']], scales = 'free') +
-    ggplot2::scale_x_discrete(labels = function(x) sub('^.*___', '', x)) +
+    ggplot2::scale_x_discrete(labels = \(x) sub('^.*___', '', x)) +
     ggplot2::labs(
       title = 'Column Value Frequencies',
       x = 'Value',
@@ -359,8 +355,8 @@ autoplot.il_training_history <- function(object, ...) {
       group = interaction(.data[['session']], .data[['gamma_level']])
     )
   ) +
-    ggplot2::geom_line(linewidth = 0.8) +
-    ggplot2::geom_point(size = 1.5) +
+    ggplot2::geom_line() +
+    ggplot2::geom_point() +
     ggplot2::facet_wrap(~ .data[['comparison']], scales = 'free_y') +
     ggplot2::labs(
       title = 'EM Training History',
