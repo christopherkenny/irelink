@@ -305,7 +305,7 @@ sql_gamma_case <- function(comp, dialect) {
       )
       days_val <- thresholds[i] * mult
       if (dialect == 'duckdb') {
-        glue::glue('WHEN {null_guard} AND ABS(CAST({lcol} AS DATE) - CAST({rcol} AS DATE)) <= {days_val} THEN {n - i + 1L}')
+        glue::glue('WHEN {null_guard} AND ABS(TRY_CAST({lcol} AS DATE) - TRY_CAST({rcol} AS DATE)) <= {days_val} THEN {n - i + 1L}')
       } else {
         glue::glue('WHEN {null_guard} AND ABS(JULIANDAY({lcol}) - JULIANDAY({rcol})) <= {days_val} THEN {n - i + 1L}')
       }
@@ -413,7 +413,7 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
     )
     days_val <- t * mult
     if (dialect == 'duckdb') {
-      return(glue::glue('{null_guard} AND ABS(CAST({lcol} AS DATE) - CAST({rcol} AS DATE)) <= {days_val}'))
+      return(glue::glue('{null_guard} AND ABS(TRY_CAST({lcol} AS DATE) - TRY_CAST({rcol} AS DATE)) <= {days_val}'))
     }
     return(glue::glue('{null_guard} AND ABS(JULIANDAY({lcol}) - JULIANDAY({rcol})) <= {days_val}'))
   }

@@ -227,16 +227,54 @@ join_original_fields <- function(result, model) {
   }
 
   con <- model$con
+  dialect <- detect_dialect(con)
   tbl_l <- model$data$tbl_l
   tbl_r <- model$data$tbl_r %||% tbl_l
 
+  if (dialect_has_fuzzy_sql(dialect)) {
+    # SQL JOIN path: upload result IDs to temp table, JOIN to source data
+    tmp_tbl <- '__il_field_join'
+    id_df <- data.frame(
+      row_idx = seq_len(nrow(result)),
+      uid_l = as.character(result$unique_id_l),
+      uid_r = as.character(result$unique_id_r),
+      stringsAsFactors = FALSE
+    )
+    DBI::dbWriteTable(con, tmp_tbl, id_df, overwrite = TRUE)
+    on.exit(drop_registered(con, tmp_tbl), add = TRUE)
+
+    all_cols <- DBI::dbListFields(con, tbl_l)
+    field_cols <- setdiff(all_cols, 'unique_id')
+    if (length(field_cols) == 0L) return(result)
+
+    l_select <- paste0('sl.', field_cols, ' AS ', field_cols, '_l', collapse = ', ')
+    if (tbl_r == tbl_l) {
+      r_field_cols <- field_cols
+    } else {
+      r_field_cols <- setdiff(DBI::dbListFields(con, tbl_r), 'unique_id')
+    }
+    r_select <- paste0('sr.', r_field_cols, ' AS ', r_field_cols, '_r', collapse = ', ')
+
+    sql <- glue::glue(
+      'SELECT t.row_idx, {l_select}, {r_select} ',
+      'FROM {tmp_tbl} t ',
+      'JOIN {tbl_l} sl ON sl.unique_id = t.uid_l ',
+      'JOIN {tbl_r} sr ON sr.unique_id = t.uid_r ',
+      'ORDER BY t.row_idx'
+    )
+    fields <- DBI::dbGetQuery(con, sql)
+    fields$row_idx <- NULL
+
+    return(tibble::as_tibble(cbind(result, fields)))
+  }
+
+  # R-side fallback for non-fuzzy-SQL dialects
   all_ids <- unique(c(
     as.character(result$unique_id_l),
     as.character(result$unique_id_r)
   ))
   id_list <- paste(DBI::dbQuoteString(con, all_ids), collapse = ', ')
 
-  # Get all columns from source table (except unique_id which we already have)
   all_cols <- DBI::dbListFields(con, tbl_l)
   field_cols <- setdiff(all_cols, 'unique_id')
   if (length(field_cols) == 0L) {

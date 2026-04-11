@@ -34,6 +34,29 @@
 #' }
 labels_from_column <- function(model, labels_col, threshold = 0) {
   validate_il_model(model)
+  con <- model$con
+  dialect <- detect_dialect(con)
+
+  if (dialect_has_fuzzy_sql(dialect)) {
+    # SQL-first: predict lazily, resolve labels via SQL JOIN, collect only the
+    # small labels frame — never materialise the full pair set into R.
+    lazy <- predict_lazy(model, threshold)
+    on.exit(drop_registered(con, lazy$predicted_tbl), add = TRUE)
+    tbl_l <- model$data$tbl_l
+    tbl_r <- model$data$tbl_r %||% tbl_l
+    sql <- glue::glue(
+      'SELECT p.unique_id_l, p.unique_id_r, ',
+      'CASE WHEN gl.{labels_col} IS NOT NULL ',
+      'AND gr.{labels_col} IS NOT NULL ',
+      'AND gl.{labels_col} = gr.{labels_col} THEN 1 ELSE 0 END AS is_match ',
+      'FROM {lazy$predicted_tbl} p ',
+      'JOIN {tbl_l} gl ON gl.unique_id = p.unique_id_l ',
+      'JOIN {tbl_r} gr ON gr.unique_id = p.unique_id_r'
+    )
+    return(DBI::dbGetQuery(con, sql))
+  }
+
+  # Fallback: collect + R-side label resolution
   pairs <- predict(model, threshold = threshold)
   resolve_labels_from_pairs(model, pairs, labels_col)
 }
@@ -139,7 +162,7 @@ score_labeled_pairs <- function(model, labels) {
   id_r <- as.character(labels$unique_id_r)
 
   if (dialect_has_fuzzy_sql(dialect)) {
-    # SQL-first: upload labels to temp table, JOIN to data, compute gammas
+    # SQL-first: upload labels, JOIN to data, compute gammas AND score in SQL
     lbl_tbl <- '__il_eval_labels'
     lbl_df <- data.frame(
       pair_idx = seq_len(nrow(labels)),
@@ -156,53 +179,67 @@ score_labeled_pairs <- function(model, labels) {
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
 
+    # Build weight expression using model parameters
+    weight_parts <- vapply(seq_along(comparisons), function(j) {
+      cn <- comp_names[j]
+      sql_weight_case(cn, mu$m_levels[[cn]], mu$u_levels[[cn]])
+    }, character(1))
+    weight_expr <- paste(weight_parts, collapse = ' + ')
+    log_prior_odds <- log(prior / (1 - prior))
+    ln2 <- log(2)
+
     sql <- glue::glue(
+      'SELECT pair_idx, ',
+      '({weight_expr}) AS match_weight, ',
+      '1.0 / (1.0 + EXP(-({log_prior_odds} + ({weight_expr}) * {ln2}))) ',
+      'AS match_probability ',
+      'FROM (',
       'SELECT lbl.pair_idx, {gamma_select} ',
       'FROM {lbl_tbl} lbl ',
       'JOIN {tbl_l} l ON l.unique_id = lbl.uid_l ',
-      'JOIN {tbl_r} r ON r.unique_id = lbl.uid_r ',
-      'ORDER BY lbl.pair_idx'
+      'JOIN {tbl_r} r ON r.unique_id = lbl.uid_r',
+      ') AS gamma_pairs ORDER BY pair_idx'
     )
     result <- DBI::dbGetQuery(con, sql)
 
-    gamma_cols <- paste0('gamma_', comp_names)
-    gamma_mat <- as.matrix(result[, gamma_cols, drop = FALSE])
-    storage.mode(gamma_mat) <- 'integer'
-    colnames(gamma_mat) <- comp_names
-  } else {
-    # Fallback: read only the needed rows via SQL WHERE clause
-    all_ids <- unique(c(id_l, id_r))
-    id_list <- paste(DBI::dbQuoteString(con, all_ids), collapse = ', ')
-
-    cols_needed <- unique(c('unique_id', comp_names))
-    col_select <- paste(cols_needed, collapse = ', ')
-
-    sql_l <- glue::glue(
-      'SELECT {col_select} FROM {tbl_l} WHERE unique_id IN ({id_list})'
-    )
-    src_l <- DBI::dbGetQuery(con, sql_l)
-    rownames(src_l) <- as.character(src_l$unique_id)
-
-    if (tbl_r == tbl_l) {
-      src_r <- src_l
-    } else {
-      sql_r <- glue::glue(
-        'SELECT {col_select} FROM {tbl_r} WHERE unique_id IN ({id_list})'
-      )
-      src_r <- DBI::dbGetQuery(con, sql_r)
-      rownames(src_r) <- as.character(src_r$unique_id)
-    }
-
-    n_labels <- nrow(labels)
-    pairs <- data.frame(row.names = seq_len(n_labels))
-    for (col in comp_names) {
-      pairs[[paste0('l_', col)]] <- src_l[id_l, col]
-      pairs[[paste0('r_', col)]] <- src_r[id_r, col]
-    }
-
-    gamma_mat <- compute_gamma_matrix(pairs, comparisons)
+    return(list(
+      label_probs = result$match_probability,
+      label_weights = result$match_weight,
+      actual_positive = as.logical(labels$is_match)
+    ))
   }
 
+  # Fallback: read only the needed rows via SQL WHERE clause
+  all_ids <- unique(c(id_l, id_r))
+  id_list <- paste(DBI::dbQuoteString(con, all_ids), collapse = ', ')
+
+  cols_needed <- unique(c('unique_id', comp_names))
+  col_select <- paste(cols_needed, collapse = ', ')
+
+  sql_l <- glue::glue(
+    'SELECT {col_select} FROM {tbl_l} WHERE unique_id IN ({id_list})'
+  )
+  src_l <- DBI::dbGetQuery(con, sql_l)
+  rownames(src_l) <- as.character(src_l$unique_id)
+
+  if (tbl_r == tbl_l) {
+    src_r <- src_l
+  } else {
+    sql_r <- glue::glue(
+      'SELECT {col_select} FROM {tbl_r} WHERE unique_id IN ({id_list})'
+    )
+    src_r <- DBI::dbGetQuery(con, sql_r)
+    rownames(src_r) <- as.character(src_r$unique_id)
+  }
+
+  n_labels <- nrow(labels)
+  pairs <- data.frame(row.names = seq_len(n_labels))
+  for (col in comp_names) {
+    pairs[[paste0('l_', col)]] <- src_l[id_l, col]
+    pairs[[paste0('r_', col)]] <- src_r[id_r, col]
+  }
+
+  gamma_mat <- compute_gamma_matrix(pairs, comparisons)
   label_weights <- score_gamma_matrix(gamma_mat, mu)
   label_probs <- weight_to_probability(label_weights, prior)
 

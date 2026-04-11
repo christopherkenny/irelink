@@ -11,5 +11,6 @@
 ^pkgdown$
 ^\.github$
 ^data-raw$
+^vignettes/articles$
 ^doc$
 ^Meta$

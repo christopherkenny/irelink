@@ -82,7 +82,7 @@ il_estimate_m_from_labels <- function(model, labels) {
   }
 
   if (dialect_has_fuzzy_sql(dialect)) {
-    # SQL-first: upload match labels, JOIN to data, compute gammas in-database
+    # SQL-first: upload match labels, JOIN to data, compute gammas, aggregate
     lbl_tbl <- '__il_m_labels'
     lbl_df <- data.frame(
       uid_l = as.character(match_pairs$unique_id_l),
@@ -97,23 +97,24 @@ il_estimate_m_from_labels <- function(model, labels) {
       glue::glue('{expr} AS gamma_{comp$columns}')
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
+    gamma_cols <- paste0('gamma_', comp_names)
+    group_by_clause <- paste(gamma_cols, collapse = ', ')
 
     sql <- glue::glue(
+      'SELECT {group_by_clause}, COUNT(*) AS n FROM (',
       'SELECT {gamma_select} ',
       'FROM {lbl_tbl} lbl ',
       'JOIN {tbl} l ON l.unique_id = lbl.uid_l ',
-      'JOIN {tbl} r ON r.unique_id = lbl.uid_r'
+      'JOIN {tbl} r ON r.unique_id = lbl.uid_r',
+      ') AS match_pairs GROUP BY {group_by_clause}'
     )
-    result <- DBI::dbGetQuery(con, sql)
+    counts <- DBI::dbGetQuery(con, sql)
 
-    if (nrow(result) == 0L) {
+    if (nrow(counts) == 0L) {
       cli::cli_abort('No matching pairs found in labels.')
     }
 
-    gamma_cols <- paste0('gamma_', comp_names)
-    gamma_mat <- as.matrix(result[, gamma_cols, drop = FALSE])
-    storage.mode(gamma_mat) <- 'integer'
-    colnames(gamma_mat) <- comp_names
+    n_pairs <- sum(counts$n)
   } else {
     # Fallback: fetch only the needed rows via SQL WHERE clause
     all_ids <- unique(c(
@@ -149,12 +150,17 @@ il_estimate_m_from_labels <- function(model, labels) {
 
     pairs <- do.call(rbind, pair_rows)
     gamma_mat <- compute_gamma_matrix(pairs, comparisons)
+    gamma_cols <- paste0('gamma_', comp_names)
+    counts_df <- as.data.frame(gamma_mat)
+    names(counts_df) <- gamma_cols
+    counts <- stats::aggregate(list(n = rep(1L, nrow(gamma_mat))), by = counts_df, FUN = sum)
+    n_pairs <- nrow(gamma_mat)
     comp_names <- colnames(gamma_mat)
   }
 
-  # Compute per-level m frequencies from matched pairs
-  n_pairs <- nrow(gamma_mat)
+  # Compute per-level m frequencies from aggregated pattern counts
   levels_per_comp <- vapply(comparisons, function(c) n_gamma_levels(c$method), integer(1))
+  gamma_cols <- paste0('gamma_', comp_names)
 
   # Merge with existing parameters
   if (!is.null(model$params$comparisons)) {
@@ -164,10 +170,11 @@ il_estimate_m_from_labels <- function(model, labels) {
     }
     for (j in seq_along(comp_names)) {
       cn <- comp_names[j]
+      gcol <- gamma_cols[j]
       nl <- levels_per_comp[j]
       for (k in seq(0L, nl - 1L)) {
-        m_k <- sum(gamma_mat[, j] == k) / n_pairs
-        m_k <- max(m_k, 0.001)
+        count_k <- sum(counts$n[counts[[gcol]] == k], na.rm = TRUE)
+        m_k <- max(count_k / n_pairs, 0.001)
         row_idx <- params$comparison == cn & params$gamma_level == k
         if (any(row_idx)) {
           params$m[row_idx] <- m_k
@@ -185,9 +192,11 @@ il_estimate_m_from_labels <- function(model, labels) {
     rows <- list()
     for (j in seq_along(comp_names)) {
       cn <- comp_names[j]
+      gcol <- gamma_cols[j]
       nl <- levels_per_comp[j]
       for (k in seq(0L, nl - 1L)) {
-        m_k <- max(sum(gamma_mat[, j] == k) / n_pairs, 0.001)
+        count_k <- sum(counts$n[counts[[gcol]] == k], na.rm = TRUE)
+        m_k <- max(count_k / n_pairs, 0.001)
         rows <- c(rows, list(data.frame(
           comparison = cn, gamma_level = k,
           m = m_k, u = NA_real_,

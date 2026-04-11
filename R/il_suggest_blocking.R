@@ -58,10 +58,11 @@ il_suggest_blocking <- function(.data, columns = NULL, con = NULL,
     columns <- setdiff(all_cols, c('unique_id', '__source_table'))
   }
 
+  n <- as.numeric(n)
   if (link_type == 'dedupe') {
-    cartesian <- as.numeric(n * (n - 1L) / 2L)
+    cartesian <- n * (n - 1) / 2
   } else {
-    cartesian <- as.numeric(n^2)
+    cartesian <- n^2
   }
 
   # Evaluate single-column rules

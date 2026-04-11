@@ -1,5 +1,65 @@
 # Internal helpers for the EM algorithm and parameter estimation.
 
+#' Get aggregated gamma-pattern counts from blocked pairs
+#'
+#' Returns unique gamma patterns with their frequency counts, keeping
+#' the data transfer from database to R minimal.  Used by
+#' [il_estimate_em()] so it never needs the full pair-level matrix.
+#'
+#' @param model An il_model object.
+#' @param blocking_rules List of blocking rule objects.
+#' @param limit Optional integer pair limit.
+#' @return A list with `counts` (data frame of gamma columns + `n`) and
+#'   `n_pairs` (total pairs).
+#' @noRd
+get_pairs_with_gamma_counts <- function(model, blocking_rules, limit = NULL) {
+  con <- model$con
+  dialect <- detect_dialect(con)
+  comparisons <- model$spec$comparisons
+  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  gamma_cols <- paste0('gamma_', comp_names)
+
+  if (dialect_has_fuzzy_sql(dialect)) {
+    gamma_sql <- build_gamma_query(model, blocking_rules, limit = limit)
+    group_by_clause <- paste(gamma_cols, collapse = ', ')
+    sql <- glue::glue(
+      'SELECT {group_by_clause}, COUNT(*) AS n FROM ({gamma_sql}) AS pairs ',
+      'GROUP BY {group_by_clause}'
+    )
+    result <- DBI::dbGetQuery(con, sql)
+    if (nrow(result) == 0L) {
+      return(list(counts = result, n_pairs = 0L))
+    }
+    return(list(counts = result, n_pairs = sum(result$n)))
+  }
+
+  # Fallback: pull pairs, compute gammas, aggregate counts in R
+  all_pairs <- list()
+  for (br in blocking_rules) {
+    bp <- get_blocked_pairs(model, br)
+    if (nrow(bp) > 0L) all_pairs <- c(all_pairs, list(bp))
+  }
+  if (length(all_pairs) == 0L) {
+    empty <- as.data.frame(matrix(
+      integer(0), nrow = 0, ncol = length(gamma_cols) + 1L,
+      dimnames = list(NULL, c(gamma_cols, 'n'))
+    ))
+    return(list(counts = empty, n_pairs = 0L))
+  }
+  pairs <- do.call(rbind, all_pairs)
+  pair_key <- paste(pairs$l_unique_id, pairs$r_unique_id, sep = '||')
+  pairs <- pairs[!duplicated(pair_key), , drop = FALSE]
+  if (!is.null(limit) && nrow(pairs) > limit) {
+    pairs <- pairs[seq_len(limit), , drop = FALSE]
+  }
+  gamma_mat <- compute_gamma_matrix(pairs, comparisons)
+  n_pairs <- nrow(gamma_mat)
+  counts_df <- as.data.frame(gamma_mat)
+  names(counts_df) <- gamma_cols
+  counts <- stats::aggregate(list(n = rep(1L, n_pairs)), by = counts_df, FUN = sum)
+  list(counts = counts, n_pairs = n_pairs)
+}
+
 #' Get pairs with pre-computed gamma columns
 #'
 #' For DuckDB: runs a single SQL query that computes gammas in-database.
@@ -161,7 +221,7 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
   n_pairs <- nrow(gamma_mat)
   counts_df <- as.data.frame(gamma_mat)
   names(counts_df) <- gamma_cols
-  counts <- aggregate(list(n = rep(1L, n_pairs)), by = counts_df, FUN = sum)
+  counts <- stats::aggregate(list(n = rep(1L, n_pairs)), by = counts_df, FUN = sum)
   list(counts = counts, n_pairs = n_pairs)
 }
 
