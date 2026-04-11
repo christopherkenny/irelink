@@ -45,7 +45,7 @@ if (can_run) {
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = '#>',
-  eval = can_run && FALSE
+  eval = can_run
 )
 ```
 
@@ -80,7 +80,7 @@ df_destination
 ## Profile the data
 
 ```{r setup-con}
-con <- DBI::dbConnect(duckdb::duckdb())
+con <- DBI::dbConnect(duckdb::duckdb(tempdir = tempdir()))
 ```
 
 ```{r profile}

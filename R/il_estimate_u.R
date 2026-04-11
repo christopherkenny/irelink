@@ -72,6 +72,10 @@ il_estimate_u <- function(model, max_pairs = 1e6) {
   comparisons <- model$spec$comparisons
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
   counts <- result$counts
+  # SQL NULLs come through as NA; treat as else/null level (0)
+  for (gcol in paste0('gamma_', comp_names)) {
+    if (gcol %in% names(counts)) counts[[gcol]][is.na(counts[[gcol]])] <- 0L
+  }
   n_pairs <- result$n_pairs
 
   rows <- list()

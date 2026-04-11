@@ -188,17 +188,16 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
     table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
     parts <- vapply(table_pairs, function(tp) {
       glue::glue(
-        'SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ',
-        '{gamma_select} ',
+        'SELECT {gamma_select} ',
         'FROM {tp$from_l} l, {tp$from_r} r ',
         'WHERE {tp$join_cond}'
       )
     }, character(1))
-    inner <- paste(parts, collapse = ' UNION ')
+    inner <- paste(parts, collapse = ' UNION ALL ')
 
     sql <- glue::glue(
       'SELECT {group_by_clause}, COUNT(*) AS n FROM (',
-      'SELECT DISTINCT * FROM ({inner}) AS pairs LIMIT {max_pairs}',
+      'SELECT * FROM ({inner}) AS pairs LIMIT {max_pairs}',
       ') AS sampled GROUP BY {group_by_clause}'
     )
     result <- DBI::dbGetQuery(con, sql)

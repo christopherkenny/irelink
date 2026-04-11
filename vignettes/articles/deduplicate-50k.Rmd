@@ -26,7 +26,7 @@ if (can_run) {
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = '#>',
-  eval = can_run && FALSE
+  eval = can_run
 )
 ```
 
@@ -58,7 +58,7 @@ Profile completeness and value distributions to inform blocking and
 comparison choices:
 
 ```{r setup-con}
-con <- DBI::dbConnect(duckdb::duckdb())
+con <- DBI::dbConnect(duckdb::duckdb(tempdir = tempdir()))
 ```
 
 ```{r completeness, fig.width = 7, fig.height = 3}

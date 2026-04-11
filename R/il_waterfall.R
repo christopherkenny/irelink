@@ -86,7 +86,8 @@ il_waterfall <- function(pairs, which = 1L) {
   # Collect per-comparison TF adjustments from stored columns
   tf_adjs <- vapply(comp_names, function(cn) {
     col_name <- paste0('tf_adj_', cn)
-    if (col_name %in% names(row)) as.numeric(row[[col_name]]) else 0
+    val <- if (col_name %in% names(row)) as.numeric(row[[col_name]]) else 0
+    if (is.na(val)) 0 else val
   }, numeric(1))
 
   has_tf <- any(tf_adjs != 0)

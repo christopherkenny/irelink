@@ -9,3 +9,5 @@ inst/doc
 *.html
 /doc/
 /Meta/
+vignettes/.tmp/
+vignettes/articles/.tmp/

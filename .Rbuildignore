@@ -12,5 +12,6 @@
 ^\.github$
 ^data-raw$
 ^vignettes/articles$
+^vignettes/\.tmp$
 ^doc$
 ^Meta$

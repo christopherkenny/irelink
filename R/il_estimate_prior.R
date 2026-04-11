@@ -73,12 +73,12 @@ il_estimate_prior <- function(model, ..., recall = 0.7) {
 
   con <- model$con
   tbl <- model$data$tbl_l
-  n_total <- model$data$n_records_l
+  n_total <- as.numeric(model$data$n_records_l)
 
   if (model$link_type == 'dedupe') {
-    total_pairs <- n_total * (n_total - 1L) / 2L
+    total_pairs <- n_total * (n_total - 1) / 2
   } else {
-    n_r <- model$data$n_records_r %||% n_total
+    n_r <- as.numeric(model$data$n_records_r %||% n_total)
     total_pairs <- n_total * n_r
   }
 
