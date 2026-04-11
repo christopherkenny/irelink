@@ -1,6 +1,10 @@
 ---
 title: "Deduplicating 50k Synthetic Records"
 output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Deduplicating 50k Synthetic Records}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
@@ -58,7 +62,7 @@ Profile completeness and value distributions to inform blocking and
 comparison choices:
 
 ```{r setup-con}
-con <- DBI::dbConnect(duckdb::duckdb(tempdir = tempdir()))
+con <- DBI::dbConnect(duckdb::duckdb())
 ```
 
 ```{r completeness, fig.width = 7, fig.height = 3}

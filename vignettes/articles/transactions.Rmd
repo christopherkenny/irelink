@@ -1,6 +1,10 @@
 ---
 title: "Linking Banking Transactions"
 output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Linking Banking Transactions}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}
@@ -80,7 +84,7 @@ df_destination
 ## Profile the data
 
 ```{r setup-con}
-con <- DBI::dbConnect(duckdb::duckdb(tempdir = tempdir()))
+con <- DBI::dbConnect(duckdb::duckdb())
 ```
 
 ```{r profile}
