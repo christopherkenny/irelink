@@ -171,20 +171,20 @@ il_weights(model)
 #> # A tibble: 14 × 5
 #>    comparison    gamma_level   m_prob  u_prob weight
 #>    <chr>               <int>    <dbl>   <dbl>  <dbl>
-#>  1 given_name              0 0.207    0.973   -2.23 
-#>  2 given_name              1 0.000999 0.0216  -4.44 
-#>  3 given_name              2 0.000999 0.00086  0.217
-#>  4 given_name              3 0.188    0.00143  7.04 
-#>  5 given_name              4 0.603    0.00315  7.58 
-#>  6 surname                 0 0.145    0.981   -2.76 
-#>  7 surname                 1 0.0150   0.0138   0.123
-#>  8 surname                 2 0.0149   0.0008   4.22 
-#>  9 surname                 3 0.151    0.0011   7.10 
-#> 10 surname                 4 0.674    0.00324  7.70 
-#> 11 date_of_birth           0 0.0830   1.000   -3.59 
-#> 12 date_of_birth           1 0.917    0.00019 12.2  
-#> 13 postcode                0 0.136    0.999   -2.87 
-#> 14 postcode                1 0.864    0.00103  9.71
+#>  1 given_name              0 0.208    0.973   -2.23 
+#>  2 given_name              1 0.000999 0.0214  -4.42 
+#>  3 given_name              2 0.000999 0.00081  0.303
+#>  4 given_name              3 0.188    0.00155  6.92 
+#>  5 given_name              4 0.602    0.00299  7.65 
+#>  6 surname                 0 0.145    0.983   -2.76 
+#>  7 surname                 1 0.0150   0.0120   0.316
+#>  8 surname                 2 0.0149   0.00091  4.03 
+#>  9 surname                 3 0.151    0.0013   6.86 
+#> 10 surname                 4 0.674    0.00318  7.73 
+#> 11 date_of_birth           0 0.0827   1.000   -3.60 
+#> 12 date_of_birth           1 0.917    0.00015 12.6  
+#> 13 postcode                0 0.137    0.999   -2.87 
+#> 14 postcode                1 0.863    0.00107  9.66
 ```
 
 ## Predict and cluster
@@ -209,12 +209,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 492       cluster_492
-#> 2 856       cluster_252
-#> 3 573       cluster_573
-#> 4 401       cluster_317
-#> 5 676       cluster_676
-#> 6 520       cluster_520
+#> 1 676       cluster_676
+#> 2 492       cluster_492
+#> 3 856       cluster_252
+#> 4 573       cluster_573
+#> 5 401       cluster_317
+#> 6 29        cluster_29
 ```
 
 ## Evaluate against ground truth
