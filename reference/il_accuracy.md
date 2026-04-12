@@ -90,11 +90,10 @@ labels <- data.frame(
 )
 
 il_accuracy(model, labels = labels)
-#> # A tibble: 3 × 8
+#> # A tibble: 2 × 8
 #>   threshold    tp    fp    fn    tn precision recall    f1
 #>       <dbl> <int> <int> <int> <int>     <dbl>  <dbl> <dbl>
-#> 1     0         1     1     0     0       0.5      1 0.667
-#> 2     0.967     1     1     0     0       0.5      1 0.667
-#> 3     1         0     0     1     1       1        0 0    
+#> 1     0.967     1     1     0     0       0.5      1 0.667
+#> 2     1         0     0     1     1       1        0 0    
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

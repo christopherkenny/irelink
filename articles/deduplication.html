@@ -345,12 +345,12 @@ arrives.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 63        cluster_63 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 558       cluster_558</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 742       cluster_738</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 784       cluster_784</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 861       cluster_861</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 871       cluster_871</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 48        cluster_44 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 442       cluster_440</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 737       cluster_736</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 887       cluster_886</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 904       cluster_900</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 965       cluster_960</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>
@@ -379,20 +379,20 @@ evaluation:</p>
 <div class="sourceCode" id="cb22"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">acc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_accuracy.html">il_accuracy</a></span><span class="op">(</span><span class="va">model</span>, labels <span class="op">=</span> <span class="va">labels</span><span class="op">)</span></span>
 <span><span class="va">acc</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 299 × 8</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 298 × 8</span></span></span>
 <span><span class="co">#&gt;      threshold    tp    fp    fn    tn precision recall    f1</span></span>
 <span><span class="co">#&gt;          <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 0            <span style="text-decoration: underline;">2</span>031  <span style="text-decoration: underline;">1</span>145     0     0     0.639  1     0.780</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 0.000<span style="text-decoration: underline;">000</span>146  <span style="text-decoration: underline;">2</span>031  <span style="text-decoration: underline;">1</span>145     0     0     0.639  1     0.780</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 0.000<span style="text-decoration: underline;">000</span>282  <span style="text-decoration: underline;">1</span>676   558   355   587     0.750  0.825 0.786</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 0.000<span style="text-decoration: underline;">000</span>462  <span style="text-decoration: underline;">1</span>461   392   570   753     0.788  0.719 0.752</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 0.000<span style="text-decoration: underline;">002</span>08   <span style="text-decoration: underline;">1</span>457   392   574   753     0.788  0.717 0.751</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 0.000<span style="text-decoration: underline;">002</span>14   <span style="text-decoration: underline;">1</span>455   391   576   754     0.788  0.716 0.751</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 0.000<span style="text-decoration: underline;">002</span>24   <span style="text-decoration: underline;">1</span>448   360   583   785     0.801  0.713 0.754</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 0.000<span style="text-decoration: underline;">002</span>37   <span style="text-decoration: underline;">1</span>423   243   608   902     0.854  0.701 0.770</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 0.000<span style="text-decoration: underline;">004</span>00   <span style="text-decoration: underline;">1</span>384   177   647   968     0.887  0.681 0.771</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 0.000<span style="text-decoration: underline;">004</span>12   <span style="text-decoration: underline;">1</span>384   175   647   970     0.888  0.681 0.771</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 289 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 0.000<span style="text-decoration: underline;">000</span>146  <span style="text-decoration: underline;">2</span>031  <span style="text-decoration: underline;">1</span>145     0     0     0.639  1     0.780</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 0.000<span style="text-decoration: underline;">000</span>282  <span style="text-decoration: underline;">1</span>676   558   355   587     0.750  0.825 0.786</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 0.000<span style="text-decoration: underline;">000</span>462  <span style="text-decoration: underline;">1</span>461   392   570   753     0.788  0.719 0.752</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 0.000<span style="text-decoration: underline;">002</span>08   <span style="text-decoration: underline;">1</span>457   392   574   753     0.788  0.717 0.751</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 0.000<span style="text-decoration: underline;">002</span>14   <span style="text-decoration: underline;">1</span>455   391   576   754     0.788  0.716 0.751</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 0.000<span style="text-decoration: underline;">002</span>24   <span style="text-decoration: underline;">1</span>448   360   583   785     0.801  0.713 0.754</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 0.000<span style="text-decoration: underline;">002</span>37   <span style="text-decoration: underline;">1</span>423   243   608   902     0.854  0.701 0.770</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 0.000<span style="text-decoration: underline;">004</span>00   <span style="text-decoration: underline;">1</span>384   177   647   968     0.887  0.681 0.771</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 0.000<span style="text-decoration: underline;">004</span>12   <span style="text-decoration: underline;">1</span>384   175   647   970     0.888  0.681 0.771</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 0.000<span style="text-decoration: underline;">004</span>31   <span style="text-decoration: underline;">1</span>384   150   647   995     0.902  0.681 0.776</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 288 more rows</span></span></span></code></pre></div>
 <div class="sourceCode" id="cb23"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">acc</span><span class="op">)</span></span></code></pre></div>
 <p><img src="deduplication_files/figure-html/accuracy-plot-1.png" class="r-plt" alt="" width="576"></p>

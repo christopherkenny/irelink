@@ -88,11 +88,10 @@ labels <- data.frame(
 )
 
 il_precision_recall(model, labels = labels)
-#> # A tibble: 3 × 3
+#> # A tibble: 2 × 3
 #>   threshold precision recall
 #>       <dbl>     <dbl>  <dbl>
-#> 1     0           0.5      1
-#> 2     0.967       0.5      1
-#> 3     1           1        0
+#> 1     0.967       0.5      1
+#> 2     1           1        0
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
