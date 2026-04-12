@@ -36,29 +36,54 @@ labels_from_column <- function(model, labels_col, threshold = 0) {
   validate_il_model(model)
   con <- model$con
   dialect <- detect_dialect(con)
+  tbl_l <- model$data$tbl_l
+  tbl_r <- model$data$tbl_r %||% tbl_l
+  link_type <- model$data$link_type %||% 'dedupe'
+  dedup_cond <- if (link_type == 'dedupe') {
+    'AND gl.unique_id < gr.unique_id '
+  } else {
+    ''
+  }
 
   if (dialect_has_fuzzy_sql(dialect)) {
-    # SQL-first: predict lazily, resolve labels via SQL JOIN, collect only the
-    # small labels frame — never materialise the full pair set into R.
     lazy <- predict_lazy(model, threshold)
     on.exit(drop_registered(con, lazy$predicted_tbl), add = TRUE)
-    tbl_l <- model$data$tbl_l
-    tbl_r <- model$data$tbl_r %||% tbl_l
+    # Universe = all true match pairs (from data) UNION all candidate pairs.
+    # This ensures true matches missed by blocking are counted as FNs.
     sql <- glue::glue(
-      'SELECT p.unique_id_l, p.unique_id_r, ',
-      'CASE WHEN gl.{labels_col} IS NOT NULL ',
-      'AND gr.{labels_col} IS NOT NULL ',
-      'AND gl.{labels_col} = gr.{labels_col} THEN 1 ELSE 0 END AS is_match ',
-      'FROM {lazy$predicted_tbl} p ',
-      'JOIN {tbl_l} gl ON gl.unique_id = p.unique_id_l ',
-      'JOIN {tbl_r} gr ON gr.unique_id = p.unique_id_r'
+      'WITH true_matches AS (',
+      'SELECT gl.unique_id AS unique_id_l, gr.unique_id AS unique_id_r ',
+      'FROM {tbl_l} gl JOIN {tbl_r} gr ',
+      'ON gl.{labels_col} IS NOT NULL AND gr.{labels_col} IS NOT NULL ',
+      'AND gl.{labels_col} = gr.{labels_col} {dedup_cond}',
+      '), universe AS (',
+      'SELECT unique_id_l, unique_id_r FROM true_matches ',
+      'UNION ',
+      'SELECT unique_id_l, unique_id_r FROM {lazy$predicted_tbl}',
+      ') ',
+      'SELECT u.unique_id_l, u.unique_id_r, ',
+      'CASE WHEN tm.unique_id_l IS NOT NULL THEN 1 ELSE 0 END AS is_match ',
+      'FROM universe u ',
+      'LEFT JOIN true_matches tm ',
+      'ON tm.unique_id_l = u.unique_id_l AND tm.unique_id_r = u.unique_id_r'
     )
     return(DBI::dbGetQuery(con, sql))
   }
 
-  # Fallback: collect + R-side label resolution
-  pairs <- predict(model, threshold = threshold)
-  resolve_labels_from_pairs(model, pairs, labels_col)
+  # Fallback: collect all true matches from data + candidate pairs, label both
+  sql_true <- glue::glue(
+    'SELECT gl.unique_id AS unique_id_l, gr.unique_id AS unique_id_r ',
+    'FROM {tbl_l} gl JOIN {tbl_r} gr ',
+    'ON gl.{labels_col} IS NOT NULL AND gr.{labels_col} IS NOT NULL ',
+    'AND gl.{labels_col} = gr.{labels_col} {dedup_cond}'
+  )
+  true_pairs <- DBI::dbGetQuery(con, sql_true)
+  true_pairs$is_match <- 1L
+  candidates <- predict(model, threshold = threshold)
+  cand_labeled <- resolve_labels_from_pairs(model, candidates, labels_col)
+  combined <- rbind(true_pairs, cand_labeled)
+  key <- canonical_pair_key(combined$unique_id_l, combined$unique_id_r)
+  combined[!duplicated(key), ]
 }
 
 #' Resolve labels for already-predicted pairs
