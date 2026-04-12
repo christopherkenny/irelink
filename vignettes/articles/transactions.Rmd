@@ -59,9 +59,7 @@ It demonstrates two-table linking (`link_type = "link"`), matching each outgoing
 The data is synthetic and designed to be challenging: amounts differ due to fees and exchange-rate effects, dates shift by a few days, and memos are sometimes truncated.
 Since every origin payment has exactly one destination counterpart, the prior match probability is `1 / n_origin`.
 
-This vignette requires the
-[nanoparquet](https://cran.r-project.org/package=nanoparquet) package to
-read the remote Parquet files and will only compile when the package and data URLs are both available.
+This vignette requires the [nanoparquet](https://cran.r-project.org/package=nanoparquet) package to read the remote Parquet files and will only compile when the package and data URLs are both available.
 
 ## Load the data
 
