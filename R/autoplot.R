@@ -303,29 +303,29 @@ autoplot.il_count_pairs <- function(object, type = c('additional', 'raw'),
     character(1)
   )
   if (type == 'additional') {
-    object$additional <- diff(c(0, object$cumulative_pairs))
-    # Keep original rule order; reverse so first rule is at the top
-    object$rule_wrapped <- factor(
-      object$rule_wrapped,
-      levels = rev(object$rule_wrapped)
-    )
+    n <- nrow(object)
+    object$xmin <- c(0, object$cumulative_pairs[-n])
+    object$xmax <- object$cumulative_pairs
+    # y positions: first rule at top (highest y)
+    object$ypos <- rev(seq_len(n))
     p <- object |>
       ggplot2::ggplot() +
-      ggplot2::geom_col(ggplot2::aes(
-        x = .data[['rule_wrapped']],
-        y = .data[['cumulative_pairs']]
-      ), fill = 'grey80') +
-      ggplot2::geom_col(ggplot2::aes(
-        x = .data[['rule_wrapped']],
-        y = .data[['additional']]
+      ggplot2::geom_rect(ggplot2::aes(
+        xmin = .data[['xmin']],
+        xmax = .data[['xmax']],
+        ymin = .data[['ypos']] - 0.4,
+        ymax = .data[['ypos']] + 0.4
       )) +
-      ggplot2::coord_flip() +
+      ggplot2::scale_y_continuous(
+        breaks = object$ypos,
+        labels = object$rule_wrapped
+      ) +
       ggplot2::labs(
         title = 'Cumulative Pairs by Blocking Rule',
-        x = NULL,
-        y = 'Pairs'
+        x = 'Pairs',
+        y = NULL
       ) +
-      ggplot2::scale_y_continuous(labels = \(x) formatC(x, format = 'f', big.mark = ',', digits = 0)) +
+      ggplot2::scale_x_continuous(labels = \(x) formatC(x, format = 'f', big.mark = ',', digits = 0)) +
       ggplot2::theme_minimal()
   } else {
     object$rule_wrapped <- stats::reorder(object$rule_wrapped, object$n_pairs)

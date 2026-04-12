@@ -56,9 +56,7 @@ knitr::opts_chunk$set(
 This vignette replicates the [Splink "Linking banking transactions" demo](https://moj-analytical-services.github.io/splink/demos/examples/duckdb/transactions.html) using `irelink`.
 It demonstrates two-table linking (`link_type = "link"`), matching each outgoing payment in the origin table to its corresponding incoming payment in the destination table.
 
-The data is synthetic and designed to be challenging: amounts differ due
-to fees and exchange-rate effects, dates shift by a few days, and memos
-are sometimes truncated.
+The data is synthetic and designed to be challenging: amounts differ due to fees and exchange-rate effects, dates shift by a few days, and memos are sometimes truncated.
 Since every origin payment has exactly one destination counterpart, the
 prior match probability is `1 / n_origin`.
 
