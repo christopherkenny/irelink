@@ -96,7 +96,7 @@ space dramatically.
 The rules below use SQL expressions via `.where`:
 
 ```{r count-pairs}
-il_count_pairs(
+counts <- il_count_pairs(
   df_origin,
   df_destination,
   # Same year-month, similar memo prefix, amount ratio within 30%
@@ -136,6 +136,11 @@ il_count_pairs(
   con = con,
   link_type = 'link'
 )
+counts
+```
+
+```{r count-pairs-plot, fig.width = 7, fig.height = 4}
+autoplot(counts)
 ```
 
 ## Define the specification
