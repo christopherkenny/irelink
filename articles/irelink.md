@@ -147,12 +147,12 @@ head(pairs)
 #> # A tibble: 6 × 7
 #>   unique_id_l unique_id_r match_weight match_probability gamma_first_name
 #>         <int>       <int>        <dbl>             <dbl>            <int>
-#> 1           5          15         9.13             0.967                2
-#> 2           7          17         9.13             0.967                2
-#> 3           3           4         9.13             0.967                2
-#> 4           2          11         9.13             0.967                2
-#> 5           1           2         9.13             0.967                2
-#> 6           6          15         9.13             0.967                2
+#> 1           1          11         9.13             0.967                2
+#> 2           3          13         9.13             0.967                2
+#> 3           4          13         9.13             0.967                2
+#> 4           9          19         9.13             0.967                2
+#> 5           8          17         8.26             0.942                1
+#> 6          10          19         8.26             0.942                1
 #> # ℹ 2 more variables: gamma_surname <int>, gamma_dob <int>
 ```
 
@@ -172,10 +172,10 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 7         cluster_17
-#> 2 2         cluster_1 
-#> 3 1         cluster_1 
-#> 4 4         cluster_13
+#> 1 19        cluster_10
+#> 2 4         cluster_13
+#> 3 11        cluster_1 
+#> 4 1         cluster_1 
 #> 5 9         cluster_10
 #> 6 8         cluster_17
 ```

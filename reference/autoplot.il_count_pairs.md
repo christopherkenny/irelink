@@ -8,7 +8,7 @@ blocking rule, from data produced by
 
 ``` r
 # S3 method for class 'il_count_pairs'
-autoplot(object, ...)
+autoplot(object, type = c("additional", "raw"), ...)
 ```
 
 ## Arguments
@@ -16,6 +16,12 @@ autoplot(object, ...)
 - object:
 
   An `il_count_pairs` tibble.
+
+- type:
+
+  One of `"additional"` (default) to show the incremental pairs each
+  rule adds beyond those already covered by earlier rules, or `"raw"` to
+  show the total pairs each rule generates independently.
 
 - ...:
 
