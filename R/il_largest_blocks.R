@@ -79,9 +79,9 @@ il_largest_blocks <- function(.data, rule, n = 5L, con = NULL,
   res <- DBI::dbGetQuery(con, sql)
 
   if (link_type == 'dedupe') {
-    res$n_pairs <- as.integer(res$n_records * (res$n_records - 1L) / 2L)
+    res$n_pairs <- as.numeric(res$n_records) * (as.numeric(res$n_records) - 1) / 2
   } else {
-    res$n_pairs <- as.integer(res$n_records^2)
+    res$n_pairs <- as.numeric(res$n_records)^2
   }
 
   tibble::as_tibble(res)

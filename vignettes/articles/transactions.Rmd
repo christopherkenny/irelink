@@ -53,8 +53,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette replicates the
-[Splink "Linking banking transactions" demo](https://moj-analytical-services.github.io/splink/demos/examples/duckdb/transactions.html)
+This vignette replicates the [Splink "Linking banking transactions" demo](https://moj-analytical-services.github.io/splink/demos/examples/duckdb/transactions.html)
 using `irelink`.
 It demonstrates two-table linking (`link_type = "link"`), matching each
 outgoing payment in the origin table to its corresponding incoming

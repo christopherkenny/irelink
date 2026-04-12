@@ -160,8 +160,7 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
     u_list[[j]] <- u_vec
   }
 
-  prior <- model$params$prior %||% 0.05
-  if (is.na(prior)) prior <- 0.05
+  prior <- safe_prior(model)
   max_iter <- max_iterations
   tol <- convergence
   history <- list()

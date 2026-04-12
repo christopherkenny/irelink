@@ -79,7 +79,9 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
   tf_cols <- tf_columns(comparisons)
 
   if (dialect_has_fuzzy_sql(dialect)) {
-    sql <- build_gamma_query(model, blocking_rules, limit = limit)
+    sql <- build_gamma_query(model, blocking_rules, limit = limit,
+      deduplicate = TRUE
+    )
     result <- DBI::dbGetQuery(con, sql)
     if (nrow(result) == 0L) {
       return(list(
@@ -455,7 +457,7 @@ get_blocked_pairs <- function(model, blocking) {
       'WHERE {where_clause}'
     )
   }, character(1))
-  sql <- paste(parts, collapse = ' UNION ')
+  sql <- paste(parts, collapse = ' UNION ALL ')
 
   DBI::dbGetQuery(con, sql)
 }
@@ -480,7 +482,7 @@ get_all_pairs <- function(model, max_pairs = 1e6) {
       'WHERE {tp$join_cond}'
     )
   }, character(1))
-  sql <- paste(parts, collapse = ' UNION ')
+  sql <- paste(parts, collapse = ' UNION ALL ')
   sql <- glue::glue('{sql} LIMIT {max_pairs}')
 
   DBI::dbGetQuery(con, sql)

@@ -114,7 +114,7 @@ predict.il_model <- function(object, threshold = 0.85,
 
   comparisons <- object$spec$comparisons
   params <- object$params$comparisons
-  prior <- object$params$prior %||% 0.05
+  prior <- safe_prior(object)
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
   blocking_rules <- object$spec$blocking_rules
 

@@ -1,5 +1,15 @@
 # Shared scoring helpers used by predict(), il_find_matches(), and il_waterfall().
 
+#' Safely extract the prior from a model, guarding NULL and NA
+#' @param model An il_model object.
+#' @param default Fallback value when prior is NULL or NA.
+#' @return Numeric scalar.
+#' @noRd
+safe_prior <- function(model, default = 0.05) {
+  p <- model$params$prior
+  if (is.null(p) || is.na(p)) default else p
+}
+
 #' Extract per-level m/u probability lists from a model's parameter tibble
 #'
 #' For each comparison, returns vectors of m and u probabilities indexed

@@ -76,7 +76,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
   dialect <- detect_dialect(con)
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
-  prior <- model$params$prior %||% 0.05
+  prior <- safe_prior(model)
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
   blocking_rules <- model$spec$blocking_rules
   comp_cols <- unique(comp_names)

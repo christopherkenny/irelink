@@ -94,7 +94,7 @@ il_waterfall <- function(pairs, which = 1L) {
   contributions <- per_comparison_contribution(
     gamma, mu, comp_names, if (has_tf) tf_adjs else NULL
   )
-  prior <- model$params$prior %||% 0.05
+  prior <- safe_prior(model)
   prior_weight <- log2(prior / (1 - prior))
   final_weight <- prior_weight + sum(contributions)
 

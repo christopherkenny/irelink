@@ -502,7 +502,8 @@ sql_array_min_distance_case <- function(level, col, null_guard) {
 #' @param limit Optional integer limit on pairs.
 #' @return A SQL query string.
 #' @noRd
-build_gamma_query <- function(model, blocking_rules, limit = NULL) {
+build_gamma_query <- function(model, blocking_rules, limit = NULL,
+                              deduplicate = FALSE) {
   con <- model$con
   dialect <- detect_dialect(con)
   tbl_l <- model$data$tbl_l
@@ -559,12 +560,18 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL) {
     }
   }
 
-  inner <- paste(all_parts, collapse = ' UNION ')
+  inner <- paste(all_parts, collapse = ' UNION ALL ')
 
-  # Wrap in DISTINCT to deduplicate across blocking rules and table combos
-  sql <- glue::glue(
-    'SELECT DISTINCT * FROM ({inner}) AS pairs'
-  )
+  # Optionally wrap in DISTINCT to deduplicate across blocking rules.
+  # Splink skips dedup at this level (UNION ALL only). For EM callers,
+
+  # GROUP BY handles aggregation.  For predict callers, dedup is applied
+  # after scoring + threshold filtering where far fewer rows remain.
+  if (deduplicate) {
+    sql <- glue::glue('SELECT DISTINCT * FROM ({inner}) AS pairs')
+  } else {
+    sql <- glue::glue('SELECT * FROM ({inner}) AS pairs')
+  }
 
   if (!is.null(limit)) {
     sql <- glue::glue('{sql} LIMIT {as.integer(limit)}')
@@ -865,7 +872,7 @@ count_blocked_pairs <- function(con, tbl_l, tbl_r, where, dedupe = TRUE) {
     )
   }
   res <- DBI::dbGetQuery(con, sql)
-  as.integer(res$n[1])
+  as.numeric(res$n[1])
 }
 
 # --- SQL-side scoring helpers (lazy prediction pipeline) --------------------
@@ -927,7 +934,7 @@ build_scored_query <- function(model, threshold = 0.85,
                                threshold_match_weight = NULL) {
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
-  prior <- model$params$prior %||% 0.05
+  prior <- safe_prior(model)
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
   blocking_rules <- model$spec$blocking_rules
 
@@ -989,9 +996,10 @@ build_scored_query <- function(model, threshold = 0.85,
 
   # Two-level nesting:
   #   Inner: gamma query + match_weight + tf_adj columns
-  #   Outer: match_probability + threshold filter
+  #   Outer: match_probability + threshold filter + DISTINCT (dedup here,
+  #          not in build_gamma_query, so we deduplicate fewer rows)
   glue::glue(
-    'SELECT unique_id_l, unique_id_r, {gamma_select}, ',
+    'SELECT DISTINCT unique_id_l, unique_id_r, {gamma_select}, ',
     'match_weight{outer_tf_adj}, ',
     '1.0 / (1.0 + EXP(-({log_prior_odds} + match_weight * {ln2}))) ',
     'AS match_probability ',

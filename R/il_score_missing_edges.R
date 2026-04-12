@@ -65,7 +65,7 @@ score_specific_pairs <- function(model, id_l, id_r, threshold = 0) {
   con <- model$con
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
-  prior <- model$params$prior %||% 0.05
+  prior <- safe_prior(model)
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
   mu <- extract_mu_vectors(params, comp_names)
   tbl_l <- model$data$tbl_l

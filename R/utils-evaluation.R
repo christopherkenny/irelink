@@ -149,7 +149,7 @@ score_labeled_pairs <- function(model, labels) {
 
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
-  prior <- model$params$prior %||% 0.05
+  prior <- safe_prior(model)
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
   mu <- extract_mu_vectors(params, comp_names)
 
@@ -189,16 +189,18 @@ score_labeled_pairs <- function(model, labels) {
     ln2 <- log(2)
 
     sql <- glue::glue(
-      'SELECT pair_idx, ',
-      '({weight_expr}) AS match_weight, ',
-      '1.0 / (1.0 + EXP(-({log_prior_odds} + ({weight_expr}) * {ln2}))) ',
+      'SELECT pair_idx, match_weight, ',
+      '1.0 / (1.0 + EXP(-({log_prior_odds} + match_weight * {ln2}))) ',
       'AS match_probability ',
+      'FROM (',
+      'SELECT pair_idx, ({weight_expr}) AS match_weight ',
       'FROM (',
       'SELECT lbl.pair_idx, {gamma_select} ',
       'FROM {lbl_tbl} lbl ',
       'JOIN {tbl_l} l ON l.unique_id = lbl.uid_l ',
       'JOIN {tbl_r} r ON r.unique_id = lbl.uid_r',
-      ') AS gamma_pairs ORDER BY pair_idx'
+      ') AS gamma_pairs',
+      ') AS weighted_pairs ORDER BY pair_idx'
     )
     result <- DBI::dbGetQuery(con, sql)
 

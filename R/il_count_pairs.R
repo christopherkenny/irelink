@@ -100,26 +100,26 @@ il_count_pairs <- function(.data, ..., con = NULL,
     tbl_r <- tbl_l
   }
 
-  n_l <- reg_l$n_records
+  n_l <- as.numeric(reg_l$n_records)
 
   if (length(blocking_rules) == 0L) {
     if (link_type == 'dedupe') {
-      n_pairs <- as.integer(n_l * (n_l - 1L) / 2L)
+      n_pairs <- n_l * (n_l - 1) / 2
     } else {
-      n_r <- if (exists('reg_r')) reg_r$n_records else n_l
-      n_pairs <- as.integer(n_l * n_r)
+      n_r <- if (exists('reg_r')) as.numeric(reg_r$n_records) else n_l
+      n_pairs <- n_l * n_r
     }
     return(tibble::tibble(rule = 'cartesian', n_pairs = n_pairs))
   }
 
   # Compute cartesian for percentage calculation
   if (link_type == 'dedupe') {
-    cartesian <- as.numeric(n_l * (n_l - 1L) / 2L)
+    cartesian <- n_l * (n_l - 1) / 2
   } else if (length(extra_inputs) > 0L) {
-    n_r <- if (exists('reg_r')) reg_r$n_records else n_l
-    cartesian <- as.numeric(n_l * n_r)
+    n_r <- if (exists('reg_r')) as.numeric(reg_r$n_records) else n_l
+    cartesian <- n_l * n_r
   } else {
-    cartesian <- as.numeric(n_l^2)
+    cartesian <- n_l^2
   }
 
   dialect <- detect_dialect(con)
@@ -140,7 +140,7 @@ il_count_pairs <- function(.data, ..., con = NULL,
     }
     tibble::tibble(
       rule = label,
-      n_pairs = as.integer(n)
+      n_pairs = as.numeric(n)
     )
   })
 
@@ -148,7 +148,7 @@ il_count_pairs <- function(.data, ..., con = NULL,
 
   # Compute cumulative unique pairs via SQL UNION
   cum_parts <- character(0)
-  cum_pairs <- integer(length(blocking_rules))
+  cum_pairs <- numeric(length(blocking_rules))
   for (i in seq_along(blocking_rules)) {
     rule <- blocking_rules[[i]]
     where <- build_blocking_condition(rule$columns, rule$where,
@@ -163,7 +163,7 @@ il_count_pairs <- function(.data, ..., con = NULL,
     ))
     union_sql <- paste(cum_parts, collapse = ' UNION ')
     count_sql <- glue::glue('SELECT COUNT(*) AS n FROM ({union_sql}) AS __cum')
-    cum_pairs[i] <- as.integer(DBI::dbGetQuery(con, count_sql)$n[1])
+    cum_pairs[i] <- as.numeric(DBI::dbGetQuery(con, count_sql)$n[1])
   }
 
   out$cumulative_pairs <- cum_pairs

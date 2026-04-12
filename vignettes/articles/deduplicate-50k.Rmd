@@ -58,8 +58,7 @@ df
 
 ## Profile the data
 
-Profile completeness and value distributions to inform blocking and
-comparison choices:
+Profile completeness and value distributions to inform blocking and comparison choices:
 
 ```{r setup-con}
 con <- DBI::dbConnect(duckdb::duckdb())
