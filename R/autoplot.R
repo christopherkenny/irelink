@@ -278,22 +278,36 @@ autoplot.il_unlinkables <- function(object, ...) {
 #' blocking rule, from data produced by [il_count_pairs()].
 #'
 #' @param object An `il_count_pairs` tibble.
+#' @param type One of `"additional"` (default) to show the incremental
+#'   pairs each rule adds beyond those already covered by earlier rules,
+#'   or `"raw"` to show the total pairs each rule generates independently.
 #' @param ... Additional arguments (currently unused).
 #'
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
-autoplot.il_count_pairs <- function(object, ...) {
+autoplot.il_count_pairs <- function(object, type = c('additional', 'raw'),
+                                    ...) {
+  type <- match.arg(type)
+  if (type == 'additional') {
+    object$plot_n <- diff(c(0, object$cumulative_pairs))
+    title <- 'Additional Pairs per Blocking Rule'
+    ylab <- 'Additional Pairs'
+  } else {
+    object$plot_n <- object$n_pairs
+    title <- 'Candidate Pairs per Blocking Rule'
+    ylab <- 'Pairs Generated'
+  }
   object |>
     ggplot2::ggplot() +
     ggplot2::geom_col(ggplot2::aes(
-      x = stats::reorder(.data[['rule']], .data[['n_pairs']]),
-      y = .data[['n_pairs']]
+      x = stats::reorder(.data[['rule']], .data[['plot_n']]),
+      y = .data[['plot_n']]
     )) +
     ggplot2::coord_flip() +
     ggplot2::labs(
-      title = 'Candidate Pairs per Blocking Rule',
+      title = title,
       x = 'Rule',
-      y = 'Pairs Generated'
+      y = ylab
     ) +
     ggplot2::theme_minimal()
 }

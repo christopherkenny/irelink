@@ -111,7 +111,7 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
   # Extract aggregated gamma patterns and their counts
   gamma_cols <- paste0('gamma_', comp_names)
   pattern_mat <- as.matrix(result$counts[, gamma_cols, drop = FALSE])
-  pattern_mat[is.na(pattern_mat)] <- 0L  # SQL NULLs -> else/null level
+  pattern_mat[is.na(pattern_mat)] <- 0L # SQL NULLs -> else/null level
   storage.mode(pattern_mat) <- 'integer'
   colnames(pattern_mat) <- comp_names
   pattern_n <- as.numeric(result$counts$n)

@@ -245,7 +245,9 @@ join_original_fields <- function(result, model) {
 
     all_cols <- DBI::dbListFields(con, tbl_l)
     field_cols <- setdiff(all_cols, 'unique_id')
-    if (length(field_cols) == 0L) return(result)
+    if (length(field_cols) == 0L) {
+      return(result)
+    }
 
     l_select <- paste0('sl.', field_cols, ' AS ', field_cols, '_l', collapse = ', ')
     if (tbl_r == tbl_l) {

@@ -41,7 +41,8 @@ get_pairs_with_gamma_counts <- function(model, blocking_rules, limit = NULL) {
   }
   if (length(all_pairs) == 0L) {
     empty <- as.data.frame(matrix(
-      integer(0), nrow = 0, ncol = length(gamma_cols) + 1L,
+      integer(0),
+      nrow = 0, ncol = length(gamma_cols) + 1L,
       dimnames = list(NULL, c(gamma_cols, 'n'))
     ))
     return(list(counts = empty, n_pairs = 0L))
@@ -79,7 +80,8 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
   tf_cols <- tf_columns(comparisons)
 
   if (dialect_has_fuzzy_sql(dialect)) {
-    sql <- build_gamma_query(model, blocking_rules, limit = limit,
+    sql <- build_gamma_query(model, blocking_rules,
+      limit = limit,
       deduplicate = TRUE
     )
     result <- DBI::dbGetQuery(con, sql)
@@ -213,7 +215,8 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
   pairs <- get_all_pairs(model, max_pairs = max_pairs)
   if (nrow(pairs) == 0L) {
     empty <- as.data.frame(matrix(
-      integer(0), nrow = 0, ncol = length(gamma_cols) + 1L,
+      integer(0),
+      nrow = 0, ncol = length(gamma_cols) + 1L,
       dimnames = list(NULL, c(gamma_cols, 'n'))
     ))
     return(list(counts = empty, n_pairs = 0L))

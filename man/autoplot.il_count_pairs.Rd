@@ -4,10 +4,14 @@
 \alias{autoplot.il_count_pairs}
 \title{Plot Blocking Rule Pair Counts}
 \usage{
-\method{autoplot}{il_count_pairs}(object, ...)
+\method{autoplot}{il_count_pairs}(object, type = c("additional", "raw"), ...)
 }
 \arguments{
 \item{object}{An \code{il_count_pairs} tibble.}
+
+\item{type}{One of \code{"additional"} (default) to show the incremental
+pairs each rule adds beyond those already covered by earlier rules,
+or \code{"raw"} to show the total pairs each rule generates independently.}
 
 \item{...}{Additional arguments (currently unused).}
 }
