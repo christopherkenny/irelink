@@ -145,8 +145,7 @@ autoplot(counts)
 
 ## Define the specification
 
-The `transaction_date` comparison is one-sided: payments can only
-*arrive* after they are *sent*, so the comparison checks
+The `transaction_date` comparison is one-sided: payments can only *arrive* after they are *sent*, so the comparison checks
 `destination_date - origin_date` is between 0 and *N* days:
 
 ```{r spec}

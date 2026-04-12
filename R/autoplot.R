@@ -51,7 +51,8 @@ autoplot.il_model <- function(object, type = c('weights', 'parameters'), ...) {
           y = 'Probability',
           fill = 'Parameter'
         ) +
-        ggplot2::theme_minimal()
+        ggplot2::theme_minimal() +
+        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
     )
   }
 
@@ -72,7 +73,8 @@ autoplot.il_model <- function(object, type = c('weights', 'parameters'), ...) {
       y = 'Weight (log2)',
       fill = 'Gamma Level'
     ) +
-    ggplot2::theme_minimal()
+    ggplot2::theme_minimal() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 }
 
 #' Quick Plot for Scored Pairs
@@ -297,16 +299,21 @@ autoplot.il_count_pairs <- function(object, type = c('additional', 'raw'),
     title <- 'Candidate Pairs per Blocking Rule'
     ylab <- 'Pairs Generated'
   }
+  object$rule_wrapped <- vapply(
+    object$rule,
+    \(x) paste(strwrap(x, width = 40), collapse = '\n'),
+    character(1)
+  )
   object |>
     ggplot2::ggplot() +
     ggplot2::geom_col(ggplot2::aes(
-      x = stats::reorder(.data[['rule']], .data[['plot_n']]),
+      x = stats::reorder(.data[['rule_wrapped']], .data[['plot_n']]),
       y = .data[['plot_n']]
     )) +
     ggplot2::coord_flip() +
     ggplot2::labs(
       title = title,
-      x = 'Rule',
+      x = NULL,
       y = ylab
     ) +
     ggplot2::theme_minimal()
@@ -403,5 +410,6 @@ autoplot.il_completeness <- function(object, ...) {
       y = '% Non-Null',
       fill = 'Table'
     ) +
-    ggplot2::theme_minimal()
+    ggplot2::theme_minimal() +
+    ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 }
