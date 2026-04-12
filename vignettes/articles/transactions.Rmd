@@ -61,8 +61,7 @@ Since every origin payment has exactly one destination counterpart, the prior ma
 
 This vignette requires the
 [nanoparquet](https://cran.r-project.org/package=nanoparquet) package to
-read the remote Parquet files and will only compile when the package and
-data URLs are both available.
+read the remote Parquet files and will only compile when the package and data URLs are both available.
 
 ## Load the data
 

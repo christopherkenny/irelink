@@ -38,7 +38,7 @@ labels_from_column <- function(model, labels_col, threshold = 0) {
   dialect <- detect_dialect(con)
   tbl_l <- model$data$tbl_l
   tbl_r <- model$data$tbl_r %||% tbl_l
-  link_type <- model$data$link_type %||% 'dedupe'
+  link_type <- model$link_type %||% 'dedupe'
   dedup_cond <- if (link_type == 'dedupe') {
     'AND gl.unique_id < gr.unique_id '
   } else {
