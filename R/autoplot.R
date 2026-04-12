@@ -292,7 +292,14 @@ autoplot.il_count_pairs <- function(object, type = c('additional', 'raw'),
   type <- match.arg(type)
   object$rule_wrapped <- vapply(
     object$rule,
-    \(x) paste(strwrap(x, width = 40), collapse = '\n'),
+    function(x) {
+      lines <- strwrap(x, width = 40)
+      if (length(lines) > 2L) {
+        lines <- c(lines[1:2])
+        lines[2L] <- paste0(substr(lines[2L], 1, 37), '...')
+      }
+      paste(lines, collapse = '\n')
+    },
     character(1)
   )
   if (type == 'additional') {
