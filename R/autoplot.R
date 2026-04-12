@@ -290,33 +290,54 @@ autoplot.il_unlinkables <- function(object, ...) {
 autoplot.il_count_pairs <- function(object, type = c('additional', 'raw'),
                                     ...) {
   type <- match.arg(type)
-  if (type == 'additional') {
-    object$plot_n <- diff(c(0, object$cumulative_pairs))
-    title <- 'Additional Pairs per Blocking Rule'
-    ylab <- 'Additional Pairs'
-  } else {
-    object$plot_n <- object$n_pairs
-    title <- 'Candidate Pairs per Blocking Rule'
-    ylab <- 'Pairs Generated'
-  }
   object$rule_wrapped <- vapply(
     object$rule,
     \(x) paste(strwrap(x, width = 40), collapse = '\n'),
     character(1)
   )
-  object |>
-    ggplot2::ggplot() +
-    ggplot2::geom_col(ggplot2::aes(
-      x = stats::reorder(.data[['rule_wrapped']], .data[['plot_n']]),
-      y = .data[['plot_n']]
-    )) +
-    ggplot2::coord_flip() +
-    ggplot2::labs(
-      title = title,
-      x = NULL,
-      y = ylab
-    ) +
-    ggplot2::theme_minimal()
+  if (type == 'additional') {
+    object$additional <- diff(c(0, object$cumulative_pairs))
+    # Keep original rule order; reverse so first rule is at the top
+    object$rule_wrapped <- factor(
+      object$rule_wrapped,
+      levels = rev(object$rule_wrapped)
+    )
+    p <- object |>
+      ggplot2::ggplot() +
+      ggplot2::geom_col(ggplot2::aes(
+        x = .data[['rule_wrapped']],
+        y = .data[['cumulative_pairs']]
+      ), fill = 'grey80') +
+      ggplot2::geom_col(ggplot2::aes(
+        x = .data[['rule_wrapped']],
+        y = .data[['additional']]
+      )) +
+      ggplot2::coord_flip() +
+      ggplot2::labs(
+        title = 'Cumulative Pairs by Blocking Rule',
+        x = NULL,
+        y = 'Pairs'
+      ) +
+      ggplot2::scale_y_continuous(labels = \(x) formatC(x, format = 'f', big.mark = ',', digits = 0)) +
+      ggplot2::theme_minimal()
+  } else {
+    object$rule_wrapped <- stats::reorder(object$rule_wrapped, object$n_pairs)
+    p <- object |>
+      ggplot2::ggplot() +
+      ggplot2::geom_col(ggplot2::aes(
+        x = .data[['rule_wrapped']],
+        y = .data[['n_pairs']]
+      )) +
+      ggplot2::coord_flip() +
+      ggplot2::labs(
+        title = 'Candidate Pairs per Blocking Rule',
+        x = NULL,
+        y = 'Pairs Generated'
+      ) +
+      ggplot2::scale_y_continuous(labels = \(x) formatC(x, format = 'f', big.mark = ',', digits = 0)) +
+      ggplot2::theme_minimal()
+  }
+  p
 }
 
 #' Plot Column Value Profiles
