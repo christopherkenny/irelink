@@ -32,6 +32,7 @@ reference:
       - il_nullif
       - il_cast_to_string
       - il_try_parse_date
+      - il_try_parse_timestamp
       - il_array_element
       - is_il_spec
 
