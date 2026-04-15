@@ -36,19 +36,8 @@ jobs:
           extra-packages: any::pkgdown, local::.
           needs: website
 
-      - name: Cache slow pkgdown articles
-        uses: actions/cache@v4
-        with:
-          path: docs/articles
-          key: pkgdown-articles-${{ hashFiles('vignettes/articles/**') }}
-
       - name: Build site
-        run: |
-          if (dir.exists('docs/articles')) {
-            htmls <- list.files('docs/articles', pattern = '\\.html$', full.names = TRUE)
-            if (length(htmls)) Sys.setFileTime(htmls, Sys.time() + 3600)
-          }
-          pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE, lazy = TRUE)
+        run: pkgdown::build_site_github_pages(new_process = FALSE, install = FALSE, lazy = TRUE)
         shell: Rscript {0}
 
       - name: Deploy to GitHub pages 🚀
