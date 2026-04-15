@@ -3,13 +3,13 @@ pkgdown: 2.2.0
 pkgdown_sha: ~
 articles:
   advanced: advanced.html
-  articles/deduplicate-50k: deduplicate-50k.html
+  deduplicate-50k: deduplicate-50k.html
   deduplication: deduplication.html
   from_splink: from_splink.html
   irelink: irelink.html
   record-linkage: record-linkage.html
-  articles/transactions: transactions.html
-last_built: 2026-04-12T17:07Z
+  transactions: transactions.html
+last_built: 2026-04-15T01:10Z
 urls:
   reference: http://christophertkenny.com/irelink/reference
   article: http://christophertkenny.com/irelink/articles

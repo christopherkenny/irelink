@@ -23,17 +23,7 @@ library(ggplot2)
 ## Load the data
 
 ``` r
-df_a <- head(febrl4a, 1000)
-df_b <- head(febrl4b, 1000)
-
-nrow(df_a)
-#> [1] 1000
-nrow(df_b)
-#> [1] 1000
-```
-
-``` r
-head(df_a)
+head(febrl4a)
 #> # A tibble: 6 × 11
 #>   rec_id    given_name surname street_number address_1 address_2 suburb postcode
 #>   <chr>     <chr>      <chr>           <int> <chr>     <chr>     <chr>     <int>
@@ -44,7 +34,7 @@ head(df_a)
 #> 5 rec-3585… mikayla    mallon…            37 randwick… avalind   hoppe…     4552
 #> 6 rec-298-… blake      howie               1 cutlack … belmont … budge…     6017
 #> # ℹ 3 more variables: state <chr>, date_of_birth <int>, soc_sec_id <int>
-head(df_b)
+head(febrl4b)
 #> # A tibble: 6 × 11
 #>   rec_id    given_name surname street_number address_1 address_2 suburb postcode
 #>   <chr>     <chr>      <chr>           <int> <chr>     <chr>     <chr>     <int>
@@ -64,21 +54,21 @@ due to the corruption process:
 
 ``` r
 con <- DBI::dbConnect(duckdb::duckdb())
-comp <- il_completeness(df_a, df_b, con = con)
+comp <- il_completeness(febrl4a, febrl4b, con = con)
 comp
 #> # A tibble: 22 × 5
 #>    table   column        n_total n_non_null pct_non_null
 #>    <chr>   <chr>           <int>      <int>        <dbl>
-#>  1 table_1 rec_id           1000       1000        100  
-#>  2 table_1 given_name       1000        979         97.9
-#>  3 table_1 surname          1000        990         99  
-#>  4 table_1 street_number    1000        968         96.8
-#>  5 table_1 address_1        1000        980         98  
-#>  6 table_1 address_2        1000        918         91.8
-#>  7 table_1 suburb           1000        985         98.5
-#>  8 table_1 postcode         1000       1000        100  
-#>  9 table_1 state            1000        991         99.1
-#> 10 table_1 date_of_birth    1000        979         97.9
+#>  1 table_1 rec_id           5000       5000        100  
+#>  2 table_1 given_name       5000       4888         97.8
+#>  3 table_1 surname          5000       4952         99.0
+#>  4 table_1 street_number    5000       4842         96.8
+#>  5 table_1 address_1        5000       4902         98.0
+#>  6 table_1 address_2        5000       4580         91.6
+#>  7 table_1 suburb           5000       4945         98.9
+#>  8 table_1 postcode         5000       5000        100  
+#>  9 table_1 state            5000       4950         99  
+#> 10 table_1 date_of_birth    5000       4906         98.1
 #> # ℹ 12 more rows
 ```
 
@@ -121,7 +111,7 @@ Create a link-type model with both tables:
 
 ``` r
 model <- il_model(
-  df_a, df_b,
+  febrl4a, febrl4b,
   spec = spec,
   con = con,
   link_type = 'link'
@@ -131,8 +121,8 @@ model
 #> irelink Model
 #>   Status: Untrained
 #>   Link type: link
-#>   Records: 1000
-#>   Records (right): 1000
+#>   Records: 5000
+#>   Records (right): 5000
 #>   Comparisons: 4
 #>   Blocking rules: 2
 ```
@@ -169,22 +159,22 @@ autoplot(model, type = 'parameters')
 ``` r
 il_weights(model)
 #> # A tibble: 14 × 5
-#>    comparison    gamma_level   m_prob  u_prob weight
-#>    <chr>               <int>    <dbl>   <dbl>  <dbl>
-#>  1 given_name              0 0.208    0.973   -2.23 
-#>  2 given_name              1 0.000999 0.0214  -4.42 
-#>  3 given_name              2 0.000999 0.00081  0.303
-#>  4 given_name              3 0.188    0.00155  6.92 
-#>  5 given_name              4 0.602    0.00299  7.65 
-#>  6 surname                 0 0.145    0.983   -2.76 
-#>  7 surname                 1 0.0150   0.0120   0.316
-#>  8 surname                 2 0.0149   0.00091  4.03 
-#>  9 surname                 3 0.151    0.0013   6.86 
-#> 10 surname                 4 0.674    0.00318  7.73 
-#> 11 date_of_birth           0 0.0827   1.000   -3.60 
-#> 12 date_of_birth           1 0.917    0.00015 12.6  
-#> 13 postcode                0 0.137    0.999   -2.87 
-#> 14 postcode                1 0.863    0.00107  9.66
+#>    comparison    gamma_level  m_prob  u_prob weight
+#>    <chr>               <int>   <dbl>   <dbl>  <dbl>
+#>  1 given_name              0 0.180   0.972   -2.43 
+#>  2 given_name              1 0.0116  0.0221  -0.928
+#>  3 given_name              2 0.0127  0.00114  3.48 
+#>  4 given_name              3 0.124   0.00114  6.77 
+#>  5 given_name              4 0.671   0.00354  7.57 
+#>  6 surname                 0 0.127   0.981   -2.95 
+#>  7 surname                 1 0.00697 0.0120  -0.788
+#>  8 surname                 2 0.0156  0.00123  3.67 
+#>  9 surname                 3 0.182   0.00141  7.01 
+#> 10 surname                 4 0.669   0.00427  7.29 
+#> 11 date_of_birth           0 0.0769  1.000   -3.70 
+#> 12 date_of_birth           1 0.923   0.0002  12.2  
+#> 13 postcode                0 0.143   0.999   -2.80 
+#> 14 postcode                1 0.857   0.00124  9.43
 ```
 
 ## Predict and cluster
@@ -192,7 +182,7 @@ il_weights(model)
 ``` r
 predictions <- predict(model, threshold = 0.5)
 nrow(predictions)
-#> [1] 160
+#> [1] 4162
 ```
 
 ``` r
@@ -207,14 +197,14 @@ Cluster the pairs to resolve entities:
 clusters <- il_cluster(predictions, threshold = 0.85)
 head(clusters)
 #> # A tibble: 6 × 2
-#>   unique_id cluster_id 
-#>   <chr>     <chr>      
-#> 1 613       cluster_314
-#> 2 280       cluster_280
-#> 3 603       cluster_603
-#> 4 192       cluster_192
-#> 5 166       cluster_166
-#> 6 405       cluster_405
+#>   unique_id cluster_id  
+#>   <chr>     <chr>       
+#> 1 137       cluster_137 
+#> 2 314       cluster_314 
+#> 3 1974      cluster_1974
+#> 4 728       cluster_2656
+#> 5 2734      cluster_2637
+#> 6 3284      cluster_3284
 ```
 
 ## Evaluate against ground truth
@@ -224,12 +214,12 @@ pairwise labels:
 
 ``` r
 # Extract entity number from rec_id (e.g., "rec-1070-org" -> "1070")
-entity_a <- sub('^rec-(\\d+)-org$', '\\1', df_a$rec_id)
-entity_b <- sub('^rec-(\\d+)-dup-\\d+$', '\\1', df_b$rec_id)
+entity_a <- sub('^rec-(\\d+)-org$', '\\1', febrl4a$rec_id)
+entity_b <- sub('^rec-(\\d+)-dup-\\d+$', '\\1', febrl4b$rec_id)
 
 # Build id-entity lookup (unique_id auto-generated by il_model)
-ids_a <- data.frame(unique_id = seq_len(nrow(df_a)), entity = entity_a)
-ids_b <- data.frame(unique_id = seq_len(nrow(df_b)), entity = entity_b)
+ids_a <- data.frame(unique_id = seq_len(nrow(febrl4a)), entity = entity_a)
+ids_b <- data.frame(unique_id = seq_len(nrow(febrl4b)), entity = entity_b)
 
 # True matches: same entity across tables
 positives <- merge(ids_a, ids_b, by = 'entity')
@@ -252,9 +242,9 @@ negatives <- data.frame(
 
 labels <- rbind(positives, negatives)
 nrow(labels)
-#> [1] 384
+#> [1] 7000
 sum(labels$is_match)
-#> [1] 192
+#> [1] 5001
 ```
 
 ### Accuracy metrics

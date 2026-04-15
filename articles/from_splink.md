@@ -20,20 +20,7 @@ serve the same role and can be passed directly to
 
 ## Core workflow
 
-| Step                | splink (Python)                                                           | irelink (R)                                          |
-|---------------------|---------------------------------------------------------------------------|------------------------------------------------------|
-| Load data           | `splink_datasets.fake_1000`                                               | `fake_1000`                                          |
-| Choose backend      | `DuckDBAPI()`                                                             | `DBI::dbConnect(duckdb::duckdb())`                   |
-| Define settings     | `SettingsCreator(...)`                                                    | `il_spec() \|> il_compare(...) \|> il_block_on(...)` |
-| Create model        | `Linker(df, settings, db_api)`                                            | `il_model(df, spec = spec, con = con)`               |
-| Estimate prior      | `linker.training.estimate_probability_two_random_records_match(...)`      | `il_estimate_prior(model, ...)`                      |
-| Estimate u          | `linker.training.estimate_u_using_random_sampling(...)`                   | `il_estimate_u(model)`                               |
-| Estimate m (EM)     | `linker.training.estimate_parameters_using_expectation_maximisation(...)` | `il_estimate_em(model, ...)`                         |
-| Estimate m (labels) | `linker.training.estimate_m_from_pairwise_labels(...)`                    | `il_estimate_m_from_labels(model, ...)`              |
-| Predict             | `linker.inference.predict(...)`                                           | `predict(model, ...)`                                |
-| Cluster             | `linker.clustering.cluster_pairwise_predictions_at_threshold(...)`        | `il_cluster(pairs)`                                  |
-| Deterministic link  | `linker.deterministic_link()`                                             | `il_deterministic_link(df, ...)`                     |
-| Find matches        | `linker.inference.find_matches_to_new_records(...)`                       | `il_find_matches(model, new_records, ...)`           |
+[TABLE]
 
 ## Comparison levels
 
@@ -78,22 +65,11 @@ that return a pre-configured set of levels.
 
 ## Model inspection
 
-| splink (Python)                                                | irelink (R)                                   |
-|----------------------------------------------------------------|-----------------------------------------------|
-| `linker.visualisations.match_weights_chart()`                  | `il_weights(model)`                           |
-| `linker.visualisations.parameter_estimate_comparisons_chart()` | `il_parameters(model)`                        |
-| `linker.visualisations.waterfall_chart(...)`                   | `il_waterfall(pairs, ...)`                    |
-| `linker.misc.query_comparison_details(...)`                    | `il_compare_records(record_a, record_b, ...)` |
-| `linker.training.prediction_errors_from_labels_column(...)`    | `il_errors(model, ...)`                       |
-| `linker.evaluation.unlinkables_chart()`                        | `il_unlinkables(model)`                       |
+[TABLE]
 
 ## Evaluation
 
-| splink (Python)                                                    | irelink (R)                       |
-|--------------------------------------------------------------------|-----------------------------------|
-| `linker.evaluation.accuracy_chart_from_labels_column(...)`         | `il_accuracy(model, ...)`         |
-| `linker.evaluation.precision_recall_chart_from_labels_column(...)` | `il_precision_recall(model, ...)` |
-| `linker.evaluation.roc_chart_from_labels_column(...)`              | `il_roc(model, ...)`              |
+[TABLE]
 
 ## Data profiling
 

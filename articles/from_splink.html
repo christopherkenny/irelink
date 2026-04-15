@@ -117,7 +117,9 @@ directly to <code><a href="../reference/il_compare.html">il_compare()</a></code>
 <tr class="odd">
 <td>Define settings</td>
 <td><code>SettingsCreator(...)</code></td>
-<td><code>il_spec() \|&gt; il_compare(...) \|&gt; il_block_on(...)</code></td>
+<td>
+<code>il_spec() \|&gt;</code><br><code>il_compare(...) \|&gt;</code><br><code>il_block_on(...)</code>
+</td>
 </tr>
 <tr class="even">
 <td>Create model</td>
@@ -126,22 +128,30 @@ directly to <code><a href="../reference/il_compare.html">il_compare()</a></code>
 </tr>
 <tr class="odd">
 <td>Estimate prior</td>
-<td><code>linker.training.estimate_probability_two_random_records_match(...)</code></td>
+<td>
+<code>linker.training.</code><br><code>estimate_probability_two_random_records_match(...)</code>
+</td>
 <td><code>il_estimate_prior(model, ...)</code></td>
 </tr>
 <tr class="even">
 <td>Estimate u</td>
-<td><code>linker.training.estimate_u_using_random_sampling(...)</code></td>
+<td>
+<code>linker.training.</code><br><code>estimate_u_using_random_sampling(...)</code>
+</td>
 <td><code>il_estimate_u(model)</code></td>
 </tr>
 <tr class="odd">
 <td>Estimate m (EM)</td>
-<td><code>linker.training.estimate_parameters_using_expectation_maximisation(...)</code></td>
+<td>
+<code>linker.training.</code><br><code>estimate_parameters_using_expectation_maximisation(...)</code>
+</td>
 <td><code>il_estimate_em(model, ...)</code></td>
 </tr>
 <tr class="even">
 <td>Estimate m (labels)</td>
-<td><code>linker.training.estimate_m_from_pairwise_labels(...)</code></td>
+<td>
+<code>linker.training.</code><br><code>estimate_m_from_pairwise_labels(...)</code>
+</td>
 <td><code>il_estimate_m_from_labels(model, ...)</code></td>
 </tr>
 <tr class="odd">
@@ -151,7 +161,9 @@ directly to <code><a href="../reference/il_compare.html">il_compare()</a></code>
 </tr>
 <tr class="even">
 <td>Cluster</td>
-<td><code>linker.clustering.cluster_pairwise_predictions_at_threshold(...)</code></td>
+<td>
+<code>linker.clustering.</code><br><code>cluster_pairwise_predictions_at_threshold(...)</code>
+</td>
 <td><code>il_cluster(pairs)</code></td>
 </tr>
 <tr class="odd">
@@ -161,7 +173,9 @@ directly to <code><a href="../reference/il_compare.html">il_compare()</a></code>
 </tr>
 <tr class="even">
 <td>Find matches</td>
-<td><code>linker.inference.find_matches_to_new_records(...)</code></td>
+<td>
+<code>linker.inference.</code><br><code>find_matches_to_new_records(...)</code>
+</td>
 <td><code>il_find_matches(model, new_records, ...)</code></td>
 </tr>
 </tbody>
@@ -307,7 +321,9 @@ functions that return a pre-configured set of levels.</p>
 <td><code>il_weights(model)</code></td>
 </tr>
 <tr class="even">
-<td><code>linker.visualisations.parameter_estimate_comparisons_chart()</code></td>
+<td>
+<code>linker.visualisations.</code><br><code>parameter_estimate_comparisons_chart()</code>
+</td>
 <td><code>il_parameters(model)</code></td>
 </tr>
 <tr class="odd">
@@ -319,7 +335,9 @@ functions that return a pre-configured set of levels.</p>
 <td><code>il_compare_records(record_a, record_b, ...)</code></td>
 </tr>
 <tr class="odd">
-<td><code>linker.training.prediction_errors_from_labels_column(...)</code></td>
+<td>
+<code>linker.training.</code><br><code>prediction_errors_from_labels_column(...)</code>
+</td>
 <td><code>il_errors(model, ...)</code></td>
 </tr>
 <tr class="even">
@@ -343,15 +361,21 @@ functions that return a pre-configured set of levels.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><code>linker.evaluation.accuracy_chart_from_labels_column(...)</code></td>
+<td>
+<code>linker.evaluation.</code><br><code>accuracy_chart_from_labels_column(...)</code>
+</td>
 <td><code>il_accuracy(model, ...)</code></td>
 </tr>
 <tr class="even">
-<td><code>linker.evaluation.precision_recall_chart_from_labels_column(...)</code></td>
+<td>
+<code>linker.evaluation.</code><br><code>precision_recall_chart_from_labels_column(...)</code>
+</td>
 <td><code>il_precision_recall(model, ...)</code></td>
 </tr>
 <tr class="odd">
-<td><code>linker.evaluation.roc_chart_from_labels_column(...)</code></td>
+<td>
+<code>linker.evaluation.</code><br><code>roc_chart_from_labels_column(...)</code>
+</td>
 <td><code>il_roc(model, ...)</code></td>
 </tr>
 </tbody>

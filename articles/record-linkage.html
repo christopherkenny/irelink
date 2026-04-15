@@ -95,15 +95,7 @@ base number (e.g., <code>rec-1070-org</code> and
 <h2 id="load-the-data">Load the data<a class="anchor" aria-label="anchor" href="#load-the-data"></a>
 </h2>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="va">df_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">febrl4a</span>, <span class="fl">1000</span><span class="op">)</span></span>
-<span><span class="va">df_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">febrl4b</span>, <span class="fl">1000</span><span class="op">)</span></span>
-<span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_a</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1000</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_b</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 1000</span></span></code></pre></div>
-<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df_a</span><span class="op">)</span></span>
+<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">febrl4a</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 11</span></span></span>
 <span><span class="co">#&gt;   rec_id    given_name surname street_number address_1 address_2 suburb postcode</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
@@ -114,7 +106,7 @@ base number (e.g., <code>rec-1070-org</code> and
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> rec-3585… mikayla    mallon…            37 randwick… avalind   hoppe…     <span style="text-decoration: underline;">4</span>552</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> rec-298-… blake      howie               1 cutlack … belmont … budge…     <span style="text-decoration: underline;">6</span>017</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 3 more variables: state &lt;chr&gt;, date_of_birth &lt;int&gt;, soc_sec_id &lt;int&gt;</span></span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">df_b</span><span class="op">)</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">febrl4b</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 11</span></span></span>
 <span><span class="co">#&gt;   rec_id    given_name surname street_number address_1 address_2 suburb postcode</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
@@ -131,25 +123,25 @@ base number (e.g., <code>rec-1070-org</code> and
 </h2>
 <p>Check completeness across both tables. Table B has more missing
 values due to the corruption process:</p>
-<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_completeness.html">il_completeness</a></span><span class="op">(</span><span class="va">df_a</span>, <span class="va">df_b</span>, con <span class="op">=</span> <span class="va">con</span><span class="op">)</span></span>
+<span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_completeness.html">il_completeness</a></span><span class="op">(</span><span class="va">febrl4a</span>, <span class="va">febrl4b</span>, con <span class="op">=</span> <span class="va">con</span><span class="op">)</span></span>
 <span><span class="va">comp</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 22 × 5</span></span></span>
 <span><span class="co">#&gt;    table   column        n_total n_non_null pct_non_null</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> table_1 rec_id           <span style="text-decoration: underline;">1</span>000       <span style="text-decoration: underline;">1</span>000        100  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> table_1 given_name       <span style="text-decoration: underline;">1</span>000        979         97.9</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> table_1 surname          <span style="text-decoration: underline;">1</span>000        990         99  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> table_1 street_number    <span style="text-decoration: underline;">1</span>000        968         96.8</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> table_1 address_1        <span style="text-decoration: underline;">1</span>000        980         98  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> table_1 address_2        <span style="text-decoration: underline;">1</span>000        918         91.8</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> table_1 suburb           <span style="text-decoration: underline;">1</span>000        985         98.5</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> table_1 postcode         <span style="text-decoration: underline;">1</span>000       <span style="text-decoration: underline;">1</span>000        100  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> table_1 state            <span style="text-decoration: underline;">1</span>000        991         99.1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> table_1 date_of_birth    <span style="text-decoration: underline;">1</span>000        979         97.9</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> table_1 rec_id           <span style="text-decoration: underline;">5</span>000       <span style="text-decoration: underline;">5</span>000        100  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> table_1 given_name       <span style="text-decoration: underline;">5</span>000       <span style="text-decoration: underline;">4</span>888         97.8</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> table_1 surname          <span style="text-decoration: underline;">5</span>000       <span style="text-decoration: underline;">4</span>952         99.0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> table_1 street_number    <span style="text-decoration: underline;">5</span>000       <span style="text-decoration: underline;">4</span>842         96.8</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> table_1 address_1        <span style="text-decoration: underline;">5</span>000       <span style="text-decoration: underline;">4</span>902         98.0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> table_1 address_2        <span style="text-decoration: underline;">5</span>000       <span style="text-decoration: underline;">4</span>580         91.6</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> table_1 suburb           <span style="text-decoration: underline;">5</span>000       <span style="text-decoration: underline;">4</span>945         98.9</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> table_1 postcode         <span style="text-decoration: underline;">5</span>000       <span style="text-decoration: underline;">5</span>000        100  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> table_1 state            <span style="text-decoration: underline;">5</span>000       <span style="text-decoration: underline;">4</span>950         99  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> table_1 date_of_birth    <span style="text-decoration: underline;">5</span>000       <span style="text-decoration: underline;">4</span>906         98.1</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 12 more rows</span></span></span></code></pre></div>
-<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">comp</span><span class="op">)</span></span></code></pre></div>
 <p><img src="record-linkage_files/figure-html/completeness-plot-1.png" class="r-plt" alt="" width="576"></p>
 </div>
@@ -160,7 +152,7 @@ values due to the corruption process:</p>
 <code>link_type = "link"</code> when creating the model. Comparisons use
 name similarity, date-of-birth matching, and postcode exact
 matching:</p>
-<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">given_name</span>, <span class="fu"><a href="../reference/cl_name.html">cl_name</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">surname</span>, <span class="fu"><a href="../reference/cl_name.html">cl_name</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -184,9 +176,9 @@ matching:</p>
 <h2 id="train-the-model">Train the model<a class="anchor" aria-label="anchor" href="#train-the-model"></a>
 </h2>
 <p>Create a link-type model with both tables:</p>
-<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_model.html">il_model</a></span><span class="op">(</span></span>
-<span>  <span class="va">df_a</span>, <span class="va">df_b</span>,</span>
+<span>  <span class="va">febrl4a</span>, <span class="va">febrl4b</span>,</span>
 <span>  spec <span class="op">=</span> <span class="va">spec</span>,</span>
 <span>  con <span class="op">=</span> <span class="va">con</span>,</span>
 <span>  link_type <span class="op">=</span> <span class="st">'link'</span></span>
@@ -196,12 +188,12 @@ matching:</p>
 <span><span class="co">#&gt; irelink Model</span></span>
 <span><span class="co">#&gt;   Status: Untrained</span></span>
 <span><span class="co">#&gt;   Link type: link</span></span>
-<span><span class="co">#&gt;   Records: 1000</span></span>
-<span><span class="co">#&gt;   Records (right): 1000</span></span>
+<span><span class="co">#&gt;   Records: 5000</span></span>
+<span><span class="co">#&gt;   Records (right): 5000</span></span>
 <span><span class="co">#&gt;   Comparisons: 4</span></span>
 <span><span class="co">#&gt;   Blocking rules: 2</span></span></code></pre></div>
 <p>Estimate prior match probability, u-probabilities, and run EM:</p>
-<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_prior.html">il_estimate_prior</a></span><span class="op">(</span></span>
 <span>  <span class="va">model</span>,</span>
 <span>  <span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">given_name</span>, <span class="va">surname</span><span class="op">)</span>,</span>
@@ -216,69 +208,69 @@ matching:</p>
 <div class="section level2">
 <h2 id="inspect-the-model">Inspect the model<a class="anchor" aria-label="anchor" href="#inspect-the-model"></a>
 </h2>
-<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></code></pre></div>
 <p><img src="record-linkage_files/figure-html/weights-1.png" class="r-plt" alt="" width="576"></p>
-<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">model</span>, type <span class="op">=</span> <span class="st">'parameters'</span><span class="op">)</span></span></code></pre></div>
 <p><img src="record-linkage_files/figure-html/params-1.png" class="r-plt" alt="" width="672"></p>
-<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_weights.html">il_weights</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 14 × 5</span></span></span>
-<span><span class="co">#&gt;    comparison    gamma_level   m_prob  u_prob weight</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> given_name              0 0.208    0.973   -<span style="color: #BB0000;">2.23</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> given_name              1 0.000<span style="text-decoration: underline;">999</span> 0.021<span style="text-decoration: underline;">4</span>  -<span style="color: #BB0000;">4.42</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> given_name              2 0.000<span style="text-decoration: underline;">999</span> 0.000<span style="text-decoration: underline;">81</span>  0.303</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> given_name              3 0.188    0.001<span style="text-decoration: underline;">55</span>  6.92 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> given_name              4 0.602    0.002<span style="text-decoration: underline;">99</span>  7.65 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> surname                 0 0.145    0.983   -<span style="color: #BB0000;">2.76</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> surname                 1 0.015<span style="text-decoration: underline;">0</span>   0.012<span style="text-decoration: underline;">0</span>   0.316</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> surname                 2 0.014<span style="text-decoration: underline;">9</span>   0.000<span style="text-decoration: underline;">91</span>  4.03 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> surname                 3 0.151    0.001<span style="text-decoration: underline;">3</span>   6.86 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> surname                 4 0.674    0.003<span style="text-decoration: underline;">18</span>  7.73 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> date_of_birth           0 0.082<span style="text-decoration: underline;">7</span>   1.000   -<span style="color: #BB0000;">3.60</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> date_of_birth           1 0.917    0.000<span style="text-decoration: underline;">15</span> 12.6  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span> postcode                0 0.137    0.999   -<span style="color: #BB0000;">2.87</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span> postcode                1 0.863    0.001<span style="text-decoration: underline;">07</span>  9.66</span></span></code></pre></div>
+<span><span class="co">#&gt;    comparison    gamma_level  m_prob  u_prob weight</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> given_name              0 0.180   0.972   -<span style="color: #BB0000;">2.43</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> given_name              1 0.011<span style="text-decoration: underline;">6</span>  0.022<span style="text-decoration: underline;">1</span>  -<span style="color: #BB0000;">0.928</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> given_name              2 0.012<span style="text-decoration: underline;">7</span>  0.001<span style="text-decoration: underline;">14</span>  3.48 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> given_name              3 0.124   0.001<span style="text-decoration: underline;">14</span>  6.77 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> given_name              4 0.671   0.003<span style="text-decoration: underline;">54</span>  7.57 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> surname                 0 0.127   0.981   -<span style="color: #BB0000;">2.95</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> surname                 1 0.006<span style="text-decoration: underline;">97</span> 0.012<span style="text-decoration: underline;">0</span>  -<span style="color: #BB0000;">0.788</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> surname                 2 0.015<span style="text-decoration: underline;">6</span>  0.001<span style="text-decoration: underline;">23</span>  3.67 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> surname                 3 0.182   0.001<span style="text-decoration: underline;">41</span>  7.01 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> surname                 4 0.669   0.004<span style="text-decoration: underline;">27</span>  7.29 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> date_of_birth           0 0.076<span style="text-decoration: underline;">9</span>  1.000   -<span style="color: #BB0000;">3.70</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> date_of_birth           1 0.923   0.000<span style="text-decoration: underline;">2</span>  12.2  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span> postcode                0 0.143   0.999   -<span style="color: #BB0000;">2.80</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span> postcode                1 0.857   0.001<span style="text-decoration: underline;">24</span>  9.43</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="predict-and-cluster">Predict and cluster<a class="anchor" aria-label="anchor" href="#predict-and-cluster"></a>
 </h2>
-<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">predictions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">predictions</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 160</span></span></code></pre></div>
-<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
+<span><span class="co">#&gt; [1] 4162</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">predictions</span><span class="op">)</span></span></code></pre></div>
 <p><img src="record-linkage_files/figure-html/hist-1.png" class="r-plt" alt="" width="576"></p>
 <p>Cluster the pairs to resolve entities:</p>
-<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">predictions</span>, threshold <span class="op">=</span> <span class="fl">0.85</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">clusters</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
-<span><span class="co">#&gt;   unique_id cluster_id </span></span>
-<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 613       cluster_314</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 280       cluster_280</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 603       cluster_603</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 192       cluster_192</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 166       cluster_166</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 405       cluster_405</span></span></code></pre></div>
+<span><span class="co">#&gt;   unique_id cluster_id  </span></span>
+<span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 137       cluster_137 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 314       cluster_314 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 1974      cluster_1974</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 728       cluster_2656</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 2734      cluster_2637</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 3284      cluster_3284</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>
 </h2>
 <p>The <code>rec_id</code> column encodes ground truth. Extract entity
 IDs and build pairwise labels:</p>
-<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Extract entity number from rec_id (e.g., "rec-1070-org" -&gt; "1070")</span></span>
-<span><span class="va">entity_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">'^rec-(\\d+)-org$'</span>, <span class="st">'\\1'</span>, <span class="va">df_a</span><span class="op">$</span><span class="va">rec_id</span><span class="op">)</span></span>
-<span><span class="va">entity_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">'^rec-(\\d+)-dup-\\d+$'</span>, <span class="st">'\\1'</span>, <span class="va">df_b</span><span class="op">$</span><span class="va">rec_id</span><span class="op">)</span></span>
+<span><span class="va">entity_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">'^rec-(\\d+)-org$'</span>, <span class="st">'\\1'</span>, <span class="va">febrl4a</span><span class="op">$</span><span class="va">rec_id</span><span class="op">)</span></span>
+<span><span class="va">entity_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">'^rec-(\\d+)-dup-\\d+$'</span>, <span class="st">'\\1'</span>, <span class="va">febrl4b</span><span class="op">$</span><span class="va">rec_id</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># Build id-entity lookup (unique_id auto-generated by il_model)</span></span>
-<span><span class="va">ids_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>unique_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_a</span><span class="op">)</span><span class="op">)</span>, entity <span class="op">=</span> <span class="va">entity_a</span><span class="op">)</span></span>
-<span><span class="va">ids_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>unique_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">df_b</span><span class="op">)</span><span class="op">)</span>, entity <span class="op">=</span> <span class="va">entity_b</span><span class="op">)</span></span>
+<span><span class="va">ids_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>unique_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">febrl4a</span><span class="op">)</span><span class="op">)</span>, entity <span class="op">=</span> <span class="va">entity_a</span><span class="op">)</span></span>
+<span><span class="va">ids_b</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span>unique_id <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/seq.html" class="external-link">seq_len</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">febrl4b</span><span class="op">)</span><span class="op">)</span>, entity <span class="op">=</span> <span class="va">entity_b</span><span class="op">)</span></span>
 <span></span>
 <span><span class="co"># True matches: same entity across tables</span></span>
 <span><span class="va">positives</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/merge.html" class="external-link">merge</a></span><span class="op">(</span><span class="va">ids_a</span>, <span class="va">ids_b</span>, by <span class="op">=</span> <span class="st">'entity'</span><span class="op">)</span></span>
@@ -301,13 +293,13 @@ IDs and build pairwise labels:</p>
 <span></span>
 <span><span class="va">labels</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/cbind.html" class="external-link">rbind</a></span><span class="op">(</span><span class="va">positives</span>, <span class="va">negatives</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">labels</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 384</span></span>
+<span><span class="co">#&gt; [1] 7000</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">labels</span><span class="op">$</span><span class="va">is_match</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 192</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 5001</span></span></code></pre></div>
 <div class="section level3">
 <h3 id="accuracy-metrics">Accuracy metrics<a class="anchor" aria-label="anchor" href="#accuracy-metrics"></a>
 </h3>
-<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">acc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_accuracy.html">il_accuracy</a></span><span class="op">(</span><span class="va">model</span>, labels <span class="op">=</span> <span class="va">labels</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">acc</span><span class="op">)</span></span></code></pre></div>
 <p><img src="record-linkage_files/figure-html/accuracy-1.png" class="r-plt" alt="" width="576"></p>
@@ -315,11 +307,11 @@ IDs and build pairwise labels:</p>
 <div class="section level3">
 <h3 id="roc-and-precisionrecall">ROC and Precision–Recall<a class="anchor" aria-label="anchor" href="#roc-and-precisionrecall"></a>
 </h3>
-<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">roc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_roc.html">il_roc</a></span><span class="op">(</span><span class="va">model</span>, labels <span class="op">=</span> <span class="va">labels</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">roc</span><span class="op">)</span></span></code></pre></div>
 <p><img src="record-linkage_files/figure-html/roc-1.png" class="r-plt" alt="" width="480"></p>
-<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_precision_recall.html">il_precision_recall</a></span><span class="op">(</span><span class="va">model</span>, labels <span class="op">=</span> <span class="va">labels</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">pr</span><span class="op">)</span></span></code></pre></div>
 <p><img src="record-linkage_files/figure-html/pr-1.png" class="r-plt" alt="" width="480"></p>
@@ -328,7 +320,7 @@ IDs and build pairwise labels:</p>
 <div class="section level2">
 <h2 id="cleanup">Cleanup<a class="anchor" aria-label="anchor" href="#cleanup"></a>
 </h2>
-<div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
+<div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 </div>
