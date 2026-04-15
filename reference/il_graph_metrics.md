@@ -99,8 +99,8 @@ metrics$clusters
 #>   <chr>        <int>   <int>   <dbl>                  <dbl>
 #> 1 cluster_13       3       3       1                      0
 #> 2 cluster_1        3       3       1                      0
-#> 3 cluster_10       3       3       1                      0
-#> 4 cluster_15       3       3       1                      0
-#> 5 cluster_17       3       3       1                      0
+#> 3 cluster_17       3       3       1                      0
+#> 4 cluster_10       3       3       1                      0
+#> 5 cluster_15       3       3       1                      0
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
