@@ -134,7 +134,8 @@ Records sharing the same cluster are considered to be the same entity.
 | `cl_cosine()` | Embedding similarity |
 | `cl_numeric_diff()` | Numeric fields (e.g., age) |
 | `cl_pct_diff()` | Percentage difference |
-| `cl_date_diff()` | Date or time fields |
+| `cl_date_diff()` | Date fields |
+| `cl_time_diff()` | Time fields |
 | `cl_distance_km()` | Geographic coordinates |
 | `cl_array_intersect()` | Array or set overlap |
 
@@ -143,10 +144,12 @@ For common field types, domain-specific helpers compose multiple levels into a s
 | Helper | Fields |
 |--------|--------|
 | `cl_name()` | Generic name field |
-| `cl_forename_surname()` | First name and last name together |
+| `cl_first_last_name()` | First name and last name as separate fields |
+| `cl_forename_surname()` | Forename and surname with transposition |
 | `cl_dob()` | Date of birth |
 | `cl_email()` | Email addresses |
-| `cl_postcode()` | Postal codes |
+| `cl_postcode()` | UK postal codes |
+| `cl_zip_code()` | US ZIP codes |
 
 ## Evaluation
 
