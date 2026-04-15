@@ -332,7 +332,7 @@ summary.il_model <- function(object, ...) {
     cat('\n  Parameters:\n')
     params <- object$params
     if (length(params) > 0L) {
-      for (nm in names(params)) {
+      for (nm in setdiff(names(params), 'history')) {
         cat(sprintf('    %s: %s\n', nm, format(params[[nm]])))
       }
     }

@@ -65,12 +65,6 @@
            comparisons:   <chr>            <int> <dbl> <dbl>
            comparisons: 1 first_name           0 0.252   0.8
            comparisons: 2 first_name           1 0.748   0.2
-          history: 1                , 1                , 1                , 1                , first_name       , first_name       , 0                , 1                , 0.232673267326733, 0.767326732673267
-           history: 1                , 1                , 2                , 2                , first_name       , first_name       , 0                , 1                , 0.249001403433013, 0.750998596566987
-           history: 1                , 1                , 3                , 3                , first_name       , first_name       , 0                , 1                , 0.251242328198734, 0.748757671801266
-           history: 1                , 1                , 4                , 4                , first_name       , first_name       , 0                , 1                , 0.251554301316564, 0.748445698683436
-           history: 1                , 1                , 5                , 5                , first_name       , first_name       , 0                , 1                , 0.251597818904961, 0.748402181095039
-           history: 1                , 1                , 6                , 6                , first_name       , first_name       , 0                , 1                , 0.251603890908476, 0.748396109091524
 
 # unit helper print snapshot
 
