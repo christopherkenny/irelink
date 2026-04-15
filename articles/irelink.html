@@ -231,12 +231,12 @@ clusters using connected-components analysis:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 5         cluster_15</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 3         cluster_13</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 6         cluster_15</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 15        cluster_15</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 17        cluster_17</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 7         cluster_17</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 7         cluster_17</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 2         cluster_1 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 1         cluster_1 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 4         cluster_13</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 9         cluster_10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 8         cluster_17</span></span></code></pre></div>
 <p>Each record is assigned a <code>cluster_id</code>. Records sharing
 the same cluster are considered to be the same entity.</p>
 </div>
@@ -289,13 +289,17 @@ for common field types:</p>
 </tr>
 <tr class="even">
 <td><code><a href="../reference/cl_date_diff.html">cl_date_diff()</a></code></td>
-<td>Date or time fields</td>
+<td>Date fields</td>
 </tr>
 <tr class="odd">
+<td><code><a href="../reference/cl_time_diff.html">cl_time_diff()</a></code></td>
+<td>Time fields</td>
+</tr>
+<tr class="even">
 <td><code><a href="../reference/cl_distance_km.html">cl_distance_km()</a></code></td>
 <td>Geographic coordinates</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code><a href="../reference/cl_array_intersect.html">cl_array_intersect()</a></code></td>
 <td>Array or set overlap</td>
 </tr>
@@ -314,20 +318,28 @@ levels into a single call:</p>
 <td>Generic name field</td>
 </tr>
 <tr class="even">
-<td><code><a href="../reference/cl_forename_surname.html">cl_forename_surname()</a></code></td>
-<td>First name and last name together</td>
+<td><code><a href="../reference/cl_first_last_name.html">cl_first_last_name()</a></code></td>
+<td>First name and last name as separate fields</td>
 </tr>
 <tr class="odd">
+<td><code><a href="../reference/cl_forename_surname.html">cl_forename_surname()</a></code></td>
+<td>Forename and surname with transposition</td>
+</tr>
+<tr class="even">
 <td><code><a href="../reference/cl_dob.html">cl_dob()</a></code></td>
 <td>Date of birth</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td><code><a href="../reference/cl_email.html">cl_email()</a></code></td>
 <td>Email addresses</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td><code><a href="../reference/cl_postcode.html">cl_postcode()</a></code></td>
-<td>Postal codes</td>
+<td>UK postal codes</td>
+</tr>
+<tr class="odd">
+<td><code><a href="../reference/cl_zip_code.html">cl_zip_code()</a></code></td>
+<td>US ZIP codes</td>
 </tr>
 </tbody>
 </table>

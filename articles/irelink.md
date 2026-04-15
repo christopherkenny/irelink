@@ -172,12 +172,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 5         cluster_15
-#> 2 3         cluster_13
-#> 3 6         cluster_15
-#> 4 15        cluster_15
-#> 5 17        cluster_17
-#> 6 7         cluster_17
+#> 1 7         cluster_17
+#> 2 2         cluster_1 
+#> 3 1         cluster_1 
+#> 4 4         cluster_13
+#> 5 9         cluster_10
+#> 6 8         cluster_17
 ```
 
 Each record is assigned a `cluster_id`. Records sharing the same cluster
@@ -199,20 +199,23 @@ field types:
 | [`cl_cosine()`](http://christophertkenny.com/irelink/reference/cl_cosine.md)                           | Embedding similarity          |
 | [`cl_numeric_diff()`](http://christophertkenny.com/irelink/reference/cl_numeric_diff.md)               | Numeric fields (e.g., age)    |
 | [`cl_pct_diff()`](http://christophertkenny.com/irelink/reference/cl_pct_diff.md)                       | Percentage difference         |
-| [`cl_date_diff()`](http://christophertkenny.com/irelink/reference/cl_date_diff.md)                     | Date or time fields           |
+| [`cl_date_diff()`](http://christophertkenny.com/irelink/reference/cl_date_diff.md)                     | Date fields                   |
+| [`cl_time_diff()`](http://christophertkenny.com/irelink/reference/cl_time_diff.md)                     | Time fields                   |
 | [`cl_distance_km()`](http://christophertkenny.com/irelink/reference/cl_distance_km.md)                 | Geographic coordinates        |
 | [`cl_array_intersect()`](http://christophertkenny.com/irelink/reference/cl_array_intersect.md)         | Array or set overlap          |
 
 For common field types, domain-specific helpers compose multiple levels
 into a single call:
 
-| Helper                                                                                           | Fields                            |
-|--------------------------------------------------------------------------------------------------|-----------------------------------|
-| [`cl_name()`](http://christophertkenny.com/irelink/reference/cl_name.md)                         | Generic name field                |
-| [`cl_forename_surname()`](http://christophertkenny.com/irelink/reference/cl_forename_surname.md) | First name and last name together |
-| [`cl_dob()`](http://christophertkenny.com/irelink/reference/cl_dob.md)                           | Date of birth                     |
-| [`cl_email()`](http://christophertkenny.com/irelink/reference/cl_email.md)                       | Email addresses                   |
-| [`cl_postcode()`](http://christophertkenny.com/irelink/reference/cl_postcode.md)                 | Postal codes                      |
+| Helper                                                                                           | Fields                                      |
+|--------------------------------------------------------------------------------------------------|---------------------------------------------|
+| [`cl_name()`](http://christophertkenny.com/irelink/reference/cl_name.md)                         | Generic name field                          |
+| [`cl_first_last_name()`](http://christophertkenny.com/irelink/reference/cl_first_last_name.md)   | First name and last name as separate fields |
+| [`cl_forename_surname()`](http://christophertkenny.com/irelink/reference/cl_forename_surname.md) | Forename and surname with transposition     |
+| [`cl_dob()`](http://christophertkenny.com/irelink/reference/cl_dob.md)                           | Date of birth                               |
+| [`cl_email()`](http://christophertkenny.com/irelink/reference/cl_email.md)                       | Email addresses                             |
+| [`cl_postcode()`](http://christophertkenny.com/irelink/reference/cl_postcode.md)                 | UK postal codes                             |
+| [`cl_zip_code()`](http://christophertkenny.com/irelink/reference/cl_zip_code.md)                 | US ZIP codes                                |
 
 ## Evaluation
 
