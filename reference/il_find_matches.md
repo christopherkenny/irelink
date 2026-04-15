@@ -81,6 +81,7 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
+#> Comparisons surname overlap with the blocking rule and will not be updated.
 new_df <- data.frame(
   first_name = 'Jhon', surname = 'Smith',
   dob = '1990-01-15', city = 'London'

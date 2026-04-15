@@ -86,6 +86,7 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
+#> Comparisons surname overlap with the blocking rule and will not be updated.
 labels <- data.frame(
   unique_id_l = c(1L, 1L),
   unique_id_r = c(11L, 2L),
@@ -96,6 +97,6 @@ il_errors(model, labels = labels, threshold = 0.85)
 #> # A tibble: 1 × 6
 #>   unique_id_l unique_id_r match_weight match_probability true_label error_type  
 #>         <int>       <int>        <dbl>             <dbl> <lgl>      <chr>       
-#> 1           1           2         9.13             0.967 FALSE      false_posit…
+#> 1           1           2         8.81             0.959 FALSE      false_posit…
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

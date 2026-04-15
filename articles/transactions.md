@@ -228,6 +228,8 @@ model$params$prior <- 1 / nrow(df_origin)
 model <- il_estimate_u(model, max_pairs = 1e6) |>
   il_estimate_em(block_on(memo)) |>
   il_estimate_em(block_on(amount))
+#> Comparisons memo overlap with the blocking rule and will not be updated.
+#> Comparisons amount overlap with the blocking rule and will not be updated.
 ```
 
 ## Inspect the trained model
@@ -247,20 +249,20 @@ summary(model)
 #>     comparisons: # A tibble: 14 × 4
 #>      comparisons:    comparison       gamma_level        m       u
 #>      comparisons:    <chr>                  <int>    <dbl>   <dbl>
-#>      comparisons:  1 amount                     0 0.000996 0.875  
-#>      comparisons:  2 amount                     1 0.000996 0.0873 
-#>      comparisons:  3 amount                     2 0.000996 0.0266 
-#>      comparisons:  4 amount                     3 0.000996 0.00743
-#>      comparisons:  5 amount                     4 0.996    0.00376
-#>      comparisons:  6 memo                       0 0.000998 0.856  
-#>      comparisons:  7 memo                       1 0.000998 0.111  
-#>      comparisons:  8 memo                       2 0.160    0.0279 
-#>      comparisons:  9 memo                       3 0.838    0.00486
-#>      comparisons: 10 transaction_date           0 0.000998 0.719  
-#>      comparisons: 11 transaction_date           1 0.000998 0.168  
-#>      comparisons: 12 transaction_date           2 0.0374   0.0600 
-#>      comparisons: 13 transaction_date           3 0.511    0.0313 
-#>      comparisons: 14 transaction_date           4 0.449    0.0211
+#>      comparisons:  1 amount                     0 0.0177   0.875  
+#>      comparisons:  2 amount                     1 0.00171  0.0873 
+#>      comparisons:  3 amount                     2 0.230    0.0266 
+#>      comparisons:  4 amount                     3 0.313    0.00743
+#>      comparisons:  5 amount                     4 0.438    0.00376
+#>      comparisons:  6 memo                       0 0.00543  0.856  
+#>      comparisons:  7 memo                       1 0.143    0.111  
+#>      comparisons:  8 memo                       2 0.274    0.0279 
+#>      comparisons:  9 memo                       3 0.577    0.00486
+#>      comparisons: 10 transaction_date           0 0.000999 0.719  
+#>      comparisons: 11 transaction_date           1 0.0402   0.168  
+#>      comparisons: 12 transaction_date           2 0.0899   0.0600 
+#>      comparisons: 13 transaction_date           3 0.473    0.0313 
+#>      comparisons: 14 transaction_date           4 0.396    0.0211
 ```
 
 ``` r
@@ -280,20 +282,20 @@ autoplot(model, type = 'parameters')
 ``` r
 predictions <- predict(model, threshold = 0.001)
 predictions
-#> # A tibble: 44,506 × 7
+#> # A tibble: 113,557 × 7
 #>    unique_id_l unique_id_r match_weight match_probability gamma_amount
 #>  *       <dbl>       <dbl>        <dbl>             <dbl>        <int>
-#>  1          15          15        19.5            0.943              4
-#>  2          33          33         8.56           0.00826            3
-#>  3          36          36         8.95           0.0108             3
-#>  4          38          38        19.5            0.943              4
-#>  5          45          45         8.95           0.0108             3
-#>  6          48          48        14.6            0.354              4
-#>  7          74          74         6.72           0.00232            2
-#>  8          91          91        15.0            0.417              4
-#>  9          97          97         8.56           0.00826            3
-#> 10         101         101        15.0            0.417              4
-#> # ℹ 44,496 more rows
+#>  1        1835        1835        11.7            0.0681             4
+#>  2        1297        1297        11.7            0.0681             4
+#>  3         281         281        11.7            0.0681             4
+#>  4        2008       21187         7.94           0.00538            2
+#>  5        1242        7224         7.94           0.00538            2
+#>  6        3534        3534         8.10           0.00600            4
+#>  7        3632        3632         7.94           0.00538            2
+#>  8        3093        3073         7.94           0.00538            2
+#>  9        4732        4730         7.94           0.00538            2
+#> 10        5907       22331         7.94           0.00538            2
+#> # ℹ 113,547 more rows
 #> # ℹ 2 more variables: gamma_memo <int>, gamma_transaction_date <int>
 ```
 
@@ -314,20 +316,22 @@ autoplot(predictions, which = 1)
 ``` r
 acc <- il_accuracy(model, labels_col = 'ground_truth')
 acc
-#> # A tibble: 101 × 8
-#>    threshold    tp      fp    fn     tn precision recall     f1
-#>        <dbl> <int>   <int> <int>  <int>     <dbl>  <dbl>  <dbl>
-#>  1  4.07e-14 45326 1276239     0      0    0.0343      1 0.0663
-#>  2  1.74e-13 45326 1249202     0  27037    0.0350      1 0.0677
-#>  3  3.12e-13 45326 1243355     0  32884    0.0352      1 0.0680
-#>  4  4.07e-13 45326 1228669     0  47570    0.0356      1 0.0687
-#>  5  1.33e-12 45326 1186806     0  89433    0.0368      1 0.0710
-#>  6  1.34e-12 45326 1183585     0  92654    0.0369      1 0.0711
-#>  7  1.74e-12 45326 1161445     0 114794    0.0376      1 0.0724
-#>  8  3.13e-12 45326 1125669     0 150570    0.0387      1 0.0745
-#>  9  4.79e-12 45326 1080984     0 195255    0.0402      1 0.0774
-#> 10  5.72e-12 45326 1042321     0 233918    0.0417      1 0.0800
+#> # A tibble: 101 × 16
+#>    threshold    tp      fp    fn     tn fn_blocking_miss precision recall     f1
+#>        <dbl> <int>   <int> <int>  <int>            <int>     <dbl>  <dbl>  <dbl>
+#>  1  3.80e-12 45326 1276239     0      0                0    0.0343      1 0.0663
+#>  2  3.94e-12 45326 1234376     0  41863                0    0.0354      1 0.0684
+#>  3  6.53e-10 45326 1207339     0  68900                0    0.0362      1 0.0698
+#>  4  6.77e-10 45326 1171563     0 104676                0    0.0372      1 0.0718
+#>  5  7.67e-10 45326 1165716     0 110523                0    0.0374      1 0.0722
+#>  6  7.94e-10 45326 1121031     0 155208                0    0.0389      1 0.0748
+#>  7  1.68e- 9 45326 1106345     0 169894                0    0.0394      1 0.0757
+#>  8  4.10e- 9 45326 1084205     0 192034                0    0.0401      1 0.0772
+#>  9  4.25e- 9 45326 1067948     0 208291                0    0.0407      1 0.0782
+#> 10  5.89e- 9 45326 1065868     0 210371                0    0.0408      1 0.0784
 #> # ℹ 91 more rows
+#> # ℹ 7 more variables: f2 <dbl>, f0_5 <dbl>, specificity <dbl>, npv <dbl>,
+#> #   accuracy <dbl>, p4 <dbl>, phi <dbl>
 ```
 
 ``` r
@@ -341,38 +345,38 @@ autoplot(acc)
 ``` r
 errors <- il_errors(model, labels_col = 'ground_truth', threshold = 0.5)
 errors[errors$error_type == 'false_positive', ]
-#> # A tibble: 345 × 6
+#> # A tibble: 586 × 6
 #>    unique_id_l unique_id_r match_weight match_probability true_label error_type 
 #>          <dbl>       <dbl>        <dbl>             <dbl> <lgl>      <chr>      
-#>  1       20843       15459         19.9             0.956 FALSE      false_posi…
-#>  2       20858       27390         19.5             0.943 FALSE      false_posi…
-#>  3       20908        2691         19.5             0.943 FALSE      false_posi…
-#>  4       21069       18603         19.5             0.943 FALSE      false_posi…
-#>  5       21633         815         19.9             0.956 FALSE      false_posi…
-#>  6       23351       41754         19.9             0.956 FALSE      false_posi…
-#>  7       24552       18926         19.5             0.943 FALSE      false_posi…
-#>  8       24863       18827         19.9             0.956 FALSE      false_posi…
-#>  9       25741       32509         19.9             0.956 FALSE      false_posi…
-#> 10       27796       45053         19.5             0.943 FALSE      false_posi…
-#> # ℹ 335 more rows
+#>  1       27106       29919         16.2             0.625 FALSE      false_posi…
+#>  2         319       44080         17.7             0.822 FALSE      false_posi…
+#>  3        1873       28525         18.0             0.852 FALSE      false_posi…
+#>  4        1336       15748         17.7             0.822 FALSE      false_posi…
+#>  5        1159       16844         17.7             0.822 FALSE      false_posi…
+#>  6         382        7770         17.7             0.822 FALSE      false_posi…
+#>  7        1932        5109         17.7             0.822 FALSE      false_posi…
+#>  8        2195       18950         17.7             0.822 FALSE      false_posi…
+#>  9        4039       34405         18.0             0.852 FALSE      false_posi…
+#> 10        2881       16960         18.0             0.852 FALSE      false_posi…
+#> # ℹ 576 more rows
 ```
 
 ``` r
 errors[errors$error_type == 'false_negative', ]
-#> # A tibble: 35,871 × 6
+#> # A tibble: 29,183 × 6
 #>    unique_id_l unique_id_r match_weight match_probability true_label error_type 
 #>          <dbl>       <dbl>        <dbl>             <dbl> <lgl>      <chr>      
-#>  1          22          22         2.19          0.000101 TRUE       false_nega…
-#>  2          26          26         8.95          0.0108   TRUE       false_nega…
-#>  3          39          39         6.72          0.00232  TRUE       false_nega…
-#>  4          69          69         4.03          0.000361 TRUE       false_nega…
-#>  5         114         114         8.95          0.0108   TRUE       false_nega…
-#>  6         125         125        15.0           0.417    TRUE       false_nega…
-#>  7         163         163        14.6           0.354    TRUE       false_nega…
-#>  8         179         179         9.89          0.0205   TRUE       false_nega…
-#>  9         185         185         6.72          0.00232  TRUE       false_nega…
-#> 10         190         190         8.95          0.0108   TRUE       false_nega…
-#> # ℹ 35,861 more rows
+#>  1        4800        4800        11.5            0.0582  TRUE       false_nega…
+#>  2        4959        4959        10.7            0.0365  TRUE       false_nega…
+#>  3        5733        5733        12.6            0.121   TRUE       false_nega…
+#>  4        5367        5367        12.6            0.121   TRUE       false_nega…
+#>  5        5810        5810        10.2            0.0257  TRUE       false_nega…
+#>  6        5545        5545        10.3            0.0275  TRUE       false_nega…
+#>  7        5979        5979        10.2            0.0257  TRUE       false_nega…
+#>  8        4845        4845         6.34           0.00178 TRUE       false_nega…
+#>  9        4943        4943        10.7            0.0365  TRUE       false_nega…
+#> 10        4927        4927        10.7            0.0365  TRUE       false_nega…
+#> # ℹ 29,173 more rows
 ```
 
 ## Cleanup

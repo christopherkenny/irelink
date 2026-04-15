@@ -80,6 +80,7 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
+#> Comparisons surname overlap with the blocking rule and will not be updated.
 pairs <- predict(model, threshold = 0.5)
 
 il_waterfall(pairs, which = 1)
@@ -87,9 +88,9 @@ il_waterfall(pairs, which = 1)
 #>   step       order contribution direction start   end
 #>   <chr>      <int>        <dbl> <chr>     <dbl> <dbl>
 #> 1 Prior          1        -4.25 prior      0    -4.25
-#> 2 first_name     2         2.82 positive  -4.25 -1.42
-#> 3 surname        3         2.78 positive  -1.42  1.36
-#> 4 dob            4         3.53 positive   1.36  4.89
-#> 5 Final          5         4.89 final      0     4.89
+#> 2 first_name     2         2.90 positive  -4.25 -1.34
+#> 3 surname        3         2.66 positive  -1.34  1.32
+#> 4 dob            4         3.24 positive   1.32  4.56
+#> 5 Final          5         4.56 final      0     4.56
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

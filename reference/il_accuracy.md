@@ -1,8 +1,7 @@
 # Accuracy Metrics Across Thresholds
 
-Computes precision, recall, F1, and counts of true positives, false
-positives, and false negatives at a range of match-probability
-thresholds. Requires labelled pairs.
+Computes a full suite of classification metrics at a range of
+match-probability thresholds. Requires labelled pairs.
 
 ## Usage
 
@@ -31,7 +30,8 @@ il_accuracy(model, labels = NULL, labels_col = NULL)
 ## Value
 
 A tibble with one row per threshold, containing columns `threshold`,
-`precision`, `recall`, `f1`, `tp`, `fp`, and `fn`.
+`tp`, `fp`, `fn`, `tn`, `precision`, `recall`, `f1`, `f2`, `f0_5`,
+`specificity`, `npv`, `accuracy`, `p4`, and `phi`.
 
 ## Examples
 
@@ -83,6 +83,7 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
+#> Comparisons surname overlap with the blocking rule and will not be updated.
 labels <- data.frame(
   unique_id_l = c(1L, 1L),
   unique_id_r = c(11L, 2L),
@@ -90,10 +91,12 @@ labels <- data.frame(
 )
 
 il_accuracy(model, labels = labels)
-#> # A tibble: 2 × 8
-#>   threshold    tp    fp    fn    tn precision recall    f1
-#>       <dbl> <int> <int> <int> <int>     <dbl>  <dbl> <dbl>
-#> 1     0.967     1     1     0     0       0.5      1 0.667
-#> 2     1         0     0     1     1       1        0 0    
+#> # A tibble: 2 × 16
+#>   threshold    tp    fp    fn    tn fn_blocking_miss precision recall    f1
+#>       <dbl> <int> <int> <int> <int>            <int>     <dbl>  <dbl> <dbl>
+#> 1     0.959     1     1     0     0                0       0.5      1 0.667
+#> 2     1         0     0     1     1                0       1        0 0    
+#> # ℹ 7 more variables: f2 <dbl>, f0_5 <dbl>, specificity <dbl>, npv <dbl>,
+#> #   accuracy <dbl>, p4 <dbl>, phi <dbl>
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

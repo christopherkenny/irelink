@@ -139,6 +139,8 @@ model <- il_estimate_prior(
 
 model <- il_estimate_u(model, max_pairs = 1e5)
 model <- il_estimate_em(model, block_on(surname))
+#> Comparisons surname overlap with the blocking rule and will not
+#> be updated.
 model <- il_estimate_em(model, block_on(suburb))
 ```
 
@@ -199,12 +201,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id  
 #>   <chr>     <chr>       
-#> 1 2824      cluster_1384
-#> 2 3115      cluster_174 
-#> 3 1380      cluster_1380
-#> 4 3671      cluster_3248
-#> 5 1720      cluster_1720
-#> 6 3380      cluster_3380
+#> 1 870       cluster_3026
+#> 2 914       cluster_1667
+#> 3 206       cluster_206 
+#> 4 718       cluster_718 
+#> 5 1155      cluster_1155
+#> 6 3211      cluster_3211
 ```
 
 ## Evaluate against ground truth

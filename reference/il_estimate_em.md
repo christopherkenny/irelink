@@ -62,9 +62,11 @@ il_estimate_em(
 
 - estimate_without_tf:
 
-  Logical. Accepted for API compatibility with splink. In irelink, term
-  frequency adjustments are always applied at scoring time rather than
-  during EM, so this parameter has no effect. Defaults to `TRUE`.
+  Logical. If `TRUE` (the default), EM runs on aggregated gamma-pattern
+  counts (fast, but ignores per-pair term frequency variation). If
+  `FALSE`, EM runs on individual pairs and incorporates per-pair TF
+  adjustments in the E-step, matching splink's default behaviour. Only
+  matters when at least one comparison has `term_frequency = TRUE`.
 
 - derive_prior:
 
@@ -130,5 +132,6 @@ model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 
 model <- il_estimate_em(model, block_on(surname))
+#> Comparisons surname overlap with the blocking rule and will not be updated.
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

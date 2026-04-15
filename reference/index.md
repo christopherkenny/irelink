@@ -24,6 +24,8 @@ Define the comparisons and blocking rules that drive the model.
   : Cast to String Column Transform
 - [`il_try_parse_date()`](http://christophertkenny.com/irelink/reference/il_try_parse_date.md)
   : Try-Parse Date Column Transform
+- [`il_try_parse_timestamp()`](http://christophertkenny.com/irelink/reference/il_try_parse_timestamp.md)
+  : Try-Parse Timestamp Column Transform
 - [`il_array_element()`](http://christophertkenny.com/irelink/reference/il_array_element.md)
   : Array Element Column Transform
 - [`is_il_spec()`](http://christophertkenny.com/irelink/reference/is_il_spec.md)

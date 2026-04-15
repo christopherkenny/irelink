@@ -122,6 +122,7 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
+#> Comparisons surname overlap with the blocking rule and will not be updated.
 
 pairs <- predict(model, threshold = 0.5)
 DBI::dbDisconnect(con, shutdown = TRUE)

@@ -203,6 +203,8 @@ matching:</p>
 <span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_u.html">il_estimate_u</a></span><span class="op">(</span><span class="va">model</span>, max_pairs <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; Comparisons <span style="color: #00BB00;">surname</span> overlap with the blocking rule and will not</span></span>
+<span><span class="co">#&gt; be updated.</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">suburb</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -251,12 +253,12 @@ matching:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id  </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 2824      cluster_1384</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 3115      cluster_174 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 1380      cluster_1380</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 3671      cluster_3248</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 1720      cluster_1720</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 3380      cluster_3380</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 870       cluster_3026</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 914       cluster_1667</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 206       cluster_206 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 718       cluster_718 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 1155      cluster_1155</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 3211      cluster_3211</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>

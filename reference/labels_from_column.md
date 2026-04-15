@@ -40,7 +40,6 @@ the column name and let irelink derive everything.
 ## Examples
 
 ``` r
-# \donttest{
 con <- DBI::dbConnect(duckdb::duckdb())
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
@@ -5215,5 +5214,4 @@ labels_from_column(model, 'cluster')
 #> 5163           3         142        0
 #> 5164           3          89        0
 DBI::dbDisconnect(con, shutdown = TRUE)
-# }
 ```

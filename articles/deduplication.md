@@ -187,7 +187,11 @@ Estimate u-probabilities from random pairs and m-probabilities via EM:
 ``` r
 model <- il_estimate_u(model, max_pairs = 1e5)
 model <- il_estimate_em(model, block_on(first_name))
+#> Comparisons first_name overlap with the blocking rule and will
+#> not be updated.
 model <- il_estimate_em(model, block_on(dob))
+#> Comparisons dob overlap with the blocking rule and will not be
+#> updated.
 ```
 
 ## Inspect the trained model
@@ -206,16 +210,16 @@ summary(model)
 #>     comparisons: # A tibble: 23 × 4
 #>      comparisons:    comparison gamma_level      m       u
 #>      comparisons:    <chr>            <int>  <dbl>   <dbl>
-#>      comparisons:  1 first_name           0 0.427  0.974  
-#>      comparisons:  2 first_name           1 0.0943 0.0147 
-#>      comparisons:  3 first_name           2 0.0246 0.00168
-#>      comparisons:  4 first_name           3 0.0801 0.00292
-#>      comparisons:  5 first_name           4 0.374  0.00672
-#>      comparisons:  6 surname              0 0.394  0.972  
-#>      comparisons:  7 surname              1 0.0834 0.0145 
-#>      comparisons:  8 surname              2 0.0249 0.00158
-#>      comparisons:  9 surname              3 0.0644 0.00247
-#>      comparisons: 10 surname              4 0.434  0.00951
+#>      comparisons:  1 first_name           0 0.453  0.974  
+#>      comparisons:  2 first_name           1 0.0922 0.0147 
+#>      comparisons:  3 first_name           2 0.0236 0.00168
+#>      comparisons:  4 first_name           3 0.0760 0.00292
+#>      comparisons:  5 first_name           4 0.355  0.00672
+#>      comparisons:  6 surname              0 0.422  0.972  
+#>      comparisons:  7 surname              1 0.0825 0.0145 
+#>      comparisons:  8 surname              2 0.0241 0.00158
+#>      comparisons:  9 surname              3 0.0616 0.00247
+#>      comparisons: 10 surname              4 0.410  0.00951
 #>      comparisons: # ℹ 13 more rows
 ```
 
@@ -260,12 +264,12 @@ head(predict(model2, threshold = 0.85))
 #> # A tibble: 6 × 10
 #>   unique_id_l unique_id_r match_weight match_probability gamma_first_name
 #>         <int>       <int>        <dbl>             <dbl>            <int>
-#> 1           6          11         11.3             0.951                4
-#> 2          10          11         11.3             0.951                4
-#> 3          27          30         10.4             0.908                4
-#> 4          35          36         25.4             1.000                4
-#> 5          45          48         23.4             1.000                4
-#> 6          46          48         23.7             1.000                4
+#> 1           6          11         18.5             1.000                4
+#> 2          10          11         18.5             1.000                4
+#> 3          27          30         17.6             0.999                4
+#> 4          28          30         13.7             0.990                4
+#> 5          29          31         13.6             0.990                4
+#> 6          35          36         23.2             1.000                4
 #> # ℹ 5 more variables: gamma_surname <int>, gamma_dob <int>, gamma_city <int>,
 #> #   gamma_email <int>, tf_adj_city <dbl>
 DBI::dbDisconnect(con2, shutdown = TRUE)
@@ -281,7 +285,7 @@ Score all candidate pairs and apply a probability threshold:
 ``` r
 predictions <- predict(model, threshold = 0.5)
 nrow(predictions)
-#> [1] 1903
+#> [1] 2095
 ```
 
 View the match-weight distribution:
@@ -308,12 +312,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 817       cluster_814
-#> 2 48        cluster_44 
-#> 3 175       cluster_172
-#> 4 578       cluster_574
-#> 5 803       cluster_799
-#> 6 904       cluster_900
+#> 1 36        cluster_32 
+#> 2 42        cluster_38 
+#> 3 127       cluster_122
+#> 4 169       cluster_164
+#> 5 226       cluster_220
+#> 6 300       cluster_296
 ```
 
 ## Evaluate against ground truth
@@ -343,20 +347,22 @@ sum(labels$is_match)
 ``` r
 acc <- il_accuracy(model, labels = labels)
 acc
-#> # A tibble: 298 × 8
-#>      threshold    tp    fp    fn    tn precision recall    f1
-#>          <dbl> <int> <int> <int> <int>     <dbl>  <dbl> <dbl>
-#>  1 0.000000146  2031  1145     0     0     0.639  1     0.780
-#>  2 0.000000282  1676   558   355   587     0.750  0.825 0.786
-#>  3 0.000000462  1461   392   570   753     0.788  0.719 0.752
-#>  4 0.00000208   1457   392   574   753     0.788  0.717 0.751
-#>  5 0.00000214   1455   391   576   754     0.788  0.716 0.751
-#>  6 0.00000224   1448   360   583   785     0.801  0.713 0.754
-#>  7 0.00000237   1423   243   608   902     0.854  0.701 0.770
-#>  8 0.00000400   1384   177   647   968     0.887  0.681 0.771
-#>  9 0.00000412   1384   175   647   970     0.888  0.681 0.771
-#> 10 0.00000431   1384   150   647   995     0.902  0.681 0.776
+#> # A tibble: 298 × 16
+#>    threshold    tp    fp    fn    tn fn_blocking_miss precision recall    f1
+#>        <dbl> <int> <int> <int> <int>            <int>     <dbl>  <dbl> <dbl>
+#>  1 0.0000616  2031  1145     0     0                0     0.639  1     0.780
+#>  2 0.0000933  1676   558   355   587              171     0.750  0.825 0.786
+#>  3 0.000154   1461   392   570   753              259     0.788  0.719 0.752
+#>  4 0.000575   1457   392   574   753              260     0.788  0.717 0.751
+#>  5 0.000809   1418   326   613   819              284     0.813  0.698 0.751
+#>  6 0.000829   1416   325   615   820              285     0.813  0.697 0.751
+#>  7 0.000912   1409   294   622   851              290     0.827  0.694 0.755
+#>  8 0.00122    1384   177   647   968              290     0.887  0.681 0.771
+#>  9 0.00126    1384   175   647   970              290     0.888  0.681 0.771
+#> 10 0.00130    1384   150   647   995              290     0.902  0.681 0.776
 #> # ℹ 288 more rows
+#> # ℹ 7 more variables: f2 <dbl>, f0_5 <dbl>, specificity <dbl>, npv <dbl>,
+#> #   accuracy <dbl>, p4 <dbl>, phi <dbl>
 ```
 
 ``` r
@@ -393,12 +399,12 @@ head(errors)
 #> # A tibble: 6 × 6
 #>   unique_id_l unique_id_r match_weight match_probability true_label error_type  
 #>         <int>       <int>        <dbl>             <dbl> <lgl>      <chr>       
-#> 1           0           1         8.35             0.708 TRUE       false_negat…
-#> 2           0           2         8.35             0.708 TRUE       false_negat…
-#> 3           4          10        13.6              0.989 FALSE      false_posit…
-#> 4           5           7        11.2              0.947 FALSE      false_posit…
-#> 5           5          10        13.6              0.989 FALSE      false_posit…
-#> 6           6           8        11.2              0.947 FALSE      false_posit…
+#> 1           4           7         16.5             0.999 FALSE      false_posit…
+#> 2           4           9         11.7             0.962 FALSE      false_posit…
+#> 3           4          10         11.8             0.964 FALSE      false_posit…
+#> 4           5           7         18.4             1.000 FALSE      false_posit…
+#> 5           5           9         13.7             0.990 FALSE      false_posit…
+#> 6           5          10         11.8             0.964 FALSE      false_posit…
 ```
 
 ### Unlinkables

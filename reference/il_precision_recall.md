@@ -81,6 +81,7 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
+#> Comparisons surname overlap with the blocking rule and will not be updated.
 labels <- data.frame(
   unique_id_l = c(1L, 1L),
   unique_id_r = c(11L, 2L),
@@ -91,7 +92,7 @@ il_precision_recall(model, labels = labels)
 #> # A tibble: 2 × 3
 #>   threshold precision recall
 #>       <dbl>     <dbl>  <dbl>
-#> 1     0.967       0.5      1
+#> 1     0.959       0.5      1
 #> 2     1           1        0
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

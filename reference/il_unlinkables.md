@@ -71,20 +71,21 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
+#> Comparisons surname overlap with the blocking rule and will not be updated.
 
 il_unlinkables(model)
 #> # A tibble: 21 × 2
 #>    threshold pct_unlinkable
 #>        <dbl>          <dbl>
 #>  1      0            0.0500
-#>  2      0.05         0.15  
-#>  3      0.1          0.15  
+#>  2      0.05         0.1   
+#>  3      0.1          0.1   
 #>  4      0.15         0.15  
 #>  5      0.2          0.15  
-#>  6      0.25         0.25  
-#>  7      0.3          0.25  
-#>  8      0.35         0.25  
-#>  9      0.4          0.25  
+#>  6      0.25         0.15  
+#>  7      0.3          0.15  
+#>  8      0.35         0.15  
+#>  9      0.4          0.15  
 #> 10      0.45         0.25  
 #> # ℹ 11 more rows
 DBI::dbDisconnect(con, shutdown = TRUE)

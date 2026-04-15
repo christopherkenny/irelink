@@ -74,18 +74,19 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
+#> Comparisons surname overlap with the blocking rule and will not be updated.
 
 il_weights(model)
 #> # A tibble: 8 × 5
-#>   comparison gamma_level m_prob u_prob weight
-#>   <chr>            <int>  <dbl>  <dbl>  <dbl>
-#> 1 first_name           0 0.0104 0.832   -6.32
-#> 2 first_name           1 0.244  0.0632   1.95
-#> 3 first_name           2 0.746  0.105    2.82
-#> 4 surname              0 0.0103 0.821   -6.31
-#> 5 surname              1 0.0103 0.0368  -1.83
-#> 6 surname              2 0.979  0.142    2.78
-#> 7 dob                  0 0.0908 0.921   -3.34
-#> 8 dob                  1 0.909  0.0789   3.53
+#>   comparison gamma_level  m_prob u_prob weight
+#>   <chr>            <int>   <dbl>  <dbl>  <dbl>
+#> 1 first_name           0 0.00917 0.832  -6.50 
+#> 2 first_name           1 0.203   0.0632  1.68 
+#> 3 first_name           2 0.788   0.105   2.90 
+#> 4 surname              0 0.05    0.821  -4.04 
+#> 5 surname              1 0.05    0.0368  0.441
+#> 6 surname              2 0.9     0.142   2.66 
+#> 7 dob                  0 0.254   0.921  -1.86 
+#> 8 dob                  1 0.746   0.0789  3.24 
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

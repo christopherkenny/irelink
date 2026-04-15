@@ -73,21 +73,22 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
+#> Comparisons surname overlap with the blocking rule and will not be updated.
 
 il_training_history(model)
-#> # A tibble: 136 × 5
-#>    session iteration comparison gamma_level  value
-#>      <int>     <int> <chr>            <int>  <dbl>
-#>  1       1         1 first_name           0 0.0111
-#>  2       1         1 first_name           1 0.203 
-#>  3       1         1 first_name           2 0.786 
-#>  4       1         1 surname              0 0.0107
-#>  5       1         1 surname              1 0.0107
-#>  6       1         1 surname              2 0.979 
-#>  7       1         1 dob                  0 0.107 
-#>  8       1         1 dob                  1 0.893 
-#>  9       1         2 first_name           0 0.0103
-#> 10       1         2 first_name           1 0.238 
-#> # ℹ 126 more rows
+#> # A tibble: 56 × 5
+#>    session iteration comparison gamma_level   value
+#>      <int>     <int> <chr>            <int>   <dbl>
+#>  1       1         1 first_name           0 0.0108 
+#>  2       1         1 first_name           1 0.206  
+#>  3       1         1 first_name           2 0.783  
+#>  4       1         1 surname              0 0.05   
+#>  5       1         1 surname              1 0.05   
+#>  6       1         1 surname              2 0.9    
+#>  7       1         1 dob                  0 0.221  
+#>  8       1         1 dob                  1 0.779  
+#>  9       1         2 first_name           0 0.00925
+#> 10       1         2 first_name           1 0.204  
+#> # ℹ 46 more rows
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

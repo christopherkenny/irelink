@@ -65,6 +65,7 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
+#> Comparisons surname overlap with the blocking rule and will not be updated.
 tmp <- tempfile(fileext = '.rds')
 
 il_save(model, tmp)

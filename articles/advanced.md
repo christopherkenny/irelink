@@ -40,7 +40,11 @@ model <- il_estimate_prior(
 )
 model <- il_estimate_u(model, max_pairs = 1e5)
 model <- il_estimate_em(model, block_on(first_name))
+#> Comparisons first_name overlap with the blocking rule and will
+#> not be updated.
 model <- il_estimate_em(model, block_on(dob))
+#> Comparisons dob overlap with the blocking rule and will not be
+#> updated.
 
 pairs <- predict(model, threshold = 0.5)
 clusters <- il_cluster(pairs, threshold = 0.85)
@@ -106,7 +110,7 @@ materialising millions of rows would exhaust memory.
 ``` r
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 1,903 pairs in table __il_predicted (threshold = 0.5)
+#> <il_compared_lazy> 2,095 pairs in table __il_predicted (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -115,7 +119,7 @@ Pass the lazy reference directly to
 ``` r
 clusters_lazy <- il_cluster(pairs_lazy, threshold = 0.85)
 nrow(clusters_lazy)
-#> [1] 892
+#> [1] 917
 ```
 
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
@@ -141,20 +145,20 @@ maximum possible edges for a cluster of that size):
 
 ``` r
 metrics$clusters
-#> # A tibble: 203 × 5
+#> # A tibble: 172 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralisation
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_133       9      22   0.611                  0.339
-#>  2 cluster_179       6      11   0.733                  0.4  
-#>  3 cluster_389       5       7   0.7                    0.5  
-#>  4 cluster_44        5      10   1                      0    
-#>  5 cluster_453       9      18   0.5                    0.321
-#>  6 cluster_476       2       1   1                     NA    
-#>  7 cluster_582       2       1   1                     NA    
-#>  8 cluster_674       8      18   0.643                  0.286
-#>  9 cluster_778       5      10   1                      0    
-#> 10 cluster_825       9      19   0.528                  0.286
-#> # ℹ 193 more rows
+#>  1 cluster_106       2       1   1                     NA    
+#>  2 cluster_164       8      24   0.857                  0.190
+#>  3 cluster_172       4       6   1                      0    
+#>  4 cluster_186       2       1   1                     NA    
+#>  5 cluster_244       8      19   0.679                  0.238
+#>  6 cluster_428       3       2   0.667                  1    
+#>  7 cluster_440       9      23   0.639                  0.304
+#>  8 cluster_58        5       8   0.8                    0.333
+#>  9 cluster_612       2       1   1                     NA    
+#> 10 cluster_871       3       3   1                      0    
+#> # ℹ 162 more rows
 ```
 
 A high maximum cluster size combined with low density often indicates
@@ -172,12 +176,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 140       cluster_133      5           0.625
-#> 2 141       cluster_133      4           0.5  
-#> 3 139       cluster_133      6           0.75 
-#> 4 134       cluster_133      6           0.75 
-#> 5 135       cluster_133      3           0.375
-#> 6 136       cluster_133      1           0.125
+#> 1 106       cluster_106      1           1    
+#> 2 114       cluster_106      1           1    
+#> 3 171       cluster_164      5           0.714
+#> 4 165       cluster_164      7           1    
+#> 5 164       cluster_164      7           1    
+#> 6 168       cluster_164      6           0.857
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -212,6 +216,8 @@ model_phon <- il_estimate_em(
   model_phon,
   block_on(first_name, .transform = il_soundex)
 )
+#> Comparisons first_name overlap with the blocking rule and will
+#> not be updated.
 ```
 
 Phonetic blocking increases recall at the cost of more candidate pairs.
@@ -237,6 +243,8 @@ spec_tr <- il_spec() |>
 model_tr <- il_model(df, spec = spec_tr, con = con)
 model_tr <- il_estimate_u(model_tr, max_pairs = 1e5)
 model_tr <- il_estimate_em(model_tr, block_on(surname))
+#> Comparisons surname overlap with the blocking rule and will not
+#> be updated.
 ```
 
 `tolower`, `toupper`, and `trimws` are translated to SQL on DuckDB and

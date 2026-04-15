@@ -9,7 +9,15 @@ layers.
 ## Usage
 
 ``` r
-il_compare(spec, col, method, ..., transform = NULL)
+il_compare(
+  spec,
+  col,
+  method,
+  ...,
+  transform = NULL,
+  tf_adjustment_weight = 1,
+  tf_minimum_u_value = 0
+)
 ```
 
 ## Arguments
@@ -43,6 +51,20 @@ il_compare(spec, col, method, ..., transform = NULL)
   when a database backend is available. Custom functions work on the
   R-side path only.
 
+- tf_adjustment_weight:
+
+  Numeric power to raise the term-frequency Bayes factor to. A value of
+  `1.0` (the default) applies the full adjustment; `0` disables it
+  entirely. Only relevant when the comparison method has
+  `term_frequency = TRUE`.
+
+- tf_minimum_u_value:
+
+  Numeric floor for the term-frequency denominator. When both TF values
+  are below this threshold, it is used instead — preventing
+  unrealistically large match weights for very rare terms. Defaults to
+  `0.0` (no floor).
+
 ## Value
 
 An updated `il_spec` (a new copy; the input is not modified).
@@ -66,4 +88,9 @@ spec <- il_spec() |>
 # Apply a transform before comparing
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7), transform = tolower)
+
+# Scale TF adjustment weight
+spec <- il_spec() |>
+  il_compare(first_name, cl_jaro_winkler(0.9, term_frequency = TRUE),
+             tf_adjustment_weight = 0.5, tf_minimum_u_value = 0.001)
 ```
