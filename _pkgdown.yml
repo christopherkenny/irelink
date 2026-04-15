@@ -125,6 +125,8 @@ reference:
     desc: "Assess model quality against labelled data."
     contents:
       - il_accuracy
+      - il_confusion_matrix
+      - il_cluster_confusion_matrix
       - labels_from_column
       - il_precision_recall
       - il_roc

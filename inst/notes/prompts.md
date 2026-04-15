@@ -788,3 +788,50 @@ Have you fixed this?
 
 Fix all of the issues you have encountered.
 Include your responses to each question and details on the fixes in document 32.
+
+## SQL pushdown audit prompt
+
+We are auditing `irelink` to ensure that as much work as possible stays in SQL rather than being materialized into R.
+Your job is to identify every place in the code path for a target feature where data crosses from the database into R, determine whether that boundary is necessary, and, where safe, push more of the work into SQL.
+
+Focus especially on:
+- `R/utils-evaluation.R`
+- `R/predict.R`
+- `R/il_cluster.R`
+- `R/utils-cc.R`
+- `R/utils-em.R`
+- `R/utils-sql.R`
+- any directly related helper files you discover while tracing execution
+
+For each target function or workflow:
+1. Identify the entrypoint function and list the exact downstream helper calls in order.
+2. Mark every `DBI::dbGetQuery()`, `collect`, `as.data.frame`, `as.matrix`, `tibble` construction from SQL results, or other point where SQL results are materialized into R.
+3. For each materialization point, answer:
+   - what rows and columns are being pulled into R?
+   - approximately how large could that object become on a large job?
+   - what does R do with it immediately afterward?
+   - could that next step be done in SQL instead?
+4. Distinguish carefully between:
+   - necessary materialization for final user-facing output
+   - harmless materialization of a tiny aggregated result
+   - harmful materialization of pair-level or record-level data that should stay in SQL
+5. Cross-check the equivalent logic in `../splink` and note whether splink keeps that step in SQL, and how.
+6. If a safe SQL pushdown is possible, implement it.
+7. If a pushdown is not clearly safe, explain why not, with exact references.
+
+Important rules:
+- Do not assume that because something is "aggregated" in R it is necessarily correct or efficient.
+- Be especially skeptical of any place where pair-level rows, gamma matrices, cluster assignments, or labeled-pair universes are pulled into R.
+- If the R side immediately groups, counts, filters, ranks, joins, or computes flags on SQL results, that is a strong sign the work belongs in SQL.
+- Keep a special eye on lazy-vs-collected paths. If a function already has a SQL path, prefer extending it rather than creating a new R-heavy branch.
+- Verify empty-result behavior and singleton/no-edge cases. SQL pushdown changes often break those.
+
+Your output should include:
+- a concise table in `inst/refs/33-sql-audit.md` with every exported function
+- for each function, include: `function`, `sql-first?`, `materializes to R?`, `problem`, `action`, and `notes`
+- keep each cell short and human-readable
+- add file and line references where useful
+- note any correctness risks, not just performance risks
+- include a short summary of code changes made
+
+If you modify code, run the relevant tests afterward and report which passed.

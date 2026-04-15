@@ -1,4 +1,4 @@
-# Sprint 10 — Evaluation: il_accuracy(), il_errors()
+# Sprint 10 — Evaluation: il_accuracy(), il_confusion_matrix(), il_errors()
 # Translated from: test_accuracy.py
 
 test_that('il_accuracy() returns correct TP/FP/TN/FN at known thresholds', {
@@ -69,6 +69,43 @@ test_that('il_accuracy() TP/FP counts are internally consistent', {
     total_pos <- acc$tp[1] + acc$fn[1]
     expect_true(all(acc$tp + acc$fn == total_pos))
   }
+})
+
+test_that('il_confusion_matrix() matches il_accuracy() at the same threshold', {
+  skip_if_not_installed('RSQLite')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- data.frame(
+    unique_id = 1:5,
+    first_name = c('A', 'A', 'A', 'B', 'B'),
+    surname = rep('X', 5)
+  )
+
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_block_on(first_name)
+
+  model <- il_model(df, spec = spec, con = con) |>
+    il_estimate_u(max_pairs = 1e6) |>
+    il_estimate_em(block_on(first_name))
+
+  labels <- data.frame(
+    unique_id_l = c(1L, 4L),
+    unique_id_r = c(2L, 5L),
+    is_match = c(TRUE, TRUE)
+  )
+
+  cm <- il_confusion_matrix(model, labels, threshold = 0.85)
+  acc <- il_accuracy(model, labels)
+  acc_row <- acc[which.min(abs(acc$threshold - 0.85)), ]
+
+  expect_s3_class(cm, 'il_confusion_matrix')
+  expect_equal(cm$tp, acc_row$tp)
+  expect_equal(cm$fp, acc_row$fp)
+  expect_equal(cm$fn, acc_row$fn)
+  expect_equal(cm$tn, acc_row$tn)
 })
 
 # --- il_errors() ----------------------------------------------------------

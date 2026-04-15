@@ -81,17 +81,17 @@ il_accuracy <- function(model, labels = NULL, labels_col = NULL) {
   thresholds <- sort(unique(c(label_probs, 1)))
 
   results <- lapply(thresholds, function(t) {
-    predicted_positive <- label_probs >= t
-    tp <- sum(predicted_positive & actual_positive)
-    fp <- sum(predicted_positive & !actual_positive)
-    fn <- sum(!predicted_positive & actual_positive)
-    tn <- sum(!predicted_positive & !actual_positive)
-
-    # How many FN are due to blocking misses (true match not found by rules)
-    fn_blocking_miss <- sum(
-      !predicted_positive & actual_positive & !found_by_blocking,
-      na.rm = TRUE
+    counts <- compute_confusion_counts(
+      label_probs = label_probs,
+      actual_positive = actual_positive,
+      found_by_blocking = found_by_blocking,
+      threshold = t
     )
+    tp <- counts$tp
+    fp <- counts$fp
+    fn <- counts$fn
+    tn <- counts$tn
+    fn_blocking_miss <- counts$fn_blocking_miss
 
     precision <- if (tp + fp > 0) tp / (tp + fp) else 1
     recall <- if (tp + fn > 0) tp / (tp + fn) else 1

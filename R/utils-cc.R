@@ -185,13 +185,22 @@ cc_iterate <- function(con, iteration) {
 #' @param max_iterations Safety valve (default 100).
 #' @return A tibble with columns `node_id` and `cluster_id`.
 #' @noRd
-solve_cc_sql <- function(con, edges_tbl, max_iterations = 100L) {
+solve_cc_sql <- function(con, edges_tbl, max_iterations = 100L,
+                         collect = TRUE) {
   # Check for empty edge set
   n_edges <- DBI::dbGetQuery(
     con, glue::glue('SELECT COUNT(*) AS n FROM {edges_tbl}')
   )$n
   if (n_edges == 0L) {
-    # All nodes are isolated — get distinct nodes from edges (empty)
+    output_tbl <- cc_tbl('output')
+    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
+    DBI::dbExecute(con, glue::glue(
+      'CREATE TABLE {output_tbl} AS ',
+      "SELECT CAST(NULL AS VARCHAR) AS node_id, CAST(NULL AS VARCHAR) AS cluster_id WHERE 1 = 0"
+    ))
+    if (!collect) {
+      return(output_tbl)
+    }
     return(tibble::tibble(
       node_id = character(0), cluster_id = character(0)
     ))
@@ -223,9 +232,6 @@ solve_cc_sql <- function(con, edges_tbl, max_iterations = 100L) {
     'CREATE TABLE {output_tbl} AS {union_sql}'
   ))
 
-  # Read result
-  result <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {output_tbl}'))
-
   # Clean up all intermediate tables (keep output for graph metrics)
   for (tbl in stable_tables) {
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
@@ -235,6 +241,11 @@ solve_cc_sql <- function(con, edges_tbl, max_iterations = 100L) {
     'DROP TABLE IF EXISTS {cc_tbl("neighbours")}'
   ))
 
+  if (!collect) {
+    return(output_tbl)
+  }
+
+  result <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {output_tbl}'))
   tibble::as_tibble(result)
 }
 
@@ -347,7 +358,8 @@ sql_best_link_filter <- function(con, edges_tbl, ties_method = 'lowest_id') {
 #' @noRd
 solve_one_to_one_sql <- function(con, edges_tbl, source_dataset,
                                  ties_method = 'lowest_id',
-                                 max_iterations = 100L) {
+                                 max_iterations = 100L,
+                                 collect = TRUE) {
   oto_repr <- cc_tbl('oto_repr')
   oto_src <- cc_tbl('oto_src')
   oto_cluster_ds <- cc_tbl('oto_cluster_ds')
@@ -474,8 +486,10 @@ solve_one_to_one_sql <- function(con, edges_tbl, source_dataset,
     ))
   }
 
-  # Read final cluster assignments
-  result <- DBI::dbGetQuery(con, glue::glue(
+  output_tbl <- cc_tbl('output')
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
+  DBI::dbExecute(con, glue::glue(
+    'CREATE TABLE {output_tbl} AS ',
     'SELECT node_id, representative AS cluster_id FROM {oto_repr}'
   ))
 
@@ -484,6 +498,11 @@ solve_one_to_one_sql <- function(con, edges_tbl, source_dataset,
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
   }
 
+  if (!collect) {
+    return(output_tbl)
+  }
+
+  result <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {output_tbl}'))
   tibble::as_tibble(result)
 }
 
