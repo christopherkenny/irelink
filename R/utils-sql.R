@@ -537,17 +537,30 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL,
   all_parts <- character(0)
   for (tp in table_pairs) {
     if (length(blocking_rules) > 0L) {
-      parts <- vapply(blocking_rules, function(br) {
+      prior_conds <- character(0)
+      parts <- vapply(seq_along(blocking_rules), function(i) {
+        br <- blocking_rules[[i]]
         cond <- build_blocking_condition(br$columns, br$where,
           transform = br$transform,
           dialect = dialect
         )
         from_l <- sql_explode_from(tp$from_l, br$explode, dialect)
         from_r <- sql_explode_from(tp$from_r, br$explode, dialect)
+        # Exclude pairs already matched by earlier blocking rules
+        if (length(prior_conds) > 0L) {
+          exclude <- paste('COALESCE(', prior_conds, ', FALSE)',
+            collapse = ' OR '
+          )
+          full_cond <- paste0(tp$join_cond, ' AND ', cond,
+            ' AND NOT (', exclude, ')')
+        } else {
+          full_cond <- paste0(tp$join_cond, ' AND ', cond)
+        }
+        prior_conds <<- c(prior_conds, cond)
         glue::glue(
           '{select_prefix}',
           'FROM {from_l} l, {from_r} r ',
-          'WHERE {tp$join_cond} AND {cond}'
+          'WHERE {full_cond}'
         )
       }, character(1))
       all_parts <- c(all_parts, parts)
@@ -563,7 +576,9 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL,
   inner <- paste(all_parts, collapse = ' UNION ALL ')
 
   # Optionally wrap in DISTINCT to deduplicate across blocking rules.
-  # Splink skips dedup at this level (UNION ALL only). For EM callers,
+  # With preceding-rule exclusion, duplicates are largely eliminated at
+  # source. For EM callers, GROUP BY handles aggregation. For predict
+  # callers, dedup is applied after scoring + threshold filtering.
 
   # GROUP BY handles aggregation.  For predict callers, dedup is applied
   # after scoring + threshold filtering where far fewer rows remain.
@@ -899,23 +914,43 @@ sql_weight_case <- function(comp_name, m_vec, u_vec) {
 
 #' Generate a CASE expression for TF adjustment of one comparison
 #'
-#' Returns log2(u_exact / max(tf_l, tf_r)) when gamma equals the highest
-#' level, 0 otherwise.  Uses LN(x)/LN(2) for portability across DuckDB
-#' and PostgreSQL.
+#' Returns a weighted log2 adjustment when gamma equals the highest level,
+#' 0 otherwise. Supports `tf_adjustment_weight` (power scaling, default 1)
+#' and `tf_minimum_u_value` (floor on TF denominator, default 0).
+#' Uses LN(x)/LN(2) for portability across DuckDB and PostgreSQL.
 #'
 #' @param col Column name.
 #' @param max_level Integer: highest gamma level (exact match).
 #' @param u_exact Numeric: u probability at the highest gamma level.
+#' @param tf_adjustment_weight Numeric power scaling (default 1.0).
+#' @param tf_minimum_u_value Numeric floor for TF denominator (default 0.0).
 #' @return A SQL expression string.
 #' @noRd
-sql_tf_adj_expr <- function(col, max_level, u_exact) {
+sql_tf_adj_expr <- function(col, max_level, u_exact,
+                            tf_adjustment_weight = 1.0,
+                            tf_minimum_u_value = 0.0) {
+  if (tf_adjustment_weight == 0) {
+    return('CAST(0.0 AS DOUBLE)')
+  }
   log2_u <- log2(max(u_exact, 1e-10))
   ln2 <- log(2)
+  # Build TF divisor expression with optional floor
+  if (tf_minimum_u_value > 0) {
+    tf_divisor <- glue::glue(
+      'GREATEST(GREATEST(tf_{col}_l, tf_{col}_r), {tf_minimum_u_value})'
+    )
+  } else {
+    tf_divisor <- glue::glue('GREATEST(tf_{col}_l, tf_{col}_r)')
+  }
+  adj_expr <- glue::glue('{log2_u} - LN({tf_divisor}) / {ln2}')
+  if (tf_adjustment_weight != 1.0) {
+    adj_expr <- glue::glue('{tf_adjustment_weight} * ({adj_expr})')
+  }
   glue::glue(
     'CAST(CASE WHEN gamma_{col} = {max_level} ',
     'AND tf_{col}_l IS NOT NULL AND tf_{col}_r IS NOT NULL ',
-    'AND GREATEST(tf_{col}_l, tf_{col}_r) > 0 ',
-    'THEN {log2_u} - LN(GREATEST(tf_{col}_l, tf_{col}_r)) / {ln2} ',
+    'AND {tf_divisor} > 0 ',
+    'THEN {adj_expr} ',
     'ELSE 0.0 END AS DOUBLE)'
   )
 }
@@ -956,7 +991,9 @@ build_scored_query <- function(model, threshold = 0.85,
       col <- comp$columns
       max_level <- n_gamma_levels(comp$method) - 1L
       u_exact <- mu$u_levels[[col]][max_level + 1L]
-      expr <- sql_tf_adj_expr(col, max_level, u_exact)
+      tf_w <- comp$tf_adjustment_weight %||% 1.0
+      tf_min <- comp$tf_minimum_u_value %||% 0.0
+      expr <- sql_tf_adj_expr(col, max_level, u_exact, tf_w, tf_min)
       tf_parts <- c(tf_parts, expr)
       tf_adj_selects <- c(
         tf_adj_selects,

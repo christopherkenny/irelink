@@ -154,6 +154,36 @@ il_try_parse_date <- function(format = '%Y-%m-%d') {
   new_column_transform(fn, 'il_try_parse_date', list(format = format))
 }
 
+#' Try-Parse Timestamp Column Transform
+#'
+#' Returns a transform that attempts to parse a string column as a
+#' timestamp. Unlike `as.POSIXct()`, failures return `NA`/`NULL` rather
+#' than raising an error — on DuckDB this uses `try_strptime()`, on
+#' PostgreSQL `TO_TIMESTAMP()`. The result can be passed as the
+#' `transform` argument to [il_compare()] or [il_block_on()], and
+#' composed with other transforms via [il_transform()].
+#'
+#' @param format A `strptime`-style format string. Defaults to
+#'   `"%Y-%m-%d %H:%M:%S"`.
+#'
+#' @return An `il_column_transform` closure.
+#' @export
+#'
+#' @examples
+#' tf <- il_try_parse_timestamp()
+#' tf(c('2020-01-15 08:30:00', 'not-a-timestamp', '1985-06-30 12:00:00'))
+#'
+#' # Custom format
+#' tf2 <- il_try_parse_timestamp('%m/%d/%Y %I:%M %p')
+#' tf2(c('01/15/2020 08:30 AM', 'bad'))
+il_try_parse_timestamp <- function(format = '%Y-%m-%d %H:%M:%S') {
+  if (!is.character(format) || length(format) != 1L) {
+    cli::cli_abort('{.arg format} must be a single character string.')
+  }
+  fn <- function(x) as.character(as.POSIXct(x, format = format, tz = 'UTC'))
+  new_column_transform(fn, 'il_try_parse_timestamp', list(format = format))
+}
+
 #' Array Element Column Transform
 #'
 #' Returns a transform that extracts the first or last element of an
@@ -239,6 +269,15 @@ column_transform_sql <- function(transform, col_ref, dialect = NULL) {
         col_ref
       }
     },
+    'il_try_parse_timestamp' = {
+      if (identical(dialect, 'duckdb')) {
+        paste0('try_strptime(', col_ref, ", '", p$format, "')")
+      } else if (identical(dialect, 'postgres')) {
+        paste0('TO_TIMESTAMP(', col_ref, ", '", p$format, "')")
+      } else {
+        col_ref
+      }
+    },
     'il_array_element' = {
       if (p$position == 'first') {
         paste0(col_ref, '[1]')
@@ -261,6 +300,7 @@ column_transform_to_name <- function(transform) {
     'il_nullif' = paste0('il_nullif("', p$value, '")'),
     'il_cast_to_string' = 'il_cast_to_string()',
     'il_try_parse_date' = paste0('il_try_parse_date("', p$format, '")'),
+    'il_try_parse_timestamp' = paste0('il_try_parse_timestamp("', p$format, '")'),
     'il_array_element' = paste0('il_array_element("', p$position, '")'),
     NA_character_
   )

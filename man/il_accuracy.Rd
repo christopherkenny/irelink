@@ -18,12 +18,12 @@ labels are derived automatically via \code{\link[=labels_from_column]{labels_fro
 }
 \value{
 A tibble with one row per threshold, containing columns
-\code{threshold}, \code{precision}, \code{recall}, \code{f1}, \code{tp}, \code{fp}, and \code{fn}.
+\code{threshold}, \code{tp}, \code{fp}, \code{fn}, \code{tn}, \code{precision}, \code{recall}, \code{f1},
+\code{f2}, \code{f0_5}, \code{specificity}, \code{npv}, \code{accuracy}, \code{p4}, and \code{phi}.
 }
 \description{
-Computes precision, recall, F1, and counts of true positives, false
-positives, and false negatives at a range of match-probability
-thresholds. Requires labelled pairs.
+Computes a full suite of classification metrics at a range of
+match-probability thresholds. Requires labelled pairs.
 }
 \examples{
 df <- data.frame(

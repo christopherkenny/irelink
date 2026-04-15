@@ -63,8 +63,8 @@
           comparisons: # A tibble: 2 x 4
            comparisons:   comparison gamma_level     m     u
            comparisons:   <chr>            <int> <dbl> <dbl>
-           comparisons: 1 first_name           0 0.252   0.8
-           comparisons: 2 first_name           1 0.748   0.2
+           comparisons: 1 first_name           0   0.1   0.8
+           comparisons: 2 first_name           1   0.9   0.2
 
 # unit helper print snapshot
 

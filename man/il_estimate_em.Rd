@@ -40,10 +40,12 @@ Defaults to \code{FALSE}. At least one of \code{fix_u} and \code{fix_m} must be
 two random records match) fixed during EM iterations.
 Defaults to \code{TRUE}.}
 
-\item{estimate_without_tf}{Logical. Accepted for API compatibility with
-splink. In irelink, term frequency adjustments are always applied at
-scoring time rather than during EM, so this parameter has no effect.
-Defaults to \code{TRUE}.}
+\item{estimate_without_tf}{Logical. If \code{TRUE} (the default), EM runs
+on aggregated gamma-pattern counts (fast, but ignores per-pair term
+frequency variation). If \code{FALSE}, EM runs on individual pairs and
+incorporates per-pair TF adjustments in the E-step, matching
+splink's default behaviour. Only matters when at least one
+comparison has \code{term_frequency = TRUE}.}
 
 \item{derive_prior}{Logical. If \code{TRUE}, derive the prior from the
 trained parameter values after EM completes and store it in the

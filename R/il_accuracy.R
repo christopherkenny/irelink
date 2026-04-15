@@ -1,8 +1,7 @@
 #' Accuracy Metrics Across Thresholds
 #'
-#' Computes precision, recall, F1, and counts of true positives, false
-#' positives, and false negatives at a range of match-probability
-#' thresholds. Requires labelled pairs.
+#' Computes a full suite of classification metrics at a range of
+#' match-probability thresholds. Requires labelled pairs.
 #'
 #' @param model A trained `il_model` object.
 #' @param labels A data frame of labelled pairs with a logical or integer
@@ -12,7 +11,8 @@
 #'   labels are derived automatically via [labels_from_column()].
 #'
 #' @return A tibble with one row per threshold, containing columns
-#'   `threshold`, `precision`, `recall`, `f1`, `tp`, `fp`, and `fn`.
+#'   `threshold`, `tp`, `fp`, `fn`, `tn`, `precision`, `recall`, `f1`,
+#'   `f2`, `f0_5`, `specificity`, `npv`, `accuracy`, `p4`, and `phi`.
 #' @export
 #'
 #' @examples
@@ -76,6 +76,7 @@ il_accuracy <- function(model, labels = NULL, labels_col = NULL) {
   scored <- score_labeled_pairs(model, labels)
   label_probs <- scored$label_probs
   actual_positive <- scored$actual_positive
+  found_by_blocking <- scored$found_by_blocking
 
   thresholds <- sort(unique(c(label_probs, 1)))
 
@@ -86,13 +87,44 @@ il_accuracy <- function(model, labels = NULL, labels_col = NULL) {
     fn <- sum(!predicted_positive & actual_positive)
     tn <- sum(!predicted_positive & !actual_positive)
 
+    # How many FN are due to blocking misses (true match not found by rules)
+    fn_blocking_miss <- sum(
+      !predicted_positive & actual_positive & !found_by_blocking,
+      na.rm = TRUE
+    )
+
     precision <- if (tp + fp > 0) tp / (tp + fp) else 1
     recall <- if (tp + fn > 0) tp / (tp + fn) else 1
     f1 <- if (precision + recall > 0) 2 * precision * recall / (precision + recall) else 0
 
+    # Weighted F-scores: F_beta = (1+beta^2) * P * R / (beta^2 * P + R)
+    f2 <- if (precision + recall > 0) 5 * precision * recall / (4 * precision + recall) else 0
+    f0_5 <- if (precision + recall > 0) 1.25 * precision * recall / (0.25 * precision + recall) else 0
+
+    specificity <- if (tn + fp > 0) tn / (tn + fp) else 1
+    npv <- if (tn + fn > 0) tn / (tn + fn) else 1
+    accuracy <- if (tp + tn + fp + fn > 0) (tp + tn) / (tp + tn + fp + fn) else 1
+
+    # P4: 4*TP*TN / ((4*TP*TN) + (TP+TN)*(FP+FN))
+    p4_num <- 4 * as.numeric(tp) * tn
+    p4_denom <- p4_num + as.numeric(tp + tn) * as.numeric(fp + fn)
+    p4 <- if (p4_denom > 0) p4_num / p4_denom else 0
+
+    # Phi / MCC: (TP*TN - FP*FN) / sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))
+    phi_num <- as.numeric(tp) * tn - as.numeric(fp) * fn
+    phi_denom <- sqrt(
+      as.numeric(tp + fp) * as.numeric(tp + fn) *
+      as.numeric(tn + fp) * as.numeric(tn + fn)
+    )
+    phi <- if (phi_denom > 0) phi_num / phi_denom else 0
+
     tibble::tibble(
       threshold = t, tp = tp, fp = fp, fn = fn, tn = tn,
-      precision = precision, recall = recall, f1 = f1
+      fn_blocking_miss = fn_blocking_miss,
+      precision = precision, recall = recall, f1 = f1,
+      f2 = f2, f0_5 = f0_5,
+      specificity = specificity, npv = npv, accuracy = accuracy,
+      p4 = p4, phi = phi
     )
   })
 

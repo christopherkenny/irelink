@@ -720,3 +720,71 @@ Implement fixes for any site where moving to SQL is clearly correct and safe.
 Do not fix sites where the R-side processing is genuinely non-trivial (e.g. stringdist comparisons with no SQL equivalent in the current dialect).
 
 Write your findings and any fixes to `inst/refs/30-sql-audit.md`.
+
+
+## Deep-Dive
+
+Perform a deep dive comparison between this package (irelink) and splink (../splink).
+This package is a derivative.
+We want to ensure that all features of splink are incorporated here.
+If there are improvements here that are not in splink, note those.
+
+Pay particular attention to any SQL generation.
+We need to ensure that any SQL we generate is correct and true to its intentions.
+
+Prepare a detailed writeup with notes on any missing features in `inst/refs/32-comparison.md`.
+Include relevant paths and links to the source of the differences.
+
+
+### Follow-up
+
+Identify all meaningful gaps and implement them.
+Use the splink code as the reference, since we are a pure derivative product.
+Go through carefully, updating the 32-comparison doc after each fix.
+Make notes about how they were fixed.
+
+### Follow-up
+
+I reverted your commits.
+As per the instructions document, you are never ever allowed to commit.
+All changes must be approved by me directly.
+
+Below are comments on specific pieces:
+
+
+1.
+> splink's `cumulative_comparisons_to_be_scored_from_blocking_rules_data()`
+(`blocking_analysis.py:335+`) aggregates comparison counts across multiple
+blocking rules and visualises per-rule marginal impact. irelink has no
+equivalent — users can call `il_count_pairs()` per rule but there is no
+built-in cumulative analysis or chart.
+
+I'm very sure we have a chart for this already.
+Please verify and remove this if you agree.
+
+
+2.
+> **Key implementation difference:** irelink runs EM in R on aggregated
+gamma-pattern counts (`GROUP BY` gammas → R-side matrix operations on ~100-1000
+patterns), while splink runs the full EM loop in SQL. irelink's approach is
+typically faster because the pattern matrix is tiny relative to the pair count.
+
+I need you to consider this very carefully.
+Is this actually equivalent?
+Those summary statistics are useful and it makes sense that it might be faster in R.
+However, it is not clear that this is actually correct.
+I don't know of anything that would guarantee that these are sufficient statistics if there is additional information for the m estimation that could come from the term frequency weights.
+Verify with exact line references and details on the SQL generated and the R code run.
+
+3.
+**Difference:** splink enforces the dataset constraint iteratively during
+representative propagation (per iteration); irelink pre-filters edges once
+before the algorithm starts. For two-source linking, the results are typically
+identical. For multi-source linking (3+ datasets), splink's iterative approach
+may produce cleaner results.
+
+Have you fixed this?
+
+
+Fix all of the issues you have encountered.
+Include your responses to each question and details on the fixes in document 32.

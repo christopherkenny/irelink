@@ -21,7 +21,6 @@
 #' @export
 #'
 #' @examples
-#' \donttest{
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
@@ -31,7 +30,6 @@
 #' model <- il_estimate_em(model, block_on(surname))
 #' labels_from_column(model, 'cluster')
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-#' }
 labels_from_column <- function(model, labels_col, threshold = 0) {
   validate_il_model(model)
   con <- model$con
@@ -132,12 +130,16 @@ resolve_labels_from_pairs <- function(model, pairs, labels_col) {
 resolve_labels <- function(model, labels, labels_col) {
   if (!is.null(labels_col)) {
     if (!is.null(labels)) {
-      cli::cli_warn('Both {.arg labels} and {.arg labels_col} provided; using {.arg labels_col}.')
+      cli::cli_warn(
+        'Both {.arg labels} and {.arg labels_col} provided; using {.arg labels_col}.'
+      )
     }
     return(labels_from_column(model, labels_col))
   }
   if (is.null(labels)) {
-    cli::cli_abort('Either {.arg labels} or {.arg labels_col} must be provided.')
+    cli::cli_abort(
+      'Either {.arg labels} or {.arg labels_col} must be provided.'
+    )
   }
   labels
 }
@@ -168,6 +170,8 @@ canonical_pair_key <- function(id_l, id_r) {
 #'   - `label_probs`: numeric vector of match probabilities per labeled pair
 #'   - `label_weights`: numeric vector of match weights per labeled pair
 #'   - `actual_positive`: logical vector of true match status
+#'   - `found_by_blocking`: logical vector indicating whether blocking would
+#'     find this pair
 #' @noRd
 score_labeled_pairs <- function(model, labels) {
   validate_il_model(model)
@@ -198,17 +202,45 @@ score_labeled_pairs <- function(model, labels) {
     DBI::dbWriteTable(con, lbl_tbl, as.data.frame(lbl_df), overwrite = TRUE)
     on.exit(drop_registered(con, lbl_tbl), add = TRUE)
 
-    gamma_exprs <- vapply(comparisons, function(comp) {
-      expr <- sql_gamma_case(comp, dialect)
-      glue::glue('{expr} AS gamma_{comp$columns}')
-    }, character(1))
+    gamma_exprs <- vapply(
+      comparisons,
+      function(comp) {
+        expr <- sql_gamma_case(comp, dialect)
+        glue::glue('{expr} AS gamma_{comp$columns}')
+      },
+      character(1)
+    )
     gamma_select <- paste(gamma_exprs, collapse = ', ')
 
+    # Blocking-miss flag: evaluate whether each pair matches any blocking rule
+    blocking_rules <- model$spec$blocking_rules
+    if (length(blocking_rules) > 0L) {
+      br_exprs <- vapply(
+        blocking_rules,
+        function(br) {
+          build_blocking_condition(
+            br$columns,
+            br$where,
+            transform = br$transform,
+            dialect = dialect
+          )
+        },
+        character(1)
+      )
+      br_sql <- paste0('(', paste(br_exprs, collapse = ' OR '), ')')
+    } else {
+      br_sql <- 'TRUE'
+    }
+
     # Build weight expression using model parameters
-    weight_parts <- vapply(seq_along(comparisons), function(j) {
-      cn <- comp_names[j]
-      sql_weight_case(cn, mu$m_levels[[cn]], mu$u_levels[[cn]])
-    }, character(1))
+    weight_parts <- vapply(
+      seq_along(comparisons),
+      function(j) {
+        cn <- comp_names[j]
+        sql_weight_case(cn, mu$m_levels[[cn]], mu$u_levels[[cn]])
+      },
+      character(1)
+    )
     weight_expr <- paste(weight_parts, collapse = ' + ')
     log_prior_odds <- log(prior / (1 - prior))
     ln2 <- log(2)
@@ -216,11 +248,13 @@ score_labeled_pairs <- function(model, labels) {
     sql <- glue::glue(
       'SELECT pair_idx, match_weight, ',
       '1.0 / (1.0 + EXP(-({log_prior_odds} + match_weight * {ln2}))) ',
-      'AS match_probability ',
+      'AS match_probability, found_by_blocking ',
       'FROM (',
-      'SELECT pair_idx, ({weight_expr}) AS match_weight ',
+      'SELECT pair_idx, ({weight_expr}) AS match_weight, ',
+      'found_by_blocking ',
       'FROM (',
-      'SELECT lbl.pair_idx, {gamma_select} ',
+      'SELECT lbl.pair_idx, {gamma_select}, ',
+      '{br_sql} AS found_by_blocking ',
       'FROM {lbl_tbl} lbl ',
       'JOIN {tbl_l} l ON l.unique_id = lbl.uid_l ',
       'JOIN {tbl_r} r ON r.unique_id = lbl.uid_r',
@@ -232,7 +266,8 @@ score_labeled_pairs <- function(model, labels) {
     return(list(
       label_probs = result$match_probability,
       label_weights = result$match_weight,
-      actual_positive = as.logical(labels$is_match)
+      actual_positive = as.logical(labels$is_match),
+      found_by_blocking = as.logical(unlist(result$found_by_blocking))
     ))
   }
 
@@ -270,9 +305,30 @@ score_labeled_pairs <- function(model, labels) {
   label_weights <- score_gamma_matrix(gamma_mat, mu)
   label_probs <- weight_to_probability(label_weights, prior)
 
+  # Blocking-miss flag (R path): check each pair against blocking rules
+  blocking_rules <- model$spec$blocking_rules
+  if (length(blocking_rules) > 0L) {
+    found <- logical(n_labels)
+    for (br in blocking_rules) {
+      rule_match <- rep(TRUE, n_labels)
+      for (col in br$columns) {
+        l_vals <- src_l[id_l, col]
+        r_vals <- src_r[id_r, col]
+        rule_match <- rule_match &
+          !is.na(l_vals) &
+          !is.na(r_vals) &
+          l_vals == r_vals
+      }
+      found <- found | rule_match
+    }
+  } else {
+    found <- rep(TRUE, n_labels)
+  }
+
   list(
     label_probs = label_probs,
     label_weights = label_weights,
-    actual_positive = as.logical(labels$is_match)
+    actual_positive = as.logical(labels$is_match),
+    found_by_blocking = found
   )
 }

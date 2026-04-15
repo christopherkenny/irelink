@@ -19,6 +19,14 @@
 #'   include `tolower`, `toupper`, and `trimws`, which are automatically
 #'   translated to SQL when a database backend is available. Custom
 #'   functions work on the R-side path only.
+#' @param tf_adjustment_weight Numeric power to raise the term-frequency
+#'   Bayes factor to. A value of `1.0` (the default) applies the full
+#'   adjustment; `0` disables it entirely. Only relevant when the
+#'   comparison method has `term_frequency = TRUE`.
+#' @param tf_minimum_u_value Numeric floor for the term-frequency
+#'   denominator. When both TF values are below this threshold, it is
+#'   used instead — preventing unrealistically large match weights for
+#'   very rare terms. Defaults to `0.0` (no floor).
 #' @param ... Reserved for future use.
 #'
 #' @return An updated `il_spec` (a new copy; the input is not modified).
@@ -32,7 +40,15 @@
 #' # Apply a transform before comparing
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7), transform = tolower)
-il_compare <- function(spec, col, method, ..., transform = NULL) {
+#'
+#' # Scale TF adjustment weight
+#' spec <- il_spec() |>
+#'   il_compare(first_name, cl_jaro_winkler(0.9, term_frequency = TRUE),
+#'              tf_adjustment_weight = 0.5, tf_minimum_u_value = 0.001)
+il_compare <- function(spec, col, method, ...,
+                       transform = NULL,
+                       tf_adjustment_weight = 1.0,
+                       tf_minimum_u_value = 0.0) {
   if (!inherits(spec, 'il_spec')) {
     cli::cli_abort(
       '{.arg spec} must be an {.cls il_spec} object, not {.obj_type_friendly {spec}}.',
@@ -48,7 +64,11 @@ il_compare <- function(spec, col, method, ..., transform = NULL) {
   col_expr <- rlang::enquo(col)
   columns <- extract_col_names(col_expr)
   for (column in columns) {
-    entry <- list(columns = column, method = method, transform = transform)
+    entry <- list(
+      columns = column, method = method, transform = transform,
+      tf_adjustment_weight = tf_adjustment_weight,
+      tf_minimum_u_value = tf_minimum_u_value
+    )
     spec$comparisons <- c(spec$comparisons, list(entry))
   }
   spec

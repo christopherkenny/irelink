@@ -125,8 +125,31 @@ cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id'
 
   if (method == 'best_link') {
     if (!is.null(source_dataset)) {
-      # Remove edges where both endpoints are from the same source dataset
-      edges_tbl <- sql_filter_same_source(con, edges_tbl, source_dataset)
+      # Iterative one-to-one: merge clusters step-by-step, re-evaluating
+      # dataset constraints after each merge (splink's approach).
+      result <- solve_one_to_one_sql(
+        con, edges_tbl, source_dataset, ties_method
+      )
+      DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
+
+      # Add isolated nodes
+      all_ids <- unique(c(
+        as.character(pairs$unique_id_l),
+        as.character(pairs$unique_id_r)
+      ))
+      isolated <- setdiff(all_ids, result$node_id)
+      if (length(isolated) > 0L) {
+        iso_df <- tibble::tibble(
+          node_id = isolated,
+          cluster_id = paste0('cluster_', isolated)
+        )
+        result <- rbind(result, iso_df)
+      }
+      result$cluster_id <- paste0('cluster_', result$cluster_id)
+      return(tibble::tibble(
+        unique_id = result$node_id,
+        cluster_id = result$cluster_id
+      ))
     }
     filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method)
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
@@ -166,8 +189,6 @@ cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id'
 #' @noRd
 cluster_igraph <- function(pairs, threshold, method, ties_method = 'lowest_id',
                            source_dataset = NULL) {
-  rlang::check_installed('igraph', reason = 'for clustering without a DuckDB or PostgreSQL connection.')
-
   all_ids <- unique(c(
     as.character(pairs$unique_id_l),
     as.character(pairs$unique_id_r)
@@ -179,10 +200,13 @@ cluster_igraph <- function(pairs, threshold, method, ties_method = 'lowest_id',
 
   if (method == 'best_link') {
     if (!is.null(source_dataset)) {
-      pairs <- filter_same_source(pairs, source_dataset)
+      # Iterative one-to-one (R fallback)
+      return(solve_one_to_one_r(pairs, source_dataset, ties_method))
     }
     pairs <- best_link_filter(pairs, ties_method)
   }
+
+  rlang::check_installed('igraph', reason = 'for clustering without a DuckDB or PostgreSQL connection.')
 
   edges <- data.frame(
     from = as.character(pairs$unique_id_l),
@@ -304,7 +328,33 @@ cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
 
   if (method == 'best_link') {
     if (!is.null(source_dataset)) {
-      edges_tbl <- sql_filter_same_source(con, edges_tbl, source_dataset)
+      # Iterative one-to-one clustering
+      result <- solve_one_to_one_sql(
+        con, edges_tbl, source_dataset, ties_method
+      )
+      DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
+
+      all_ids <- DBI::dbGetQuery(con, glue::glue(
+        'SELECT DISTINCT id FROM (',
+        'SELECT unique_id_l AS id FROM {predicted_tbl} ',
+        'UNION ',
+        'SELECT unique_id_r AS id FROM {predicted_tbl}',
+        ') sub'
+      ))$id
+
+      isolated <- setdiff(all_ids, result$node_id)
+      if (length(isolated) > 0L) {
+        iso_df <- tibble::tibble(
+          node_id = isolated,
+          cluster_id = paste0('cluster_', isolated)
+        )
+        result <- rbind(result, iso_df)
+      }
+      result$cluster_id <- paste0('cluster_', result$cluster_id)
+      return(tibble::tibble(
+        unique_id = result$node_id,
+        cluster_id = result$cluster_id
+      ))
     }
     filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method)
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))

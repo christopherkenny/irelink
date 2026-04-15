@@ -326,6 +326,303 @@ sql_best_link_filter <- function(con, edges_tbl, ties_method = 'lowest_id') {
   filtered_tbl
 }
 
+# --- Iterative one-to-one clustering ----------------------------------------
+
+#' Iterative one-to-one clustering (SQL)
+#'
+#' Implements splink's iterative best-link merge with dataset constraints.
+#' Each iteration: (1) identify which datasets each cluster contains,
+#' (2) rank candidate edges excluding those that would cause dataset
+#' collisions, (3) keep mutual best pairs, (4) merge. Repeat until
+#' no more merges are possible.
+#'
+#' @param con DBI connection.
+#' @param edges_tbl Name of edges table (unique_id_l, unique_id_r,
+#'   match_probability).
+#' @param source_dataset Named character vector mapping unique_id →
+#'   source_dataset.
+#' @param ties_method How to break ties: `"lowest_id"` or `"drop"`.
+#' @param max_iterations Safety valve (default 100).
+#' @return A tibble with columns `node_id` and `cluster_id`.
+#' @noRd
+solve_one_to_one_sql <- function(con, edges_tbl, source_dataset,
+                                 ties_method = 'lowest_id',
+                                 max_iterations = 100L) {
+  oto_repr <- cc_tbl('oto_repr')
+  oto_src <- cc_tbl('oto_src')
+  oto_cluster_ds <- cc_tbl('oto_cluster_ds')
+  oto_ranked <- cc_tbl('oto_ranked')
+  oto_merged <- cc_tbl('oto_merged')
+
+  # Upload source dataset mapping
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_src}'))
+  sd_df <- data.frame(
+    node_id = names(source_dataset),
+    source_dataset = unname(source_dataset),
+    stringsAsFactors = FALSE
+  )
+  DBI::dbWriteTable(con, oto_src, sd_df)
+
+  # Initialize: each node is its own representative
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_repr}'))
+  DBI::dbExecute(con, glue::glue(
+    'CREATE TABLE {oto_repr} AS ',
+    'SELECT DISTINCT node_id, node_id AS representative ',
+    'FROM (',
+    '  SELECT unique_id_l AS node_id FROM {edges_tbl} ',
+    '  UNION ',
+    '  SELECT unique_id_r AS node_id FROM {edges_tbl}',
+    ') sub'
+  ))
+
+  for (iter in seq_len(max_iterations)) {
+    # Step 1: Build cluster→datasets mapping
+    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_cluster_ds}'))
+    DBI::dbExecute(con, glue::glue(
+      'CREATE TABLE {oto_cluster_ds} AS ',
+      'SELECT DISTINCT r.representative, s.source_dataset ',
+      'FROM {oto_repr} r ',
+      'INNER JOIN {oto_src} s ON r.node_id = s.node_id'
+    ))
+
+    # Step 2: Find candidate edges that don't violate constraints,
+    # rank by probability, and keep mutual best
+    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_ranked}'))
+
+    tie_order <- if (ties_method == 'lowest_id') {
+      ', CASE WHEN repr < partner_repr THEN partner_repr ELSE repr END'
+    } else {
+      ''
+    }
+
+    DBI::dbExecute(con, glue::glue(
+      'CREATE TABLE {oto_ranked} AS ',
+      'WITH candidate_edges AS (',
+      '  SELECT e.unique_id_l, e.unique_id_r, e.match_probability, ',
+      '         rl.representative AS repr_l, rr.representative AS repr_r ',
+      '  FROM {edges_tbl} e ',
+      '  INNER JOIN {oto_repr} rl ON e.unique_id_l = rl.node_id ',
+      '  INNER JOIN {oto_repr} rr ON e.unique_id_r = rr.node_id ',
+      '  WHERE rl.representative <> rr.representative ',
+      '  AND NOT EXISTS (',
+      '    SELECT 1 FROM {oto_cluster_ds} cdl ',
+      '    INNER JOIN {oto_cluster_ds} cdr ',
+      '      ON cdl.source_dataset = cdr.source_dataset ',
+      '    WHERE cdl.representative = rl.representative ',
+      '    AND cdr.representative = rr.representative',
+      '  )',
+      '), ',
+      'bidir AS (',
+      '  SELECT repr_l AS repr, repr_r AS partner_repr, ',
+      '         match_probability AS prob, unique_id_l, unique_id_r ',
+      '  FROM candidate_edges ',
+      '  UNION ALL ',
+      '  SELECT repr_r AS repr, repr_l AS partner_repr, ',
+      '         match_probability AS prob, unique_id_l, unique_id_r ',
+      '  FROM candidate_edges',
+      '), ',
+      'ranked AS (',
+      '  SELECT *, ROW_NUMBER() OVER (',
+      '    PARTITION BY repr ORDER BY prob DESC{tie_order}',
+      '  ) AS rn ',
+      '  FROM bidir',
+      ') ',
+      'SELECT DISTINCT unique_id_l, unique_id_r, prob AS match_probability, ',
+      '       repr, partner_repr ',
+      'FROM ranked r1 ',
+      'WHERE r1.rn = 1 ',
+      'AND EXISTS (',
+      '  SELECT 1 FROM ranked r2 ',
+      '  WHERE r2.repr = r1.partner_repr ',
+      '  AND r2.partner_repr = r1.repr ',
+      '  AND r2.rn = 1',
+      ')'
+    ))
+
+    # Check if any merges happened
+    n_merges <- DBI::dbGetQuery(
+      con, glue::glue('SELECT COUNT(*) AS n FROM {oto_ranked}')
+    )$n
+
+    if (n_merges == 0L) break
+
+    # Step 3: Merge clusters — update representatives
+    # For each mutual-best pair, the new representative is MIN(repr_l, repr_r)
+    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_merged}'))
+    DBI::dbExecute(con, glue::glue(
+      'CREATE TABLE {oto_merged} AS ',
+      'WITH merge_pairs AS (',
+      '  SELECT repr, partner_repr, ',
+      '         CASE WHEN repr < partner_repr THEN repr ',
+      '              ELSE partner_repr END AS new_repr ',
+      '  FROM {oto_ranked}',
+      '), ',
+      'repr_map AS (',
+      '  SELECT repr AS old_repr, MIN(new_repr) AS new_repr ',
+      '  FROM merge_pairs ',
+      '  GROUP BY repr',
+      ') ',
+      'SELECT r.node_id, ',
+      '  COALESCE(m.new_repr, r.representative) AS representative ',
+      'FROM {oto_repr} r ',
+      'LEFT JOIN repr_map m ON r.representative = m.old_repr'
+    ))
+
+    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_repr}'))
+    DBI::dbExecute(con, glue::glue(
+      'ALTER TABLE {oto_merged} RENAME TO {oto_repr}'
+    ))
+  }
+
+  # Read final cluster assignments
+  result <- DBI::dbGetQuery(con, glue::glue(
+    'SELECT node_id, representative AS cluster_id FROM {oto_repr}'
+  ))
+
+  # Clean up
+  for (tbl in c(oto_repr, oto_src, oto_cluster_ds, oto_ranked, oto_merged)) {
+    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
+  }
+
+  tibble::as_tibble(result)
+}
+
+
+#' Iterative one-to-one clustering (R/igraph fallback)
+#'
+#' R-side version of the iterative best-link algorithm with dataset
+#' constraints. Used when no DuckDB/PostgreSQL connection is available.
+#'
+#' @param pairs An il_compared tibble (already threshold-filtered).
+#' @param source_dataset Named character vector mapping unique_id →
+#'   source_dataset.
+#' @param ties_method How to break ties: `"lowest_id"` or `"drop"`.
+#' @param max_iterations Safety valve (default 100).
+#' @return A tibble with columns `unique_id` and `cluster_id`.
+#' @noRd
+solve_one_to_one_r <- function(pairs, source_dataset,
+                               ties_method = 'lowest_id',
+                               max_iterations = 100L) {
+  all_ids <- unique(c(
+    as.character(pairs$unique_id_l),
+    as.character(pairs$unique_id_r)
+  ))
+
+  # Initialize: each node is its own representative
+  repr <- stats::setNames(all_ids, all_ids)
+
+  edges <- data.frame(
+    id_l = as.character(pairs$unique_id_l),
+    id_r = as.character(pairs$unique_id_r),
+    prob = pairs$match_probability,
+    stringsAsFactors = FALSE
+  )
+
+  for (iter in seq_len(max_iterations)) {
+    # Get cluster (representative) for each endpoint
+    repr_l <- repr[edges$id_l]
+    repr_r <- repr[edges$id_r]
+
+    # Only consider edges between different clusters
+    cross <- repr_l != repr_r
+    if (!any(cross)) break
+
+    ce <- edges[cross, , drop = FALSE]
+    cr_l <- repr_l[cross]
+    cr_r <- repr_r[cross]
+
+    # Build cluster→datasets mapping
+    cluster_datasets <- split(
+      source_dataset[all_ids[all_ids %in% names(source_dataset)]],
+      repr[all_ids[all_ids %in% names(source_dataset)]]
+    )
+    cluster_datasets <- lapply(cluster_datasets, unique)
+
+    # Filter: remove edges where merging would cause dataset collision
+    valid <- vapply(seq_len(nrow(ce)), function(i) {
+      ds_l <- cluster_datasets[[cr_l[i]]]
+      ds_r <- cluster_datasets[[cr_r[i]]]
+      if (is.null(ds_l) || is.null(ds_r)) return(TRUE)
+      !any(ds_l %in% ds_r)
+    }, logical(1))
+
+    if (!any(valid)) break
+
+    ce <- ce[valid, , drop = FALSE]
+    cr_l <- cr_l[valid]
+    cr_r <- cr_r[valid]
+
+    # Bidirectional: find best partner for each cluster representative
+    best_partner <- list()
+    best_prob <- list()
+
+    for (i in seq_len(nrow(ce))) {
+      for (side in 1:2) {
+        cl <- if (side == 1) cr_l[i] else cr_r[i]
+        partner <- if (side == 1) cr_r[i] else cr_l[i]
+        p <- ce$prob[i]
+        prev_p <- best_prob[[cl]]
+
+        if (is.null(prev_p)) {
+          best_partner[[cl]] <- partner
+          best_prob[[cl]] <- p
+        } else if (p > prev_p) {
+          best_partner[[cl]] <- partner
+          best_prob[[cl]] <- p
+        } else if (p == prev_p && ties_method == 'lowest_id') {
+          if (partner < best_partner[[cl]]) {
+            best_partner[[cl]] <- partner
+          }
+        }
+      }
+    }
+
+    if (ties_method == 'drop') {
+      # Drop clusters with tied best probability
+      tie_count <- list()
+      for (i in seq_len(nrow(ce))) {
+        for (side in 1:2) {
+          cl <- if (side == 1) cr_l[i] else cr_r[i]
+          if (ce$prob[i] == best_prob[[cl]]) {
+            tie_count[[cl]] <- (tie_count[[cl]] %||% 0L) + 1L
+          }
+        }
+      }
+      tied <- names(tie_count)[vapply(tie_count, function(x) x > 1L, logical(1))]
+      for (cl in tied) {
+        best_partner[[cl]] <- NULL
+        best_prob[[cl]] <- NULL
+      }
+    }
+
+    # Keep only mutual best pairs
+    merged_any <- FALSE
+    already_merged <- character(0)
+    for (cl in names(best_partner)) {
+      partner <- best_partner[[cl]]
+      if (is.null(partner)) next
+      if (cl %in% already_merged || partner %in% already_merged) next
+      partner_best <- best_partner[[partner]]
+      if (!is.null(partner_best) && partner_best == cl) {
+        # Mutual best — merge: assign all nodes in larger-id cluster
+        # to smaller-id cluster
+        new_rep <- min(cl, partner)
+        old_rep <- max(cl, partner)
+        repr[repr == old_rep] <- new_rep
+        already_merged <- c(already_merged, cl, partner)
+        merged_any <- TRUE
+      }
+    }
+
+    if (!merged_any) break
+  }
+
+  tibble::tibble(
+    unique_id = all_ids,
+    cluster_id = paste0('cluster_', unname(repr[all_ids]))
+  )
+}
+
 # --- SQL graph metrics ------------------------------------------------------
 
 #' Compute node-level graph metrics in SQL

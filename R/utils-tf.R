@@ -129,6 +129,9 @@ compute_tf_adjustment <- function(gamma_mat, tf_data, comparisons, mu) {
 
     if (!isTRUE(comp$method$term_frequency)) next
 
+    tf_w <- comp$tf_adjustment_weight %||% 1.0
+    if (tf_w == 0) next
+
     tf_l <- tf_data[[paste0('tf_', col, '_l')]]
     tf_r <- tf_data[[paste0('tf_', col, '_r')]]
 
@@ -137,14 +140,20 @@ compute_tf_adjustment <- function(gamma_mat, tf_data, comparisons, mu) {
     # Use maximum of left/right TF values (following splink)
     tf_max <- pmax(tf_l, tf_r, na.rm = TRUE)
 
+    # Apply tf_minimum_u_value floor
+    tf_min <- comp$tf_minimum_u_value %||% 0.0
+    if (tf_min > 0) {
+      tf_max <- pmax(tf_max, tf_min)
+    }
+
     # TF applies at the highest gamma level (exact match)
     max_level <- n_gamma_levels(comp$method) - 1L
     u_exact <- mu$u_levels[[col]][max_level + 1L]
 
     mask <- gamma_mat[, j] == max_level & !is.na(tf_max) & tf_max > 0
     if (any(mask)) {
-      adjustment[mask] <- adjustment[mask] +
-        log2(pmax(u_exact, 1e-10) / tf_max[mask])
+      raw_adj <- log2(pmax(u_exact, 1e-10) / tf_max[mask])
+      adjustment[mask] <- adjustment[mask] + tf_w * raw_adj
     }
   }
 
@@ -177,17 +186,24 @@ compute_tf_adjustment_matrix <- function(gamma_mat, tf_data, comparisons, mu) {
 
     if (!isTRUE(comp$method$term_frequency)) next
 
+    tf_w <- comp$tf_adjustment_weight %||% 1.0
+    if (tf_w == 0) next
+
     adj <- numeric(n_pairs)
     tf_l <- tf_data[[paste0('tf_', col, '_l')]]
     tf_r <- tf_data[[paste0('tf_', col, '_r')]]
 
     if (!is.null(tf_l) && !is.null(tf_r)) {
       tf_max <- pmax(tf_l, tf_r, na.rm = TRUE)
+      tf_min <- comp$tf_minimum_u_value %||% 0.0
+      if (tf_min > 0) {
+        tf_max <- pmax(tf_max, tf_min)
+      }
       max_level <- n_gamma_levels(comp$method) - 1L
       u_exact <- mu$u_levels[[col]][max_level + 1L]
       mask <- gamma_mat[, j] == max_level & !is.na(tf_max) & tf_max > 0
       if (any(mask)) {
-        adj[mask] <- log2(pmax(u_exact, 1e-10) / tf_max[mask])
+        adj[mask] <- tf_w * log2(pmax(u_exact, 1e-10) / tf_max[mask])
       }
     }
 

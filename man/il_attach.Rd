@@ -41,7 +41,6 @@ continue training with \code{\link[=il_estimate_em]{il_estimate_em()}} using the
 parameters as a warm start.
 }
 \examples{
-\donttest{
 con <- DBI::dbConnect(duckdb::duckdb())
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
@@ -56,5 +55,4 @@ con2 <- DBI::dbConnect(duckdb::duckdb())
 loaded <- il_load(path)
 model2 <- il_attach(loaded, fake_1000, con = con2)
 DBI::dbDisconnect(con2, shutdown = TRUE)
-}
 }

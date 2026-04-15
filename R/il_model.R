@@ -39,8 +39,13 @@
 #' tbl_ref <- dplyr::tbl(con, 'my_data')
 #' model2 <- il_model(tbl_ref, spec = spec)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_model <- function(.data, ..., spec, con = NULL,
-                     link_type = c('dedupe', 'link', 'link_and_dedupe')) {
+il_model <- function(
+  .data,
+  ...,
+  spec,
+  con = NULL,
+  link_type = c('dedupe', 'link', 'link_and_dedupe')
+) {
   link_type <- match.arg(link_type)
   extra_inputs <- list(...)
 
@@ -62,7 +67,9 @@ il_model <- function(.data, ..., spec, con = NULL,
     )
   }
 
-  if (link_type %in% c('link', 'link_and_dedupe') && length(extra_inputs) == 0L) {
+  if (
+    link_type %in% c('link', 'link_and_dedupe') && length(extra_inputs) == 0L
+  ) {
     cli::cli_abort(
       '{.arg link_type} is {.val {link_type}} but only one dataset was provided. Supply a second data frame.'
     )
@@ -72,7 +79,11 @@ il_model <- function(.data, ..., spec, con = NULL,
   tbl_name_r <- NULL
   n_records_r <- NULL
   if (length(extra_inputs) > 0L) {
-    reg_r <- register_data(extra_inputs[[1]], con = con, tbl_name = '__il_data_r')
+    reg_r <- register_data(
+      extra_inputs[[1]],
+      con = con,
+      tbl_name = '__il_data_r'
+    )
     tbl_name_r <- reg_r$tbl_name
     n_records_r <- reg_r$n_records
   }
@@ -126,7 +137,6 @@ il_model <- function(.data, ..., spec, con = NULL,
 #' @export
 #'
 #' @examples
-#' \donttest{
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
@@ -141,7 +151,6 @@ il_model <- function(.data, ..., spec, con = NULL,
 #' loaded <- il_load(path)
 #' model2 <- il_attach(loaded, fake_1000, con = con2)
 #' DBI::dbDisconnect(con2, shutdown = TRUE)
-#' }
 il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
   validate_il_model(model)
 
@@ -165,7 +174,9 @@ il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
     )
   }
 
-  if (link_type %in% c('link', 'link_and_dedupe') && length(extra_inputs) == 0L) {
+  if (
+    link_type %in% c('link', 'link_and_dedupe') && length(extra_inputs) == 0L
+  ) {
     cli::cli_abort(
       '{.arg link_type} is {.val {link_type}} but only one dataset was provided. Supply a second data frame.'
     )
@@ -175,7 +186,11 @@ il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
   tbl_name_r <- NULL
   n_records_r <- NULL
   if (length(extra_inputs) > 0L) {
-    reg_r <- register_data(extra_inputs[[1]], con = con, tbl_name = '__il_data_r')
+    reg_r <- register_data(
+      extra_inputs[[1]],
+      con = con,
+      tbl_name = '__il_data_r'
+    )
     tbl_name_r <- reg_r$tbl_name
     n_records_r <- reg_r$n_records
   }
