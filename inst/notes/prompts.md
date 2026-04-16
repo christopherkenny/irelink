@@ -721,7 +721,6 @@ Do not fix sites where the R-side processing is genuinely non-trivial (e.g. stri
 
 Write your findings and any fixes to `inst/refs/30-sql-audit.md`.
 
-
 ## Deep-Dive
 
 Perform a deep dive comparison between this package (irelink) and splink (../splink).
@@ -751,7 +750,6 @@ All changes must be approved by me directly.
 
 Below are comments on specific pieces:
 
-
 1.
 > splink's `cumulative_comparisons_to_be_scored_from_blocking_rules_data()`
 (`blocking_analysis.py:335+`) aggregates comparison counts across multiple
@@ -761,7 +759,6 @@ built-in cumulative analysis or chart.
 
 I'm very sure we have a chart for this already.
 Please verify and remove this if you agree.
-
 
 2.
 > **Key implementation difference:** irelink runs EM in R on aggregated
@@ -785,9 +782,37 @@ may produce cleaner results.
 
 Have you fixed this?
 
-
 Fix all of the issues you have encountered.
 Include your responses to each question and details on the fixes in document 32.
+
+## Trace down bug
+
+`irelink` appears to overmatch substantially relative to `fastLink`.
+In the rendered comparison, `fastLink` remains much more precise, while `irelink` still produces many extra links that should not be there.
+
+Before deciding what to do next, the main things to check are:
+
+- whether the issue is mostly in pairwise scoring or mostly in clustering
+- whether some comparisons are being weighted too strongly, especially for plausible near-matches
+- whether the EM-trained probabilities are poorly calibrated even when ranking is reasonable
+- whether the same false-positive pattern persists under labeled estimation rather than unsupervised EM
+
+That would tell us whether this is mainly a vignette/demo problem, a calibration problem, or evidence of a deeper modeling issue.
+
+## Follow-up
+
+High-level issue: after fixing the EM bug, irelink is no longer failing catastrophically, but it still appears to produce too many false positives relative to fastLink on this benchmark.
+The remaining errors are mostly very plausible near-matches: exact or near-exact names with 2 out of 3 DOB components matching.
+That suggests the comparison is now surfacing a real modeling/calibration gap rather than just a vignette setup problem.
+
+Things worth looking at next:
+
+- Whether irelink is overcounting correlated evidence, especially exact first name + exact surname + partial DOB agreement.
+- Whether the learned u probabilities are too small for common nonmatch patterns, which would make these near-matches look rarer than they really are.
+- Whether the current discretized comparison design for names and dates is too coarse relative to fastLink’s partial-agreement handling.
+- Whether the remaining gap is mostly in pairwise scoring or in how pairwise links are turned into clusters.
+- Whether probability calibration is too aggressive even when the ranking of candidate pairs is reasonable.
+
 
 ## SQL pushdown audit prompt
 

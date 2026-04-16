@@ -5,7 +5,7 @@
 #' @param default Fallback value when prior is NULL or NA.
 #' @return Numeric scalar.
 #' @noRd
-safe_prior <- function(model, default = 0.05) {
+safe_prior <- function(model, default = 0.0001) {
   p <- model$params$prior
   if (is.null(p) || is.na(p)) default else p
 }

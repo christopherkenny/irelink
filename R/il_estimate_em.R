@@ -87,7 +87,7 @@
 il_estimate_em <- function(model, blocking, convergence = 1e-5,
                            fix_u = TRUE, fix_m = FALSE,
                            max_iterations = 25L,
-                           fix_prior = TRUE,
+                           fix_prior = FALSE,
                            estimate_without_tf = TRUE,
                            derive_prior = FALSE, ...) {
   validate_il_model(model)
@@ -233,6 +233,10 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
     log_nonmatch <- rep(log(1 - prior), n_patterns)
 
     for (j in seq_len(n_comp)) {
+      # Skip deactivated comparisons in E-step — their contribution is
+      # already captured by the blocking-adjusted prior (splink removes
+      # them from the comparison list entirely).
+      if (deactivated[j]) next
       m_vec <- pmax(m_list[[j]], 1e-10)
       u_vec <- pmax(u_list[[j]], 1e-10)
       log_m_vals <- log(m_vec)
