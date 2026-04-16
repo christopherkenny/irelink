@@ -40,11 +40,23 @@ model <- il_estimate_prior(
 )
 model <- il_estimate_u(model, max_pairs = 1e5)
 model <- il_estimate_em(model, block_on(first_name))
-#> Comparisons first_name overlap with the blocking rule and will
-#> not be updated.
+#> Warning: Comparisons first_name overlap with the EM blocking rule and will not be
+#> updated in this pass.
+#> ℹ These columns have no variation within the blocked training pairs, so their
+#>   m/u parameters cannot be estimated from this run.
+#> ℹ If these comparisons are important for scoring, this can lead to poor
+#>   calibration or over-confident match probabilities.
+#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
+#>   fields, or raise the prediction threshold and inspect the results carefully.
 model <- il_estimate_em(model, block_on(dob))
-#> Comparisons dob overlap with the blocking rule and will not be
-#> updated.
+#> Warning: Comparisons dob overlap with the EM blocking rule and will not be updated in
+#> this pass.
+#> ℹ These columns have no variation within the blocked training pairs, so their
+#>   m/u parameters cannot be estimated from this run.
+#> ℹ If these comparisons are important for scoring, this can lead to poor
+#>   calibration or over-confident match probabilities.
+#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
+#>   fields, or raise the prediction threshold and inspect the results carefully.
 
 pairs <- predict(model, threshold = 0.5)
 clusters <- il_cluster(pairs, threshold = 0.85)
@@ -110,7 +122,7 @@ materialising millions of rows would exhaust memory.
 ``` r
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,095 pairs in table __il_predicted (threshold = 0.5)
+#> <il_compared_lazy> 3,938 pairs in table __il_predicted (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -119,7 +131,7 @@ Pass the lazy reference directly to
 ``` r
 clusters_lazy <- il_cluster(pairs_lazy, threshold = 0.85)
 nrow(clusters_lazy)
-#> [1] 917
+#> [1] 962
 ```
 
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
@@ -145,20 +157,20 @@ maximum possible edges for a cluster of that size):
 
 ``` r
 metrics$clusters
-#> # A tibble: 172 × 5
+#> # A tibble: 88 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralisation
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_106       2       1   1                     NA    
-#>  2 cluster_164       8      24   0.857                  0.190
-#>  3 cluster_172       4       6   1                      0    
-#>  4 cluster_186       2       1   1                     NA    
-#>  5 cluster_244       8      19   0.679                  0.238
-#>  6 cluster_428       3       2   0.667                  1    
-#>  7 cluster_440       9      23   0.639                  0.304
-#>  8 cluster_58        5       8   0.8                    0.333
-#>  9 cluster_612       2       1   1                     NA    
-#> 10 cluster_871       3       3   1                      0    
-#> # ℹ 162 more rows
+#>  1 cluster_10       13      35  0.449                  0.258 
+#>  2 cluster_252       9      32  0.889                  0.143 
+#>  3 cluster_409       4       8  1.25                   0.167 
+#>  4 cluster_550       8      26  0.929                  0.0952
+#>  5 cluster_684       2       1  1                     NA     
+#>  6 cluster_738       6      15  1                      0     
+#>  7 cluster_760      11      36  0.655                  0.3   
+#>  8 cluster_772       5       9  0.9                    0.167 
+#>  9 cluster_888       9      32  0.889                  0.143 
+#> 10 cluster_0       266    1635  0.0464                 0.0749
+#> # ℹ 78 more rows
 ```
 
 A high maximum cluster size combined with low density often indicates
@@ -176,12 +188,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 106       cluster_106      1           1    
-#> 2 114       cluster_106      1           1    
-#> 3 171       cluster_164      5           0.714
-#> 4 165       cluster_164      7           1    
-#> 5 164       cluster_164      7           1    
-#> 6 168       cluster_164      6           0.857
+#> 1 339       cluster_338      1           0.5  
+#> 2 338       cluster_338      1           0.5  
+#> 3 340       cluster_338      2           1    
+#> 4 476       cluster_476      1           1    
+#> 5 477       cluster_476      1           1    
+#> 6 676       cluster_674      6           0.857
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -216,8 +228,14 @@ model_phon <- il_estimate_em(
   model_phon,
   block_on(first_name, .transform = il_soundex)
 )
-#> Comparisons first_name overlap with the blocking rule and will
-#> not be updated.
+#> Warning: Comparisons first_name overlap with the EM blocking rule and will not be
+#> updated in this pass.
+#> ℹ These columns have no variation within the blocked training pairs, so their
+#>   m/u parameters cannot be estimated from this run.
+#> ℹ If these comparisons are important for scoring, this can lead to poor
+#>   calibration or over-confident match probabilities.
+#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
+#>   fields, or raise the prediction threshold and inspect the results carefully.
 ```
 
 Phonetic blocking increases recall at the cost of more candidate pairs.
@@ -243,8 +261,14 @@ spec_tr <- il_spec() |>
 model_tr <- il_model(df, spec = spec_tr, con = con)
 model_tr <- il_estimate_u(model_tr, max_pairs = 1e5)
 model_tr <- il_estimate_em(model_tr, block_on(surname))
-#> Comparisons surname overlap with the blocking rule and will not
-#> be updated.
+#> Warning: Comparisons surname overlap with the EM blocking rule and will not be updated
+#> in this pass.
+#> ℹ These columns have no variation within the blocked training pairs, so their
+#>   m/u parameters cannot be estimated from this run.
+#> ℹ If these comparisons are important for scoring, this can lead to poor
+#>   calibration or over-confident match probabilities.
+#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
+#>   fields, or raise the prediction threshold and inspect the results carefully.
 ```
 
 `tolower`, `toupper`, and `trimws` are translated to SQL on DuckDB and
@@ -273,9 +297,27 @@ new_df <- data.frame(
 
 matches <- il_find_matches(model, new_df, threshold = 0.5)
 matches
-#> # A tibble: 0 × 4
-#> # ℹ 4 variables: unique_id_l <chr>, unique_id_r <chr>, match_weight <dbl>,
-#> #   match_probability <dbl>
+#> # A tibble: 18 × 4
+#>    unique_id_l unique_id_r match_weight match_probability
+#>          <int>       <int>        <dbl>             <dbl>
+#>  1           2         859       -0.962             0.932
+#>  2           1         237       -0.697             0.943
+#>  3           1         238       -0.697             0.943
+#>  4           1         240       -0.697             0.943
+#>  5           1         242       -0.697             0.943
+#>  6           1         367       -0.697             0.943
+#>  7           1         789       -0.697             0.943
+#>  8           1         791       -0.697             0.943
+#>  9           2         858       -0.962             0.932
+#> 10           1         241       -0.697             0.943
+#> 11           1         362       -0.697             0.943
+#> 12           1         365       -0.697             0.943
+#> 13           2         864       -0.962             0.932
+#> 14           2         866       -0.962             0.932
+#> 15           1         239       -0.697             0.943
+#> 16           1         363       -0.697             0.943
+#> 17           1         364       -0.697             0.943
+#> 18           1         366       -0.697             0.943
 ```
 
 Each row is a (new record, existing record) pair. `unique_id_l`

@@ -83,7 +83,14 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
-#> Comparisons surname overlap with the blocking rule and will not be updated.
+#> Warning: Comparisons surname overlap with the EM blocking rule and will not be updated
+#> in this pass.
+#> ℹ These columns have no variation within the blocked training pairs, so their
+#>   m/u parameters cannot be estimated from this run.
+#> ℹ If these comparisons are important for scoring, this can lead to poor
+#>   calibration or over-confident match probabilities.
+#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
+#>   fields, or raise the prediction threshold and inspect the results carefully.
 labels <- data.frame(
   unique_id_l = c(1L, 1L),
   unique_id_r = c(11L, 2L),
@@ -94,7 +101,7 @@ il_accuracy(model, labels = labels)
 #> # A tibble: 2 × 16
 #>   threshold    tp    fp    fn    tn fn_blocking_miss precision recall    f1
 #>       <dbl> <int> <int> <int> <int>            <int>     <dbl>  <dbl> <dbl>
-#> 1     0.959     1     1     0     0                0       0.5      1 0.667
+#> 1     1.000     1     1     0     0                0       0.5      1 0.667
 #> 2     1         0     0     1     1                0       1        0 0    
 #> # ℹ 7 more variables: f2 <dbl>, f0_5 <dbl>, specificity <dbl>, npv <dbl>,
 #> #   accuracy <dbl>, p4 <dbl>, phi <dbl>

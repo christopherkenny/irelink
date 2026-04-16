@@ -139,8 +139,14 @@ model <- il_estimate_prior(
 
 model <- il_estimate_u(model, max_pairs = 1e5)
 model <- il_estimate_em(model, block_on(surname))
-#> Comparisons surname overlap with the blocking rule and will not
-#> be updated.
+#> Warning: Comparisons surname overlap with the EM blocking rule and will not be updated
+#> in this pass.
+#> ℹ These columns have no variation within the blocked training pairs, so their
+#>   m/u parameters cannot be estimated from this run.
+#> ℹ If these comparisons are important for scoring, this can lead to poor
+#>   calibration or over-confident match probabilities.
+#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
+#>   fields, or raise the prediction threshold and inspect the results carefully.
 model <- il_estimate_em(model, block_on(suburb))
 ```
 
@@ -163,20 +169,20 @@ il_weights(model)
 #> # A tibble: 14 × 5
 #>    comparison    gamma_level  m_prob  u_prob weight
 #>    <chr>               <int>   <dbl>   <dbl>  <dbl>
-#>  1 given_name              0 0.180   0.972   -2.43 
-#>  2 given_name              1 0.0116  0.0221  -0.928
-#>  3 given_name              2 0.0127  0.00114  3.48 
-#>  4 given_name              3 0.124   0.00114  6.77 
-#>  5 given_name              4 0.671   0.00354  7.57 
-#>  6 surname                 0 0.127   0.981   -2.95 
-#>  7 surname                 1 0.00697 0.0120  -0.788
-#>  8 surname                 2 0.0156  0.00123  3.67 
-#>  9 surname                 3 0.182   0.00141  7.01 
-#> 10 surname                 4 0.669   0.00427  7.29 
-#> 11 date_of_birth           0 0.0769  1.000   -3.70 
-#> 12 date_of_birth           1 0.923   0.0002  12.2  
-#> 13 postcode                0 0.143   0.999   -2.80 
-#> 14 postcode                1 0.857   0.00124  9.43
+#>  1 given_name              0 0.199   0.972   -2.29 
+#>  2 given_name              1 0.0128  0.0221  -0.786
+#>  3 given_name              2 0.0129  0.00114  3.50 
+#>  4 given_name              3 0.121   0.00114  6.72 
+#>  5 given_name              4 0.655   0.00354  7.53 
+#>  6 surname                 0 0.144   0.981   -2.77 
+#>  7 surname                 1 0.00685 0.0120  -0.814
+#>  8 surname                 2 0.0159  0.00123  3.69 
+#>  9 surname                 3 0.178   0.00141  6.98 
+#> 10 surname                 4 0.655   0.00427  7.26 
+#> 11 date_of_birth           0 0.103   1.000   -3.29 
+#> 12 date_of_birth           1 0.897   0.0002  12.1  
+#> 13 postcode                0 0.166   0.999   -2.59 
+#> 14 postcode                1 0.834   0.00124  9.39
 ```
 
 ## Predict and cluster
@@ -184,7 +190,7 @@ il_weights(model)
 ``` r
 predictions <- predict(model, threshold = 0.5)
 nrow(predictions)
-#> [1] 4162
+#> [1] 4993
 ```
 
 ``` r
@@ -201,12 +207,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id  
 #>   <chr>     <chr>       
-#> 1 870       cluster_3026
-#> 2 914       cluster_1667
-#> 3 206       cluster_206 
-#> 4 718       cluster_718 
-#> 5 1155      cluster_1155
-#> 6 3211      cluster_3211
+#> 1 1974      cluster_1974
+#> 2 2734      cluster_2637
+#> 3 4170      cluster_4170
+#> 4 4852      cluster_2292
+#> 5 1271      cluster_1271
+#> 6 1973      cluster_1973
 ```
 
 ## Evaluate against ground truth

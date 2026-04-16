@@ -117,8 +117,14 @@ generate the training pairs:
 
 ``` r
 model <- il_estimate_em(model, block_on(surname))
-#> Comparisons surname overlap with the blocking rule and will not
-#> be updated.
+#> Warning: Comparisons surname overlap with the EM blocking rule and will not be updated
+#> in this pass.
+#> ℹ These columns have no variation within the blocked training pairs, so their
+#>   m/u parameters cannot be estimated from this run.
+#> ℹ If these comparisons are important for scoring, this can lead to poor
+#>   calibration or over-confident match probabilities.
+#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
+#>   fields, or raise the prediction threshold and inspect the results carefully.
 ```
 
 You can inspect the learned parameters at any time:
@@ -126,16 +132,16 @@ You can inspect the learned parameters at any time:
 ``` r
 il_weights(model)
 #> # A tibble: 8 × 5
-#>   comparison gamma_level  m_prob u_prob weight
-#>   <chr>            <int>   <dbl>  <dbl>  <dbl>
-#> 1 first_name           0 0.00917 0.832  -6.50 
-#> 2 first_name           1 0.203   0.0632  1.68 
-#> 3 first_name           2 0.788   0.105   2.90 
-#> 4 surname              0 0.05    0.821  -4.04 
-#> 5 surname              1 0.05    0.0368  0.441
-#> 6 surname              2 0.9     0.142   2.66 
-#> 7 dob                  0 0.254   0.921  -1.86 
-#> 8 dob                  1 0.746   0.0789  3.24
+#>   comparison gamma_level m_prob u_prob weight
+#>   <chr>            <int>  <dbl>  <dbl>  <dbl>
+#> 1 first_name           0 0.0114 0.832  -6.18 
+#> 2 first_name           1 0.196  0.0632  1.63 
+#> 3 first_name           2 0.792  0.105   2.91 
+#> 4 surname              0 0.05   0.821  -4.04 
+#> 5 surname              1 0.05   0.0368  0.441
+#> 6 surname              2 0.9    0.142   2.66 
+#> 7 dob                  0 0.280  0.921  -1.72 
+#> 8 dob                  1 0.720  0.0789  3.19
 ```
 
 ## Step 4: Predict
@@ -149,12 +155,12 @@ head(pairs)
 #> # A tibble: 6 × 7
 #>   unique_id_l unique_id_r match_weight match_probability gamma_first_name
 #>         <int>       <int>        <dbl>             <dbl>            <int>
-#> 1           2          11         8.81             0.959                2
-#> 2           7          17         8.81             0.959                2
-#> 3           1           2         8.81             0.959                2
-#> 4           5          15         8.81             0.959                2
-#> 5           6          15         8.81             0.959                2
-#> 6           7           8         7.58             0.910                1
+#> 1           1          11         8.76             1.000                2
+#> 2           4          14         3.86             0.989                2
+#> 3           8          17         7.49             0.999                1
+#> 4          19          20         3.86             0.989                2
+#> 5           3          13         8.76             1.000                2
+#> 6           4          13         8.76             1.000                2
 #> # ℹ 2 more variables: gamma_surname <int>, gamma_dob <int>
 ```
 
@@ -174,12 +180,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 19        cluster_10
-#> 2 4         cluster_13
-#> 3 11        cluster_1 
-#> 4 7         cluster_17
-#> 5 1         cluster_1 
-#> 6 8         cluster_17
+#> 1 4         cluster_13
+#> 2 8         cluster_17
+#> 3 19        cluster_10
+#> 4 9         cluster_10
+#> 5 10        cluster_10
+#> 6 7         cluster_17
 ```
 
 Each record is assigned a `cluster_id`. Records sharing the same cluster

@@ -80,17 +80,24 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
-#> Comparisons surname overlap with the blocking rule and will not be updated.
+#> Warning: Comparisons surname overlap with the EM blocking rule and will not be updated
+#> in this pass.
+#> ℹ These columns have no variation within the blocked training pairs, so their
+#>   m/u parameters cannot be estimated from this run.
+#> ℹ If these comparisons are important for scoring, this can lead to poor
+#>   calibration or over-confident match probabilities.
+#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
+#>   fields, or raise the prediction threshold and inspect the results carefully.
 pairs <- predict(model, threshold = 0.5)
 
 il_waterfall(pairs, which = 1)
 #> # A tibble: 5 × 6
 #>   step       order contribution direction start   end
 #>   <chr>      <int>        <dbl> <chr>     <dbl> <dbl>
-#> 1 Prior          1        -4.25 prior      0    -4.25
-#> 2 first_name     2         2.90 positive  -4.25 -1.34
-#> 3 surname        3         2.66 positive  -1.34  1.32
-#> 4 dob            4         3.24 positive   1.32  4.56
-#> 5 Final          5         4.56 final      0     4.56
+#> 1 Prior          1        2.61  prior      0     2.61
+#> 2 first_name     2        2.91  positive   2.61  5.52
+#> 3 surname        3        0.441 positive   5.52  5.96
+#> 4 dob            4       -1.72  negative   5.96  4.25
+#> 5 Final          5        4.25  final      0     4.25
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

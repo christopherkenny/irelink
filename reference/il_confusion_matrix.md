@@ -1,13 +1,15 @@
-# Identify Prediction Errors
+# Confusion Matrix at a Threshold
 
-Compares model predictions against labelled pairs and returns all
-false-positive and false-negative errors at a given threshold. Useful
-for understanding which record pairs the model gets wrong.
+Computes the thresholded confusion-matrix counts for labelled pairs.
+Uses the same SQL-first scoring path as
+[`il_accuracy()`](http://christophertkenny.com/irelink/reference/il_accuracy.md)
+on supported backends, so labelled pairs do not need to be predicted and
+collected in full before evaluation.
 
 ## Usage
 
 ``` r
-il_errors(model, labels = NULL, threshold = 0.85, labels_col = NULL)
+il_confusion_matrix(model, labels = NULL, threshold = 0.85, labels_col = NULL)
 ```
 
 ## Arguments
@@ -29,12 +31,14 @@ il_errors(model, labels = NULL, threshold = 0.85, labels_col = NULL)
 - labels_col:
 
   Optional string naming a column in the original data containing
-  ground-truth cluster/entity IDs.
+  ground-truth cluster/entity IDs. When provided, pairwise labels are
+  derived automatically via
+  [`labels_from_column()`](http://christophertkenny.com/irelink/reference/labels_from_column.md).
 
 ## Value
 
-A tibble of misclassified pairs with columns `id_l`, `id_r`,
-`match_weight`, `match_prob`, `true_label`, and `error_type`.
+A one-row tibble containing `threshold`, `tp`, `fp`, `fn`, `tn`,
+`fn_blocking_miss`, `precision`, `recall`, and `f1`.
 
 ## Examples
 
@@ -59,21 +63,6 @@ df <- data.frame(
     '1988-07-04', '1988-07-04', '1990-01-01', '1990-01-02',
     '1985-06-15', '1985-06-16', '2000-12-01', '2000-12-02',
     '1975-03-22', '1975-03-23', '1988-07-04', '1988-07-05'
-  ),
-  city = c(
-    'London', 'London', 'Paris', 'Paris', 'Berlin',
-    'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid',
-    'London', 'London', 'Paris', 'Paris', 'Berlin',
-    'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
-  ),
-  email = c(
-    'john@example.com', 'jon@example.com', 'jane@example.com',
-    'jane@example.com', 'bob@example.com', 'bobby@example.com',
-    'alice@example.com', 'alicia@example.com', 'tom@example.com',
-    'thomas@example.com', 'john@example.com', 'jon@example.com',
-    'jane@example.com', 'janet@example.com', 'bob@example.com',
-    'robert@example.com', 'alice@example.com', 'alison@example.com',
-    'tom@example.com', 'tomas@example.com'
   )
 )
 con <- DBI::dbConnect(duckdb::duckdb())
@@ -100,10 +89,10 @@ labels <- data.frame(
   is_match = c(1L, 0L)
 )
 
-il_errors(model, labels = labels, threshold = 0.85)
-#> # A tibble: 1 × 6
-#>   unique_id_l unique_id_r match_weight match_probability true_label error_type  
-#>         <int>       <int>        <dbl>             <dbl> <lgl>      <chr>       
-#> 1           1           2         8.76             1.000 FALSE      false_posit…
+il_confusion_matrix(model, labels = labels, threshold = 0.85)
+#> # A tibble: 1 × 9
+#>   threshold    tp    fp    fn    tn fn_blocking_miss precision recall    f1
+#>       <dbl> <int> <int> <int> <int>            <int>     <dbl>  <dbl> <dbl>
+#> 1      0.85     1     1     0     0                0       0.5      1 0.667
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

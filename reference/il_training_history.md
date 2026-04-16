@@ -73,22 +73,29 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
-#> Comparisons surname overlap with the blocking rule and will not be updated.
+#> Warning: Comparisons surname overlap with the EM blocking rule and will not be updated
+#> in this pass.
+#> ℹ These columns have no variation within the blocked training pairs, so their
+#>   m/u parameters cannot be estimated from this run.
+#> ℹ If these comparisons are important for scoring, this can lead to poor
+#>   calibration or over-confident match probabilities.
+#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
+#>   fields, or raise the prediction threshold and inspect the results carefully.
 
 il_training_history(model)
-#> # A tibble: 56 × 5
-#>    session iteration comparison gamma_level   value
-#>      <int>     <int> <chr>            <int>   <dbl>
-#>  1       1         1 first_name           0 0.0108 
-#>  2       1         1 first_name           1 0.206  
-#>  3       1         1 first_name           2 0.783  
-#>  4       1         1 surname              0 0.05   
-#>  5       1         1 surname              1 0.05   
-#>  6       1         1 surname              2 0.9    
-#>  7       1         1 dob                  0 0.221  
-#>  8       1         1 dob                  1 0.779  
-#>  9       1         2 first_name           0 0.00925
-#> 10       1         2 first_name           1 0.204  
-#> # ℹ 46 more rows
+#> # A tibble: 104 × 5
+#>    session iteration comparison gamma_level  value
+#>      <int>     <int> <chr>            <int>  <dbl>
+#>  1       1         1 first_name           0 0.143 
+#>  2       1         1 first_name           1 0.162 
+#>  3       1         1 first_name           2 0.695 
+#>  4       1         1 surname              0 0.05  
+#>  5       1         1 surname              1 0.05  
+#>  6       1         1 surname              2 0.9   
+#>  7       1         1 dob                  0 0.217 
+#>  8       1         1 dob                  1 0.783 
+#>  9       1         2 first_name           0 0.0177
+#> 10       1         2 first_name           1 0.193 
+#> # ℹ 94 more rows
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

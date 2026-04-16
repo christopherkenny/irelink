@@ -89,7 +89,14 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
-#> Comparisons surname overlap with the blocking rule and will not be updated.
+#> Warning: Comparisons surname overlap with the EM blocking rule and will not be updated
+#> in this pass.
+#> ℹ These columns have no variation within the blocked training pairs, so their
+#>   m/u parameters cannot be estimated from this run.
+#> ℹ If these comparisons are important for scoring, this can lead to poor
+#>   calibration or over-confident match probabilities.
+#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
+#>   fields, or raise the prediction threshold and inspect the results carefully.
 pairs <- predict(model, threshold = 0.5)
 clusters <- il_cluster(pairs)
 
@@ -98,10 +105,10 @@ metrics$clusters
 #> # A tibble: 5 × 5
 #>   cluster_id n_nodes n_edges density cluster_centralisation
 #>   <chr>        <int>   <int>   <dbl>                  <dbl>
-#> 1 cluster_13       3       3       1                      0
-#> 2 cluster_10       3       3       1                      0
-#> 3 cluster_15       3       3       1                      0
-#> 4 cluster_17       3       3       1                      0
-#> 5 cluster_1        3       3       1                      0
+#> 1 cluster_13       4       6   1                      0    
+#> 2 cluster_10       4       6   1                      0    
+#> 3 cluster_15       3       3   1                      0    
+#> 4 cluster_17       3       3   1                      0    
+#> 5 cluster_1        4       4   0.667                  0.667
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

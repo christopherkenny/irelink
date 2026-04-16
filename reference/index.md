@@ -192,6 +192,10 @@ Assess model quality against labelled data.
 
 - [`il_accuracy()`](http://christophertkenny.com/irelink/reference/il_accuracy.md)
   : Accuracy Metrics Across Thresholds
+- [`il_confusion_matrix()`](http://christophertkenny.com/irelink/reference/il_confusion_matrix.md)
+  : Confusion Matrix at a Threshold
+- [`il_cluster_confusion_matrix()`](http://christophertkenny.com/irelink/reference/il_cluster_confusion_matrix.md)
+  : Cluster-Level Confusion Matrix for Deduplication
 - [`labels_from_column()`](http://christophertkenny.com/irelink/reference/labels_from_column.md)
   : Derive Pairwise Labels from a Ground-Truth Column
 - [`il_precision_recall()`](http://christophertkenny.com/irelink/reference/il_precision_recall.md)
