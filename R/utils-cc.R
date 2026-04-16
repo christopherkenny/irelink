@@ -196,7 +196,7 @@ solve_cc_sql <- function(con, edges_tbl, max_iterations = 100L,
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
     DBI::dbExecute(con, glue::glue(
       'CREATE TABLE {output_tbl} AS ',
-      "SELECT CAST(NULL AS VARCHAR) AS node_id, CAST(NULL AS VARCHAR) AS cluster_id WHERE 1 = 0"
+      'SELECT CAST(NULL AS VARCHAR) AS node_id, CAST(NULL AS VARCHAR) AS cluster_id WHERE 1 = 0'
     ))
     if (!collect) {
       return(output_tbl)
@@ -561,7 +561,9 @@ solve_one_to_one_r <- function(pairs, source_dataset,
     valid <- vapply(seq_len(nrow(ce)), function(i) {
       ds_l <- cluster_datasets[[cr_l[i]]]
       ds_r <- cluster_datasets[[cr_r[i]]]
-      if (is.null(ds_l) || is.null(ds_r)) return(TRUE)
+      if (is.null(ds_l) || is.null(ds_r)) {
+        return(TRUE)
+      }
       !any(ds_l %in% ds_r)
     }, logical(1))
 

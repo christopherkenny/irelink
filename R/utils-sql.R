@@ -551,8 +551,10 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL,
           exclude <- paste('COALESCE(', prior_conds, ', FALSE)',
             collapse = ' OR '
           )
-          full_cond <- paste0(tp$join_cond, ' AND ', cond,
-            ' AND NOT (', exclude, ')')
+          full_cond <- paste0(
+            tp$join_cond, ' AND ', cond,
+            ' AND NOT (', exclude, ')'
+          )
         } else {
           full_cond <- paste0(tp$join_cond, ' AND ', cond)
         }

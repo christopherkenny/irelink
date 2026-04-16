@@ -134,14 +134,16 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
   deactivated <- vapply(comparisons, function(c) {
     any(c$columns %in% br_cols)
   }, logical(1))
-  if (any(deactivated)) {
-    deact_names <- comp_names[deactivated]
-    cli::cli_warn(c(
-      'Comparisons {.field {deact_names}} overlap with the EM blocking rule and will not be updated in this pass.',
-      'i' = 'These columns have no variation within the blocked training pairs, so their m/u parameters cannot be estimated from this run.',
-      'i' = 'If these comparisons are important for scoring, this can lead to poor calibration or over-confident match probabilities.',
-      'i' = 'Use a different EM blocking rule, add another EM pass on non-overlapping fields, or raise the prediction threshold and inspect the results carefully.'
-    ))
+  trained_names <- comp_names[!deactivated]
+  deact_names <- comp_names[deactivated]
+  if (length(trained_names) > 0 && length(deact_names) > 0) {
+    cli::cli_inform(
+      'EM trained: {.field {trained_names}} | skipped (blocked on): {.field {deact_names}}'
+    )
+  } else if (length(trained_names) > 0) {
+    cli::cli_inform('EM trained: {.field {trained_names}}')
+  } else {
+    cli::cli_inform('EM: all comparisons overlap with the blocking rule; nothing was trained.')
   }
 
   # Extract gamma patterns and counts (or per-pair gammas for TF mode)
@@ -215,7 +217,7 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
     prior_bf <- prior / (1 - prior)
     for (j in which(deactivated)) {
       nl <- levels_per_comp[j]
-      m_top <- m_list[[j]][nl]  # highest gamma level (exact match)
+      m_top <- m_list[[j]][nl] # highest gamma level (exact match)
       u_top <- u_list[[j]][nl]
       level_bf <- max(m_top, 1e-10) / max(u_top, 1e-10)
       prior_bf <- prior_bf * level_bf

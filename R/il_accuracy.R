@@ -114,7 +114,7 @@ il_accuracy <- function(model, labels = NULL, labels_col = NULL) {
     phi_num <- as.numeric(tp) * tn - as.numeric(fp) * fn
     phi_denom <- sqrt(
       as.numeric(tp + fp) * as.numeric(tp + fn) *
-      as.numeric(tn + fp) * as.numeric(tn + fn)
+        as.numeric(tn + fp) * as.numeric(tn + fn)
     )
     phi <- if (phi_denom > 0) phi_num / phi_denom else 0
 
