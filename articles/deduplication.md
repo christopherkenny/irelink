@@ -274,16 +274,16 @@ loaded <- il_load(path)
 model2 <- il_attach(loaded, fake_1000, con = con2)
 head(predict(model2, threshold = 0.85))
 #> # A tibble: 6 × 10
-#>   unique_id_l unique_id_r match_weight match_probability gamma_first_name
-#>         <int>       <int>        <dbl>             <dbl>            <int>
-#> 1           6          11         19.2             1.000                4
-#> 2          10          11         19.2             1.000                4
-#> 3          27          30         18.2             1.000                4
-#> 4          28          30         14.5             1.000                4
-#> 5          29          31         14.8             1.000                4
-#> 6          35          36         24.2             1.000                4
-#> # ℹ 5 more variables: gamma_surname <int>, gamma_dob <int>, gamma_city <int>,
-#> #   gamma_email <int>, tf_adj_city <dbl>
+#>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob gamma_city
+#>         <int>       <int>            <int>         <int>     <int>      <int>
+#> 1         471         473                4             4         5          0
+#> 2         508         512                4             0         3          1
+#> 3         510         512                4             4         3          1
+#> 4          97         104                4             2         5          1
+#> 5         102         104                4             2         5          1
+#> 6         252         254                4             4         5          0
+#> # ℹ 4 more variables: gamma_email <int>, match_weight <dbl>, tf_adj_city <dbl>,
+#> #   match_probability <dbl>
 DBI::dbDisconnect(con2, shutdown = TRUE)
 ```
 
@@ -324,12 +324,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 411       cluster_409
-#> 2 931       cluster_924
-#> 3 369       cluster_368
-#> 4 659       cluster_654
-#> 5 929       cluster_924
-#> 6 774       cluster_772
+#> 1 229       cluster_229
+#> 2 233       cluster_229
+#> 3 778       cluster_777
+#> 4 571       cluster_566
+#> 5 661       cluster_654
+#> 6 947       cluster_947
 ```
 
 ## Evaluate against ground truth

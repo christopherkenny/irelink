@@ -153,15 +153,15 @@ candidate pair and returns those above a match-weight threshold:
 pairs <- predict(model, threshold = 0.5)
 head(pairs)
 #> # A tibble: 6 × 7
-#>   unique_id_l unique_id_r match_weight match_probability gamma_first_name
-#>         <int>       <int>        <dbl>             <dbl>            <int>
-#> 1           1          11         8.76             1.000                2
-#> 2           4          14         3.86             0.989                2
-#> 3           8          17         7.49             0.999                1
-#> 4          19          20         3.86             0.989                2
-#> 5           3          13         8.76             1.000                2
-#> 6           4          13         8.76             1.000                2
-#> # ℹ 2 more variables: gamma_surname <int>, gamma_dob <int>
+#>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob match_weight
+#>         <int>       <int>            <int>         <int>     <int>        <dbl>
+#> 1           2          12                2             1         0         1.64
+#> 2           2          11                2             2         1         8.76
+#> 3           3          14                2             2         0         3.86
+#> 4           4          14                2             2         0         3.86
+#> 5           9          20                2             2         0         3.86
+#> 6          10          20                2             2         0         3.86
+#> # ℹ 1 more variable: match_probability <dbl>
 ```
 
 Each row is a candidate pair with columns for the left and right record
@@ -180,12 +180,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 4         cluster_13
-#> 2 8         cluster_17
-#> 3 19        cluster_10
-#> 4 9         cluster_10
-#> 5 10        cluster_10
-#> 6 7         cluster_17
+#> 1 3         cluster_13
+#> 2 14        cluster_13
+#> 3 5         cluster_15
+#> 4 6         cluster_15
+#> 5 15        cluster_15
+#> 6 17        cluster_17
 ```
 
 Each record is assigned a `cluster_id`. Records sharing the same cluster

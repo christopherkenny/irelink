@@ -94,10 +94,10 @@ il_waterfall(pairs, which = 1)
 #> # A tibble: 5 × 6
 #>   step       order contribution direction start   end
 #>   <chr>      <int>        <dbl> <chr>     <dbl> <dbl>
-#> 1 Prior          1        2.61  prior      0     2.61
-#> 2 first_name     2        2.91  positive   2.61  5.52
-#> 3 surname        3        0.441 positive   5.52  5.96
-#> 4 dob            4       -1.72  negative   5.96  4.25
-#> 5 Final          5        4.25  final      0     4.25
+#> 1 Prior          1         2.61 prior      0     2.61
+#> 2 first_name     2         2.91 positive   2.61  5.52
+#> 3 surname        3         2.66 positive   5.52  8.19
+#> 4 dob            4         3.19 positive   8.19 11.4 
+#> 5 Final          5        11.4  final      0    11.4 
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
