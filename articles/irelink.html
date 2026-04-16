@@ -183,14 +183,8 @@ chance true matches agree on each level). You supply a blocking rule to
 generate the training pairs:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Comparisons <span style="color: #00BB00;">surname</span> overlap with the EM blocking rule and will not be updated</span></span>
-<span><span class="co">#&gt; in this pass.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> These columns have no variation within the blocked training pairs, so their</span></span>
-<span><span class="co">#&gt;   m/u parameters cannot be estimated from this run.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> If these comparisons are important for scoring, this can lead to poor</span></span>
-<span><span class="co">#&gt;   calibration or over-confident match probabilities.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use a different EM blocking rule, add another EM pass on non-overlapping</span></span>
-<span><span class="co">#&gt;   fields, or raise the prediction threshold and inspect the results carefully.</span></span></code></pre></div>
+<span><span class="co">#&gt; EM trained: <span style="color: #00BB00;">first_name</span> and <span style="color: #00BB00;">dob</span> | skipped (blocked on):</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">surname</span></span></span></code></pre></div>
 <p>You can inspect the learned parameters at any time:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_weights.html">il_weights</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
@@ -239,12 +233,12 @@ clusters using connected-components analysis:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 3         cluster_13</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 14        cluster_13</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 5         cluster_15</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 6         cluster_15</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 15        cluster_15</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 17        cluster_17</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 4         cluster_13</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 9         cluster_10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 10        cluster_10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 13        cluster_13</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 7         cluster_17</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 8         cluster_17</span></span></code></pre></div>
 <p>Each record is assigned a <code>cluster_id</code>. Records sharing
 the same cluster are considered to be the same entity.</p>
 </div>

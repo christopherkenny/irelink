@@ -164,22 +164,10 @@ model <- df |>
   il_estimate_u(max_pairs = 5e6) |>
   il_estimate_em(block_on(first_name, surname)) |>
   il_estimate_em(block_on(dob))
-#> Warning: Comparisons first_name and surname overlap with the EM blocking rule and will
-#> not be updated in this pass.
-#> ℹ These columns have no variation within the blocked training pairs, so their
-#>   m/u parameters cannot be estimated from this run.
-#> ℹ If these comparisons are important for scoring, this can lead to poor
-#>   calibration or over-confident match probabilities.
-#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
-#>   fields, or raise the prediction threshold and inspect the results carefully.
-#> Warning: Comparisons dob overlap with the EM blocking rule and will not be updated in
-#> this pass.
-#> ℹ These columns have no variation within the blocked training pairs, so their
-#>   m/u parameters cannot be estimated from this run.
-#> ℹ If these comparisons are important for scoring, this can lead to poor
-#>   calibration or over-confident match probabilities.
-#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
-#>   fields, or raise the prediction threshold and inspect the results carefully.
+#> EM trained: dob, postcode_fake, birth_place, and occupation | skipped (blocked
+#> on): first_name and surname
+#> EM trained: first_name, surname, postcode_fake, birth_place, and occupation |
+#> skipped (blocked on): dob
 ```
 
 ## Inspect the trained model
@@ -271,18 +259,18 @@ autoplot(predictions, which = 1)
 clusters <- il_cluster(predictions, threshold = 0.95)
 clusters
 #> # A tibble: 41,798 × 2
-#>    unique_id   cluster_id         
-#>    <chr>       <chr>              
-#>  1 Q2516590-2  cluster_Q2516590-1 
-#>  2 Q55455287-1 cluster_Q55455287-1
-#>  3 Q631006-1   cluster_Q631006-1  
-#>  4 Q18917156-1 cluster_Q18917156-1
-#>  5 Q18917156-2 cluster_Q18917156-1
-#>  6 Q7795446-2  cluster_Q7795446-1 
-#>  7 Q16211961-1 cluster_Q16211961-1
-#>  8 Q2426857-2  cluster_Q2426857-1 
-#>  9 Q18593464-4 cluster_Q18593464-1
-#> 10 Q459764-1   cluster_Q459764-1  
+#>    unique_id    cluster_id          
+#>    <chr>        <chr>               
+#>  1 Q18529964-2  cluster_Q18529964-1 
+#>  2 Q3643409-2   cluster_Q3643409-1  
+#>  3 Q2306330-2   cluster_Q2306330-1  
+#>  4 Q16043465-1  cluster_Q16043465-1 
+#>  5 Q98767934-15 cluster_Q98767934-15
+#>  6 Q2548284-1   cluster_Q2548284-1  
+#>  7 Q3801403-2   cluster_Q3801403-1  
+#>  8 Q6238736-1   cluster_Q6238736-1  
+#>  9 Q16025304-2  cluster_Q16025304-1 
+#> 10 Q16025304-3  cluster_Q16025304-1 
 #> # ℹ 41,788 more rows
 ```
 
@@ -338,13 +326,13 @@ errors[errors$error_type == 'false_positive', ]
 #>  1 Q21462932-2 Q98761863-5         18.4             1.000 FALSE      false_posi…
 #>  2 Q21462932-4 Q98761863-5         18.8             1.000 FALSE      false_posi…
 #>  3 Q21462932-2 Q98761863-1         18.4             1.000 FALSE      false_posi…
-#>  4 Q21456175-2 Q919640-2           18.1             1.000 FALSE      false_posi…
-#>  5 Q21289577-2 Q21454003-2         20.3             1.000 FALSE      false_posi…
-#>  6 Q21289577-4 Q21454003-2         20.3             1.000 FALSE      false_posi…
-#>  7 Q4758994-1  Q4799735-4          15.4             1.000 FALSE      false_posi…
-#>  8 Q4758994-2  Q4799735-4          15.4             1.000 FALSE      false_posi…
-#>  9 Q18145317-1 Q21464696-1         15.4             1.000 FALSE      false_posi…
-#> 10 Q21289577-1 Q21454003-1         20.3             1.000 FALSE      false_posi…
+#>  4 Q16750724-2 Q26422972-6         18.4             1.000 FALSE      false_posi…
+#>  5 Q16750724-1 Q26422972-2         18.4             1.000 FALSE      false_posi…
+#>  6 Q16750724-4 Q26422972-2         18.4             1.000 FALSE      false_posi…
+#>  7 Q16750724-2 Q26422972-1         18.4             1.000 FALSE      false_posi…
+#>  8 Q19974918-2 Q8004400-2          20.0             1.000 FALSE      false_posi…
+#>  9 Q19974918-2 Q8004400-1          20.0             1.000 FALSE      false_posi…
+#> 10 Q56676142-1 Q6225175-9          15.6             1.000 FALSE      false_posi…
 #> # ℹ 24,012 more rows
 ```
 

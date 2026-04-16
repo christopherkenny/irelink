@@ -79,14 +79,7 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
-#> Warning: Comparisons surname overlap with the EM blocking rule and will not be updated
-#> in this pass.
-#> ℹ These columns have no variation within the blocked training pairs, so their
-#>   m/u parameters cannot be estimated from this run.
-#> ℹ If these comparisons are important for scoring, this can lead to poor
-#>   calibration or over-confident match probabilities.
-#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
-#>   fields, or raise the prediction threshold and inspect the results carefully.
+#> EM trained: first_name | skipped (blocked on): surname
 
 il_cluster_confusion_matrix(model, labels_col = 'cluster', threshold = 0.85)
 #> # A tibble: 1 × 9

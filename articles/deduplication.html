@@ -235,23 +235,11 @@ EM:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_u.html">il_estimate_u</a></span><span class="op">(</span><span class="va">model</span>, max_pairs <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">first_name</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Comparisons <span style="color: #00BB00;">first_name</span> overlap with the EM blocking rule and will not be</span></span>
-<span><span class="co">#&gt; updated in this pass.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> These columns have no variation within the blocked training pairs, so their</span></span>
-<span><span class="co">#&gt;   m/u parameters cannot be estimated from this run.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> If these comparisons are important for scoring, this can lead to poor</span></span>
-<span><span class="co">#&gt;   calibration or over-confident match probabilities.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use a different EM blocking rule, add another EM pass on non-overlapping</span></span>
-<span><span class="co">#&gt;   fields, or raise the prediction threshold and inspect the results carefully.</span></span>
+<span><span class="co">#&gt; EM trained: <span style="color: #00BB00;">surname</span>, <span style="color: #00BB00;">dob</span>, <span style="color: #00BB00;">city</span>, and</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">email</span> | skipped (blocked on): <span style="color: #00BB00;">first_name</span></span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">dob</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Comparisons <span style="color: #00BB00;">dob</span> overlap with the EM blocking rule and will not be updated in</span></span>
-<span><span class="co">#&gt; this pass.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> These columns have no variation within the blocked training pairs, so their</span></span>
-<span><span class="co">#&gt;   m/u parameters cannot be estimated from this run.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> If these comparisons are important for scoring, this can lead to poor</span></span>
-<span><span class="co">#&gt;   calibration or over-confident match probabilities.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use a different EM blocking rule, add another EM pass on non-overlapping</span></span>
-<span><span class="co">#&gt;   fields, or raise the prediction threshold and inspect the results carefully.</span></span></code></pre></div>
+<span><span class="co">#&gt; EM trained: <span style="color: #00BB00;">first_name</span>, <span style="color: #00BB00;">surname</span>, <span style="color: #00BB00;">city</span>, and</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">email</span> | skipped (blocked on): <span style="color: #00BB00;">dob</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="inspect-the-trained-model">Inspect the trained model<a class="anchor" aria-label="anchor" href="#inspect-the-trained-model"></a>
@@ -346,12 +334,12 @@ arrives.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 229       cluster_229</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 233       cluster_229</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 778       cluster_777</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 571       cluster_566</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 661       cluster_654</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 947       cluster_947</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 786       cluster_784</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 915       cluster_911</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 698       cluster_694</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 742       cluster_738</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 259       cluster_252</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 553       cluster_550</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>

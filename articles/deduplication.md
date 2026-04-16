@@ -187,23 +187,11 @@ Estimate u-probabilities from random pairs and m-probabilities via EM:
 ``` r
 model <- il_estimate_u(model, max_pairs = 1e5)
 model <- il_estimate_em(model, block_on(first_name))
-#> Warning: Comparisons first_name overlap with the EM blocking rule and will not be
-#> updated in this pass.
-#> ℹ These columns have no variation within the blocked training pairs, so their
-#>   m/u parameters cannot be estimated from this run.
-#> ℹ If these comparisons are important for scoring, this can lead to poor
-#>   calibration or over-confident match probabilities.
-#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
-#>   fields, or raise the prediction threshold and inspect the results carefully.
+#> EM trained: surname, dob, city, and
+#> email | skipped (blocked on): first_name
 model <- il_estimate_em(model, block_on(dob))
-#> Warning: Comparisons dob overlap with the EM blocking rule and will not be updated in
-#> this pass.
-#> ℹ These columns have no variation within the blocked training pairs, so their
-#>   m/u parameters cannot be estimated from this run.
-#> ℹ If these comparisons are important for scoring, this can lead to poor
-#>   calibration or over-confident match probabilities.
-#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
-#>   fields, or raise the prediction threshold and inspect the results carefully.
+#> EM trained: first_name, surname, city, and
+#> email | skipped (blocked on): dob
 ```
 
 ## Inspect the trained model
@@ -324,12 +312,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 229       cluster_229
-#> 2 233       cluster_229
-#> 3 778       cluster_777
-#> 4 571       cluster_566
-#> 5 661       cluster_654
-#> 6 947       cluster_947
+#> 1 786       cluster_784
+#> 2 915       cluster_911
+#> 3 698       cluster_694
+#> 4 742       cluster_738
+#> 5 259       cluster_252
+#> 6 553       cluster_550
 ```
 
 ## Evaluate against ground truth

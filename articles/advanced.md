@@ -40,23 +40,11 @@ model <- il_estimate_prior(
 )
 model <- il_estimate_u(model, max_pairs = 1e5)
 model <- il_estimate_em(model, block_on(first_name))
-#> Warning: Comparisons first_name overlap with the EM blocking rule and will not be
-#> updated in this pass.
-#> ℹ These columns have no variation within the blocked training pairs, so their
-#>   m/u parameters cannot be estimated from this run.
-#> ℹ If these comparisons are important for scoring, this can lead to poor
-#>   calibration or over-confident match probabilities.
-#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
-#>   fields, or raise the prediction threshold and inspect the results carefully.
+#> EM trained: surname, dob, city, and
+#> email | skipped (blocked on): first_name
 model <- il_estimate_em(model, block_on(dob))
-#> Warning: Comparisons dob overlap with the EM blocking rule and will not be updated in
-#> this pass.
-#> ℹ These columns have no variation within the blocked training pairs, so their
-#>   m/u parameters cannot be estimated from this run.
-#> ℹ If these comparisons are important for scoring, this can lead to poor
-#>   calibration or over-confident match probabilities.
-#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
-#>   fields, or raise the prediction threshold and inspect the results carefully.
+#> EM trained: first_name, surname, city, and
+#> email | skipped (blocked on): dob
 
 pairs <- predict(model, threshold = 0.5)
 clusters <- il_cluster(pairs, threshold = 0.85)
@@ -160,16 +148,16 @@ metrics$clusters
 #> # A tibble: 88 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralisation
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_10       13      35   0.449                 0.258 
-#>  2 cluster_252       9      32   0.889                 0.143 
-#>  3 cluster_409       4       8   1.25                  0.167 
-#>  4 cluster_550       8      26   0.929                 0.0952
-#>  5 cluster_684       2       1   1                    NA     
-#>  6 cluster_738       6      15   1                     0     
-#>  7 cluster_760      11      36   0.655                 0.3   
-#>  8 cluster_772       5       9   0.9                   0.167 
-#>  9 cluster_888       9      32   0.889                 0.143 
-#> 10 cluster_115       8      24   0.857                 0.190 
+#>  1 cluster_10       13      35  0.449                  0.258 
+#>  2 cluster_252       9      32  0.889                  0.143 
+#>  3 cluster_409       4       8  1.25                   0.167 
+#>  4 cluster_550       8      26  0.929                  0.0952
+#>  5 cluster_684       2       1  1                     NA     
+#>  6 cluster_738       6      15  1                      0     
+#>  7 cluster_760      11      36  0.655                  0.3   
+#>  8 cluster_772       5       9  0.9                    0.167 
+#>  9 cluster_888       9      32  0.889                  0.143 
+#> 10 cluster_0       266    1635  0.0464                 0.0749
 #> # ℹ 78 more rows
 ```
 
@@ -188,12 +176,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 338       cluster_338      1           0.5  
-#> 2 340       cluster_338      2           1    
-#> 3 339       cluster_338      1           0.5  
-#> 4 476       cluster_476      1           1    
-#> 5 477       cluster_476      1           1    
-#> 6 675       cluster_674      6           0.857
+#> 1 617       cluster_186      2            0.5 
+#> 2 187       cluster_186      3            0.75
+#> 3 616       cluster_186      4            1   
+#> 4 186       cluster_186      3            0.75
+#> 5 615       cluster_186      4            1   
+#> 6 251       cluster_244      7            1
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -228,14 +216,8 @@ model_phon <- il_estimate_em(
   model_phon,
   block_on(first_name, .transform = il_soundex)
 )
-#> Warning: Comparisons first_name overlap with the EM blocking rule and will not be
-#> updated in this pass.
-#> ℹ These columns have no variation within the blocked training pairs, so their
-#>   m/u parameters cannot be estimated from this run.
-#> ℹ If these comparisons are important for scoring, this can lead to poor
-#>   calibration or over-confident match probabilities.
-#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
-#>   fields, or raise the prediction threshold and inspect the results carefully.
+#> EM trained: surname and dob | skipped (blocked on):
+#> first_name
 ```
 
 Phonetic blocking increases recall at the cost of more candidate pairs.
@@ -261,14 +243,8 @@ spec_tr <- il_spec() |>
 model_tr <- il_model(df, spec = spec_tr, con = con)
 model_tr <- il_estimate_u(model_tr, max_pairs = 1e5)
 model_tr <- il_estimate_em(model_tr, block_on(surname))
-#> Warning: Comparisons surname overlap with the EM blocking rule and will not be updated
-#> in this pass.
-#> ℹ These columns have no variation within the blocked training pairs, so their
-#>   m/u parameters cannot be estimated from this run.
-#> ℹ If these comparisons are important for scoring, this can lead to poor
-#>   calibration or over-confident match probabilities.
-#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
-#>   fields, or raise the prediction threshold and inspect the results carefully.
+#> EM trained: first_name and dob | skipped (blocked on):
+#> surname
 ```
 
 `tolower`, `toupper`, and `trimws` are translated to SQL on DuckDB and

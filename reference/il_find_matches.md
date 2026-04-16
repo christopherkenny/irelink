@@ -81,14 +81,7 @@ spec <- il_spec() |>
 model <- il_model(df, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
-#> Warning: Comparisons surname overlap with the EM blocking rule and will not be updated
-#> in this pass.
-#> ℹ These columns have no variation within the blocked training pairs, so their
-#>   m/u parameters cannot be estimated from this run.
-#> ℹ If these comparisons are important for scoring, this can lead to poor
-#>   calibration or over-confident match probabilities.
-#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
-#>   fields, or raise the prediction threshold and inspect the results carefully.
+#> EM trained: first_name and dob | skipped (blocked on): surname
 new_df <- data.frame(
   first_name = 'Jhon', surname = 'Smith',
   dob = '1990-01-15', city = 'London'
@@ -98,8 +91,8 @@ il_find_matches(model, new_df, threshold = 0.5)
 #> # A tibble: 3 × 4
 #>   unique_id_l unique_id_r match_weight match_probability
 #>         <int>       <int>        <dbl>             <dbl>
-#> 1           1          11         3.86             0.989
+#> 1           1           1         3.86             0.989
 #> 2           1           2         3.86             0.989
-#> 3           1           1         3.86             0.989
+#> 3           1          11         3.86             0.989
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

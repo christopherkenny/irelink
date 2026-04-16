@@ -139,15 +139,11 @@ model <- il_estimate_prior(
 
 model <- il_estimate_u(model, max_pairs = 1e5)
 model <- il_estimate_em(model, block_on(surname))
-#> Warning: Comparisons surname overlap with the EM blocking rule and will not be updated
-#> in this pass.
-#> ℹ These columns have no variation within the blocked training pairs, so their
-#>   m/u parameters cannot be estimated from this run.
-#> ℹ If these comparisons are important for scoring, this can lead to poor
-#>   calibration or over-confident match probabilities.
-#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
-#>   fields, or raise the prediction threshold and inspect the results carefully.
+#> EM trained: given_name, date_of_birth, and postcode | skipped (blocked on):
+#> surname
 model <- il_estimate_em(model, block_on(suburb))
+#> EM trained: given_name, surname, date_of_birth,
+#> and postcode
 ```
 
 ## Inspect the model
@@ -207,12 +203,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id  
 #>   <chr>     <chr>       
-#> 1 664       cluster_664 
-#> 2 3157      cluster_3157
-#> 3 3041      cluster_1271
-#> 4 924       cluster_1018
-#> 5 2330      cluster_2330
-#> 6 4656      cluster_4656
+#> 1 2101      cluster_1642
+#> 2 3248      cluster_3248
+#> 3 4963      cluster_4602
+#> 4 66        cluster_3380
+#> 5 258       cluster_2348
+#> 6 3348      cluster_3348
 ```
 
 ## Evaluate against ground truth

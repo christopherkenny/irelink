@@ -71,6 +71,7 @@ spec <- il_spec() |>
 model <- il_model(fake_1000, spec = spec, con = con)
 model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
+#> EM trained: first_name
 path <- tempfile(fileext = '.rds')
 il_save(model, path)
 DBI::dbDisconnect(con, shutdown = TRUE)

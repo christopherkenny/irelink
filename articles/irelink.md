@@ -117,14 +117,8 @@ generate the training pairs:
 
 ``` r
 model <- il_estimate_em(model, block_on(surname))
-#> Warning: Comparisons surname overlap with the EM blocking rule and will not be updated
-#> in this pass.
-#> ℹ These columns have no variation within the blocked training pairs, so their
-#>   m/u parameters cannot be estimated from this run.
-#> ℹ If these comparisons are important for scoring, this can lead to poor
-#>   calibration or over-confident match probabilities.
-#> ℹ Use a different EM blocking rule, add another EM pass on non-overlapping
-#>   fields, or raise the prediction threshold and inspect the results carefully.
+#> EM trained: first_name and dob | skipped (blocked on):
+#> surname
 ```
 
 You can inspect the learned parameters at any time:
@@ -180,12 +174,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 3         cluster_13
-#> 2 14        cluster_13
-#> 3 5         cluster_15
-#> 4 6         cluster_15
-#> 5 15        cluster_15
-#> 6 17        cluster_17
+#> 1 4         cluster_13
+#> 2 9         cluster_10
+#> 3 10        cluster_10
+#> 4 13        cluster_13
+#> 5 7         cluster_17
+#> 6 8         cluster_17
 ```
 
 Each record is assigned a `cluster_id`. Records sharing the same cluster

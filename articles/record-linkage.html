@@ -203,15 +203,11 @@ matching:</p>
 <span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_u.html">il_estimate_u</a></span><span class="op">(</span><span class="va">model</span>, max_pairs <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Comparisons <span style="color: #00BB00;">surname</span> overlap with the EM blocking rule and will not be updated</span></span>
-<span><span class="co">#&gt; in this pass.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> These columns have no variation within the blocked training pairs, so their</span></span>
-<span><span class="co">#&gt;   m/u parameters cannot be estimated from this run.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> If these comparisons are important for scoring, this can lead to poor</span></span>
-<span><span class="co">#&gt;   calibration or over-confident match probabilities.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use a different EM blocking rule, add another EM pass on non-overlapping</span></span>
-<span><span class="co">#&gt;   fields, or raise the prediction threshold and inspect the results carefully.</span></span>
-<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">suburb</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co">#&gt; EM trained: <span style="color: #00BB00;">given_name</span>, <span style="color: #00BB00;">date_of_birth</span>, and <span style="color: #00BB00;">postcode</span> | skipped (blocked on):</span></span>
+<span><span class="co">#&gt; <span style="color: #00BB00;">surname</span></span></span>
+<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">suburb</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; EM trained: <span style="color: #00BB00;">given_name</span>, <span style="color: #00BB00;">surname</span>, <span style="color: #00BB00;">date_of_birth</span>,</span></span>
+<span><span class="co">#&gt; and <span style="color: #00BB00;">postcode</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="inspect-the-model">Inspect the model<a class="anchor" aria-label="anchor" href="#inspect-the-model"></a>
@@ -259,12 +255,12 @@ matching:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id  </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 664       cluster_664 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 3157      cluster_3157</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 3041      cluster_1271</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 924       cluster_1018</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 2330      cluster_2330</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 4656      cluster_4656</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 2101      cluster_1642</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 3248      cluster_3248</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 4963      cluster_4602</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 66        cluster_3380</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 258       cluster_2348</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 3348      cluster_3348</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>

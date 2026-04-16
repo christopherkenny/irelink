@@ -133,14 +133,7 @@ edges or weakly connected components.</p>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="il_model.html">il_model</a></span><span class="op">(</span><span class="va">df</span>, spec <span class="op">=</span> <span class="va">spec</span>, con <span class="op">=</span> <span class="va">con</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="il_estimate_u.html">il_estimate_u</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="block_on.html">block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span><span class="op">)</span></span></span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span class="warning">Warning: </span>Comparisons <span style="color: #00BB00;">surname</span> overlap with the EM blocking rule and will not be updated</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> in this pass.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> These columns have no variation within the blocked training pairs, so their</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>   m/u parameters cannot be estimated from this run.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> If these comparisons are important for scoring, this can lead to poor</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>   calibration or over-confident match probabilities.</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">ℹ</span> Use a different EM blocking rule, add another EM pass on non-overlapping</span>
-<span class="r-wrn co"><span class="r-pr">#&gt;</span>   fields, or raise the prediction threshold and inspect the results carefully.</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> EM trained: <span style="color: #00BB00;">first_name</span> and <span style="color: #00BB00;">dob</span> | skipped (blocked on): <span style="color: #00BB00;">surname</span></span>
 <span class="r-in"><span><span class="va">pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">pairs</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
@@ -149,11 +142,11 @@ edges or weakly connected components.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 5 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   cluster_id n_nodes n_edges density cluster_centralisation</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> cluster_13       4       6   1                      0    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> cluster_10       4       6   1                      0    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> cluster_15       3       3   1                      0    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> cluster_17       3       3   1                      0    </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> cluster_1        4       4   0.667                  0.667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> cluster_10       4       6   1                      0    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> cluster_15       3       3   1                      0    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> cluster_17       3       3   1                      0    </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> cluster_1        4       4   0.667                  0.667</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> cluster_13       4       6   1                      0    </span>
 <span class="r-in"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>

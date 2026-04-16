@@ -224,22 +224,10 @@ weight than rare ones:</p>
 <span>  <span class="fu"><a href="../reference/il_estimate_u.html">il_estimate_u</a></span><span class="op">(</span>max_pairs <span class="op">=</span> <span class="fl">5e6</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">first_name</span>, <span class="va">surname</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">dob</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Warning: Comparisons <span style="color: #00BB00;">first_name</span> and <span style="color: #00BB00;">surname</span> overlap with the EM blocking rule and will</span></span>
-<span><span class="co">#&gt; not be updated in this pass.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> These columns have no variation within the blocked training pairs, so their</span></span>
-<span><span class="co">#&gt;   m/u parameters cannot be estimated from this run.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> If these comparisons are important for scoring, this can lead to poor</span></span>
-<span><span class="co">#&gt;   calibration or over-confident match probabilities.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use a different EM blocking rule, add another EM pass on non-overlapping</span></span>
-<span><span class="co">#&gt;   fields, or raise the prediction threshold and inspect the results carefully.</span></span>
-<span><span class="co">#&gt; Warning: Comparisons <span style="color: #00BB00;">dob</span> overlap with the EM blocking rule and will not be updated in</span></span>
-<span><span class="co">#&gt; this pass.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> These columns have no variation within the blocked training pairs, so their</span></span>
-<span><span class="co">#&gt;   m/u parameters cannot be estimated from this run.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> If these comparisons are important for scoring, this can lead to poor</span></span>
-<span><span class="co">#&gt;   calibration or over-confident match probabilities.</span></span>
-<span><span class="co">#&gt; <span style="color: #00BBBB;">ℹ</span> Use a different EM blocking rule, add another EM pass on non-overlapping</span></span>
-<span><span class="co">#&gt;   fields, or raise the prediction threshold and inspect the results carefully.</span></span></code></pre></div>
+<span><span class="co">#&gt; EM trained: <span style="color: #00BB00;">dob</span>, <span style="color: #00BB00;">postcode_fake</span>, <span style="color: #00BB00;">birth_place</span>, and <span style="color: #00BB00;">occupation</span> | skipped (blocked</span></span>
+<span><span class="co">#&gt; on): <span style="color: #00BB00;">first_name</span> and <span style="color: #00BB00;">surname</span></span></span>
+<span><span class="co">#&gt; EM trained: <span style="color: #00BB00;">first_name</span>, <span style="color: #00BB00;">surname</span>, <span style="color: #00BB00;">postcode_fake</span>, <span style="color: #00BB00;">birth_place</span>, and <span style="color: #00BB00;">occupation</span> |</span></span>
+<span><span class="co">#&gt; skipped (blocked on): <span style="color: #00BB00;">dob</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="inspect-the-trained-model">Inspect the trained model<a class="anchor" aria-label="anchor" href="#inspect-the-trained-model"></a>
@@ -316,18 +304,18 @@ weight than rare ones:</p>
 <code class="sourceCode R"><span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">predictions</span>, threshold <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span>
 <span><span class="va">clusters</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 41,798 × 2</span></span></span>
-<span><span class="co">#&gt;    unique_id   cluster_id         </span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Q2516590-2  cluster_Q2516590-1 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Q55455287-1 cluster_Q55455287-1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Q631006-1   cluster_Q631006-1  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Q18917156-1 cluster_Q18917156-1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Q18917156-2 cluster_Q18917156-1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Q7795446-2  cluster_Q7795446-1 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Q16211961-1 cluster_Q16211961-1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Q2426857-2  cluster_Q2426857-1 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Q18593464-4 cluster_Q18593464-1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Q459764-1   cluster_Q459764-1  </span></span>
+<span><span class="co">#&gt;    unique_id    cluster_id          </span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Q18529964-2  cluster_Q18529964-1 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Q3643409-2   cluster_Q3643409-1  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Q2306330-2   cluster_Q2306330-1  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Q16043465-1  cluster_Q16043465-1 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Q98767934-15 cluster_Q98767934-15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Q2548284-1   cluster_Q2548284-1  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Q3801403-2   cluster_Q3801403-1  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Q6238736-1   cluster_Q6238736-1  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Q16025304-2  cluster_Q16025304-1 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Q16025304-3  cluster_Q16025304-1 </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 41,788 more rows</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -373,13 +361,13 @@ weight than rare ones:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Q21462932-2 Q98761863-5         18.4             1.000 FALSE      false_posi…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Q21462932-4 Q98761863-5         18.8             1.000 FALSE      false_posi…</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Q21462932-2 Q98761863-1         18.4             1.000 FALSE      false_posi…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Q21456175-2 Q919640-2           18.1             1.000 FALSE      false_posi…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Q21289577-2 Q21454003-2         20.3             1.000 FALSE      false_posi…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Q21289577-4 Q21454003-2         20.3             1.000 FALSE      false_posi…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Q4758994-1  Q4799735-4          15.4             1.000 FALSE      false_posi…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Q4758994-2  Q4799735-4          15.4             1.000 FALSE      false_posi…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Q18145317-1 Q21464696-1         15.4             1.000 FALSE      false_posi…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Q21289577-1 Q21454003-1         20.3             1.000 FALSE      false_posi…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Q16750724-2 Q26422972-6         18.4             1.000 FALSE      false_posi…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Q16750724-1 Q26422972-2         18.4             1.000 FALSE      false_posi…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Q16750724-4 Q26422972-2         18.4             1.000 FALSE      false_posi…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Q16750724-2 Q26422972-1         18.4             1.000 FALSE      false_posi…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Q19974918-2 Q8004400-2          20.0             1.000 FALSE      false_posi…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Q19974918-2 Q8004400-1          20.0             1.000 FALSE      false_posi…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Q56676142-1 Q6225175-9          15.6             1.000 FALSE      false_posi…</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 24,012 more rows</span></span></span></code></pre></div>
 <p>Some false negatives will be because the true pair was never
 generated by any blocking rule:</p>
