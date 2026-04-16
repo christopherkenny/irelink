@@ -814,7 +814,7 @@ Things worth looking at next:
 - Whether probability calibration is too aggressive even when the ranking of candidate pairs is reasonable.
 
 
-## SQL pushdown audit prompt
+## SQL pushdown audit prompt (Opus 4.6 high)
 
 We are auditing `irelink` to ensure that as much work as possible stays in SQL rather than being materialized into R.
 Your job is to identify every place in the code path for a target feature where data crosses from the database into R, determine whether that boundary is necessary, and, where safe, push more of the work into SQL.

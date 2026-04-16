@@ -63,10 +63,37 @@
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_unlinkables <- function(model) {
   validate_il_model(model)
-  all_pairs <- predict(model, threshold = 0.0)
   n_records <- model$data$n_records_l
-
   thresholds <- seq(0, 1, by = 0.05)
+  con <- model$con
+  dialect <- detect_dialect(con)
+
+  if (dialect_has_fuzzy_sql(dialect)) {
+    # SQL path: score in-database, collect only max_prob per record
+    lazy <- predict_lazy(model, threshold = 0)
+    on.exit(drop_registered(con, lazy$predicted_tbl), add = TRUE)
+
+    max_prob_sql <- glue::glue(
+      'SELECT MAX(match_probability) AS max_prob FROM (',
+      'SELECT unique_id_l AS id, match_probability FROM {lazy$predicted_tbl} ',
+      'UNION ALL ',
+      'SELECT unique_id_r AS id, match_probability FROM {lazy$predicted_tbl}',
+      ') sub GROUP BY id'
+    )
+    max_probs <- DBI::dbGetQuery(con, max_prob_sql)$max_prob
+
+    pcts <- vapply(thresholds, function(t) {
+      1 - sum(max_probs >= t) / n_records
+    }, numeric(1))
+
+    return(
+      tibble::tibble(threshold = thresholds, pct_unlinkable = pcts) |>
+        add_class('il_unlinkables')
+    )
+  }
+
+  # R-side fallback for SQLite and other backends
+  all_pairs <- predict(model, threshold = 0.0)
 
   results <- lapply(thresholds, function(t) {
     linked <- all_pairs[all_pairs$match_probability >= t, ]

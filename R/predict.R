@@ -112,6 +112,28 @@ predict.il_model <- function(object, threshold = 0.85,
     ))
   }
 
+  # SQL-first collect path for DuckDB/PostgreSQL:
+  # Score, filter, and deduplicate in SQL; only collect the final result.
+  dialect <- detect_dialect(object$con)
+  if (dialect_has_fuzzy_sql(dialect)) {
+    scored_sql <- build_scored_query(object, threshold,
+      threshold_match_weight = threshold_match_weight
+    )
+    if (include_fields) {
+      scored_sql <- build_fields_join_query(object, scored_sql)
+    }
+    result <- tibble::as_tibble(DBI::dbGetQuery(object$con, scored_sql))
+    if (nrow(result) == 0L) {
+      empty <- tibble::tibble(
+        unique_id_l = integer(0), unique_id_r = integer(0),
+        match_weight = numeric(0), match_probability = numeric(0)
+      )
+      return(new_il_compared(empty, model = object))
+    }
+    return(new_il_compared(result, model = object))
+  }
+
+  # R-side fallback for SQLite and other backends
   comparisons <- object$spec$comparisons
   params <- object$params$comparisons
   prior <- safe_prior(object)
