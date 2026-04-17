@@ -1,6 +1,7 @@
 url: http://christophertkenny.com/irelink/
 template:
   bootstrap: 5
+  package: ctktemplate
 
 home:
   sidebar:
