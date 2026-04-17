@@ -8,7 +8,8 @@
 <title>Getting Started • irelink</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Fira_Sans-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Getting Started">
 </head>
@@ -16,7 +17,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">irelink</a>
 
@@ -211,12 +212,12 @@ above a match-weight threshold:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 7</span></span></span>
 <span><span class="co">#&gt;   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob match_weight</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           2          12                2             1         0         1.64</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           2          11                2             2         1         8.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           3          14                2             2         0         3.86</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           4          14                2             2         0         3.86</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           9          20                2             2         0         3.86</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>          10          20                2             2         0         3.86</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           1          11                2             2         1         8.76</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           7          17                2             2         1         8.76</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           8          17                1             2         1         7.49</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>          19          20                2             2         0         3.86</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           1           2                2             2         1         8.76</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           3          13                2             2         1         8.76</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 1 more variable: match_probability &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>Each row is a candidate pair with columns for the left and right
 record identifiers, the per-comparison gamma values, and the overall
@@ -233,12 +234,12 @@ clusters using connected-components analysis:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 4         cluster_13</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 9         cluster_10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 10        cluster_10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 13        cluster_13</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 7         cluster_17</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 8         cluster_17</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 3         cluster_13</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 5         cluster_15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 6         cluster_15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 17        cluster_17</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 14        cluster_13</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 15        cluster_15</span></span></code></pre></div>
 <p>Each record is assigned a <code>cluster_id</code>. Records sharing
 the same cluster are considered to be the same entity.</p>
 </div>

@@ -8,7 +8,8 @@
 <title>Advanced Workflows • irelink</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
 <link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Fira_Sans-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Advanced Workflows">
 </head>
@@ -16,7 +17,7 @@
     <a href="#main" class="visually-hidden-focusable">Skip to contents</a>
 
 
-    <nav class="navbar navbar-expand-lg fixed-top bg-light" data-bs-theme="light" aria-label="Site navigation"><div class="container">
+    <nav class="navbar navbar-expand-lg fixed-top bg-primary" data-bs-theme="light" aria-label="Site navigation"><div class="container">
 
     <a class="navbar-brand me-2" href="../index.html">irelink</a>
 
@@ -196,18 +197,18 @@ maximum possible edges for a cluster of that size):</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">metrics</span><span class="op">$</span><span class="va">clusters</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 88 × 5</span></span></span>
-<span><span class="co">#&gt;    cluster_id  n_nodes n_edges density cluster_centralisation</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> cluster_10       13      35  0.449                  0.258 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> cluster_252       9      32  0.889                  0.143 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> cluster_409       4       8  1.25                   0.167 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> cluster_550       8      26  0.929                  0.095<span style="text-decoration: underline;">2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> cluster_684       2       1  1                     <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> cluster_738       6      15  1                      0     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_760      11      36  0.655                  0.3   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_772       5       9  0.9                    0.167 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_888       9      32  0.889                  0.143 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_0       266    <span style="text-decoration: underline;">1</span>635  0.046<span style="text-decoration: underline;">4</span>                 0.074<span style="text-decoration: underline;">9</span></span></span>
+<span><span class="co">#&gt;    cluster_id          n_nodes n_edges density cluster_centralisation</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>                 <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> cluster_115               8      24   0.857                  0.190</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> cluster_326               4       4   0.667                  0.667</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> cluster_792               7      15   0.714                  0.4  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> cluster_867               3       3   1                      0    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> cluster_924               8      28   1                      0    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> cluster_cluster_650       1       2   0                     <span style="color: #BB0000;">NA</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_100              37     192   0.288                  0.283</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_156               8      20   0.714                  0.190</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_368               4       6   1                      0    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_755               5      10   1                      0    </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 78 more rows</span></span></span></code></pre></div>
 <p>A high maximum cluster size combined with low density often indicates
 that a transitive link is pulling unrelated entities together. Consider
@@ -220,12 +221,12 @@ raising the threshold in <code><a href="https://rdrr.io/r/stats/predict.html" cl
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id  degree node_centrality</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 617       cluster_186      2            0.5 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 187       cluster_186      3            0.75</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 616       cluster_186      4            1   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 186       cluster_186      3            0.75</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 615       cluster_186      4            1   </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 251       cluster_244      7            1</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 338       cluster_338      1           0.5  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 340       cluster_338      2           1    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 339       cluster_338      1           0.5  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 476       cluster_476      1           1    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 477       cluster_476      1           1    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 675       cluster_674      6           0.857</span></span></code></pre></div>
 <p>Records with unusually high degree relative to their cluster size may
 be acting as hubs that inflate the cluster beyond its true
 membership.</p>
@@ -306,24 +307,24 @@ same blocking rules and comparison spec:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 18 × 4</span></span></span>
 <span><span class="co">#&gt;    unique_id_l unique_id_r match_weight match_probability</span></span>
 <span><span class="co">#&gt;          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>           2         859       -<span style="color: #BB0000;">0.962</span>             0.932</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>           1         237       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>           1         238       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>           1         240       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>           1         242       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>           1         367       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>           1         789       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>           1         791       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>           2         858       -<span style="color: #BB0000;">0.962</span>             0.932</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           1         241       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>           1         362       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>           1         365       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>           2         864       -<span style="color: #BB0000;">0.962</span>             0.932</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>           2         866       -<span style="color: #BB0000;">0.962</span>             0.932</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span>           1         239       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span>           1         363       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">17</span>           1         364       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">18</span>           1         366       -<span style="color: #BB0000;">0.697</span>             0.943</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>           1         241       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>           1         362       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>           1         365       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>           2         864       -<span style="color: #BB0000;">0.962</span>             0.932</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>           2         866       -<span style="color: #BB0000;">0.962</span>             0.932</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>           1         239       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>           1         363       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>           1         364       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>           1         366       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           2         859       -<span style="color: #BB0000;">0.962</span>             0.932</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>           1         237       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>           1         238       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>           1         240       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>           1         242       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span>           1         367       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span>           1         789       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">17</span>           1         791       -<span style="color: #BB0000;">0.697</span>             0.943</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">18</span>           2         858       -<span style="color: #BB0000;">0.962</span>             0.932</span></span></code></pre></div>
 <p>Each row is a (new record, existing record) pair.
 <code>unique_id_l</code> identifies the new record (auto-assigned
 starting from 1) and <code>unique_id_r</code> identifies the matched

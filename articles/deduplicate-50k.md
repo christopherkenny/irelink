@@ -223,18 +223,18 @@ autoplot(il_unlinkables(model))
 predictions <- predict(model, threshold = 0.5)
 predictions
 #> # A tibble: 313,033 × 12
-#>    unique_id_l unique_id_r  gamma_first_name gamma_surname gamma_dob
-#>  * <chr>       <chr>                   <int>         <int>     <int>
-#>  1 Q1443188-1  Q1443188-4                  1             4         5
-#>  2 Q21464185-2 Q21464185-4                 4             4         5
-#>  3 Q2516590-1  Q2516590-3                  4             4         5
-#>  4 Q2516590-2  Q2516590-3                  4             4         5
-#>  5 Q55455287-1 Q55455287-12                4             4         5
-#>  6 Q631006-1   Q631006-2                   4             4         5
-#>  7 Q18917156-1 Q18917156-6                 1             4         5
-#>  8 Q18917156-2 Q18917156-6                 1             4         5
-#>  9 Q7795446-1  Q7795446-3                  4             4         5
-#> 10 Q7795446-2  Q7795446-3                  4             4         5
+#>    unique_id_l  unique_id_r gamma_first_name gamma_surname gamma_dob
+#>  * <chr>        <chr>                  <int>         <int>     <int>
+#>  1 Q16855481-12 Q16855481-4                4             4         5
+#>  2 Q8004274-1   Q8004274-3                 4             4         5
+#>  3 Q8004274-2   Q8004274-3                 4             4         5
+#>  4 Q8004274-12  Q8004274-3                 4             4         5
+#>  5 Q18530939-4  Q18530939-9                4             4         5
+#>  6 Q18530939-7  Q18530939-9                2             4         5
+#>  7 Q18530939-14 Q18530939-9                3             4         5
+#>  8 Q18530939-16 Q18530939-9                4             4         5
+#>  9 Q18530939-20 Q18530939-9                3             4         5
+#> 10 Q3285335-2   Q3285335-3                 4             4         5
 #> # ℹ 313,023 more rows
 #> # ℹ 7 more variables: gamma_postcode_fake <int>, gamma_birth_place <int>,
 #> #   gamma_occupation <int>, match_weight <dbl>, tf_adj_birth_place <dbl>,
@@ -259,18 +259,18 @@ autoplot(predictions, which = 1)
 clusters <- il_cluster(predictions, threshold = 0.95)
 clusters
 #> # A tibble: 41,798 × 2
-#>    unique_id    cluster_id          
-#>    <chr>        <chr>               
-#>  1 Q18529964-2  cluster_Q18529964-1 
-#>  2 Q3643409-2   cluster_Q3643409-1  
-#>  3 Q2306330-2   cluster_Q2306330-1  
-#>  4 Q16043465-1  cluster_Q16043465-1 
-#>  5 Q98767934-15 cluster_Q98767934-15
-#>  6 Q2548284-1   cluster_Q2548284-1  
-#>  7 Q3801403-2   cluster_Q3801403-1  
-#>  8 Q6238736-1   cluster_Q6238736-1  
-#>  9 Q16025304-2  cluster_Q16025304-1 
-#> 10 Q16025304-3  cluster_Q16025304-1 
+#>    unique_id    cluster_id         
+#>    <chr>        <chr>              
+#>  1 Q16855481-12 cluster_Q16855481-1
+#>  2 Q8004274-2   cluster_Q8004274-1 
+#>  3 Q18530939-4  cluster_Q18530939-1
+#>  4 Q6793159-1   cluster_Q6793159-1 
+#>  5 Q6793159-11  cluster_Q6793159-1 
+#>  6 Q76368924-3  cluster_Q76368924-1
+#>  7 Q6760008-1   cluster_Q6760008-1 
+#>  8 Q5931349-11  cluster_Q5931349-1 
+#>  9 Q18670530-1  cluster_Q18670530-1
+#> 10 Q18670530-2  cluster_Q18670530-1
 #> # ℹ 41,788 more rows
 ```
 
@@ -323,16 +323,16 @@ errors[errors$error_type == 'false_positive', ]
 #> # A tibble: 24,022 × 6
 #>    unique_id_l unique_id_r match_weight match_probability true_label error_type 
 #>    <chr>       <chr>              <dbl>             <dbl> <lgl>      <chr>      
-#>  1 Q21462932-2 Q98761863-5         18.4             1.000 FALSE      false_posi…
-#>  2 Q21462932-4 Q98761863-5         18.8             1.000 FALSE      false_posi…
-#>  3 Q21462932-2 Q98761863-1         18.4             1.000 FALSE      false_posi…
-#>  4 Q16750724-2 Q26422972-6         18.4             1.000 FALSE      false_posi…
-#>  5 Q16750724-1 Q26422972-2         18.4             1.000 FALSE      false_posi…
-#>  6 Q16750724-4 Q26422972-2         18.4             1.000 FALSE      false_posi…
-#>  7 Q16750724-2 Q26422972-1         18.4             1.000 FALSE      false_posi…
-#>  8 Q19974918-2 Q8004400-2          20.0             1.000 FALSE      false_posi…
-#>  9 Q19974918-2 Q8004400-1          20.0             1.000 FALSE      false_posi…
-#> 10 Q56676142-1 Q6225175-9          15.6             1.000 FALSE      false_posi…
+#>  1 Q16750724-2 Q26422972-6         18.4             1.000 FALSE      false_posi…
+#>  2 Q16750724-1 Q26422972-2         18.4             1.000 FALSE      false_posi…
+#>  3 Q16750724-4 Q26422972-2         18.4             1.000 FALSE      false_posi…
+#>  4 Q16750724-2 Q26422972-1         18.4             1.000 FALSE      false_posi…
+#>  5 Q19974918-2 Q8004400-2          20.0             1.000 FALSE      false_posi…
+#>  6 Q19974918-2 Q8004400-1          20.0             1.000 FALSE      false_posi…
+#>  7 Q56676142-1 Q6225175-9          15.6             1.000 FALSE      false_posi…
+#>  8 Q56676142-6 Q6225175-9          15.6             1.000 FALSE      false_posi…
+#>  9 Q56676142-1 Q6225175-5          15.6             1.000 FALSE      false_posi…
+#> 10 Q56676142-3 Q6225175-5          15.6             1.000 FALSE      false_posi…
 #> # ℹ 24,012 more rows
 ```
 
