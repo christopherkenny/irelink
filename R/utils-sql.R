@@ -288,7 +288,7 @@ sql_gamma_case <- function(comp, dialect) {
     whens <- vapply(seq_along(thresholds), function(i) {
       glue::glue(
         'WHEN {null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) / ',
-        'NULLIF(GREATEST(ABS(CAST({lcol} AS DOUBLE)), ABS(CAST({rcol} AS DOUBLE))), 0) <= {thresholds[i]} THEN {n - i + 1L}'
+        'NULLIF(GREATEST(ABS(CAST({lcol} AS DOUBLE)), ABS(CAST({rcol} AS DOUBLE))), 0) < {thresholds[i]} THEN {n - i + 1L}'
       )
     }, character(1))
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
@@ -936,13 +936,24 @@ sql_tf_adj_expr <- function(col, max_level, u_exact,
   }
   log2_u <- log2(max(u_exact, 1e-10))
   ln2 <- log(2)
-  # Build TF divisor expression with optional floor
+  # Build TF divisor using COALESCE so that when only one side has a TF
+  # value the available value is used (matches splink's coalesce approach
+  # and the R-side pmax(na.rm=TRUE) path).
+  tf_coalesce_lr <- glue::glue(
+    'COALESCE(tf_{col}_l, tf_{col}_r)'
+  )
+  tf_coalesce_rl <- glue::glue(
+    'COALESCE(tf_{col}_r, tf_{col}_l)'
+  )
+  tf_max_expr <- glue::glue(
+    'GREATEST({tf_coalesce_lr}, {tf_coalesce_rl})'
+  )
   if (tf_minimum_u_value > 0) {
     tf_divisor <- glue::glue(
-      'GREATEST(GREATEST(tf_{col}_l, tf_{col}_r), {tf_minimum_u_value})'
+      'GREATEST({tf_max_expr}, {tf_minimum_u_value})'
     )
   } else {
-    tf_divisor <- glue::glue('GREATEST(tf_{col}_l, tf_{col}_r)')
+    tf_divisor <- tf_max_expr
   }
   adj_expr <- glue::glue('{log2_u} - LN({tf_divisor}) / {ln2}')
   if (tf_adjustment_weight != 1.0) {
@@ -950,7 +961,7 @@ sql_tf_adj_expr <- function(col, max_level, u_exact,
   }
   glue::glue(
     'CAST(CASE WHEN gamma_{col} = {max_level} ',
-    'AND tf_{col}_l IS NOT NULL AND tf_{col}_r IS NOT NULL ',
+    'AND {tf_coalesce_lr} IS NOT NULL ',
     'AND {tf_divisor} > 0 ',
     'THEN {adj_expr} ',
     'ELSE 0.0 END AS DOUBLE)'

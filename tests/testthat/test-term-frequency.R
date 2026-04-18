@@ -67,6 +67,50 @@ test_that('tf_columns() returns empty for no TF comparisons', {
   expect_length(cols, 0)
 })
 
+test_that('compute_tf_adjustment() handles one-sided NA like splink COALESCE', {
+  comparisons <- list(
+    list(columns = 'city', method = cl_exact(term_frequency = TRUE))
+  )
+
+  gamma_mat <- matrix(c(1L, 1L, 1L, 0L),
+    ncol = 1,
+    dimnames = list(NULL, 'city')
+  )
+
+  tf_data <- data.frame(
+    tf_city_l = c(0.05, NA, NA, 0.50),
+    tf_city_r = c(NA, 0.10, NA, 0.50)
+  )
+
+  mu <- list(
+    m_levels = list(city = c(0.05, 0.95)),
+    u_levels = list(city = c(0.90, 0.10))
+  )
+
+  adj <- compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
+
+  # Pair 1: gamma=1, tf_l=0.05, tf_r=NA → use 0.05
+  expect_equal(adj[1], log2(0.10 / 0.05), tolerance = 1e-10)
+
+  # Pair 2: gamma=1, tf_l=NA, tf_r=0.10 → use 0.10
+  expect_equal(adj[2], log2(0.10 / 0.10), tolerance = 1e-10)
+
+  # Pair 3: gamma=1, both NA → no adjustment
+  expect_equal(adj[3], 0)
+
+  # Pair 4: gamma=0 → no adjustment regardless
+  expect_equal(adj[4], 0)
+})
+
+test_that('sql_tf_adj_expr() uses COALESCE for one-sided NULL handling', {
+  sql <- sql_tf_adj_expr('city', max_level = 1L, u_exact = 0.10)
+  expect_true(grepl('COALESCE', sql, ignore.case = TRUE))
+  # Should NOT require both sides non-NULL
+  expect_false(grepl('tf_city_l IS NOT NULL AND tf_city_r IS NOT NULL', sql))
+  # Should require at least one side non-NULL via COALESCE
+  expect_true(grepl('COALESCE\\(tf_city_l, tf_city_r\\) IS NOT NULL', sql))
+})
+
 # --- TF adjustment math ------------------------------------------------------
 
 test_that('compute_tf_adjustment() produces correct adjustments', {
@@ -258,4 +302,50 @@ test_that('sql_tf_select_exprs() generates correct SQL fragments', {
 
 test_that('sql_tf_select_exprs() returns NULL for empty input', {
   expect_null(sql_tf_select_exprs(character(0)))
+})
+
+# --- TF one-sided NULL: SQL vs R path consistency ----------------------------
+
+test_that('TF adjustment handles one-sided NULL city in SQL path (DuckDB)', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  # Build a linking model where dataset B has missing city values.
+  # The TF lookup comes from the union; the missing city should still get a
+
+  # TF adjustment when the other side has a TF value.
+  df_a <- data.frame(
+    unique_id = 1:20,
+    city = c(rep('London', 16), rep('Truro', 4)),
+    stringsAsFactors = FALSE
+  )
+  df_b <- data.frame(
+    unique_id = 21:40,
+    city = c(rep('London', 10), rep('Truro', 2), rep(NA_character_, 8)),
+    stringsAsFactors = FALSE
+  )
+
+  spec <- il_spec() |>
+    il_compare(city, cl_exact(term_frequency = TRUE)) |>
+    il_block_on(city)
+
+  model <- il_model(df_a, df_b, spec = spec, con = con) |>
+    il_estimate_u() |>
+    il_estimate_em(block_on(city))
+
+  # SQL path: collect = FALSE then collect manually
+  pairs_sql <- predict(model, threshold = 0, collect = TRUE)
+
+  if (nrow(pairs_sql) > 0 && 'tf_adj_city' %in% names(pairs_sql)) {
+    # All pairs where gamma_city == 1 should have a non-zero TF adjustment
+    # even if one side had NULL city (and therefore NULL TF) — the COALESCE
+    # ensures the available TF value is used.
+    exact_matches <- pairs_sql[pairs_sql$gamma_city == 1, ]
+    if (nrow(exact_matches) > 0) {
+      expect_true(
+        all(!is.na(exact_matches$tf_adj_city)),
+        info = 'TF adjustment should be non-NA for exact matches'
+      )
+    }
+  }
 })

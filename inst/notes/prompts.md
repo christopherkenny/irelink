@@ -814,7 +814,7 @@ Things worth looking at next:
 - Whether probability calibration is too aggressive even when the ranking of candidate pairs is reasonable.
 
 
-## SQL pushdown audit prompt (Opus 4.6 high)
+## SQL pushdown audit (Opus 4.6 high)
 
 We are auditing `irelink` to ensure that as much work as possible stays in SQL rather than being materialized into R.
 Your job is to identify every place in the code path for a target feature where data crosses from the database into R, determine whether that boundary is necessary, and, where safe, push more of the work into SQL.
@@ -860,3 +860,51 @@ Your output should include:
 - include a short summary of code changes made
 
 If you modify code, run the relevant tests afterward and report which passed.
+
+## Correctness audit (Opus 4.6 high)
+
+Perform an extremely detailed correctness comparison between this package (`irelink`) and `splink` (`../splink`).
+Focus on places where a small mistranslation could silently change results, especially SQL generation, comparison translation, EM estimation, term frequency, scoring, clustering, defaults, and edge-case handling.
+
+For each investigation, identify the `irelink` entrypoint and matching `splink` code path, trace the relevant helpers, compare the SQL and output behavior, determine whether the translation is correct, and fix anything that is wrong.
+Be especially careful about places where `irelink` aggregates in R while `splink` aggregates in SQL, where flags or defaults are accepted but not used, or where behavior may diverge on empty inputs, singleton inputs, tied scores, or multi-dataset linking.
+
+Write the results to `inst/refs/34-splink-correctness.md`.
+Include a primary markdown table with one row per investigation and these columns: `investigation`, `irelink path`, `splink path`, `status`, `risk`, `action`, and `summary`
+
+After the table, include a short markdown subsection for each investigation covering what was checked, what was found, why it is or is not correct, what was changed, and any remaining follow-up.
+
+Ensure all tests pass after corrections.
+
+## Correctness audit (Opus 4.6 high)
+
+Perform an independent correctness audit between this package (`irelink`) and `splink` (`../splink`).
+Do not treat prior comparison writeups as authoritative.
+In particular, `inst/refs/34-splink-correctness.md` is an example of an audit that is too cursory and too willing to declare equivalence.
+Use it only as a warning about what not to do.
+
+Your job is to perform the audit directly.
+Trace the code paths yourself.
+Check the SQL yourself.
+Verify edge cases yourself.
+Do not rely on high-level claims like "same algorithm", "equivalent", or "no bugs found" unless you can support them with exact evidence.
+
+Focus on places where a small mistranslation could silently change results, especially:
+- SQL generation
+- comparison level behavior
+- term frequency handling
+- EM estimation
+- scoring and thresholds
+- clustering and connected components
+- defaults and fallback behavior
+- empty, NULL, tied-score, and multi-dataset edge cases
+
+When prior work such as `inst/refs/34-splink-correctness.md` makes a claim, verify it from the code rather than repeating it.
+If the prior writeup is too weak to support a claim, say so plainly and then determine the answer yourself.
+
+Write the results to `inst/refs/35-correctness-audit.md`.
+Include a primary markdown table with these columns: `investigation`, `status`, `risk`, `irelink path`, `splink path`, `evidence`, `action`
+
+After the table, include short subsections for the most important investigations.
+For each one, state what was checked, what was found, why the evidence is sufficient, and what remains uncertain.
+If you find places where `34` made claims that were too cursory, unsupported, or overstated, note that briefly as part of the investigation rather than turning this into a review of that file.

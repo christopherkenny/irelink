@@ -97,6 +97,17 @@ test_that('cl_pct_diff() stores percentage-difference thresholds', {
   expect_equal(lev$method, 'pct_diff')
 })
 
+test_that('pct_diff uses strict < (not <=) matching splink', {
+  # A pair with exactly 10% difference should NOT match a 0.10 threshold
+  sql <- sql_gamma_case(
+    list(columns = 'val', method = cl_pct_diff(0.10)),
+    dialect = 'duckdb'
+  )
+  # The SQL should use < not <=
+  expect_true(grepl('< 0.1', sql))
+  expect_false(grepl('<= 0.1', sql))
+})
+
 # --- cl_date_diff() -------------------------------------------------------
 # From: test_date_levels_and_comparisons.py
 
