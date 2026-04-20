@@ -393,6 +393,7 @@ autoplot.il_training_history <- function(object, ...) {
       x = .data[['iteration']],
       y = .data[['value']],
       colour = factor(.data[['session']]),
+      linetype = factor(.data[['gamma_level']]),
       group = interaction(.data[['session']], .data[['gamma_level']])
     )) +
     ggplot2::geom_point(ggplot2::aes(
@@ -406,7 +407,8 @@ autoplot.il_training_history <- function(object, ...) {
       title = 'EM Training History',
       x = 'Iteration',
       y = 'm probability',
-      colour = 'EM session'
+      colour = 'EM session',
+      linetype = 'Gamma level'
     ) +
     ggplot2::theme_minimal()
 }

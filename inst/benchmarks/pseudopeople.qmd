@@ -3,7 +3,7 @@ title: "Scaling and Accuracy with `pseudopeople`"
 format:
   typst:
     syntax-highlighting: idiomatic
-    keep-typ: false
+    keep-typ: true
 ---
 
 This document benchmarks `irelink` on five `pseudopeople` scenarios using the parquet files in the sibling `pseudopeople-ri` repository.
@@ -175,6 +175,38 @@ Accuracy evaluation takes `r round(zero_zero_accuracy_time, 1)` seconds.
 autoplot(zero_zero_accuracy)
 ```
 
+### Prediction
+
+```{r zero-zero-prediction-data}
+tic.clearlog()
+tic('zero_zero_prediction', quiet = TRUE)
+zero_zero_pairs <- predict(
+  zero_zero_model,
+  threshold = zero_zero_best$threshold
+)
+zero_zero_prediction_timing <- toc(log = TRUE, quiet = TRUE)
+zero_zero_prediction_time <- as.numeric(
+  zero_zero_prediction_timing$toc - zero_zero_prediction_timing$tic
+)
+zero_zero_predicted_links <- nrow(zero_zero_pairs)
+
+tic.clearlog()
+tic('zero_zero_prediction_correctness', quiet = TRUE)
+zero_zero_confusion <- il_confusion_matrix(
+  zero_zero_model,
+  threshold = zero_zero_best$threshold,
+  labels_col = 'simulant_id'
+)
+zero_zero_prediction_correctness_timing <- toc(log = TRUE, quiet = TRUE)
+zero_zero_prediction_correctness_time <- as.numeric(
+  zero_zero_prediction_correctness_timing$toc -
+    zero_zero_prediction_correctness_timing$tic
+)
+```
+
+At the best F1 threshold, `predict()` returns `r format(zero_zero_predicted_links, big.mark = ",", scientific = FALSE)` links in `r round(zero_zero_prediction_time, 1)` seconds.
+Thresholded prediction correctness is precision `r round(100 * zero_zero_confusion$precision, 2)`%, recall `r round(100 * zero_zero_confusion$recall, 2)`%, and F1 `r round(zero_zero_confusion$f1, 3)`.
+
 ### Timing
 
 ```{r zero-zero-timings}
@@ -183,13 +215,21 @@ zero_zero_timings <- tibble::tibble(
     'Blocking analysis',
     'Model fitting',
     'Accuracy evaluation',
+    'Prediction',
+    'Prediction correctness',
     'Total'
   ),
   seconds = c(
     zero_zero_blocking_time,
     zero_zero_fit_time,
     zero_zero_accuracy_time,
-    zero_zero_blocking_time + zero_zero_fit_time + zero_zero_accuracy_time
+    zero_zero_prediction_time,
+    zero_zero_prediction_correctness_time,
+    zero_zero_blocking_time +
+      zero_zero_fit_time +
+      zero_zero_accuracy_time +
+      zero_zero_prediction_time +
+      zero_zero_prediction_correctness_time
   )
 )
 
@@ -293,7 +333,7 @@ zero_default_fit_time <- as.numeric(
 ```
 
 This fit step takes `r round(zero_default_fit_time, 1)` seconds.
-The same specification is used here, but the default-noise file makes the EM updates materially less clean than in No noise to zero`.
+The same specification is used here, but the default-noise file makes the EM updates materially less clean than in the no-noise-to-zero case.
 
 ```{r zero-default-model-plot}
 #| fig-width: 7
@@ -334,6 +374,38 @@ Accuracy evaluation takes `r round(zero_default_accuracy_time, 1)` seconds.
 autoplot(zero_default_accuracy)
 ```
 
+### Prediction
+
+```{r zero-default-prediction-data}
+tic.clearlog()
+tic('zero_default_prediction', quiet = TRUE)
+zero_default_pairs <- predict(
+  zero_default_model,
+  threshold = zero_default_best$threshold
+)
+zero_default_prediction_timing <- toc(log = TRUE, quiet = TRUE)
+zero_default_prediction_time <- as.numeric(
+  zero_default_prediction_timing$toc - zero_default_prediction_timing$tic
+)
+zero_default_predicted_links <- nrow(zero_default_pairs)
+
+tic.clearlog()
+tic('zero_default_prediction_correctness', quiet = TRUE)
+zero_default_confusion <- il_confusion_matrix(
+  zero_default_model,
+  threshold = zero_default_best$threshold,
+  labels_col = 'simulant_id'
+)
+zero_default_prediction_correctness_timing <- toc(log = TRUE, quiet = TRUE)
+zero_default_prediction_correctness_time <- as.numeric(
+  zero_default_prediction_correctness_timing$toc -
+    zero_default_prediction_correctness_timing$tic
+)
+```
+
+At the best F1 threshold, `predict()` returns `r format(zero_default_predicted_links, big.mark = ",", scientific = FALSE)` links in `r round(zero_default_prediction_time, 1)` seconds.
+Thresholded prediction correctness is precision `r round(100 * zero_default_confusion$precision, 2)`%, recall `r round(100 * zero_default_confusion$recall, 2)`%, and F1 `r round(zero_default_confusion$f1, 3)`.
+
 ### Timing
 
 ```{r zero-default-timings}
@@ -342,15 +414,21 @@ zero_default_timings <- tibble::tibble(
     'Blocking analysis',
     'Model fitting',
     'Accuracy evaluation',
+    'Prediction',
+    'Prediction correctness',
     'Total'
   ),
   seconds = c(
     zero_default_blocking_time,
     zero_default_fit_time,
     zero_default_accuracy_time,
+    zero_default_prediction_time,
+    zero_default_prediction_correctness_time,
     zero_default_blocking_time +
       zero_default_fit_time +
-      zero_default_accuracy_time
+      zero_default_accuracy_time +
+      zero_default_prediction_time +
+      zero_default_prediction_correctness_time
   )
 )
 
@@ -454,7 +532,7 @@ zero_high_fit_time <- as.numeric(
 ```
 
 The fit step takes `r round(zero_high_fit_time, 1)` seconds.
-This is the hardest one-sided linkage task in the document, so the fitted parameter separation is weaker than in No noise to default`.
+This is the hardest one-sided linkage task in the document, so the fitted parameter separation is weaker than in the no-noise-to-default case.
 
 ```{r zero-high-model-plot}
 #| fig-width: 7
@@ -495,6 +573,38 @@ Accuracy evaluation takes `r round(zero_high_accuracy_time, 1)` seconds.
 autoplot(zero_high_accuracy)
 ```
 
+### Prediction
+
+```{r zero-high-prediction-data}
+tic.clearlog()
+tic('zero_high_prediction', quiet = TRUE)
+zero_high_pairs <- predict(
+  zero_high_model,
+  threshold = zero_high_best$threshold
+)
+zero_high_prediction_timing <- toc(log = TRUE, quiet = TRUE)
+zero_high_prediction_time <- as.numeric(
+  zero_high_prediction_timing$toc - zero_high_prediction_timing$tic
+)
+zero_high_predicted_links <- nrow(zero_high_pairs)
+
+tic.clearlog()
+tic('zero_high_prediction_correctness', quiet = TRUE)
+zero_high_confusion <- il_confusion_matrix(
+  zero_high_model,
+  threshold = zero_high_best$threshold,
+  labels_col = 'simulant_id'
+)
+zero_high_prediction_correctness_timing <- toc(log = TRUE, quiet = TRUE)
+zero_high_prediction_correctness_time <- as.numeric(
+  zero_high_prediction_correctness_timing$toc -
+    zero_high_prediction_correctness_timing$tic
+)
+```
+
+At the best F1 threshold, `predict()` returns `r format(zero_high_predicted_links, big.mark = ",", scientific = FALSE)` links in `r round(zero_high_prediction_time, 1)` seconds.
+Thresholded prediction correctness is precision `r round(100 * zero_high_confusion$precision, 2)`%, recall `r round(100 * zero_high_confusion$recall, 2)`%, and F1 `r round(zero_high_confusion$f1, 3)`.
+
 ### Timing
 
 ```{r zero-high-timings}
@@ -503,13 +613,21 @@ zero_high_timings <- tibble::tibble(
     'Blocking analysis',
     'Model fitting',
     'Accuracy evaluation',
+    'Prediction',
+    'Prediction correctness',
     'Total'
   ),
   seconds = c(
     zero_high_blocking_time,
     zero_high_fit_time,
     zero_high_accuracy_time,
-    zero_high_blocking_time + zero_high_fit_time + zero_high_accuracy_time
+    zero_high_prediction_time,
+    zero_high_prediction_correctness_time,
+    zero_high_blocking_time +
+      zero_high_fit_time +
+      zero_high_accuracy_time +
+      zero_high_prediction_time +
+      zero_high_prediction_correctness_time
   )
 )
 
@@ -654,6 +772,38 @@ Accuracy evaluation takes `r round(default_high_accuracy_time, 1)` seconds.
 autoplot(default_high_accuracy)
 ```
 
+### Prediction
+
+```{r default-high-prediction-data}
+tic.clearlog()
+tic('default_high_prediction', quiet = TRUE)
+default_high_pairs <- predict(
+  default_high_model,
+  threshold = default_high_best$threshold
+)
+default_high_prediction_timing <- toc(log = TRUE, quiet = TRUE)
+default_high_prediction_time <- as.numeric(
+  default_high_prediction_timing$toc - default_high_prediction_timing$tic
+)
+default_high_predicted_links <- nrow(default_high_pairs)
+
+tic.clearlog()
+tic('default_high_prediction_correctness', quiet = TRUE)
+default_high_confusion <- il_confusion_matrix(
+  default_high_model,
+  threshold = default_high_best$threshold,
+  labels_col = 'simulant_id'
+)
+default_high_prediction_correctness_timing <- toc(log = TRUE, quiet = TRUE)
+default_high_prediction_correctness_time <- as.numeric(
+  default_high_prediction_correctness_timing$toc -
+    default_high_prediction_correctness_timing$tic
+)
+```
+
+At the best F1 threshold, `predict()` returns `r format(default_high_predicted_links, big.mark = ",", scientific = FALSE)` links in `r round(default_high_prediction_time, 1)` seconds.
+Thresholded prediction correctness is precision `r round(100 * default_high_confusion$precision, 2)`%, recall `r round(100 * default_high_confusion$recall, 2)`%, and F1 `r round(default_high_confusion$f1, 3)`.
+
 ### Timing
 
 ```{r default-high-timings}
@@ -662,15 +812,21 @@ default_high_timings <- tibble::tibble(
     'Blocking analysis',
     'Model fitting',
     'Accuracy evaluation',
+    'Prediction',
+    'Prediction correctness',
     'Total'
   ),
   seconds = c(
     default_high_blocking_time,
     default_high_fit_time,
     default_high_accuracy_time,
+    default_high_prediction_time,
+    default_high_prediction_correctness_time,
     default_high_blocking_time +
       default_high_fit_time +
-      default_high_accuracy_time
+      default_high_accuracy_time +
+      default_high_prediction_time +
+      default_high_prediction_correctness_time
   )
 )
 
@@ -811,6 +967,74 @@ Accuracy evaluation takes `r round(stacked_dedupe_accuracy_time, 1)` seconds.
 autoplot(stacked_dedupe_accuracy)
 ```
 
+### Prediction
+
+```{r stacked-dedupe-prediction-data}
+tic.clearlog()
+tic('stacked_dedupe_prediction', quiet = TRUE)
+stacked_dedupe_pairs <- predict(
+  stacked_dedupe_model,
+  threshold = stacked_dedupe_best$threshold
+)
+stacked_dedupe_prediction_timing <- toc(log = TRUE, quiet = TRUE)
+stacked_dedupe_prediction_time <- as.numeric(
+  stacked_dedupe_prediction_timing$toc - stacked_dedupe_prediction_timing$tic
+)
+stacked_dedupe_predicted_pairs <- nrow(stacked_dedupe_pairs)
+
+tic.clearlog()
+tic('stacked_dedupe_prediction_correctness', quiet = TRUE)
+stacked_dedupe_confusion <- il_confusion_matrix(
+  stacked_dedupe_model,
+  threshold = stacked_dedupe_best$threshold,
+  labels_col = 'simulant_id'
+)
+stacked_dedupe_prediction_correctness_timing <- toc(log = TRUE, quiet = TRUE)
+stacked_dedupe_prediction_correctness_time <- as.numeric(
+  stacked_dedupe_prediction_correctness_timing$toc -
+    stacked_dedupe_prediction_correctness_timing$tic
+)
+```
+
+At the best F1 threshold, `predict()` returns `r format(stacked_dedupe_predicted_pairs, big.mark = ",", scientific = FALSE)` scored duplicate pairs in `r round(stacked_dedupe_prediction_time, 1)` seconds.
+Pairwise correctness at that threshold is precision `r round(100 * stacked_dedupe_confusion$precision, 2)`%, recall `r round(100 * stacked_dedupe_confusion$recall, 2)`%, and F1 `r round(stacked_dedupe_confusion$f1, 3)`.
+
+### Clustering
+
+```{r stacked-dedupe-clustering-data}
+tic.clearlog()
+tic('stacked_dedupe_clustering', quiet = TRUE)
+stacked_dedupe_clusters <- il_cluster(stacked_dedupe_pairs)
+stacked_dedupe_clustering_timing <- toc(log = TRUE, quiet = TRUE)
+stacked_dedupe_clustering_time <- as.numeric(
+  stacked_dedupe_clustering_timing$toc - stacked_dedupe_clustering_timing$tic
+)
+stacked_dedupe_cluster_sizes <- stacked_dedupe_clusters |>
+  count(cluster_id, name = 'cluster_size', sort = TRUE)
+stacked_dedupe_n_clusters <- nrow(stacked_dedupe_cluster_sizes)
+stacked_dedupe_largest_cluster <- if (nrow(stacked_dedupe_cluster_sizes) > 0) {
+  max(stacked_dedupe_cluster_sizes$cluster_size)
+} else {
+  0L
+}
+
+tic.clearlog()
+tic('stacked_dedupe_cluster_correctness', quiet = TRUE)
+stacked_dedupe_cluster_confusion <- il_cluster_confusion_matrix(
+  stacked_dedupe_model,
+  labels_col = 'simulant_id',
+  threshold = stacked_dedupe_best$threshold
+)
+stacked_dedupe_cluster_correctness_timing <- toc(log = TRUE, quiet = TRUE)
+stacked_dedupe_cluster_correctness_time <- as.numeric(
+  stacked_dedupe_cluster_correctness_timing$toc -
+    stacked_dedupe_cluster_correctness_timing$tic
+)
+```
+
+Connected-components clustering yields `r format(stacked_dedupe_n_clusters, big.mark = ",", scientific = FALSE)` clusters, with largest cluster size `r format(stacked_dedupe_largest_cluster, big.mark = ",", scientific = FALSE)`, in `r round(stacked_dedupe_clustering_time, 1)` seconds.
+Cluster-level duplicate detection correctness is precision `r round(100 * stacked_dedupe_cluster_confusion$precision, 2)`%, recall `r round(100 * stacked_dedupe_cluster_confusion$recall, 2)`%, and F1 `r round(stacked_dedupe_cluster_confusion$f1, 3)`.
+
 ### Timing
 
 ```{r stacked-dedupe-timings}
@@ -819,15 +1043,27 @@ stacked_dedupe_timings <- tibble::tibble(
     'Blocking analysis',
     'Model fitting',
     'Accuracy evaluation',
+    'Prediction',
+    'Prediction correctness',
+    'Clustering',
+    'Cluster correctness',
     'Total'
   ),
   seconds = c(
     stacked_dedupe_blocking_time,
     stacked_dedupe_fit_time,
     stacked_dedupe_accuracy_time,
+    stacked_dedupe_prediction_time,
+    stacked_dedupe_prediction_correctness_time,
+    stacked_dedupe_clustering_time,
+    stacked_dedupe_cluster_correctness_time,
     stacked_dedupe_blocking_time +
       stacked_dedupe_fit_time +
-      stacked_dedupe_accuracy_time
+      stacked_dedupe_accuracy_time +
+      stacked_dedupe_prediction_time +
+      stacked_dedupe_prediction_correctness_time +
+      stacked_dedupe_clustering_time +
+      stacked_dedupe_cluster_correctness_time
   )
 )
 
