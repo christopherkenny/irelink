@@ -305,18 +305,18 @@ weight than rare ones:</p>
 <code class="sourceCode R"><span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">predictions</span>, threshold <span class="op">=</span> <span class="fl">0.95</span><span class="op">)</span></span>
 <span><span class="va">clusters</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 41,798 × 2</span></span></span>
-<span><span class="co">#&gt;    unique_id    cluster_id          </span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Q61354618-4  cluster_Q61354618-4 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Q64238-1     cluster_Q64238-1    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Q64238-4     cluster_Q64238-1    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Q6234678-16  cluster_Q6234678-16 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Q8004966-2   cluster_Q8004966-1  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Q28873162-10 cluster_Q28873162-10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Q28873162-11 cluster_Q28873162-10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Q6218687-2   cluster_Q6218687-1  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Q6218687-10  cluster_Q6218687-10 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Q18674193-10 cluster_Q18674193-1 </span></span>
+<span><span class="co">#&gt;    unique_id    cluster_id         </span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Q11288994-12 cluster_Q11288994-1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Q11288994-15 cluster_Q11288994-1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Q89136413-13 cluster_Q89136413-1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Q11288994-1  cluster_Q11288994-1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Q3296126-4   cluster_Q3296126-4 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Q55841256-2  cluster_Q55841256-1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Q6137113-1   cluster_Q6137113-1 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Q6137113-5   cluster_Q6137113-1 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Q10305096-1  cluster_Q10305096-1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Q273170-3    cluster_Q273170-1  </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 41,788 more rows</span></span></span></code></pre></div>
 </div>
 <div class="section level2">
@@ -357,18 +357,18 @@ weight than rare ones:</p>
 <code class="sourceCode R"><span><span class="va">errors</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_errors.html">il_errors</a></span><span class="op">(</span><span class="va">model</span>, labels_col <span class="op">=</span> <span class="st">'cluster'</span>, threshold <span class="op">=</span> <span class="fl">0.999</span><span class="op">)</span></span>
 <span><span class="va">errors</span><span class="op">[</span><span class="va">errors</span><span class="op">$</span><span class="va">error_type</span> <span class="op">==</span> <span class="st">'false_positive'</span>, <span class="op">]</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 24,022 × 6</span></span></span>
-<span><span class="co">#&gt;    unique_id_l  unique_id_r match_weight match_probability true_label error_type</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Q18735703-1  Q18910874-4         15.4             1.000 FALSE      false_pos…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Q20379060-3  Q52155443-1         15.4             1.000 FALSE      false_pos…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Q18735703-1  Q18910874-1         15.4             1.000 FALSE      false_pos…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Q20007846-4  Q8004400-2          15.4             1.000 FALSE      false_pos…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Q20007846-5  Q8004400-2          15.4             1.000 FALSE      false_pos…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Q20007846-5  Q8004400-1          15.4             1.000 FALSE      false_pos…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Q20007846-14 Q8004400-1          15.4             1.000 FALSE      false_pos…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Q7167252-3   Q7324689-8          15.4             1.000 FALSE      false_pos…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Q7167252-2   Q7324689-3          15.4             1.000 FALSE      false_pos…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Q7167252-1   Q7324689-2          15.4             1.000 FALSE      false_pos…</span></span>
+<span><span class="co">#&gt;    unique_id_l unique_id_r  match_weight match_probability true_label error_type</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Q21462932-1 Q98761863-5          18.4             1.000 FALSE      false_pos…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Q21462932-4 Q98761863-3          18.8             1.000 FALSE      false_pos…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Q21462932-1 Q98761863-1          18.4             1.000 FALSE      false_pos…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Q389547-9   Q5075523-2           15.0             0.999 FALSE      false_pos…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Q24254543-1 Q75339949-10         15.0             0.999 FALSE      false_pos…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Q24254543-2 Q75339949-10         15.0             0.999 FALSE      false_pos…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Q24254543-1 Q75339949-8          15.0             0.999 FALSE      false_pos…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Q24254543-3 Q75339949-8          15.0             0.999 FALSE      false_pos…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Q24254543-2 Q75339949-6          15.0             0.999 FALSE      false_pos…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Q24254543-3 Q75339949-6          15.0             0.999 FALSE      false_pos…</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 24,012 more rows</span></span></span></code></pre></div>
 <p>Some false negatives will be because the true pair was never
 generated by any blocking rule:</p>
@@ -378,16 +378,16 @@ generated by any blocking rule:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 39,906 × 6</span></span></span>
 <span><span class="co">#&gt;    unique_id_l  unique_id_r match_weight match_probability true_label error_type</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Q2296770-15  Q2296770-16        -<span style="color: #BB0000;">1.64</span>         0.018<span style="text-decoration: underline;">5</span>    TRUE       false_neg…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Q21464185-7  Q21464185-8        -<span style="color: #BB0000;">3.25</span>         0.006<span style="text-decoration: underline;">13</span>   TRUE       false_neg…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Q55455287-1  Q55455287-…         2.99         0.318     TRUE       false_neg…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Q55455287-10 Q55455287-…         2.99         0.318     TRUE       false_neg…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Q55455287-12 Q55455287-…         2.99         0.318     TRUE       false_neg…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Q631006-2    Q631006-3           1.80         0.169     TRUE       false_neg…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Q18917156-1  Q18917156-…        -<span style="color: #BB0000;">5.22</span>         0.001<span style="text-decoration: underline;">57</span>   TRUE       false_neg…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Q7149918-13  Q7149918-20        -<span style="color: #BB0000;">1.63</span>         0.018<span style="text-decoration: underline;">6</span>    TRUE       false_neg…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Q7793204-12  Q7793204-16         1.80         0.169     TRUE       false_neg…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Q8004274-14  Q8004274-20       -<span style="color: #BB0000;">10.5</span>          0.000<span style="text-decoration: underline;">039</span>9 TRUE       false_neg…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> Q55455287-12 Q55455287-…      -<span style="color: #BB0000;">10.5</span>           0.000<span style="text-decoration: underline;">039</span>9 TRUE       false_neg…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> Q18917156-10 Q18917156-8       -<span style="color: #BB0000;">5.22</span>          0.001<span style="text-decoration: underline;">57</span>   TRUE       false_neg…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> Q7149918-13  Q7149918-18       -<span style="color: #BB0000;">1.63</span>          0.018<span style="text-decoration: underline;">6</span>    TRUE       false_neg…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> Q8004274-13  Q8004274-18       -<span style="color: #BB0000;">1.63</span>          0.018<span style="text-decoration: underline;">6</span>    TRUE       false_neg…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> Q8004274-16  Q8004274-18        1.37          0.132     TRUE       false_neg…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> Q3526548-7   Q3526548-8         1.39          0.134     TRUE       false_neg…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> Q18593464-10 Q18593464-8       -<span style="color: #BB0000;">3.25</span>          0.006<span style="text-decoration: underline;">13</span>   TRUE       false_neg…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> Q4693039-13  Q4693039-14       -<span style="color: #BB0000;">0.231</span>         0.047<span style="text-decoration: underline;">6</span>    TRUE       false_neg…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> Q2878295-15  Q2878295-19        1.85          0.174     TRUE       false_neg…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> Q2878295-16  Q2878295-19       -<span style="color: #BB0000;">1.64</span>          0.018<span style="text-decoration: underline;">5</span>    TRUE       false_neg…</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 39,896 more rows</span></span></span></code></pre></div>
 </div>
 </div>

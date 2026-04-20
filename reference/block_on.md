@@ -103,7 +103,7 @@ block_on(first_name, .transform = il_soundex)
 #> {
 #>     vapply(x, soundex_one, character(1), USE.NAMES = FALSE)
 #> }
-#> <bytecode: 0x55c23e2aeef0>
+#> <bytecode: 0x560bc1cbbe78>
 #> <environment: namespace:irelink>
 #> 
 #> $explode
