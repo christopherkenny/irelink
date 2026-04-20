@@ -146,18 +146,18 @@ maximum possible edges for a cluster of that size):
 ``` r
 metrics$clusters
 #> # A tibble: 88 × 5
-#>    cluster_id          n_nodes n_edges density cluster_centralisation
-#>    <chr>                 <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_115               8      24   0.857                  0.190
-#>  2 cluster_326               4       4   0.667                  0.667
-#>  3 cluster_792               7      15   0.714                  0.4  
-#>  4 cluster_867               3       3   1                      0    
-#>  5 cluster_924               8      28   1                      0    
-#>  6 cluster_cluster_650       1       2   0                     NA    
-#>  7 cluster_229               8      28   1                      0    
-#>  8 cluster_261               4       6   1                      0    
-#>  9 cluster_603               9      29   0.806                  0.25 
-#> 10 cluster_100              37     192   0.288                  0.283
+#>    cluster_id  n_nodes n_edges density cluster_centralisation
+#>    <chr>         <int>   <int>   <dbl>                  <dbl>
+#>  1 cluster_10       13      35   0.449                 0.258 
+#>  2 cluster_252       9      32   0.889                 0.143 
+#>  3 cluster_409       4       8   1.25                  0.167 
+#>  4 cluster_550       8      26   0.929                 0.0952
+#>  5 cluster_684       2       1   1                    NA     
+#>  6 cluster_738       6      15   1                     0     
+#>  7 cluster_760      11      36   0.655                 0.3   
+#>  8 cluster_772       5       9   0.9                   0.167 
+#>  9 cluster_888       9      32   0.889                 0.143 
+#> 10 cluster_229       8      28   1                     0     
 #> # ℹ 78 more rows
 ```
 
@@ -176,12 +176,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 339       cluster_338      1           0.5  
-#> 2 338       cluster_338      1           0.5  
-#> 3 340       cluster_338      2           1    
-#> 4 476       cluster_476      1           1    
-#> 5 477       cluster_476      1           1    
-#> 6 679       cluster_674      5           0.714
+#> 1 617       cluster_186      2            0.5 
+#> 2 616       cluster_186      4            1   
+#> 3 615       cluster_186      4            1   
+#> 4 186       cluster_186      3            0.75
+#> 5 187       cluster_186      3            0.75
+#> 6 245       cluster_244      7            1
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -276,24 +276,24 @@ matches
 #> # A tibble: 18 × 4
 #>    unique_id_l unique_id_r match_weight match_probability
 #>          <int>       <int>        <dbl>             <dbl>
-#>  1           2         859       -0.962             0.932
-#>  2           1         237       -0.697             0.943
-#>  3           1         238       -0.697             0.943
-#>  4           1         240       -0.697             0.943
-#>  5           1         242       -0.697             0.943
-#>  6           1         367       -0.697             0.943
-#>  7           1         789       -0.697             0.943
-#>  8           1         791       -0.697             0.943
-#>  9           2         858       -0.962             0.932
-#> 10           1         241       -0.697             0.943
-#> 11           1         362       -0.697             0.943
-#> 12           1         365       -0.697             0.943
-#> 13           2         864       -0.962             0.932
-#> 14           2         866       -0.962             0.932
-#> 15           1         239       -0.697             0.943
-#> 16           1         363       -0.697             0.943
-#> 17           1         364       -0.697             0.943
-#> 18           1         366       -0.697             0.943
+#>  1           1         241       -0.697             0.943
+#>  2           1         362       -0.697             0.943
+#>  3           1         365       -0.697             0.943
+#>  4           2         864       -0.962             0.932
+#>  5           2         866       -0.962             0.932
+#>  6           1         239       -0.697             0.943
+#>  7           1         363       -0.697             0.943
+#>  8           1         364       -0.697             0.943
+#>  9           1         366       -0.697             0.943
+#> 10           2         859       -0.962             0.932
+#> 11           1         237       -0.697             0.943
+#> 12           1         238       -0.697             0.943
+#> 13           1         240       -0.697             0.943
+#> 14           1         242       -0.697             0.943
+#> 15           1         367       -0.697             0.943
+#> 16           1         789       -0.697             0.943
+#> 17           1         791       -0.697             0.943
+#> 18           2         858       -0.962             0.932
 ```
 
 Each row is a (new record, existing record) pair. `unique_id_l`
