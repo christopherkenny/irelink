@@ -1,0 +1,841 @@
+---
+title: "Scaling and Accuracy with `pseudopeople`"
+format:
+  typst:
+    syntax-highlighting: idiomatic
+    keep-typ: false
+---
+
+This document benchmarks `irelink` on five `pseudopeople` scenarios using the parquet files in the sibling `pseudopeople-ri` repository.
+Every scenario reads the parquet files directly through DuckDB, so the full source tables stay out of R memory.
+
+The same comparison specification and the same three blocking rules are used across all five tests:
+
+1. `first_name + last_name`
+2. `last_name + date_of_birth`
+3. `zipcode + date_of_birth`
+
+```{r setup}
+devtools::load_all()
+library(dplyr)
+library(ggplot2)
+library(knitr)
+library(tictoc)
+
+pseudopeople_dir <- '../../../pseudopeople-ri'
+
+zero_path <- paste0(pseudopeople_dir, '/psp_census_2020_zero_noise.parquet')
+default_path <- paste0(
+  pseudopeople_dir,
+  '/psp_census_2020_default_noise.parquet'
+)
+high_path <- paste0(pseudopeople_dir, '/psp_census_2020_high_noise.parquet')
+
+common_spec <- il_spec() |>
+  il_compare(first_name, cl_name()) |>
+  il_compare(last_name, cl_name()) |>
+  il_compare(date_of_birth, cl_damerau_levenshtein(1, 2)) |>
+  il_compare(street_number, cl_damerau_levenshtein(1)) |>
+  il_compare(city, cl_exact()) |>
+  il_compare(zipcode, cl_damerau_levenshtein(1)) |>
+  il_block_on(first_name, last_name) |>
+  il_block_on(last_name, date_of_birth) |>
+  il_block_on(zipcode, date_of_birth)
+```
+
+## No noise to zero
+
+```{r zero-zero-data}
+zero_zero_con <- DBI::dbConnect(duckdb::duckdb())
+
+DBI::dbExecute(
+  zero_zero_con,
+  paste0(
+    'CREATE VIEW zero_zero_left AS ',
+    "SELECT * FROM read_parquet('",
+    zero_path,
+    "')"
+  )
+)
+DBI::dbExecute(
+  zero_zero_con,
+  paste0(
+    'CREATE VIEW zero_zero_right AS ',
+    "SELECT * FROM read_parquet('",
+    zero_path,
+    "')"
+  )
+)
+
+zero_zero_left <- tbl(zero_zero_con, 'zero_zero_left')
+zero_zero_right <- tbl(zero_zero_con, 'zero_zero_right')
+```
+
+### Blocking
+
+```{r zero-zero-blocking-data}
+tic.clearlog()
+tic('zero_zero_blocking', quiet = TRUE)
+zero_zero_blocking <- il_count_pairs(
+  zero_zero_left,
+  zero_zero_right,
+  block_on(first_name, last_name),
+  block_on(last_name, date_of_birth),
+  block_on(zipcode, date_of_birth),
+  con = zero_zero_con,
+  link_type = 'link'
+)
+zero_zero_blocking_timing <- toc(log = TRUE, quiet = TRUE)
+zero_zero_blocking_time <- as.numeric(
+  zero_zero_blocking_timing$toc - zero_zero_blocking_timing$tic
+)
+zero_zero_candidate_pairs <- max(zero_zero_blocking$cumulative_pairs)
+zero_zero_cartesian_share <- max(zero_zero_blocking$pct_of_cartesian)
+```
+
+This is the clean ceiling case: the same zero-noise census file appears on both sides, so the benchmark should be close to a keyed merge.
+The blocking rules reduce the search to `r format(round(zero_zero_candidate_pairs), big.mark = ",", scientific = FALSE)` candidate pairs, which is `r round(100 * zero_zero_cartesian_share, 3)`% of the full cross-product.
+
+```{r zero-zero-blocking-plot}
+#| fig-width: 7
+#| fig-height: 3.2
+autoplot(zero_zero_blocking)
+```
+
+### Model fit
+
+```{r zero-zero-model}
+tic.clearlog()
+tic('zero_zero_fit', quiet = TRUE)
+zero_zero_model <- il_model(
+  zero_zero_left,
+  zero_zero_right,
+  spec = common_spec,
+  con = zero_zero_con,
+  link_type = 'link'
+) |>
+  il_estimate_prior(
+    block_on(first_name, last_name, date_of_birth),
+    recall = 0.8
+  ) |>
+  il_estimate_u(max_pairs = 5e5) |>
+  il_estimate_em(
+    blocking = block_on(first_name, last_name),
+    max_iterations = 8L
+  ) |>
+  il_estimate_em(
+    blocking = block_on(zipcode, date_of_birth),
+    max_iterations = 8L
+  )
+zero_zero_fit_timing <- toc(log = TRUE, quiet = TRUE)
+zero_zero_fit_time <- as.numeric(
+  zero_zero_fit_timing$toc - zero_zero_fit_timing$tic
+)
+```
+
+The model fit includes prior estimation, u-estimation, and two EM sessions.
+This step takes `r round(zero_zero_fit_time, 1)` seconds in the clean linkage ceiling case.
+
+```{r zero-zero-model-plot}
+#| fig-width: 7
+#| fig-height: 4
+autoplot(zero_zero_model, type = 'parameters')
+```
+
+```{r zero-zero-history}
+#| fig-width: 7
+#| fig-height: 4
+il_training_history(zero_zero_model) |>
+  autoplot()
+```
+
+### Accuracy
+
+```{r zero-zero-accuracy-data}
+tic.clearlog()
+tic('zero_zero_accuracy', quiet = TRUE)
+zero_zero_accuracy <- il_accuracy(
+  zero_zero_model,
+  labels_col = 'simulant_id'
+)
+zero_zero_accuracy_timing <- toc(log = TRUE, quiet = TRUE)
+zero_zero_accuracy_time <- as.numeric(
+  zero_zero_accuracy_timing$toc - zero_zero_accuracy_timing$tic
+)
+zero_zero_best <- zero_zero_accuracy |>
+  slice_max(f1, n = 1, with_ties = FALSE)
+```
+
+At the best threshold (`r round(zero_zero_best$threshold, 3)`), precision is `r round(100 * zero_zero_best$precision, 2)`%, recall is `r round(100 * zero_zero_best$recall, 2)`%, and F1 is `r round(zero_zero_best$f1, 3)`.
+Accuracy evaluation takes `r round(zero_zero_accuracy_time, 1)` seconds.
+
+```{r zero-zero-accuracy-plot}
+#| fig-width: 6.5
+#| fig-height: 3.8
+autoplot(zero_zero_accuracy)
+```
+
+### Timing
+
+```{r zero-zero-timings}
+zero_zero_timings <- tibble::tibble(
+  stage = c(
+    'Blocking analysis',
+    'Model fitting',
+    'Accuracy evaluation',
+    'Total'
+  ),
+  seconds = c(
+    zero_zero_blocking_time,
+    zero_zero_fit_time,
+    zero_zero_accuracy_time,
+    zero_zero_blocking_time + zero_zero_fit_time + zero_zero_accuracy_time
+  )
+)
+
+zero_zero_timings
+```
+
+```{r zero-zero-cleanup}
+#| include: false
+il_cleanup(zero_zero_model)
+DBI::dbDisconnect(zero_zero_con, shutdown = TRUE)
+```
+
+## No noise to default
+
+```{r zero-default-data}
+zero_default_con <- DBI::dbConnect(duckdb::duckdb())
+
+DBI::dbExecute(
+  zero_default_con,
+  paste0(
+    'CREATE VIEW zero_default_left AS ',
+    "SELECT * FROM read_parquet('",
+    zero_path,
+    "')"
+  )
+)
+DBI::dbExecute(
+  zero_default_con,
+  paste0(
+    'CREATE VIEW zero_default_right AS ',
+    "SELECT * FROM read_parquet('",
+    default_path,
+    "')"
+  )
+)
+
+zero_default_left <- tbl(zero_default_con, 'zero_default_left')
+zero_default_right <- tbl(zero_default_con, 'zero_default_right')
+```
+
+### Blocking
+
+```{r zero-default-blocking-data}
+tic.clearlog()
+tic('zero_default_blocking', quiet = TRUE)
+zero_default_blocking <- il_count_pairs(
+  zero_default_left,
+  zero_default_right,
+  block_on(first_name, last_name),
+  block_on(last_name, date_of_birth),
+  block_on(zipcode, date_of_birth),
+  con = zero_default_con,
+  link_type = 'link'
+)
+zero_default_blocking_timing <- toc(log = TRUE, quiet = TRUE)
+zero_default_blocking_time <- as.numeric(
+  zero_default_blocking_timing$toc - zero_default_blocking_timing$tic
+)
+zero_default_candidate_pairs <- max(zero_default_blocking$cumulative_pairs)
+zero_default_cartesian_share <- max(zero_default_blocking$pct_of_cartesian)
+```
+
+This links the clean census extract to the default-noise administrative extract.
+The blocking rules keep the candidate space to `r format(round(zero_default_candidate_pairs), big.mark = ",", scientific = FALSE)` pairs, or `r round(100 * zero_default_cartesian_share, 3)`% of the full cross-product.
+
+```{r zero-default-blocking-plot}
+#| fig-width: 7
+#| fig-height: 3.2
+autoplot(zero_default_blocking)
+```
+
+### Model fit
+
+```{r zero-default-model}
+tic.clearlog()
+tic('zero_default_fit', quiet = TRUE)
+zero_default_model <- il_model(
+  zero_default_left,
+  zero_default_right,
+  spec = common_spec,
+  con = zero_default_con,
+  link_type = 'link'
+) |>
+  il_estimate_prior(
+    block_on(first_name, last_name, date_of_birth),
+    recall = 0.8
+  ) |>
+  il_estimate_u(max_pairs = 5e5) |>
+  il_estimate_em(
+    blocking = block_on(first_name, last_name),
+    max_iterations = 8L
+  ) |>
+  il_estimate_em(
+    blocking = block_on(zipcode, date_of_birth),
+    max_iterations = 8L
+  )
+zero_default_fit_timing <- toc(log = TRUE, quiet = TRUE)
+zero_default_fit_time <- as.numeric(
+  zero_default_fit_timing$toc - zero_default_fit_timing$tic
+)
+```
+
+This fit step takes `r round(zero_default_fit_time, 1)` seconds.
+The same specification is used here, but the default-noise file makes the EM updates materially less clean than in No noise to zero`.
+
+```{r zero-default-model-plot}
+#| fig-width: 7
+#| fig-height: 4
+autoplot(zero_default_model, type = 'parameters')
+```
+
+```{r zero-default-history}
+#| fig-width: 7
+#| fig-height: 4
+il_training_history(zero_default_model) |>
+  autoplot()
+```
+
+### Accuracy
+
+```{r zero-default-accuracy-data}
+tic.clearlog()
+tic('zero_default_accuracy', quiet = TRUE)
+zero_default_accuracy <- il_accuracy(
+  zero_default_model,
+  labels_col = 'simulant_id'
+)
+zero_default_accuracy_timing <- toc(log = TRUE, quiet = TRUE)
+zero_default_accuracy_time <- as.numeric(
+  zero_default_accuracy_timing$toc - zero_default_accuracy_timing$tic
+)
+zero_default_best <- zero_default_accuracy |>
+  slice_max(f1, n = 1, with_ties = FALSE)
+```
+
+At the best threshold (`r round(zero_default_best$threshold, 3)`), precision is `r round(100 * zero_default_best$precision, 2)`%, recall is `r round(100 * zero_default_best$recall, 2)`%, and F1 is `r round(zero_default_best$f1, 3)`.
+Accuracy evaluation takes `r round(zero_default_accuracy_time, 1)` seconds.
+
+```{r zero-default-accuracy-plot}
+#| fig-width: 6.5
+#| fig-height: 3.8
+autoplot(zero_default_accuracy)
+```
+
+### Timing
+
+```{r zero-default-timings}
+zero_default_timings <- tibble::tibble(
+  stage = c(
+    'Blocking analysis',
+    'Model fitting',
+    'Accuracy evaluation',
+    'Total'
+  ),
+  seconds = c(
+    zero_default_blocking_time,
+    zero_default_fit_time,
+    zero_default_accuracy_time,
+    zero_default_blocking_time +
+      zero_default_fit_time +
+      zero_default_accuracy_time
+  )
+)
+
+zero_default_timings
+```
+
+```{r zero-default-cleanup}
+#| include: false
+il_cleanup(zero_default_model)
+DBI::dbDisconnect(zero_default_con, shutdown = TRUE)
+```
+
+## No noise to high
+
+```{r zero-high-data}
+zero_high_con <- DBI::dbConnect(duckdb::duckdb())
+
+DBI::dbExecute(
+  zero_high_con,
+  paste0(
+    'CREATE VIEW zero_high_left AS ',
+    "SELECT * FROM read_parquet('",
+    zero_path,
+    "')"
+  )
+)
+DBI::dbExecute(
+  zero_high_con,
+  paste0(
+    'CREATE VIEW zero_high_right AS ',
+    "SELECT * FROM read_parquet('",
+    high_path,
+    "')"
+  )
+)
+
+zero_high_left <- tbl(zero_high_con, 'zero_high_left')
+zero_high_right <- tbl(zero_high_con, 'zero_high_right')
+```
+
+### Blocking
+
+```{r zero-high-blocking-data}
+tic.clearlog()
+tic('zero_high_blocking', quiet = TRUE)
+zero_high_blocking <- il_count_pairs(
+  zero_high_left,
+  zero_high_right,
+  block_on(first_name, last_name),
+  block_on(last_name, date_of_birth),
+  block_on(zipcode, date_of_birth),
+  con = zero_high_con,
+  link_type = 'link'
+)
+zero_high_blocking_timing <- toc(log = TRUE, quiet = TRUE)
+zero_high_blocking_time <- as.numeric(
+  zero_high_blocking_timing$toc - zero_high_blocking_timing$tic
+)
+zero_high_candidate_pairs <- max(zero_high_blocking$cumulative_pairs)
+zero_high_cartesian_share <- max(zero_high_blocking$pct_of_cartesian)
+```
+
+This links the clean census extract to the high-noise administrative extract.
+The candidate universe is `r format(round(zero_high_candidate_pairs), big.mark = ",", scientific = FALSE)` pairs, or `r round(100 * zero_high_cartesian_share, 3)`% of the full cross-product.
+
+```{r zero-high-blocking-plot}
+#| fig-width: 7
+#| fig-height: 3.2
+autoplot(zero_high_blocking)
+```
+
+### Model fit
+
+```{r zero-high-model}
+tic.clearlog()
+tic('zero_high_fit', quiet = TRUE)
+zero_high_model <- il_model(
+  zero_high_left,
+  zero_high_right,
+  spec = common_spec,
+  con = zero_high_con,
+  link_type = 'link'
+) |>
+  il_estimate_prior(
+    block_on(first_name, last_name, date_of_birth),
+    recall = 0.8
+  ) |>
+  il_estimate_u(max_pairs = 5e5) |>
+  il_estimate_em(
+    blocking = block_on(first_name, last_name),
+    max_iterations = 8L
+  ) |>
+  il_estimate_em(
+    blocking = block_on(zipcode, date_of_birth),
+    max_iterations = 8L
+  )
+zero_high_fit_timing <- toc(log = TRUE, quiet = TRUE)
+zero_high_fit_time <- as.numeric(
+  zero_high_fit_timing$toc - zero_high_fit_timing$tic
+)
+```
+
+The fit step takes `r round(zero_high_fit_time, 1)` seconds.
+This is the hardest one-sided linkage task in the document, so the fitted parameter separation is weaker than in No noise to default`.
+
+```{r zero-high-model-plot}
+#| fig-width: 7
+#| fig-height: 4
+autoplot(zero_high_model, type = 'parameters')
+```
+
+```{r zero-high-history}
+#| fig-width: 7
+#| fig-height: 4
+il_training_history(zero_high_model) |>
+  autoplot()
+```
+
+### Accuracy
+
+```{r zero-high-accuracy-data}
+tic.clearlog()
+tic('zero_high_accuracy', quiet = TRUE)
+zero_high_accuracy <- il_accuracy(
+  zero_high_model,
+  labels_col = 'simulant_id'
+)
+zero_high_accuracy_timing <- toc(log = TRUE, quiet = TRUE)
+zero_high_accuracy_time <- as.numeric(
+  zero_high_accuracy_timing$toc - zero_high_accuracy_timing$tic
+)
+zero_high_best <- zero_high_accuracy |>
+  slice_max(f1, n = 1, with_ties = FALSE)
+```
+
+At the best threshold (`r round(zero_high_best$threshold, 3)`), precision is `r round(100 * zero_high_best$precision, 2)`%, recall is `r round(100 * zero_high_best$recall, 2)`%, and F1 is `r round(zero_high_best$f1, 3)`.
+Accuracy evaluation takes `r round(zero_high_accuracy_time, 1)` seconds.
+
+```{r zero-high-accuracy-plot}
+#| fig-width: 6.5
+#| fig-height: 3.8
+autoplot(zero_high_accuracy)
+```
+
+### Timing
+
+```{r zero-high-timings}
+zero_high_timings <- tibble::tibble(
+  stage = c(
+    'Blocking analysis',
+    'Model fitting',
+    'Accuracy evaluation',
+    'Total'
+  ),
+  seconds = c(
+    zero_high_blocking_time,
+    zero_high_fit_time,
+    zero_high_accuracy_time,
+    zero_high_blocking_time + zero_high_fit_time + zero_high_accuracy_time
+  )
+)
+
+zero_high_timings
+```
+
+```{r zero-high-cleanup}
+#| include: false
+il_cleanup(zero_high_model)
+DBI::dbDisconnect(zero_high_con, shutdown = TRUE)
+```
+
+## Default noise to high
+
+```{r default-high-data}
+default_high_con <- DBI::dbConnect(duckdb::duckdb())
+
+DBI::dbExecute(
+  default_high_con,
+  paste0(
+    'CREATE VIEW default_high_left AS ',
+    "SELECT * FROM read_parquet('",
+    default_path,
+    "')"
+  )
+)
+DBI::dbExecute(
+  default_high_con,
+  paste0(
+    'CREATE VIEW default_high_right AS ',
+    "SELECT * FROM read_parquet('",
+    high_path,
+    "')"
+  )
+)
+
+default_high_left <- tbl(default_high_con, 'default_high_left')
+default_high_right <- tbl(default_high_con, 'default_high_right')
+```
+
+### Blocking
+
+```{r default-high-blocking-data}
+tic.clearlog()
+tic('default_high_blocking', quiet = TRUE)
+default_high_blocking <- il_count_pairs(
+  default_high_left,
+  default_high_right,
+  block_on(first_name, last_name),
+  block_on(last_name, date_of_birth),
+  block_on(zipcode, date_of_birth),
+  con = default_high_con,
+  link_type = 'link'
+)
+default_high_blocking_timing <- toc(log = TRUE, quiet = TRUE)
+default_high_blocking_time <- as.numeric(
+  default_high_blocking_timing$toc - default_high_blocking_timing$tic
+)
+default_high_candidate_pairs <- max(default_high_blocking$cumulative_pairs)
+default_high_cartesian_share <- max(default_high_blocking$pct_of_cartesian)
+```
+
+This is the realistic administrative linkage case, with noise on both sides.
+The candidate universe is `r format(round(default_high_candidate_pairs), big.mark = ",", scientific = FALSE)` pairs, or `r round(100 * default_high_cartesian_share, 3)`% of the full cross-product.
+
+```{r default-high-blocking-plot}
+#| fig-width: 7
+#| fig-height: 3.2
+autoplot(default_high_blocking)
+```
+
+### Model fit
+
+```{r default-high-model}
+tic.clearlog()
+tic('default_high_fit', quiet = TRUE)
+default_high_model <- il_model(
+  default_high_left,
+  default_high_right,
+  spec = common_spec,
+  con = default_high_con,
+  link_type = 'link'
+) |>
+  il_estimate_prior(
+    block_on(first_name, last_name, date_of_birth),
+    recall = 0.8
+  ) |>
+  il_estimate_u(max_pairs = 5e5) |>
+  il_estimate_em(
+    blocking = block_on(first_name, last_name),
+    max_iterations = 8L
+  ) |>
+  il_estimate_em(
+    blocking = block_on(zipcode, date_of_birth),
+    max_iterations = 8L
+  )
+default_high_fit_timing <- toc(log = TRUE, quiet = TRUE)
+default_high_fit_time <- as.numeric(
+  default_high_fit_timing$toc - default_high_fit_timing$tic
+)
+```
+
+The fit step takes `r round(default_high_fit_time, 1)` seconds.
+Because both sides are noisy, this is the most realistic two-file linkage benchmark in the set.
+
+```{r default-high-model-plot}
+#| fig-width: 7
+#| fig-height: 4
+autoplot(default_high_model, type = 'parameters')
+```
+
+```{r default-high-history}
+#| fig-width: 7
+#| fig-height: 4
+il_training_history(default_high_model) |>
+  autoplot()
+```
+
+### Accuracy
+
+```{r default-high-accuracy-data}
+tic.clearlog()
+tic('default_high_accuracy', quiet = TRUE)
+default_high_accuracy <- il_accuracy(
+  default_high_model,
+  labels_col = 'simulant_id'
+)
+default_high_accuracy_timing <- toc(log = TRUE, quiet = TRUE)
+default_high_accuracy_time <- as.numeric(
+  default_high_accuracy_timing$toc - default_high_accuracy_timing$tic
+)
+default_high_best <- default_high_accuracy |>
+  slice_max(f1, n = 1, with_ties = FALSE)
+```
+
+At the best threshold (`r round(default_high_best$threshold, 3)`), precision is `r round(100 * default_high_best$precision, 2)`%, recall is `r round(100 * default_high_best$recall, 2)`%, and F1 is `r round(default_high_best$f1, 3)`.
+Accuracy evaluation takes `r round(default_high_accuracy_time, 1)` seconds.
+
+```{r default-high-accuracy-plot}
+#| fig-width: 6.5
+#| fig-height: 3.8
+autoplot(default_high_accuracy)
+```
+
+### Timing
+
+```{r default-high-timings}
+default_high_timings <- tibble::tibble(
+  stage = c(
+    'Blocking analysis',
+    'Model fitting',
+    'Accuracy evaluation',
+    'Total'
+  ),
+  seconds = c(
+    default_high_blocking_time,
+    default_high_fit_time,
+    default_high_accuracy_time,
+    default_high_blocking_time +
+      default_high_fit_time +
+      default_high_accuracy_time
+  )
+)
+
+default_high_timings
+```
+
+```{r default-high-cleanup}
+#| include: false
+il_cleanup(default_high_model)
+DBI::dbDisconnect(default_high_con, shutdown = TRUE)
+```
+
+## Stacked zero, default, and high noise
+
+```{r stacked-dedupe-data}
+stacked_dedupe_con <- DBI::dbConnect(duckdb::duckdb())
+
+DBI::dbExecute(
+  stacked_dedupe_con,
+  paste0(
+    'CREATE VIEW stacked_dedupe_input AS ',
+    "SELECT 'zero' AS source_file, * FROM read_parquet('",
+    zero_path,
+    "') ",
+    'UNION ALL ',
+    "SELECT 'default' AS source_file, * FROM read_parquet('",
+    default_path,
+    "') ",
+    'UNION ALL ',
+    "SELECT 'high' AS source_file, * FROM read_parquet('",
+    high_path,
+    "')"
+  )
+)
+
+stacked_dedupe_input <- tbl(stacked_dedupe_con, 'stacked_dedupe_input')
+```
+
+### Blocking
+
+```{r stacked-dedupe-blocking-data}
+tic.clearlog()
+tic('stacked_dedupe_blocking', quiet = TRUE)
+stacked_dedupe_blocking <- il_count_pairs(
+  stacked_dedupe_input,
+  block_on(first_name, last_name),
+  block_on(last_name, date_of_birth),
+  block_on(zipcode, date_of_birth),
+  con = stacked_dedupe_con,
+  link_type = 'dedupe'
+)
+stacked_dedupe_blocking_timing <- toc(log = TRUE, quiet = TRUE)
+stacked_dedupe_blocking_time <- as.numeric(
+  stacked_dedupe_blocking_timing$toc - stacked_dedupe_blocking_timing$tic
+)
+stacked_dedupe_candidate_pairs <- max(stacked_dedupe_blocking$cumulative_pairs)
+stacked_dedupe_cartesian_share <- max(stacked_dedupe_blocking$pct_of_cartesian)
+```
+
+This stacks the clean, default-noise, and high-noise census extracts and deduplicates the combined table.
+The blocking rules cut the search to `r format(round(stacked_dedupe_candidate_pairs), big.mark = ",", scientific = FALSE)` candidate pairs, or `r round(100 * stacked_dedupe_cartesian_share, 3)`% of all within-table pairs.
+
+```{r stacked-dedupe-blocking-plot}
+#| fig-width: 7
+#| fig-height: 3.2
+autoplot(stacked_dedupe_blocking)
+```
+
+### Model fit
+
+```{r stacked-dedupe-model}
+tic.clearlog()
+tic('stacked_dedupe_fit', quiet = TRUE)
+stacked_dedupe_model <- il_model(
+  stacked_dedupe_input,
+  spec = common_spec,
+  con = stacked_dedupe_con,
+  link_type = 'dedupe'
+) |>
+  il_estimate_prior(
+    block_on(first_name, last_name, date_of_birth),
+    recall = 0.8
+  ) |>
+  il_estimate_u(max_pairs = 5e5) |>
+  il_estimate_em(
+    blocking = block_on(first_name, last_name),
+    max_iterations = 8L
+  ) |>
+  il_estimate_em(
+    blocking = block_on(zipcode, date_of_birth),
+    max_iterations = 8L
+  )
+stacked_dedupe_fit_timing <- toc(log = TRUE, quiet = TRUE)
+stacked_dedupe_fit_time <- as.numeric(
+  stacked_dedupe_fit_timing$toc - stacked_dedupe_fit_timing$tic
+)
+```
+
+This fit step takes `r round(stacked_dedupe_fit_time, 1)` seconds.
+The stacked deduplication case is the heaviest benchmark because it includes cross-source duplicates and the small number of within-source duplicates present in the noisy files.
+
+```{r stacked-dedupe-model-plot}
+#| fig-width: 7
+#| fig-height: 4
+autoplot(stacked_dedupe_model, type = 'parameters')
+```
+
+```{r stacked-dedupe-history}
+#| fig-width: 7
+#| fig-height: 4
+il_training_history(stacked_dedupe_model) |>
+  autoplot()
+```
+
+### Accuracy
+
+```{r stacked-dedupe-accuracy-data}
+tic.clearlog()
+tic('stacked_dedupe_accuracy', quiet = TRUE)
+stacked_dedupe_accuracy <- il_accuracy(
+  stacked_dedupe_model,
+  labels_col = 'simulant_id'
+)
+stacked_dedupe_accuracy_timing <- toc(log = TRUE, quiet = TRUE)
+stacked_dedupe_accuracy_time <- as.numeric(
+  stacked_dedupe_accuracy_timing$toc - stacked_dedupe_accuracy_timing$tic
+)
+stacked_dedupe_best <- stacked_dedupe_accuracy |>
+  slice_max(f1, n = 1, with_ties = FALSE)
+```
+
+At the best threshold (`r round(stacked_dedupe_best$threshold, 3)`), precision is `r round(100 * stacked_dedupe_best$precision, 2)`%, recall is `r round(100 * stacked_dedupe_best$recall, 2)`%, and F1 is `r round(stacked_dedupe_best$f1, 3)`.
+Accuracy evaluation takes `r round(stacked_dedupe_accuracy_time, 1)` seconds.
+
+```{r stacked-dedupe-accuracy-plot}
+#| fig-width: 6.5
+#| fig-height: 3.8
+autoplot(stacked_dedupe_accuracy)
+```
+
+### Timing
+
+```{r stacked-dedupe-timings}
+stacked_dedupe_timings <- tibble::tibble(
+  stage = c(
+    'Blocking analysis',
+    'Model fitting',
+    'Accuracy evaluation',
+    'Total'
+  ),
+  seconds = c(
+    stacked_dedupe_blocking_time,
+    stacked_dedupe_fit_time,
+    stacked_dedupe_accuracy_time,
+    stacked_dedupe_blocking_time +
+      stacked_dedupe_fit_time +
+      stacked_dedupe_accuracy_time
+  )
+)
+
+stacked_dedupe_timings
+```
+
+```{r stacked-dedupe-cleanup}
+#| include: false
+il_cleanup(stacked_dedupe_model)
+DBI::dbDisconnect(stacked_dedupe_con, shutdown = TRUE)
+```

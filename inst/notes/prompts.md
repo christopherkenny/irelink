@@ -908,3 +908,30 @@ Include a primary markdown table with these columns: `investigation`, `status`, 
 After the table, include short subsections for the most important investigations.
 For each one, state what was checked, what was found, why the evidence is sufficient, and what remains uncertain.
 If you find places where `34` made claims that were too cursory, unsupported, or overstated, note that briefly as part of the investigation rather than turning this into a review of that file.
+
+## Scaling Testing (Opus 4.6 high)
+
+We need to develop some pseudopeople benchmarks.
+In `../pseudopeople-ri` are 5 parquet files.
+Look at the single python file there, which will show how they were generated.
+
+We want to population a single quarto file in `inst/benchmarks/pseudopeople.qmd` which runs several benchmarks:
+
+- zero:zero (ideal scenario that should be merge-equivalent)
+- zero:default (admin linkage to normal data)
+- zero:high (admin linkage to noisy data)
+- default:high (realistic linkage)
+- rbind(zero, default, high) (deduplication)
+
+For each of these, be sure to contain information about (1) accuracy, (2) blocking rules, (3) model fit, and (4) timing.
+Each task should include relevant plots and timing information in the text.
+
+The files cannot be copied into this repo, but exist at `../pseudopeople-ri/`.
+They are parquet files and, ideally, you should not ever read the data into memory.
+
+Process-wise, start by running tasks in R without Quarto, then move them into the Quarto document once it works interactively.
+Ping me once the file successfully compiles and report back on any specific changes you need to make.
+
+Note: there is no python on this machine.
+You cannot run any python commands.
+Everything must be done in R.
