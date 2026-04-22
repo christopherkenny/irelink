@@ -92,7 +92,7 @@ il_roc(model, labels = labels)
 #> # A tibble: 2 × 3
 #>   threshold   fpr   tpr
 #>       <dbl> <dbl> <dbl>
-#> 1     1.000     1     1
+#> 1     0.998     1     1
 #> 2     1         0     0
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

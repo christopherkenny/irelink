@@ -85,12 +85,12 @@ pairs <- predict(model, threshold = 0.5)
 
 il_waterfall(pairs, which = 1)
 #> # A tibble: 5 × 6
-#>   step       order contribution direction start   end
-#>   <chr>      <int>        <dbl> <chr>     <dbl> <dbl>
-#> 1 Prior          1         2.61 prior      0     2.61
-#> 2 first_name     2         2.91 positive   2.61  5.52
-#> 3 surname        3         2.66 positive   5.52  8.19
-#> 4 dob            4         3.19 positive   8.19 11.4 
-#> 5 Final          5        11.4  final      0    11.4 
+#>   step       order contribution direction   start     end
+#>   <chr>      <int>        <dbl> <chr>       <dbl>   <dbl>
+#> 1 Prior          1      -0.0510 prior      0      -0.0510
+#> 2 first_name     2       2.91   positive  -0.0510  2.86  
+#> 3 surname        3       2.66   positive   2.86    5.52  
+#> 4 dob            4       3.19   positive   5.52    8.71  
+#> 5 Final          5       8.71   final      0       8.71  
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

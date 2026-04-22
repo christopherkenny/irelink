@@ -15,7 +15,7 @@ il_estimate_em(
   fix_u = TRUE,
   fix_m = FALSE,
   max_iterations = 25L,
-  fix_prior = TRUE,
+  fix_prior = FALSE,
   estimate_without_tf = TRUE,
   derive_prior = FALSE,
   ...
@@ -58,7 +58,7 @@ il_estimate_em(
 - fix_prior:
 
   Logical. If `TRUE`, hold the prior (probability that two random
-  records match) fixed during EM iterations. Defaults to `TRUE`.
+  records match) fixed during EM iterations. Defaults to `FALSE`.
 
 - estimate_without_tf:
 

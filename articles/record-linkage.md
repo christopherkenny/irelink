@@ -165,18 +165,18 @@ il_weights(model)
 #> # A tibble: 14 × 5
 #>    comparison    gamma_level  m_prob  u_prob weight
 #>    <chr>               <int>   <dbl>   <dbl>  <dbl>
-#>  1 given_name              0 0.199   0.972   -2.29 
-#>  2 given_name              1 0.0128  0.0221  -0.786
-#>  3 given_name              2 0.0129  0.00114  3.50 
-#>  4 given_name              3 0.121   0.00114  6.72 
-#>  5 given_name              4 0.655   0.00354  7.53 
-#>  6 surname                 0 0.144   0.981   -2.77 
-#>  7 surname                 1 0.00685 0.0120  -0.814
-#>  8 surname                 2 0.0159  0.00123  3.69 
-#>  9 surname                 3 0.178   0.00141  6.98 
-#> 10 surname                 4 0.655   0.00427  7.26 
-#> 11 date_of_birth           0 0.103   1.000   -3.29 
-#> 12 date_of_birth           1 0.897   0.0002  12.1  
+#>  1 given_name              0 0.157   0.866   -2.46 
+#>  2 given_name              1 0.0136  0.0221  -0.702
+#>  3 given_name              2 0.0136  0.00114  3.57 
+#>  4 given_name              3 0.127   0.00114  6.80 
+#>  5 given_name              4 0.689   0.00354  7.60 
+#>  6 surname                 0 0.126   0.951   -2.92 
+#>  7 surname                 1 0.00700 0.0120  -0.782
+#>  8 surname                 2 0.0163  0.00123  3.73 
+#>  9 surname                 3 0.181   0.00141  7.01 
+#> 10 surname                 4 0.669   0.00427  7.29 
+#> 11 date_of_birth           0 0.104   1.000   -3.27 
+#> 12 date_of_birth           1 0.896   0.0002  12.1  
 #> 13 postcode                0 0.166   0.999   -2.59 
 #> 14 postcode                1 0.834   0.00124  9.39
 ```
@@ -203,12 +203,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id  
 #>   <chr>     <chr>       
-#> 1 200       cluster_200 
-#> 2 1111      cluster_1111
-#> 3 3173      cluster_1298
-#> 4 2034      cluster_2034
-#> 5 2071      cluster_2071
-#> 6 1018      cluster_1018
+#> 1 2348      cluster_2348
+#> 2 1940      cluster_1940
+#> 3 2640      cluster_2640
+#> 4 1505      cluster_1505
+#> 5 4219      cluster_1973
+#> 6 2271      cluster_2271
 ```
 
 ## Evaluate against ground truth
