@@ -19,7 +19,7 @@
 #'   `25L`. The loop stops early when convergence is reached.
 #' @param fix_prior Logical. If `TRUE`, hold the prior (probability that
 #'   two random records match) fixed during EM iterations.
-#'   Defaults to `TRUE`.
+#'   Defaults to `FALSE`.
 #' @param estimate_without_tf Logical. If `TRUE` (the default), EM runs
 #'   on aggregated gamma-pattern counts (fast, but ignores per-pair term
 #'   frequency variation). If `FALSE`, EM runs on individual pairs and
@@ -208,22 +208,10 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
     u_list[[j]] <- u_vec
   }
 
-  prior <- safe_prior(model)
-
-  # Blocking-adjusted prior: blocking columns force agreement, enriching
-  # the pair population with matches. Adjust the prior upward by the
-  # Bayes factors of deactivated comparisons' exact-match levels.
-  if (any(deactivated)) {
-    prior_bf <- prior / (1 - prior)
-    for (j in which(deactivated)) {
-      nl <- levels_per_comp[j]
-      m_top <- m_list[[j]][nl] # highest gamma level (exact match)
-      u_top <- u_list[[j]][nl]
-      level_bf <- max(m_top, 1e-10) / max(u_top, 1e-10)
-      prior_bf <- prior_bf * level_bf
-    }
-    prior <- min(max(prior_bf / (1 + prior_bf), 1e-6), 1 - 1e-6)
-  }
+  global_prior <- safe_prior(model)
+  prior <- adjust_prior_for_blocking(
+    global_prior, deactivated, m_list, u_list, levels_per_comp
+  )
 
   max_iter <- max_iterations
   tol <- convergence
@@ -243,9 +231,13 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
       u_vec <- pmax(u_list[[j]], 1e-10)
       log_m_vals <- log(m_vec)
       log_u_vals <- log(u_vec)
-      idx <- pattern_mat[, j] + 1L
-      log_match <- log_match + log_m_vals[idx]
-      log_nonmatch <- log_nonmatch + log_u_vals[idx]
+      gamma_vals <- pattern_mat[, j]
+      observed <- gamma_vals >= 0L
+      if (any(observed)) {
+        idx <- gamma_vals[observed] + 1L
+        log_match[observed] <- log_match[observed] + log_m_vals[idx]
+        log_nonmatch[observed] <- log_nonmatch[observed] + log_u_vals[idx]
+      }
     }
 
     # Per-pair TF adjustment in E-step (only in pair-level mode)
@@ -289,8 +281,7 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
 
     # Update prior unless fixed
     if (!fix_prior) {
-      prior <- sum_w / n_pairs
-      prior <- max(min(prior, 1 - 1e-6), 1e-6)
+      prior <- clamp_probability(sum_w / n_pairs)
     }
 
     if (!fix_m) {
@@ -366,15 +357,20 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
   }
   model$params$comparisons <- tibble::as_tibble(do.call(rbind, rows))
 
-  # Store updated prior if it was estimated
+  # Store the global prior, not the blocking-enriched training prior.
   if (!fix_prior) {
-    model$params$prior <- prior
+    model$params$prior <- reverse_blocking_adjusted_prior(
+      prior, deactivated, m_list, u_list, levels_per_comp
+    )
   }
 
   # Derive prior from trained parameter values
   if (derive_prior) {
-    model$params$prior <- derive_prior_from_params(
+    derived_prior <- derive_prior_from_params(
       m_list, u_list, pattern_mat, pattern_n
+    )
+    model$params$prior <- reverse_blocking_adjusted_prior(
+      derived_prior, deactivated, m_list, u_list, levels_per_comp
     )
   }
 
@@ -401,8 +397,12 @@ derive_prior_from_params <- function(m_list, u_list, pattern_mat, pattern_n) {
   for (j in seq_len(n_comp)) {
     m_vec <- pmax(m_list[[j]], 1e-10)
     u_vec <- pmax(u_list[[j]], 1e-10)
-    idx <- pattern_mat[, j] + 1L
-    log_bf <- log_bf + log(m_vec[idx]) - log(u_vec[idx])
+    gamma_vals <- pattern_mat[, j]
+    observed <- gamma_vals >= 0L
+    if (any(observed)) {
+      idx <- gamma_vals[observed] + 1L
+      log_bf[observed] <- log_bf[observed] + log(m_vec[idx]) - log(u_vec[idx])
+    }
   }
   bf <- exp(log_bf)
   # Weighted average posterior match probability with a flat 0.5 prior

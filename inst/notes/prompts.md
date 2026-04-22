@@ -935,3 +935,20 @@ Ping me once the file successfully compiles and report back on any specific chan
 Note: there is no python on this machine.
 You cannot run any python commands.
 Everything must be done in R.
+
+
+## Fixes after scaling testing (GPT-5.4)
+
+We have performed some large scale testing of this package.
+Most of the results look very good.
+
+Look at this summary of the problem we encounter:
+
+The stacked dedupe scenario is not good if we judge it by pairwise duplicate detection.
+Its best threshold is 0, pairwise precision is only 24.24%, F1 is 0.39, it emits 14.4M duplicate pairs, and clustering produces a largest cluster of 733,099 records.
+That reads like substantial over-linking, even though cluster-level metrics recover somewhat to precision 77.68% / recall 99.59% / F1 0.873: pseudopeople.typ (line 1473), pseudopeople.typ (line 1559), pseudopeople.typ (line 1598), pseudopeople.typ (line 1635).
+
+As needed, look at ../splink to check our process against theirs, as this is a derivative software.
+If you spot meaningful differences, implement them here.
+
+Return when you have identified and fixed the problem.

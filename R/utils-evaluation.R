@@ -350,6 +350,12 @@ compute_confusion_counts <- function(label_probs, actual_positive,
                                      found_by_blocking = NULL,
                                      threshold = 0.85) {
   predicted_positive <- label_probs >= threshold
+
+  if (!is.null(found_by_blocking)) {
+    found_by_blocking <- !is.na(found_by_blocking) & found_by_blocking
+    predicted_positive <- predicted_positive & found_by_blocking
+  }
+
   tp <- sum(predicted_positive & actual_positive)
   fp <- sum(predicted_positive & !actual_positive)
   fn <- sum(!predicted_positive & actual_positive)
@@ -358,10 +364,7 @@ compute_confusion_counts <- function(label_probs, actual_positive,
   if (is.null(found_by_blocking)) {
     fn_blocking_miss <- NA_integer_
   } else {
-    fn_blocking_miss <- sum(
-      !predicted_positive & actual_positive & !found_by_blocking,
-      na.rm = TRUE
-    )
+    fn_blocking_miss <- sum(actual_positive & !found_by_blocking)
   }
 
   tibble::tibble(

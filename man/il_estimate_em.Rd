@@ -11,7 +11,7 @@ il_estimate_em(
   fix_u = TRUE,
   fix_m = FALSE,
   max_iterations = 25L,
-  fix_prior = TRUE,
+  fix_prior = FALSE,
   estimate_without_tf = TRUE,
   derive_prior = FALSE,
   ...
@@ -38,7 +38,7 @@ Defaults to \code{FALSE}. At least one of \code{fix_u} and \code{fix_m} must be
 
 \item{fix_prior}{Logical. If \code{TRUE}, hold the prior (probability that
 two random records match) fixed during EM iterations.
-Defaults to \code{TRUE}.}
+Defaults to \code{FALSE}.}
 
 \item{estimate_without_tf}{Logical. If \code{TRUE} (the default), EM runs
 on aggregated gamma-pattern counts (fast, but ignores per-pair term

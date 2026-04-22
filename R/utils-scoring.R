@@ -10,6 +10,62 @@ safe_prior <- function(model, default = 0.0001) {
   if (is.null(p) || is.na(p)) default else p
 }
 
+#' Clamp probabilities away from 0 and 1
+#' @noRd
+clamp_probability <- function(prob, eps = 1e-6) {
+  pmin(pmax(prob, eps), 1 - eps)
+}
+
+#' Convert a probability to Bayes-factor odds
+#' @noRd
+prob_to_bayes_factor <- function(prob) {
+  prob <- clamp_probability(prob)
+  prob / (1 - prob)
+}
+
+#' Convert Bayes-factor odds to a probability
+#' @noRd
+bayes_factor_to_probability <- function(bf) {
+  bf <- pmax(bf, 1e-10)
+  clamp_probability(bf / (1 + bf))
+}
+
+#' Adjust the global prior for exact agreements implied by blocking
+#' @noRd
+adjust_prior_for_blocking <- function(prior, deactivated,
+                                      m_list, u_list, levels_per_comp) {
+  if (!any(deactivated)) {
+    return(clamp_probability(prior))
+  }
+
+  prior_bf <- prob_to_bayes_factor(prior)
+  for (j in which(deactivated)) {
+    nl <- levels_per_comp[j]
+    level_bf <- max(m_list[[j]][nl], 1e-10) / max(u_list[[j]][nl], 1e-10)
+    prior_bf <- prior_bf * level_bf
+  }
+
+  bayes_factor_to_probability(prior_bf)
+}
+
+#' Reverse a blocking adjustment back to the global prior
+#' @noRd
+reverse_blocking_adjusted_prior <- function(prior, deactivated,
+                                            m_list, u_list, levels_per_comp) {
+  if (!any(deactivated)) {
+    return(clamp_probability(prior))
+  }
+
+  prior_bf <- prob_to_bayes_factor(prior)
+  for (j in which(deactivated)) {
+    nl <- levels_per_comp[j]
+    level_bf <- max(m_list[[j]][nl], 1e-10) / max(u_list[[j]][nl], 1e-10)
+    prior_bf <- prior_bf / level_bf
+  }
+
+  bayes_factor_to_probability(prior_bf)
+}
+
 #' Extract per-level m/u probability lists from a model's parameter tibble
 #'
 #' For each comparison, returns vectors of m and u probabilities indexed
@@ -75,8 +131,12 @@ score_gamma_matrix <- function(gamma_mat, mu) {
     m_vec <- mu$m_levels[[cn]]
     u_vec <- mu$u_levels[[cn]]
     level_weights <- log2(m_vec / u_vec)
-    # gamma_mat[, j] has values 0..K; R is 1-indexed so add 1
-    total_weight <- total_weight + level_weights[gamma_mat[, j] + 1L]
+    gamma_vals <- gamma_mat[, j]
+    observed <- gamma_vals >= 0L
+    if (any(observed)) {
+      total_weight[observed] <- total_weight[observed] +
+        level_weights[gamma_vals[observed] + 1L]
+    }
   }
   total_weight
 }
@@ -114,7 +174,9 @@ per_comparison_contribution <- function(gamma, mu, comp_names = NULL,
     m_vec <- mu$m_levels[[cn]]
     u_vec <- mu$u_levels[[cn]]
     level_weights <- log2(m_vec / u_vec)
-    contrib[j] <- level_weights[gamma[j] + 1L]
+    if (gamma[j] >= 0L) {
+      contrib[j] <- level_weights[gamma[j] + 1L]
+    }
   }
   if (!is.null(tf_adjs)) {
     contrib <- contrib + tf_adjs

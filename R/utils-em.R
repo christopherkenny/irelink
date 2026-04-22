@@ -408,15 +408,26 @@ compute_gamma <- function(val_l, val_r, comp_level) {
   }
 
   if (method == 'levels') {
+    has_null_level <- any(vapply(comp_level$levels, function(l) {
+      isTRUE(l$is_null_level)
+    }, logical(1)))
+
     # Check sublevels from best to worst (skip null/else)
     sublevels <- Filter(function(l) {
       !isTRUE(l$is_null_level) && !isTRUE(l$is_else_level)
     }, comp_level$levels)
     nsub <- length(sublevels)
     if (nsub == 0L) {
-      return(ifelse(both_present & val_l == val_r, 1L, 0L))
+      gamma <- ifelse(both_present & val_l == val_r, 1L, 0L)
+      if (has_null_level) {
+        gamma[!both_present] <- -1L
+      }
+      return(gamma)
     }
     gamma <- rep(0L, n)
+    if (has_null_level) {
+      gamma[!both_present] <- -1L
+    }
     for (i in rev(seq_along(sublevels))) {
       sub_gamma <- compute_gamma(val_l, val_r, sublevels[[i]])
       level_code <- nsub - i + 1L

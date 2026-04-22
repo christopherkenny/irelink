@@ -342,14 +342,23 @@ sql_gamma_case <- function(comp, dialect) {
   }
 
   if (method == 'levels') {
+    has_null_level <- any(vapply(level$levels, function(l) {
+      isTRUE(l$is_null_level)
+    }, logical(1)))
+
     # Build multi-level CASE from sublevels (skip null and else)
     sublevels <- Filter(function(l) {
       !isTRUE(l$is_null_level) && !isTRUE(l$is_else_level)
     }, level$levels)
     n <- length(sublevels)
+    null_when <- if (has_null_level) {
+      glue::glue('WHEN NOT ({null_guard}) THEN -1 ')
+    } else {
+      ''
+    }
     if (n == 0L) {
       return(glue::glue(
-        'CASE WHEN {null_guard} AND {lcol} = {rcol} THEN 1 ELSE 0 END'
+        'CASE {null_when}WHEN {null_guard} AND {lcol} = {rcol} THEN 1 ELSE 0 END'
       ))
     }
     whens <- vapply(seq_along(sublevels), function(i) {
@@ -357,7 +366,9 @@ sql_gamma_case <- function(comp, dialect) {
       cond <- sql_sublevel_condition(sub, col, dialect, null_guard, lcol, rcol)
       glue::glue('WHEN {cond} THEN {n - i + 1L}')
     }, character(1))
-    return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
+    return(glue::glue(
+      'CASE {null_when}{paste(whens, collapse = " ")} ELSE 0 END'
+    ))
   }
 
   # Fallback: exact match
