@@ -199,16 +199,16 @@ maximum possible edges for a cluster of that size):</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 116 × 5</span></span></span>
 <span><span class="co">#&gt;    cluster_id  n_nodes n_edges density cluster_centralisation</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> cluster_115       8      24   0.857                  0.190</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> cluster_326       4       4   0.667                  0.667</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> cluster_792       7      15   0.714                  0.4  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> cluster_867       3       3   1                      0    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> cluster_924       8      28   1                      0    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> cluster_229       8      28   1                      0    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_237       6      15   1                      0    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_261       4       6   1                      0    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_603       9      29   0.806                  0.25 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_13       14      40   0.440                  0.205</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> cluster_133      44     146   0.154                  0.350</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> cluster_338       3       2   0.667                  1    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> cluster_476       2       1   1                     <span style="color: #BB0000;">NA</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> cluster_674       8      18   0.643                  0.286</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> cluster_825       9      22   0.597                  0.196</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> cluster_874       2       1   1                     <span style="color: #BB0000;">NA</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_905       2       1   1                     <span style="color: #BB0000;">NA</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_91        5       9   0.9                    0.167</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_164      32     140   0.282                  0.559</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_172      18      52   0.340                  0.544</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 106 more rows</span></span></span></code></pre></div>
 <p>A high maximum cluster size combined with low density often indicates
 that a transitive link is pulling unrelated entities together. Consider
@@ -307,23 +307,23 @@ same blocking rules and comparison spec:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 17 × 4</span></span></span>
 <span><span class="co">#&gt;    unique_id_l unique_id_r match_weight match_probability</span></span>
 <span><span class="co">#&gt;          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>           2         858         1.47             0.856</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>           1         240         1.46             0.855</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>           1         363         1.46             0.855</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>           2         859         2.55             0.927</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>           2         864         1.47             0.856</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>           1         238         2.67             0.932</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>           1         791         1.46             0.855</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>           1         237         2.54             0.926</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>           1         239         1.46             0.855</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           1         364         1.46             0.855</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>           1         365         1.46             0.855</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>           1         241         1.46             0.855</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>           1         242         1.46             0.855</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>           1         362         2.54             0.926</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span>           1         366         1.46             0.855</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span>           1         367         1.46             0.855</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">17</span>           1         789         2.67             0.932</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>           1         237         2.54             0.926</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>           1         239         1.46             0.855</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>           1         364         1.46             0.855</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>           1         365         1.46             0.855</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>           1         241         1.46             0.855</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>           1         242         1.46             0.855</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>           1         362         2.54             0.926</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>           1         366         1.46             0.855</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>           1         367         1.46             0.855</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           1         789         2.67             0.932</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>           2         858         1.47             0.856</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>           1         240         1.46             0.855</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>           1         363         1.46             0.855</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>           2         859         2.55             0.927</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span>           2         864         1.47             0.856</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span>           1         238         2.67             0.932</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">17</span>           1         791         1.46             0.855</span></span></code></pre></div>
 <p>Each row is a (new record, existing record) pair.
 <code>unique_id_l</code> identifies the new record (auto-assigned
 starting from 1) and <code>unique_id_r</code> identifies the matched
