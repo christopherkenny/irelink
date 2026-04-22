@@ -6,7 +6,7 @@
 #' Accepts a data.frame, a dbplyr `tbl_lazy`, or a character table name
 #' and returns a standardized list describing the data's location in the
 #' database. For data.frames, uploads via `dbWriteTable`. For database
-#' references, creates a VIEW to inject `unique_id` if missing.
+#' references, materializes a table to inject `unique_id` if missing.
 #'
 #' @param data A data.frame, `tbl_lazy`, or character table name.
 #' @param con A DBI connection (optional when `data` is `tbl_lazy`).
@@ -40,26 +40,30 @@ register_data <- function(data, con = NULL, tbl_name = '__il_data',
       dbplyr::remote_query(data)
     }
 
-    # Create a view, adding unique_id if needed
-    # Drop any existing table/view first to avoid type conflicts
+    # Create a registered object, adding unique_id if needed.
+    # When we must synthesize row IDs, materialize them once in a table so
+    # they stay stable across later queries to the model.
+    # Drop any existing table/view first to avoid type conflicts.
     drop_registered(con, tbl_name)
     has_uid <- 'unique_id' %in% cols
     if (has_uid) {
       view_sql <- glue::glue(
         'CREATE OR REPLACE VIEW {tbl_name} AS {source_sql}'
       )
+      DBI::dbExecute(con, view_sql)
     } else if (add_unique_id) {
-      view_sql <- glue::glue(
-        'CREATE OR REPLACE VIEW {tbl_name} AS ',
+      table_sql <- glue::glue(
+        'CREATE TABLE {tbl_name} AS ',
         'SELECT *, ROW_NUMBER() OVER () AS unique_id FROM ({source_sql}) AS __src'
       )
       cols <- c(cols, 'unique_id')
+      DBI::dbExecute(con, table_sql)
     } else {
       view_sql <- glue::glue(
         'CREATE OR REPLACE VIEW {tbl_name} AS {source_sql}'
       )
+      DBI::dbExecute(con, view_sql)
     }
-    DBI::dbExecute(con, view_sql)
 
     return(list(
       tbl_name = tbl_name,
@@ -88,24 +92,27 @@ register_data <- function(data, con = NULL, tbl_name = '__il_data',
     }
 
     has_uid <- 'unique_id' %in% cols
-    # Drop any existing table/view first to avoid type conflicts
+    # Drop any existing table/view first to avoid type conflicts.
+    # As above, materialize synthesized row IDs once so they stay stable.
     drop_registered(con, tbl_name)
     if (has_uid) {
       view_sql <- glue::glue(
         'CREATE OR REPLACE VIEW {tbl_name} AS SELECT * FROM {data}'
       )
+      DBI::dbExecute(con, view_sql)
     } else if (add_unique_id) {
-      view_sql <- glue::glue(
-        'CREATE OR REPLACE VIEW {tbl_name} AS ',
+      table_sql <- glue::glue(
+        'CREATE TABLE {tbl_name} AS ',
         'SELECT *, ROW_NUMBER() OVER () AS unique_id FROM {data}'
       )
       cols <- c(cols, 'unique_id')
+      DBI::dbExecute(con, table_sql)
     } else {
       view_sql <- glue::glue(
         'CREATE OR REPLACE VIEW {tbl_name} AS SELECT * FROM {data}'
       )
+      DBI::dbExecute(con, view_sql)
     }
-    DBI::dbExecute(con, view_sql)
 
     return(list(
       tbl_name = tbl_name,

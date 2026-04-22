@@ -108,6 +108,46 @@ test_that('il_confusion_matrix() matches il_accuracy() at the same threshold', {
   expect_equal(cm$tn, acc_row$tn)
 })
 
+test_that('il_accuracy() and il_confusion_matrix() agree for lazy inputs without unique_id', {
+  skip_if_not_installed('duckdb')
+  skip_if_not_installed('dbplyr')
+  skip_if_not_installed('dplyr')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- data.frame(
+    first_name = c('A', 'A', 'A', 'B', 'B', 'C'),
+    surname = c('X', 'X', 'X', 'Y', 'Y', 'Z'),
+    cluster = c(1, 1, 1, 2, 2, 3)
+  )
+  DBI::dbWriteTable(con, 'accuracy_random_src', df, overwrite = TRUE)
+  tbl_ref <- dplyr::tbl(
+    con,
+    dbplyr::sql(
+      'SELECT first_name, surname, cluster FROM accuracy_random_src ORDER BY random()'
+    )
+  )
+
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_compare(surname, cl_exact()) |>
+    il_block_on(first_name)
+
+  model <- il_model(tbl_ref, spec = spec) |>
+    il_estimate_u(max_pairs = 100) |>
+    il_estimate_em(block_on(first_name), max_iterations = 2L)
+
+  acc <- il_accuracy(model, labels_col = 'cluster')
+  best <- acc[which.max(acc$f1), , drop = FALSE]
+  cm <- il_confusion_matrix(model, labels_col = 'cluster', threshold = best$threshold)
+
+  expect_equal(cm$tp, best$tp)
+  expect_equal(cm$fp, best$fp)
+  expect_equal(cm$fn, best$fn)
+  expect_equal(cm$tn, best$tn)
+})
+
 # --- il_errors() ----------------------------------------------------------
 # From: test_prediction_errors_from_labels_table
 

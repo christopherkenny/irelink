@@ -50,6 +50,42 @@ test_that('register_data handles tbl_lazy input', {
   expect_true('unique_id' %in% reg$columns)
 })
 
+test_that('register_data materializes stable synthetic unique_id values', {
+  skip_if_not_installed('dbplyr')
+  skip_if_not_installed('dplyr')
+  con <- test_con()
+  on.exit(test_discon(con))
+
+  src <- fake_20[, c('first_name', 'surname')]
+  DBI::dbWriteTable(con, 'lazy_random_src', src, overwrite = TRUE)
+  tbl_ref <- dplyr::tbl(
+    con,
+    dbplyr::sql(
+      'SELECT first_name, surname FROM lazy_random_src ORDER BY random()'
+    )
+  )
+
+  reg <- register_data(tbl_ref, tbl_name = '__test_lazy_random')
+  on.exit(drop_registered(con, '__test_lazy_random'), add = TRUE, after = FALSE)
+
+  first_read <- DBI::dbGetQuery(
+    con,
+    paste(
+      'SELECT unique_id, first_name, surname',
+      'FROM __test_lazy_random ORDER BY unique_id'
+    )
+  )
+  second_read <- DBI::dbGetQuery(
+    con,
+    paste(
+      'SELECT unique_id, first_name, surname',
+      'FROM __test_lazy_random ORDER BY unique_id'
+    )
+  )
+
+  expect_identical(first_read, second_read)
+})
+
 test_that('register_data replaces table with view without error', {
   skip_if_not_installed('dbplyr')
   skip_if_not_installed('dplyr')

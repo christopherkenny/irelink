@@ -7,7 +7,7 @@
 #'
 #' When `.data` is a `tbl_lazy` (from [dplyr::tbl()]), the connection
 #' is extracted automatically and data stays in-database with zero
-#' copying. A `unique_id` column is injected via a SQL view if not
+#' copying. A `unique_id` column is injected automatically if not
 #' already present.
 #'
 #' @param .data A data frame, tibble, dbplyr `tbl_lazy`, or character
