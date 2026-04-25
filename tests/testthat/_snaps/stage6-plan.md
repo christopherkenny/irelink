@@ -65,7 +65,7 @@
            comparisons:   <chr>            <int> <dbl> <dbl>
            comparisons: 1 first_name           0   0.1   0.8
            comparisons: 2 first_name           1   0.9   0.2
-          prior: 0.0004498426
+          prior: 1e-04
 
 # unit helper print snapshot
 
