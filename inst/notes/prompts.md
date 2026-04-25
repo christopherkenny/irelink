@@ -992,35 +992,52 @@ It is a derivative product of splink (../splink).
 We are adding a new feature: custom priors.
 This is not a splink feature.
 
-Read `features.md`, especially the custom-priors section. Treat it as the
-source of truth for the API and semantics.
-
 The feature has two distinct concepts:
 
-- regularizing priors, which softly pull EM estimates using finite
-  pseudo-count strength;
-- fixed constraints, which hold selected parameters fixed and must not be
-  implemented as huge prior strengths.
+- regularizing priors, which softly pull EM estimates using finite pseudo-count strength
+- fixed constraints, which hold selected parameters fixed and must not be implemented as huge prior strengths.
 
-Implement the full feature set described in `features.md`:
+Implement the full feature set as described:
 
-- user-facing helpers for prevalence priors and matched-class field priors;
-- user-facing helpers for field-level fixed constraints;
-- storage on the model in a clear, inspectable form;
-- integration with `il_estimate_em()`;
-- validation for bad probabilities, bad strengths, unknown columns, malformed
-  level distributions, and priors or constraints on comparisons deactivated by
-  the EM blocking rule;
-- focused tests showing regularizing priors move estimates in the expected
-  direction;
-- focused tests showing fixed constraints hold the requested parameters fixed;
+- user-facing helpers for prevalence priors and matched-class field priors
+- user-facing helpers for field-level fixed constraints
+- storage on the model in a clear, inspectable form
+- integration with `il_estimate_em()`
+- validation for bad probabilities, bad strengths, unknown columns, malformed level distributions, and priors or constraints on comparisons deactivated by the EM blocking rule
+- focused tests showing regularizing priors move estimates in the expected direction
+- focused tests showing fixed constraints hold the requested parameters fixed
 - save/load round-trip coverage for the new metadata.
 
-If you discover a genuine blocker that prevents implementing one part of the
-spec, do not silently omit it. Leave the code in a coherent state, document the
-blocker in `inst/39-custom-priors.md`, and make sure unsupported combinations
-raise clear errors.
+If you discover a genuine blocker that prevents implementing one part of the spec, do not silently omit it.
+Leave the code in a coherent state, document the blocker in `inst/39-custom-priors.md`, and make sure unsupported combinations raise clear errors.
 
 Update user-facing docs as needed.
 
 When you are done, write a summary to `inst/39-custom-priors.md`.
+
+## Dependency-aware scoring (Codex GPT-5.5 medium)
+
+You are working on a record linkage package in R.
+It is a derivative product of splink (../splink).
+
+We are adding a new feature: dependency-aware scoring.
+This is not a splink feature.
+
+Implement the full dependency-aware scoring feature:
+
+- expose a clear estimator-mode option with the existing independent estimator as the default
+- aggregate comparison patterns and fit EM on the pattern table
+- use a log-linear matched-class model with main effects and an unmatched-class model with pairwise interactions
+- treat missing comparison states as explicit pattern levels
+- return valid posterior match probabilities for scored patterns and candidate pairs
+- support scoring a compatible pattern table that is larger than, or not identical to, the table used for fitting
+- store dependency-aware estimator state in a clear, inspectable form
+- reject priors, fixed constraints, and unsupported field-level adjustments with clear errors when combined with dependency-aware scoring
+- add focused tests for dependent-field behavior, missing states, compatible train-vs-score pattern tables, unsupported combinations, and save/load round-tripping.
+
+If you discover a genuine blocker that prevents implementing one part of the spec, do not silently omit it.
+Leave the code in a coherent state, document the blocker in `inst/40-dependency-aware-scoring.md`, and make sure unsupported combinations raise clear errors.
+
+Update user-facing docs as needed.
+
+When you are done, write a summary to `inst/40-dependency-aware-scoring.md`.
