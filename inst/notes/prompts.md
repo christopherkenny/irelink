@@ -969,4 +969,17 @@ Look at `inst/refs/` and identify notes on why it was removed and its goals.
 
 Then, re-implement it with fixes.
 Add corresponding tests.
-It should be explicitly tested that if a valid json is given as a model, that we can run predict after.
+It should be explictly tested that if a valid json is given as a model, that we can run predict after.
+
+## Greedy matching (GPT-5.4 high)
+
+You are working on a record linkage package in R.
+It is a derivative product of splink (../splink).
+
+We are adding a new feature: simple greedy matching.
+This is not a splink feature.
+
+The core idea is that for linking, we should take the best linkings, sorted by highest posterior matches.
+In cases of ties, break first by the smaller row index of the first dataset and then by the smaller row index of the second.
+
+When you are done, write a summary to `inst/38-greedy-matching.md`.
