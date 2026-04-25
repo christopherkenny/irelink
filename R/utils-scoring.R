@@ -69,17 +69,17 @@ reverse_blocking_adjusted_prior <- function(prior, deactivated,
 #' Extract per-level m/u probability lists from a model's parameter tibble
 #'
 #' For each comparison, returns vectors of m and u probabilities indexed
-#' by gamma level (0, 1, ..., K). Compatible with both the new
-#' `gamma_level` format and the legacy `level` (match/non_match) format.
+#' by gamma level (0, 1, ..., K). Compatible with both the current
+#' `gamma_level` format and the earlier `level` (match/non_match) format.
 #'
 #' @param params A tibble with columns `comparison`, `gamma_level`, `m`, `u`
-#'   (or legacy `comparison`, `level`, `m`, `u`).
+#'   (or earlier `comparison`, `level`, `m`, `u`).
 #' @param comp_names Character vector of comparison names, in order.
 #' @return A named list with `m_levels` and `u_levels`, each a list of
 #'   numeric vectors (one per comparison), indexed from gamma_level 0.
 #' @noRd
 extract_mu_vectors <- function(params, comp_names) {
-  # Detect legacy format and convert
+  # Detect earlier format and convert
   if ('level' %in% names(params) && !'gamma_level' %in% names(params)) {
     params <- migrate_params_to_gamma_level(params)
   }
@@ -101,7 +101,7 @@ extract_mu_vectors <- function(params, comp_names) {
   list(m_levels = m_levels, u_levels = u_levels)
 }
 
-#' Migrate legacy match/non_match params to gamma_level format
+#' Normalize match/non_match params to gamma_level format
 #' @param params Tibble with `level` column (match/non_match).
 #' @return Tibble with `gamma_level` integer column.
 #' @noRd

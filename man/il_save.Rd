@@ -19,10 +19,13 @@ Defaults to \code{FALSE}.}
 \code{model}, invisibly.
 }
 \description{
-Serialises a trained \code{il_model} object to an RDS file so that it can be
-loaded later without re-training. The database connection and any
-in-database tables are not stored; supply a fresh connection with
-\code{\link[=il_attach]{il_attach()}} after loading.
+Serialises a trained \code{il_model} object to \code{.json} or \code{.rds}, chosen from
+\code{path}.
+}
+\details{
+\code{.json} writes Splink settings JSON. Other extensions write RDS. The
+database connection and any in-database tables are not stored; supply a
+fresh connection with \code{\link[=il_attach]{il_attach()}} after loading.
 }
 \examples{
 df <- data.frame(

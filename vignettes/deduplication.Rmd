@@ -156,10 +156,9 @@ autoplot(model, type = 'parameters')
 
 ## Save and reuse the model
 
-Once you are satisfied with the parameters, save the model to a JSON
-file.
-The file stores the spec, trained parameters, and all metadata needed
-to re-apply the model without retraining:
+Once you are satisfied with the parameters, save the model to disk.
+The saved file stores the spec and trained parameters so you can
+re-apply the model without retraining:
 
 ```{r save}
 path <- tempfile(fileext = '.rds')

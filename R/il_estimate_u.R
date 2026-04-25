@@ -100,7 +100,7 @@ il_estimate_u <- function(model, max_pairs = 1e6) {
     params_tbl$m <- NA_real_
   } else {
     old_params <- model$params$comparisons
-    # Migrate legacy format if needed
+    # Normalize earlier format if needed
     if ('level' %in% names(old_params) && !'gamma_level' %in% names(old_params)) {
       old_params <- migrate_params_to_gamma_level(old_params)
     }

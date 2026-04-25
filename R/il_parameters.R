@@ -66,7 +66,7 @@ il_parameters <- function(model) {
   if (is.null(params)) {
     cli::cli_abort('Model has no parameters yet. Run training verbs first.')
   }
-  # Migrate legacy format if needed
+  # Normalize earlier format if needed
   if ('level' %in% names(params) && !'gamma_level' %in% names(params)) {
     params <- migrate_params_to_gamma_level(params)
   }

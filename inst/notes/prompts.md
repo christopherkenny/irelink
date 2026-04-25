@@ -952,3 +952,21 @@ As needed, look at ../splink to check our process against theirs, as this is a d
 If you spot meaningful differences, implement them here.
 
 Return when you have identified and fixed the problem.
+
+# Eric Requests
+
+## JSON (GPT-5.4 high)
+
+You are working on a record linkage package in R.
+It is a derivative product of splink (../splink).
+You can use their implementations as necessary.
+
+In commit d6851a, we removed parity for splink's json saving of models.
+This makes sense for pure R since it is replaced with a compressed RDS.
+
+We need to add back support for the JSON and make it work so that it can be passed between the programs.
+Look at `inst/refs/` and identify notes on why it was removed and its goals.
+
+Then, re-implement it with fixes.
+Add corresponding tests.
+It should be explictly tested that if a valid json is given as a model, that we can run predict after.

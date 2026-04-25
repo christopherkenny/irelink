@@ -42,7 +42,7 @@ data that already lives in a database.
 \details{
 When \code{.data} is a \code{tbl_lazy} (from \code{\link[dplyr:tbl]{dplyr::tbl()}}), the connection
 is extracted automatically and data stays in-database with zero
-copying. A \code{unique_id} column is injected via a SQL view if not
+copying. A \code{unique_id} column is injected automatically if not
 already present.
 }
 \examples{

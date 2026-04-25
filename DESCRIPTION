@@ -61,6 +61,7 @@ Suggests:
     dbplyr,
     dplyr,
     igraph,
+    jsonlite,
     knitr,
     nanoparquet,
     rmarkdown,

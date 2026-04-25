@@ -86,7 +86,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 ## SQL backends and persistence
 
 - All computation runs inside a DBI-compatible database: DuckDB (recommended), SQLite, or PostgreSQL.
-- `il_save()` and `il_load()` use R's native RDS format, which handles nested R objects (comparison levels, transforms, tibble params) without lossy type coercion.
+- `il_save()` and `il_load()` support both RDS files and Splink settings JSON.
 - `il_attach()` reattaches a saved model to different data or connections.
 - `il_cleanup()` removes temporary tables from the database.
 

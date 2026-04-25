@@ -286,7 +286,10 @@ test_that('block_on with il_soundex works in il_estimate_em', {
 
 # --- Save/load round-trip for phonetic blocking transforms -------------------
 
-test_that('save/load preserves phonetic blocking transforms', {
+test_that('JSON save writes plain phonetic blocking SQL and loaded model predicts', {
+  skip_if_no_jsonlite()
+  skip_if_not_installed('duckdb')
+
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 
@@ -304,8 +307,17 @@ test_that('save/load preserves phonetic blocking transforms', {
   path <- tempfile(fileext = '.json')
   on.exit(unlink(path), add = TRUE)
   il_save(model, path)
+  raw <- jsonlite::read_json(path, simplifyVector = FALSE)
   loaded <- il_load(path)
 
-  expect_identical(loaded$spec$blocking_rules[[1]]$transform, il_soundex)
+  expect_no_match(raw$blocking_rules_to_generate_predictions[[1]]$blocking_rule, '__irelink__')
+  expect_match(raw$blocking_rules_to_generate_predictions[[1]]$blocking_rule, 'soundex|il_soundex')
+  expect_null(loaded$spec$blocking_rules[[1]]$transform)
   expect_null(loaded$spec$blocking_rules[[2]]$transform)
+
+  attached <- il_attach(loaded, fake_1000, con = con)
+  pairs <- predict(attached, threshold = 0)
+
+  expect_s3_class(pairs, 'il_compared')
+  expect_gt(nrow(pairs), 0)
 })

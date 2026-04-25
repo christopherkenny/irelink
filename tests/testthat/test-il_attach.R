@@ -33,6 +33,7 @@ make_attach_model <- function(con) {
 # --- Basic il_attach() usage -----------------------------------------------
 
 test_that('il_attach() returns a valid il_model', {
+  skip_if_no_jsonlite()
   skip_if_not_installed('RSQLite')
 
   con <- test_con()
@@ -77,6 +78,7 @@ test_that('il_attach() returns a valid il_model', {
 # --- Parameters are preserved -----------------------------------------------
 
 test_that('il_attach() preserves trained parameters', {
+  skip_if_no_jsonlite()
   skip_if_not_installed('RSQLite')
 
   con <- test_con()
@@ -114,6 +116,7 @@ test_that('il_attach() preserves trained parameters', {
 # --- Predict works on attached model ----------------------------------------
 
 test_that('predict() works on attached model', {
+  skip_if_no_jsonlite()
   skip_if_not_installed('RSQLite')
 
   con <- test_con()
@@ -151,6 +154,7 @@ test_that('predict() works on attached model', {
 # --- Warm-start retraining on new data --------------------------------------
 
 test_that('il_estimate_em() works on attached model (warm start)', {
+  skip_if_no_jsonlite()
   skip_if_not_installed('RSQLite')
 
   con <- test_con()
@@ -199,6 +203,7 @@ test_that('il_estimate_em() works on attached model (warm start)', {
 # --- il_find_matches on attached model --------------------------------------
 
 test_that('il_find_matches() works on attached model', {
+  skip_if_no_jsonlite()
   skip_if_not_installed('RSQLite')
 
   con <- test_con()
@@ -240,6 +245,7 @@ test_that('il_find_matches() works on attached model', {
 # --- Link mode with two tables ---------------------------------------------
 
 test_that('il_attach() works with two-table link mode', {
+  skip_if_no_jsonlite()
   skip_if_not_installed('RSQLite')
 
   con <- test_con()
@@ -335,6 +341,7 @@ test_that('il_attach() errors on missing columns', {
 })
 
 test_that('il_attach() errors when link model gets one table', {
+  skip_if_no_jsonlite()
   skip_if_not_installed('RSQLite')
 
   con <- test_con()

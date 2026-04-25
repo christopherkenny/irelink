@@ -1,10 +1,12 @@
-test_that('transform stored in spec and serializes correctly', {
+test_that('JSON save writes Splink SQL for transformed comparisons and loaded model predicts', {
+  skip_if_no_jsonlite()
   spec <- il_spec() |>
     il_compare(name, cl_exact(), transform = tolower)
 
   expect_identical(spec$comparisons[[1]]$transform, tolower)
 
-  # Save/load round-trip
+  skip_if_not_installed('duckdb')
+
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 
@@ -21,10 +23,19 @@ test_that('transform stored in spec and serializes correctly', {
   path <- tempfile(fileext = '.json')
   on.exit(unlink(path), add = TRUE)
   il_save(model, path)
+  raw <- jsonlite::read_json(path, simplifyVector = FALSE)
   loaded <- il_load(path)
 
-  expect_identical(loaded$spec$comparisons[[1]]$transform, tolower)
+  expect_null(raw$comparisons[[1]]$comparison_description)
+  expect_match(raw$comparisons[[1]]$comparison_levels[[1]]$sql_condition, 'LOWER')
+  expect_null(loaded$spec$comparisons[[1]]$transform)
   expect_null(loaded$spec$comparisons[[2]]$transform)
+
+  attached <- il_attach(loaded, df, con = con)
+  pairs <- predict(attached, threshold = 0)
+
+  expect_s3_class(pairs, 'il_compared')
+  expect_gt(nrow(pairs), 0)
 })
 
 test_that('transform = tolower produces LOWER() in SQL gamma', {

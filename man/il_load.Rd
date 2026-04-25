@@ -13,9 +13,12 @@ il_load(path)
 An \code{il_model} object.
 }
 \description{
-Reads a previously saved \code{il_model} object from disk. The loaded model
-is ready for prediction without re-training, though a fresh database
-connection may need to be supplied via \code{\link[=il_attach]{il_attach()}}.
+Reads a saved \code{il_model} object from \code{.json} or \code{.rds}.
+}
+\details{
+Settings JSON is loaded into an \code{il_model} that can be used with
+\code{\link[=il_attach]{il_attach()}} and \code{\link[=predict]{predict()}}. The database connection and any in-database
+tables are not loaded.
 }
 \examples{
 df <- data.frame(

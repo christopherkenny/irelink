@@ -206,8 +206,9 @@ model_tr <- il_estimate_em(model_tr, block_on(surname))
 `tolower`, `toupper`, and `trimws` are translated to SQL on DuckDB and
 PostgreSQL, so the transform runs in-database at full speed.
 Custom R functions work on the R-side path only.
-When saving a model with `il_save()`, transforms are stored by name and
-restored on `il_load()`; anonymous functions produce a warning on save.
+When saving a model with `il_save()`, `.rds` keeps the R object as-is.
+`.json` writes Splink settings SQL, so loaded comparisons come back as
+SQL-backed levels. Anonymous functions still produce a warning on save.
 
 ## Incremental matching
 

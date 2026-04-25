@@ -17,3 +17,7 @@ test_discon <- function(con) {
     DBI::dbDisconnect(con)
   }
 }
+
+skip_if_no_jsonlite <- function() {
+  testthat::skip_if_not_installed('jsonlite')
+}
