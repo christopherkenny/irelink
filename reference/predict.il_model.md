@@ -16,6 +16,7 @@ predict(
   type = c("pairs", "weights"),
   collect = TRUE,
   include_fields = FALSE,
+  greedy = FALSE,
   ...
 )
 ```
@@ -59,6 +60,13 @@ predict(
   are included in the output (suffixed `_l` and `_r`). Defaults to
   `FALSE` for performance. When `collect = FALSE` the join is performed
   in-database before the table is created.
+
+- greedy:
+
+  If `TRUE`, keep a deterministic one-to-one greedy matching for link
+  models. Defaults to `FALSE`, returning all above-threshold candidate
+  pairs. Greedy matching sorts pairs by descending posterior match
+  probability, then by left and right row order.
 
 - ...:
 

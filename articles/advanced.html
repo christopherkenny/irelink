@@ -199,16 +199,16 @@ maximum possible edges for a cluster of that size):</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 116 × 5</span></span></span>
 <span><span class="co">#&gt;    cluster_id  n_nodes n_edges density cluster_centralisation</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> cluster_115       8      24   0.857                  0.190</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> cluster_326       4       4   0.667                  0.667</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> cluster_792       7      15   0.714                  0.4  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> cluster_867       3       3   1                      0    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> cluster_924       8      28   1                      0    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> cluster_229       8      28   1                      0    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_237       6      15   1                      0    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_261       4       6   1                      0    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_603       9      29   0.806                  0.25 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_100      19      74   0.436                  0.382</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> cluster_164      32     140   0.282                  0.559</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> cluster_172      18      52   0.340                  0.544</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> cluster_176      26     122   0.375                  0.287</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> cluster_186       5       8   0.8                    0.333</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> cluster_244       8      22   0.786                  0.286</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> cluster_428       3       2   0.667                  1    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_440       9      27   0.75                   0.161</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_58        5      10   1                      0    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_612       2       1   1                     <span style="color: #BB0000;">NA</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_871       3       3   1                      0    </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 106 more rows</span></span></span></code></pre></div>
 <p>A high maximum cluster size combined with low density often indicates
 that a transitive link is pulling unrelated entities together. Consider
@@ -221,12 +221,12 @@ raising the threshold in <code><a href="https://rdrr.io/r/stats/predict.html" cl
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id  degree node_centrality</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 995       cluster_164      8           0.258</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 458       cluster_164     10           0.323</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 45        cluster_164      8           0.258</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 171       cluster_164      6           0.194</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 993       cluster_164      8           0.258</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 461       cluster_164     10           0.323</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 456       cluster_164     10          0.323 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 718       cluster_164     22          0.710 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 46        cluster_164      8          0.258 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 462       cluster_164      2          0.064<span style="text-decoration: underline;">5</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 459       cluster_164     13          0.419 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 171       cluster_164      6          0.194</span></span></code></pre></div>
 <p>Records with unusually high degree relative to their cluster size may
 be acting as hubs that inflate the cluster beyond its true
 membership.</p>
