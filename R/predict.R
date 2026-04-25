@@ -26,6 +26,10 @@
 #'   records in each pair are included in the output (suffixed `_l` and
 #'   `_r`). Defaults to `FALSE` for performance. When `collect = FALSE`
 #'   the join is performed in-database before the table is created.
+#' @param greedy If `TRUE`, keep a deterministic one-to-one greedy matching
+#'   for link models. Defaults to `FALSE`, returning all above-threshold
+#'   candidate pairs. Greedy matching sorts pairs by descending posterior
+#'   match probability, then by left and right row order.
 #' @param ... Additional arguments passed to the generic.
 #'
 #' @return When `collect = TRUE`: an `il_compared` tibble with one row
@@ -90,12 +94,24 @@ predict.il_model <- function(object, threshold = 0.85,
                              threshold_match_weight = NULL,
                              type = c('pairs', 'weights'),
                              collect = TRUE,
-                             include_fields = FALSE, ...) {
+                             include_fields = FALSE,
+                             greedy = FALSE,
+                             ...) {
   type <- match.arg(type)
   validate_il_model(object)
 
   if (!object$trained) {
     cli::cli_abort('Model must be trained before prediction. Use {.fn il_estimate_em} first.')
+  }
+
+  if (!is.logical(greedy) || length(greedy) != 1L || is.na(greedy)) {
+    cli::cli_abort('{.arg greedy} must be `TRUE` or `FALSE`.')
+  }
+
+  if (greedy && !identical(object$link_type, 'link')) {
+    cli::cli_abort(
+      '{.arg greedy = TRUE} is only supported when {.code link_type = "link"}.'
+    )
   }
 
   # Lazy path: push scoring entirely into SQL
@@ -108,7 +124,8 @@ predict.il_model <- function(object, threshold = 0.85,
     }
     return(predict_lazy(object, threshold,
       threshold_match_weight = threshold_match_weight,
-      include_fields = include_fields
+      include_fields = include_fields,
+      greedy = greedy
     ))
   }
 
@@ -119,10 +136,18 @@ predict.il_model <- function(object, threshold = 0.85,
     scored_sql <- build_scored_query(object, threshold,
       threshold_match_weight = threshold_match_weight
     )
-    if (include_fields) {
+    if (greedy) {
+      result <- tibble::as_tibble(DBI::dbGetQuery(object$con, scored_sql))
+      result <- greedy_match_pairs(result, model = object)
+      if (include_fields) {
+        result <- join_original_fields(result, object)
+      }
+    } else if (include_fields) {
       scored_sql <- build_fields_join_query(object, scored_sql)
+      result <- tibble::as_tibble(DBI::dbGetQuery(object$con, scored_sql))
+    } else {
+      result <- tibble::as_tibble(DBI::dbGetQuery(object$con, scored_sql))
     }
-    result <- tibble::as_tibble(DBI::dbGetQuery(object$con, scored_sql))
     if (nrow(result) == 0L) {
       empty <- tibble::tibble(
         unique_id_l = integer(0), unique_id_r = integer(0),
@@ -195,6 +220,10 @@ predict.il_model <- function(object, threshold = 0.85,
   }
   result <- tibble::as_tibble(result)
 
+  if (greedy) {
+    result <- greedy_match_pairs(result, model = object)
+  }
+
   if (include_fields) {
     result <- join_original_fields(result, object)
   }
@@ -213,15 +242,20 @@ predict.il_model <- function(object, threshold = 0.85,
 #' @return An `il_compared_lazy` object.
 #' @noRd
 predict_lazy <- function(model, threshold, threshold_match_weight = NULL,
-                         include_fields = FALSE) {
+                         include_fields = FALSE,
+                         greedy = FALSE) {
   con <- model$con
   predicted_tbl <- '__il_predicted'
   scored_sql <- build_scored_query(model, threshold,
     threshold_match_weight = threshold_match_weight
   )
+  if (greedy) {
+    scored_sql <- build_greedy_query(model, scored_sql)
+  }
   if (include_fields) {
     scored_sql <- build_fields_join_query(model, scored_sql)
   }
+
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {predicted_tbl}'))
   DBI::dbExecute(con, glue::glue(
     'CREATE TABLE {predicted_tbl} AS {scored_sql}'
@@ -232,6 +266,109 @@ predict_lazy <- function(model, threshold, threshold_match_weight = NULL,
     model = model,
     threshold = threshold
   )
+}
+
+#' Apply deterministic greedy one-to-one matching to scored pairs
+#'
+#' Sorts scored pairs by descending posterior match probability, then by
+#' left and right source row order, and keeps the first pair whose left
+#' and right records have not already been used.
+#'
+#' @param pairs A scored-pairs tibble.
+#' @param model The `il_model` that produced the pairs.
+#' @param row_index_l Optional integer vector of left row indices.
+#' @param row_index_r Optional integer vector of right row indices.
+#' @return A tibble of one-to-one greedy matches.
+#' @noRd
+greedy_match_pairs <- function(pairs, model = NULL,
+                               row_index_l = NULL,
+                               row_index_r = NULL) {
+  if (nrow(pairs) == 0L) {
+    return(pairs)
+  }
+
+  if (is.null(row_index_l) || is.null(row_index_r)) {
+    row_index <- pair_row_indices(pairs, model %||% attr(pairs, 'model'))
+    row_index_l <- row_index$row_index_l
+    row_index_r <- row_index$row_index_r
+  }
+
+  if (length(row_index_l) != nrow(pairs) || length(row_index_r) != nrow(pairs)) {
+    cli::cli_abort('Greedy matching row indices must have one entry per pair.')
+  }
+
+  if (anyNA(row_index_l) || anyNA(row_index_r)) {
+    cli::cli_abort(
+      'Greedy matching could not map all predicted pairs back to source row indices.'
+    )
+  }
+
+  order_idx <- order(-pairs$match_probability, row_index_l, row_index_r)
+  ordered_pairs <- tibble::as_tibble(pairs[order_idx, , drop = FALSE])
+
+  used_l <- new.env(parent = emptyenv())
+  used_r <- new.env(parent = emptyenv())
+  keep <- logical(nrow(ordered_pairs))
+
+  for (i in seq_len(nrow(ordered_pairs))) {
+    key_l <- as.character(ordered_pairs$unique_id_l[i])
+    key_r <- as.character(ordered_pairs$unique_id_r[i])
+
+    if (!exists(key_l, envir = used_l, inherits = FALSE) &&
+      !exists(key_r, envir = used_r, inherits = FALSE)) {
+      keep[i] <- TRUE
+      assign(key_l, TRUE, envir = used_l)
+      assign(key_r, TRUE, envir = used_r)
+    }
+  }
+
+  result <- tibble::as_tibble(ordered_pairs[keep, , drop = FALSE])
+  if (inherits(pairs, 'il_compared')) {
+    return(new_il_compared(result, model = model %||% attr(pairs, 'model')))
+  }
+
+  result
+}
+
+#' Resolve source row indices for scored pairs
+#' @param pairs A scored-pairs tibble.
+#' @param model The `il_model` that produced the pairs.
+#' @return A list with `row_index_l` and `row_index_r`.
+#' @noRd
+pair_row_indices <- function(pairs, model) {
+  if (is.null(model)) {
+    cli::cli_abort(
+      'Greedy matching needs the originating model to resolve source row indices.'
+    )
+  }
+
+  lookup_l <- row_index_lookup(model$con, model$data$tbl_l)
+  tbl_r <- model$data$tbl_r %||% model$data$tbl_l
+  lookup_r <- if (identical(tbl_r, model$data$tbl_l)) {
+    lookup_l
+  } else {
+    row_index_lookup(model$con, tbl_r)
+  }
+
+  list(
+    row_index_l = unname(lookup_l[as.character(pairs$unique_id_l)]),
+    row_index_r = unname(lookup_r[as.character(pairs$unique_id_r)])
+  )
+}
+
+#' Build a unique_id -> row-index lookup for a registered source table
+#' @param con A DBI connection.
+#' @param tbl Table name.
+#' @return A named integer vector.
+#' @noRd
+row_index_lookup <- function(con, tbl) {
+  ids <- DBI::dbGetQuery(
+    con,
+    glue::glue('SELECT unique_id FROM {tbl}')
+  )$unique_id
+  lookup <- seq_along(ids)
+  names(lookup) <- as.character(ids)
+  lookup
 }
 
 #' Join original field values into predicted pairs

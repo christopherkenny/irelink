@@ -969,4 +969,4 @@ Look at `inst/refs/` and identify notes on why it was removed and its goals.
 
 Then, re-implement it with fixes.
 Add corresponding tests.
-It should be explictly tested that if a valid json is given as a model, that we can run predict after.
+It should be explicitly tested that if a valid json is given as a model, that we can run predict after.

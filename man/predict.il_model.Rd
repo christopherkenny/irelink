@@ -11,6 +11,7 @@
   type = c("pairs", "weights"),
   collect = TRUE,
   include_fields = FALSE,
+  greedy = FALSE,
   ...
 )
 }
@@ -41,6 +42,11 @@ Requires a DuckDB or PostgreSQL backend.}
 records in each pair are included in the output (suffixed \verb{_l} and
 \verb{_r}). Defaults to \code{FALSE} for performance. When \code{collect = FALSE}
 the join is performed in-database before the table is created.}
+
+\item{greedy}{If \code{TRUE}, keep a deterministic one-to-one greedy matching
+for link models. Defaults to \code{FALSE}, returning all above-threshold
+candidate pairs. Greedy matching sorts pairs by descending posterior
+match probability, then by left and right row order.}
 
 \item{...}{Additional arguments passed to the generic.}
 }

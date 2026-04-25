@@ -1074,6 +1074,112 @@ build_scored_query <- function(model, threshold = 0.85,
   )
 }
 
+#' Wrap scored pairs with deterministic greedy one-to-one matching
+#'
+#' Applies the same greedy resolver used by the collected path, but keeps
+#' all candidate scoring and assignment inside the database.  DuckDB and
+#' PostgreSQL use different list/array syntax in the recursive state.
+#'
+#' @param model A trained `il_model`.
+#' @param inner_sql Character scalar: the scored-pairs SQL query to wrap.
+#' @return A SQL query string with greedy one-to-one pairs.
+#' @noRd
+build_greedy_query <- function(model, inner_sql) {
+  con <- model$con
+  dialect <- detect_dialect(con)
+
+  tbl_l <- model$data$tbl_l
+  tbl_r <- model$data$tbl_r %||% tbl_l
+  qtbl_l <- DBI::dbQuoteIdentifier(con, tbl_l)
+  qtbl_r <- DBI::dbQuoteIdentifier(con, tbl_r)
+
+  result_cols <- greedy_result_columns(model)
+  result_select <- paste(
+    paste0('p.', DBI::dbQuoteIdentifier(con, result_cols)),
+    collapse = ', '
+  )
+
+  if (identical(dialect, 'duckdb')) {
+    used_l_init <- 'list_value(unique_id_l)'
+    used_r_init <- 'list_value(unique_id_r)'
+    used_l_next <- 'list_append(g.used_l, p.unique_id_l)'
+    used_r_next <- 'list_append(g.used_r, p.unique_id_r)'
+    unused_l <- 'NOT list_contains(g.used_l, p2.unique_id_l)'
+    unused_r <- 'NOT list_contains(g.used_r, p2.unique_id_r)'
+  } else if (identical(dialect, 'postgres')) {
+    used_l_init <- 'ARRAY[unique_id_l]'
+    used_r_init <- 'ARRAY[unique_id_r]'
+    used_l_next <- 'array_append(g.used_l, p.unique_id_l)'
+    used_r_next <- 'array_append(g.used_r, p.unique_id_r)'
+    unused_l <- 'NOT p2.unique_id_l = ANY(g.used_l)'
+    unused_r <- 'NOT p2.unique_id_r = ANY(g.used_r)'
+  } else {
+    cli::cli_abort(
+      '{.arg greedy = TRUE} with {.arg collect = FALSE} requires a DuckDB or PostgreSQL backend.'
+    )
+  }
+
+  glue::glue(
+    'WITH RECURSIVE ',
+    'scored_pairs AS ({inner_sql}), ',
+    'left_rows AS (',
+    'SELECT unique_id, ROW_NUMBER() OVER () AS row_index_l FROM {qtbl_l}',
+    '), ',
+    'right_rows AS (',
+    'SELECT unique_id, ROW_NUMBER() OVER () AS row_index_r FROM {qtbl_r}',
+    '), ',
+    'ranked_pairs AS (',
+    'SELECT s.*, ',
+    'ROW_NUMBER() OVER (',
+    'ORDER BY s.match_probability DESC, l.row_index_l, r.row_index_r',
+    ') AS greedy_rank ',
+    'FROM scored_pairs AS s ',
+    'LEFT JOIN left_rows AS l ON s.unique_id_l = l.unique_id ',
+    'LEFT JOIN right_rows AS r ON s.unique_id_r = r.unique_id',
+    '), ',
+    'greedy(greedy_rank, unique_id_l, unique_id_r, used_l, used_r) AS (',
+    'SELECT greedy_rank, unique_id_l, unique_id_r, ',
+    '{used_l_init} AS used_l, {used_r_init} AS used_r ',
+    'FROM ranked_pairs ',
+    'WHERE greedy_rank = (SELECT MIN(greedy_rank) FROM ranked_pairs) ',
+    'UNION ALL ',
+    'SELECT p.greedy_rank, p.unique_id_l, p.unique_id_r, ',
+    '{used_l_next} AS used_l, {used_r_next} AS used_r ',
+    'FROM greedy AS g ',
+    'JOIN ranked_pairs AS p ON p.greedy_rank = (',
+    'SELECT MIN(p2.greedy_rank) FROM ranked_pairs AS p2 ',
+    'WHERE p2.greedy_rank > g.greedy_rank ',
+    'AND {unused_l} AND {unused_r}',
+    ')',
+    ') ',
+    'SELECT {result_select} ',
+    'FROM ranked_pairs AS p ',
+    'INNER JOIN greedy AS g ON p.greedy_rank = g.greedy_rank ',
+    'ORDER BY p.greedy_rank'
+  )
+}
+
+#' Output columns emitted by a scored-pairs query
+#' @param model A trained `il_model`.
+#' @return Character vector of output column names.
+#' @noRd
+greedy_result_columns <- function(model) {
+  comp_names <- vapply(model$spec$comparisons, function(c) c$columns, character(1))
+  tf_cols <- vapply(model$spec$comparisons, function(c) {
+    if (isTRUE(c$method$term_frequency)) c$columns else NA_character_
+  }, character(1))
+  tf_cols <- tf_cols[!is.na(tf_cols)]
+
+  c(
+    'unique_id_l',
+    'unique_id_r',
+    paste0('gamma_', comp_names),
+    'match_weight',
+    if (length(tf_cols) > 0L) paste0('tf_adj_', tf_cols) else character(0),
+    'match_probability'
+  )
+}
+
 #' Wrap a scored-pairs query with LEFT JOINs to the source tables
 #'
 #' Produces a SQL query that augments the scored-pairs output with the

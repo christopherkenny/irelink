@@ -19,6 +19,30 @@ make_trained_model <- function(con) {
     il_estimate_em(block_on(dob))
 }
 
+make_tied_link_model <- function(con) {
+  df_l <- data.frame(
+    unique_id = c(20L, 10L),
+    key = c('match', 'match'),
+    stringsAsFactors = FALSE
+  )
+  df_r <- data.frame(
+    unique_id = c(200L, 100L),
+    key = c('match', 'match'),
+    stringsAsFactors = FALSE
+  )
+  spec <- il_spec() |>
+    il_compare(key, cl_exact()) |>
+    il_block_on(key)
+
+  il_model(df_l, df_r,
+    spec = spec,
+    con = con,
+    link_type = 'link'
+  ) |>
+    il_estimate_u(max_pairs = 1e4) |>
+    il_estimate_em(block_on(key))
+}
+
 test_that('predict() returns an il_compared tibble', {
   skip_if_not_installed('RSQLite')
 
@@ -161,4 +185,74 @@ test_that('threshold_match_weight overrides probability threshold', {
 
   # weight threshold of -100 should include everything
   expect_equal(nrow(pairs), nrow(pairs_prob))
+})
+
+test_that('greedy_match_pairs uses global posterior ordering', {
+  pairs <- tibble::tibble(
+    unique_id_l = c('a1', 'a2', 'a2'),
+    unique_id_r = c('b1', 'b1', 'b2'),
+    match_weight = c(1, 1, 1),
+    match_probability = c(0.90, 0.89, 0.88)
+  )
+
+  matched <- greedy_match_pairs(
+    pairs,
+    row_index_l = c(1L, 2L, 2L),
+    row_index_r = c(1L, 1L, 2L)
+  )
+
+  expect_equal(matched$unique_id_l, c('a1', 'a2'))
+  expect_equal(matched$unique_id_r, c('b1', 'b2'))
+})
+
+test_that('predict(greedy = TRUE) keeps a deterministic one-to-one matching', {
+  skip_if_not_installed('RSQLite')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  model <- make_tied_link_model(con)
+
+  all_pairs <- predict(model, threshold = 0)
+  greedy_pairs <- predict(model, threshold = 0, greedy = TRUE)
+
+  expect_equal(nrow(all_pairs), 4)
+  expect_equal(nrow(greedy_pairs), 2)
+  expect_equal(length(unique(greedy_pairs$unique_id_l)), nrow(greedy_pairs))
+  expect_equal(length(unique(greedy_pairs$unique_id_r)), nrow(greedy_pairs))
+  expect_equal(greedy_pairs$unique_id_l, c(20, 10))
+  expect_equal(greedy_pairs$unique_id_r, c(200, 100))
+})
+
+test_that('predict(greedy = TRUE, collect = FALSE) returns a lazy one-to-one result', {
+  skip_if_not_installed('duckdb')
+
+  con <- DBI::dbConnect(duckdb::duckdb())
+  withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
+
+  model <- make_tied_link_model(con)
+
+  collected <- predict(model, threshold = 0, greedy = TRUE)
+  lazy <- predict(model, threshold = 0, greedy = TRUE, collect = FALSE)
+  greedy_pairs <- collect_il_compared_lazy(lazy)
+
+  expect_s3_class(lazy, 'il_compared_lazy')
+  expect_equal(greedy_pairs$unique_id_l, collected$unique_id_l)
+  expect_equal(greedy_pairs$unique_id_r, collected$unique_id_r)
+  expect_equal(length(unique(greedy_pairs$unique_id_l)), nrow(greedy_pairs))
+  expect_equal(length(unique(greedy_pairs$unique_id_r)), nrow(greedy_pairs))
+})
+
+test_that('predict(greedy = TRUE) is only available for link models', {
+  skip_if_not_installed('RSQLite')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  model <- make_trained_model(con)
+
+  expect_error(
+    predict(model, greedy = TRUE),
+    'only supported'
+  )
 })
