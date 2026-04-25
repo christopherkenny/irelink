@@ -170,7 +170,7 @@
 <h3 id="sql-backends-and-persistence-0-0-0-9000">SQL backends and persistence<a class="anchor" aria-label="anchor" href="#sql-backends-and-persistence-0-0-0-9000"></a></h3>
 <ul><li>All computation runs inside a DBI-compatible database: DuckDB (recommended), SQLite, or PostgreSQL.</li>
 <li>
-<code><a href="../reference/il_save.html">il_save()</a></code> and <code><a href="../reference/il_load.html">il_load()</a></code> use R’s native RDS format, which handles nested R objects (comparison levels, transforms, tibble params) without lossy type coercion.</li>
+<code><a href="../reference/il_save.html">il_save()</a></code> and <code><a href="../reference/il_load.html">il_load()</a></code> support both RDS files and Splink settings JSON.</li>
 <li>
 <code><a href="../reference/il_attach.html">il_attach()</a></code> reattaches a saved model to different data or connections.</li>
 <li>

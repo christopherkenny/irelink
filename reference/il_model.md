@@ -56,7 +56,7 @@ An untrained `il_model` object, ready for training verbs.
 When `.data` is a `tbl_lazy` (from
 [`dplyr::tbl()`](https://dplyr.tidyverse.org/reference/tbl.html)), the
 connection is extracted automatically and data stays in-database with
-zero copying. A `unique_id` column is injected via a SQL view if not
+zero copying. A `unique_id` column is injected automatically if not
 already present.
 
 ## Examples

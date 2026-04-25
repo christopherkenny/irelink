@@ -92,5 +92,6 @@ spec <- il_spec() |>
 # Scale TF adjustment weight
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, term_frequency = TRUE),
-             tf_adjustment_weight = 0.5, tf_minimum_u_value = 0.001)
+    tf_adjustment_weight = 0.5, tf_minimum_u_value = 0.001
+  )
 ```

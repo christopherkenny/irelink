@@ -223,8 +223,7 @@ probabilistic record linkage engine into idiomatic R.
 - [`il_save()`](http://christophertkenny.com/irelink/reference/il_save.md)
   and
   [`il_load()`](http://christophertkenny.com/irelink/reference/il_load.md)
-  use R’s native RDS format, which handles nested R objects (comparison
-  levels, transforms, tibble params) without lossy type coercion.
+  support both RDS files and Splink settings JSON.
 - [`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md)
   reattaches a saved model to different data or connections.
 - [`il_cleanup()`](http://christophertkenny.com/irelink/reference/il_cleanup.md)

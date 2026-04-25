@@ -1,10 +1,7 @@
 # Save a Model to Disk
 
-Serialises a trained `il_model` object to an RDS file so that it can be
-loaded later without re-training. The database connection and any
-in-database tables are not stored; supply a fresh connection with
-[`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md)
-after loading.
+Serialises a trained `il_model` object to `.json` or `.rds`, chosen from
+`path`.
 
 ## Usage
 
@@ -29,6 +26,14 @@ il_save(model, path, overwrite = FALSE)
 ## Value
 
 `model`, invisibly.
+
+## Details
+
+`.json` writes Splink settings JSON. Other extensions write RDS. The
+database connection and any in-database tables are not stored; supply a
+fresh connection with
+[`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md)
+after loading.
 
 ## Examples
 

@@ -148,16 +148,16 @@ metrics$clusters
 #> # A tibble: 116 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralisation
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_133      44     146   0.154                  0.350
-#>  2 cluster_338       3       2   0.667                  1    
-#>  3 cluster_476       2       1   1                     NA    
-#>  4 cluster_674       8      18   0.643                  0.286
-#>  5 cluster_825       9      22   0.597                  0.196
-#>  6 cluster_874       2       1   1                     NA    
-#>  7 cluster_905       2       1   1                     NA    
-#>  8 cluster_91        5       9   0.9                    0.167
-#>  9 cluster_164      32     140   0.282                  0.559
-#> 10 cluster_172      18      52   0.340                  0.544
+#>  1 cluster_115       8      24   0.857                  0.190
+#>  2 cluster_326       4       4   0.667                  0.667
+#>  3 cluster_792       7      15   0.714                  0.4  
+#>  4 cluster_867       3       3   1                      0    
+#>  5 cluster_924       8      28   1                      0    
+#>  6 cluster_229       8      28   1                      0    
+#>  7 cluster_237       6      15   1                      0    
+#>  8 cluster_261       4       6   1                      0    
+#>  9 cluster_603       9      29   0.806                  0.25 
+#> 10 cluster_100      19      74   0.436                  0.382
 #> # ℹ 106 more rows
 ```
 
@@ -176,12 +176,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 855       cluster_133      7          0.163 
-#> 2 243       cluster_133      3          0.0698
-#> 3 973       cluster_133      1          0.0233
-#> 4 857       cluster_133      2          0.0465
-#> 5 853       cluster_133      2          0.0465
-#> 6 919       cluster_133      2          0.0465
+#> 1 995       cluster_164      8           0.258
+#> 2 458       cluster_164     10           0.323
+#> 3 45        cluster_164      8           0.258
+#> 4 171       cluster_164      6           0.194
+#> 5 993       cluster_164      8           0.258
+#> 6 461       cluster_164     10           0.323
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -251,9 +251,9 @@ model_tr <- il_estimate_em(model_tr, block_on(surname))
 PostgreSQL, so the transform runs in-database at full speed. Custom R
 functions work on the R-side path only. When saving a model with
 [`il_save()`](http://christophertkenny.com/irelink/reference/il_save.md),
-transforms are stored by name and restored on
-[`il_load()`](http://christophertkenny.com/irelink/reference/il_load.md);
-anonymous functions produce a warning on save.
+`.rds` keeps the R object as-is. `.json` writes Splink settings SQL, so
+loaded comparisons come back as SQL-backed levels. Anonymous functions
+still produce a warning on save.
 
 ## Incremental matching
 

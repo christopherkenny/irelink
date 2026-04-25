@@ -1,9 +1,6 @@
 # Load a Saved Model
 
-Reads a previously saved `il_model` object from disk. The loaded model
-is ready for prediction without re-training, though a fresh database
-connection may need to be supplied via
-[`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md).
+Reads a saved `il_model` object from `.json` or `.rds`.
 
 ## Usage
 
@@ -20,6 +17,13 @@ il_load(path)
 ## Value
 
 An `il_model` object.
+
+## Details
+
+Settings JSON is loaded into an `il_model` that can be used with
+[`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md)
+and [`predict()`](https://rdrr.io/r/stats/predict.html). The database
+connection and any in-database tables are not loaded.
 
 ## Examples
 
