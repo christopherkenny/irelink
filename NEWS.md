@@ -39,6 +39,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 - `il_estimate_u()` estimates non-match probabilities by sampling random pairs.
 - `il_estimate_em()` runs the Fellegi-Sunter EM algorithm with configurable `max_iterations`, `convergence`, `fix_u`, `fix_m`, `fix_prior`, `derive_prior`, and `estimate_without_tf` parameters.
 - `il_estimate_prior()` sets the prior match probability.
+- `il_prior_prevalence()` and `il_prior_m()` add regularizing custom priors for EM; `il_constrain_m()` adds explicit fixed matched-class constraints.
 - `il_estimate_m_from_labels()` and `il_estimate_m_from_column()` initialise parameters from ground-truth labels.
 
 ## Prediction

@@ -983,3 +983,44 @@ The core idea is that for linking, we should take the best linkings, sorted by h
 In cases of ties, break first by the smaller row index of the first dataset and then by the smaller row index of the second.
 
 When you are done, write a summary to `inst/38-greedy-matching.md`.
+
+## Custom priors (Codex GPT-5.5 medium)
+
+You are working on a record linkage package in R.
+It is a derivative product of splink (../splink).
+
+We are adding a new feature: custom priors.
+This is not a splink feature.
+
+Read `features.md`, especially the custom-priors section. Treat it as the
+source of truth for the API and semantics.
+
+The feature has two distinct concepts:
+
+- regularizing priors, which softly pull EM estimates using finite
+  pseudo-count strength;
+- fixed constraints, which hold selected parameters fixed and must not be
+  implemented as huge prior strengths.
+
+Implement the full feature set described in `features.md`:
+
+- user-facing helpers for prevalence priors and matched-class field priors;
+- user-facing helpers for field-level fixed constraints;
+- storage on the model in a clear, inspectable form;
+- integration with `il_estimate_em()`;
+- validation for bad probabilities, bad strengths, unknown columns, malformed
+  level distributions, and priors or constraints on comparisons deactivated by
+  the EM blocking rule;
+- focused tests showing regularizing priors move estimates in the expected
+  direction;
+- focused tests showing fixed constraints hold the requested parameters fixed;
+- save/load round-trip coverage for the new metadata.
+
+If you discover a genuine blocker that prevents implementing one part of the
+spec, do not silently omit it. Leave the code in a coherent state, document the
+blocker in `inst/39-custom-priors.md`, and make sure unsupported combinations
+raise clear errors.
+
+Update user-facing docs as needed.
+
+When you are done, write a summary to `inst/39-custom-priors.md`.

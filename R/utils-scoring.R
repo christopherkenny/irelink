@@ -6,8 +6,8 @@
 #' @return Numeric scalar.
 #' @noRd
 safe_prior <- function(model, default = 0.0001) {
-  p <- model$params$prior
-  if (is.null(p) || is.na(p)) default else p
+  p <- model$params[['prior']]
+  if (is.null(p) || length(p) != 1L || is.na(p)) default else p
 }
 
 #' Clamp probabilities away from 0 and 1

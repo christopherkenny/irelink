@@ -89,6 +89,9 @@ reference:
       - il_estimate_u
       - il_estimate_em
       - il_estimate_prior
+      - il_prior_prevalence
+      - il_prior_m
+      - il_constrain_m
       - il_estimate_m_from_column
       - il_estimate_m_from_labels
       - is_il_model
@@ -106,6 +109,8 @@ reference:
     desc: "Examine parameters, weights, and training diagnostics."
     contents:
       - il_parameters
+      - il_priors
+      - il_constraints
       - il_weights
       - il_training_history
       - autoplot.il_training_history
