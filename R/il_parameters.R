@@ -62,6 +62,13 @@
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_parameters <- function(model) {
   validate_il_model(model)
+  if (identical(model$params$estimator_mode, 'dependency-aware')) {
+    state <- model$params$dependency_aware
+    if (is.null(state)) {
+      cli::cli_abort('Model has no dependency-aware estimator state.')
+    }
+    return(state$training_patterns)
+  }
   params <- model$params$comparisons
   if (is.null(params)) {
     cli::cli_abort('Model has no parameters yet. Run training verbs first.')

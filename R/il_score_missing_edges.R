@@ -67,7 +67,10 @@ score_specific_pairs <- function(model, id_l, id_r, threshold = 0) {
   params <- model$params$comparisons
   prior <- safe_prior(model)
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
-  mu <- extract_mu_vectors(params, comp_names)
+  dependency_aware <- identical(model$params$estimator_mode, 'dependency-aware')
+  if (!dependency_aware) {
+    mu <- extract_mu_vectors(params, comp_names)
+  }
   tbl_l <- model$data$tbl_l
   tbl_r <- model$data$tbl_r %||% tbl_l
 
@@ -100,8 +103,16 @@ score_specific_pairs <- function(model, id_l, id_r, threshold = 0) {
     gamma_mat[, j] <- compute_gamma(val_l, val_r, comparisons[[j]]$method)
   }
 
-  match_weight <- score_gamma_matrix(gamma_mat, mu)
-  match_probability <- weight_to_probability(match_weight, prior)
+  if (dependency_aware) {
+    scored_patterns <- dependency_pattern_score(
+      gamma_mat, comp_names, model$params$dependency_aware
+    )
+    match_weight <- scored_patterns$match_weight
+    match_probability <- scored_patterns$match_probability
+  } else {
+    match_weight <- score_gamma_matrix(gamma_mat, mu)
+    match_probability <- weight_to_probability(match_weight, prior)
+  }
 
   result <- tibble::tibble(
     unique_id_l = id_l,

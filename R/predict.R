@@ -114,6 +114,8 @@ predict.il_model <- function(object, threshold = 0.85,
     )
   }
 
+  blocking_rules <- object$spec$blocking_rules
+
   # Lazy path: push scoring entirely into SQL
   if (!collect) {
     dialect <- detect_dialect(object$con)
@@ -133,21 +135,40 @@ predict.il_model <- function(object, threshold = 0.85,
   # Score, filter, and deduplicate in SQL; only collect the final result.
   dialect <- detect_dialect(object$con)
   if (dialect_has_fuzzy_sql(dialect)) {
-    scored_sql <- build_scored_query(object, threshold,
-      threshold_match_weight = threshold_match_weight
+    dependency_aware <- identical(
+      object$params$estimator_mode,
+      'dependency-aware'
     )
-    if (greedy) {
-      result <- tibble::as_tibble(DBI::dbGetQuery(object$con, scored_sql))
-      result <- greedy_match_pairs(result, model = object)
-      if (include_fields) {
-        result <- join_original_fields(result, object)
+    if (dependency_aware) {
+      gamma_sql <- build_gamma_query(object, blocking_rules)
+      prepared <- prepare_dependency_scored_query(
+        object,
+        gamma_sql = gamma_sql,
+        threshold = threshold,
+        threshold_match_weight = threshold_match_weight,
+        score_tbl = '__il_dependency_scores'
+      )
+      on.exit(drop_registered(object$con, prepared$score_tbl), add = TRUE)
+      if (is.null(prepared$scored_sql)) {
+        empty <- tibble::tibble(
+          unique_id_l = integer(0), unique_id_r = integer(0),
+          match_weight = numeric(0), match_probability = numeric(0)
+        )
+        return(new_il_compared(empty, model = object))
       }
-    } else if (include_fields) {
-      scored_sql <- build_fields_join_query(object, scored_sql)
-      result <- tibble::as_tibble(DBI::dbGetQuery(object$con, scored_sql))
+      scored_sql <- prepared$scored_sql
     } else {
-      result <- tibble::as_tibble(DBI::dbGetQuery(object$con, scored_sql))
+      scored_sql <- build_scored_query(object, threshold,
+        threshold_match_weight = threshold_match_weight
+      )
     }
+    if (greedy) {
+      scored_sql <- build_greedy_query(object, scored_sql)
+    }
+    if (include_fields) {
+      scored_sql <- build_fields_join_query(object, scored_sql)
+    }
+    result <- tibble::as_tibble(DBI::dbGetQuery(object$con, scored_sql))
     if (nrow(result) == 0L) {
       empty <- tibble::tibble(
         unique_id_l = integer(0), unique_id_r = integer(0),
@@ -163,7 +184,6 @@ predict.il_model <- function(object, threshold = 0.85,
   params <- object$params$comparisons
   prior <- safe_prior(object)
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
-  blocking_rules <- object$spec$blocking_rules
 
   result_data <- get_pairs_with_gammas(object, blocking_rules)
   gamma_mat <- result_data$gamma_mat
@@ -178,23 +198,32 @@ predict.il_model <- function(object, threshold = 0.85,
   }
 
   n_comp <- length(comparisons)
-  mu <- extract_mu_vectors(params, comp_names)
-  match_weight <- score_gamma_matrix(gamma_mat, mu)
+  if (identical(object$params$estimator_mode, 'dependency-aware')) {
+    scored_patterns <- dependency_pattern_score(
+      gamma_mat, comp_names, object$params$dependency_aware
+    )
+    match_weight <- scored_patterns$match_weight
+    match_probability <- scored_patterns$match_probability
+    tf_adj_list <- NULL
+  } else {
+    mu <- extract_mu_vectors(params, comp_names)
+    match_weight <- score_gamma_matrix(gamma_mat, mu)
 
-  # Apply term-frequency adjustments
-  tf_cols <- tf_columns(comparisons)
-  tf_adj_list <- NULL
-  if (length(tf_cols) > 0L && !is.null(result_data$tf_data)) {
-    tf_adj <- compute_tf_adjustment(
-      gamma_mat, result_data$tf_data, comparisons, mu
-    )
-    match_weight <- match_weight + tf_adj
-    tf_adj_list <- compute_tf_adjustment_matrix(
-      gamma_mat, result_data$tf_data, comparisons, mu
-    )
+    # Apply term-frequency adjustments
+    tf_cols <- tf_columns(comparisons)
+    tf_adj_list <- NULL
+    if (length(tf_cols) > 0L && !is.null(result_data$tf_data)) {
+      tf_adj <- compute_tf_adjustment(
+        gamma_mat, result_data$tf_data, comparisons, mu
+      )
+      match_weight <- match_weight + tf_adj
+      tf_adj_list <- compute_tf_adjustment_matrix(
+        gamma_mat, result_data$tf_data, comparisons, mu
+      )
+    }
+
+    match_probability <- weight_to_probability(match_weight, prior)
   }
-
-  match_probability <- weight_to_probability(match_weight, prior)
 
   result <- tibble::tibble(
     unique_id_l = ids$l_unique_id,
@@ -246,9 +275,41 @@ predict_lazy <- function(model, threshold, threshold_match_weight = NULL,
                          greedy = FALSE) {
   con <- model$con
   predicted_tbl <- '__il_predicted'
-  scored_sql <- build_scored_query(model, threshold,
-    threshold_match_weight = threshold_match_weight
-  )
+  dependency_aware <- identical(model$params$estimator_mode, 'dependency-aware')
+  if (dependency_aware) {
+    gamma_sql <- build_gamma_query(model, model$spec$blocking_rules)
+    prepared <- prepare_dependency_scored_query(
+      model,
+      gamma_sql = gamma_sql,
+      threshold = threshold,
+      threshold_match_weight = threshold_match_weight,
+      score_tbl = '__il_dependency_scores'
+    )
+    on.exit(drop_registered(con, prepared$score_tbl), add = TRUE)
+    if (is.null(prepared$scored_sql)) {
+      DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {predicted_tbl}'))
+      DBI::dbExecute(con, glue::glue(
+        'CREATE TABLE {predicted_tbl} AS ',
+        'SELECT CAST(NULL AS INTEGER) AS unique_id_l, ',
+        'CAST(NULL AS INTEGER) AS unique_id_r, ',
+        'CAST(NULL AS DOUBLE) AS match_weight, ',
+        'CAST(NULL AS DOUBLE) AS match_probability ',
+        'WHERE FALSE'
+      ))
+      return(new_il_compared_lazy(
+        con = con,
+        predicted_tbl = predicted_tbl,
+        model = model,
+        threshold = threshold,
+        n_pairs = 0L
+      ))
+    }
+    scored_sql <- prepared$scored_sql
+  } else {
+    scored_sql <- build_scored_query(model, threshold,
+      threshold_match_weight = threshold_match_weight
+    )
+  }
   if (greedy) {
     scored_sql <- build_greedy_query(model, scored_sql)
   }

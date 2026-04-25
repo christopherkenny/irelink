@@ -80,8 +80,10 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
   blocking_rules <- model$spec$blocking_rules
   comp_cols <- unique(comp_names)
-
-  mu <- extract_mu_vectors(params, comp_names)
+  dependency_aware <- identical(model$params$estimator_mode, 'dependency-aware')
+  if (!dependency_aware) {
+    mu <- extract_mu_vectors(params, comp_names)
+  }
 
   # Upload new records to a temporary table for SQL-side blocking
   # Pad missing comparison/blocking columns with NA before registering
@@ -140,44 +142,64 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
       )
     }
     sql <- glue::glue('SELECT DISTINCT * FROM ({inner}) AS pairs')
-    result_raw <- DBI::dbGetQuery(con, sql)
-
-    if (nrow(result_raw) == 0L) {
-      return(tibble::tibble(
-        unique_id_l = character(0), unique_id_r = character(0),
-        match_weight = numeric(0), match_probability = numeric(0)
-      ))
-    }
-
-    gamma_cols <- paste0('gamma_', comp_names)
-    gamma_mat <- as.matrix(result_raw[, gamma_cols, drop = FALSE])
-    storage.mode(gamma_mat) <- 'integer'
-    colnames(gamma_mat) <- comp_names
-
-    match_weight <- score_gamma_matrix(gamma_mat, mu)
-
-    # Apply TF adjustments
-    if (length(tf_cols) > 0L) {
-      tf_col_names <- c(
-        paste0('tf_', tf_cols, '_l'),
-        paste0('tf_', tf_cols, '_r')
+    if (dependency_aware) {
+      prepared <- prepare_dependency_scored_query(
+        model,
+        gamma_sql = sql,
+        threshold = threshold,
+        score_tbl = '__il_find_dependency_scores'
       )
-      present <- intersect(tf_col_names, names(result_raw))
-      if (length(present) > 0L) {
-        tf_data <- result_raw[, present, drop = FALSE]
-        tf_adj <- compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
-        match_weight <- match_weight + tf_adj
+      on.exit(drop_registered(con, prepared$score_tbl), add = TRUE)
+      if (is.null(prepared$scored_sql)) {
+        return(tibble::tibble(
+          unique_id_l = character(0), unique_id_r = character(0),
+          match_weight = numeric(0), match_probability = numeric(0)
+        ))
       }
+      scored_sql <- glue::glue(
+        'SELECT unique_id_l, unique_id_r, match_weight, match_probability ',
+        'FROM ({prepared$scored_sql}) AS scored'
+      )
+      result <- tibble::as_tibble(DBI::dbGetQuery(con, scored_sql))
+    } else {
+      result_raw <- DBI::dbGetQuery(con, sql)
+
+      if (nrow(result_raw) == 0L) {
+        return(tibble::tibble(
+          unique_id_l = character(0), unique_id_r = character(0),
+          match_weight = numeric(0), match_probability = numeric(0)
+        ))
+      }
+
+      gamma_cols <- paste0('gamma_', comp_names)
+      gamma_mat <- as.matrix(result_raw[, gamma_cols, drop = FALSE])
+      storage.mode(gamma_mat) <- 'integer'
+      colnames(gamma_mat) <- comp_names
+
+      match_weight <- score_gamma_matrix(gamma_mat, mu)
+
+      # Apply TF adjustments
+      if (length(tf_cols) > 0L) {
+        tf_col_names <- c(
+          paste0('tf_', tf_cols, '_l'),
+          paste0('tf_', tf_cols, '_r')
+        )
+        present <- intersect(tf_col_names, names(result_raw))
+        if (length(present) > 0L) {
+          tf_data <- result_raw[, present, drop = FALSE]
+          tf_adj <- compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
+          match_weight <- match_weight + tf_adj
+        }
+      }
+
+      match_probability <- weight_to_probability(match_weight, prior)
+      result <- tibble::tibble(
+        unique_id_l = result_raw$l_unique_id,
+        unique_id_r = result_raw$r_unique_id,
+        match_weight = match_weight,
+        match_probability = match_probability
+      )
     }
-
-    match_probability <- weight_to_probability(match_weight, prior)
-
-    result <- tibble::tibble(
-      unique_id_l = result_raw$l_unique_id,
-      unique_id_r = result_raw$r_unique_id,
-      match_weight = match_weight,
-      match_probability = match_probability
-    )
   } else {
     # Fallback: R-side gamma computation
     block_cols <- unique(unlist(lapply(blocking_rules, function(r) r$columns)))
@@ -223,17 +245,25 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     pairs <- pairs[!duplicated(pair_key), , drop = FALSE]
 
     gamma_mat <- compute_gamma_matrix(pairs, comparisons)
-    match_weight <- score_gamma_matrix(gamma_mat, mu)
+    if (dependency_aware) {
+      scored_patterns <- dependency_pattern_score(
+        gamma_mat, comp_names, model$params$dependency_aware
+      )
+      match_weight <- scored_patterns$match_weight
+      match_probability <- scored_patterns$match_probability
+    } else {
+      match_weight <- score_gamma_matrix(gamma_mat, mu)
 
-    # Apply TF adjustments (R-side)
-    tf_cols <- tf_columns(comparisons)
-    if (length(tf_cols) > 0L) {
-      tf_data <- lookup_tf_r(model, pairs, tf_cols)
-      tf_adj <- compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
-      match_weight <- match_weight + tf_adj
+      # Apply TF adjustments (R-side)
+      tf_cols <- tf_columns(comparisons)
+      if (length(tf_cols) > 0L) {
+        tf_data <- lookup_tf_r(model, pairs, tf_cols)
+        tf_adj <- compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
+        match_weight <- match_weight + tf_adj
+      }
+
+      match_probability <- weight_to_probability(match_weight, prior)
     }
-
-    match_probability <- weight_to_probability(match_weight, prior)
 
     result <- tibble::tibble(
       unique_id_l = pairs$l_unique_id,

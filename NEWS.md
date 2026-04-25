@@ -37,7 +37,8 @@ Initial development release, translating Python's [splink](https://github.com/mo
 ## Training
 
 - `il_estimate_u()` estimates non-match probabilities by sampling random pairs.
-- `il_estimate_em()` runs the Fellegi-Sunter EM algorithm with configurable `max_iterations`, `convergence`, `fix_u`, `fix_m`, `fix_prior`, `derive_prior`, and `estimate_without_tf` parameters.
+- `il_estimate_em()` runs the Fellegi-Sunter EM algorithm with configurable `max_iterations`, `convergence`, `fix_u`, `fix_m`, `fix_prior`, `derive_prior`, `estimate_without_tf`, and `estimator_mode` parameters.
+- `estimator_mode = "dependency-aware"` fits log-linear matched and unmatched comparison-pattern distributions over aggregated gamma counts, preserving missing comparison states as explicit pattern levels.
 - `il_estimate_prior()` sets the prior match probability.
 - `il_prior_prevalence()` and `il_prior_m()` add regularizing custom priors for EM; `il_constrain_m()` adds explicit fixed matched-class constraints.
 - `il_estimate_m_from_labels()` and `il_estimate_m_from_column()` initialise parameters from ground-truth labels.
@@ -48,6 +49,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 - `include_fields = TRUE` joins all source columns into the scored output.
 - `collect = FALSE` returns an `il_compared_lazy` object backed by an in-database table.
 - `il_score_missing_edges()` enumerates and scores unscored within-cluster pairs.
+- `il_score_patterns()` scores compatible comparison-pattern tables, including dependency-aware pattern tables larger than the table used for fitting.
 - `il_deterministic_link()` performs exact-match linking without training.
 - `il_find_matches()` scores a set of probe records against existing data.
 

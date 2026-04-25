@@ -10,10 +10,11 @@ il_estimate_em(
   convergence = 1e-05,
   fix_u = TRUE,
   fix_m = FALSE,
-  max_iterations = 25L,
+  max_iterations = 100L,
   fix_prior = FALSE,
   estimate_without_tf = TRUE,
   derive_prior = FALSE,
+  estimator_mode = c("independent", "dependency-aware"),
   ...
 )
 }
@@ -27,14 +28,16 @@ when the largest change in any updated parameter is below this value.
 Defaults to \code{1e-5}.}
 
 \item{fix_u}{Logical. If \code{TRUE} (the default), hold u parameters fixed
-during EM — only m is updated. Set to \code{FALSE} to also estimate u.}
+during EM — only m is updated. Set to \code{FALSE} to also estimate u.
+Only supported with \code{estimator_mode = "independent"}.}
 
 \item{fix_m}{Logical. If \code{TRUE}, hold m parameters fixed during EM.
 Defaults to \code{FALSE}. At least one of \code{fix_u} and \code{fix_m} must be
-\code{FALSE}, otherwise the algorithm cannot learn anything.}
+\code{FALSE}, otherwise the algorithm cannot learn anything. Only supported
+with \code{estimator_mode = "independent"}.}
 
 \item{max_iterations}{Maximum number of EM iterations. Defaults to
-\code{25L}. The loop stops early when convergence is reached.}
+\code{100L}. The loop stops early when convergence is reached.}
 
 \item{fix_prior}{Logical. If \code{TRUE}, hold the prior (probability that
 two random records match) fixed during EM iterations.
@@ -45,11 +48,17 @@ on aggregated gamma-pattern counts (fast, but ignores per-pair term
 frequency variation). If \code{FALSE}, EM runs on individual pairs and
 incorporates per-pair TF adjustments in the E-step, matching
 splink's default behaviour. Only matters when at least one
-comparison has \code{term_frequency = TRUE}.}
+comparison has \code{term_frequency = TRUE}. Only supported with
+\code{estimator_mode = "independent"}.}
 
 \item{derive_prior}{Logical. If \code{TRUE}, derive the prior from the
 trained parameter values after EM completes and store it in the
-model. Defaults to \code{FALSE}.}
+model. Defaults to \code{FALSE}. Only supported with
+\code{estimator_mode = "independent"}.}
+
+\item{estimator_mode}{Estimator to use. \code{"independent"} keeps the
+conditionally independent Fellegi-Sunter EM estimator. \code{"dependency-aware"}
+fits log-linear matched and unmatched comparison-pattern distributions.}
 
 \item{...}{Reserved for future options.}
 }

@@ -63,6 +63,11 @@ il_save <- function(model, path, overwrite = FALSE) {
 
   format <- detect_model_serialization_format(path)
   if (identical(format, 'json')) {
+    if (identical(model$params$estimator_mode, 'dependency-aware')) {
+      cli::cli_abort(
+        'Dependency-aware estimator state cannot be saved as Splink settings JSON. Use an {.file .rds} path.'
+      )
+    }
     write_model_json(model, path)
   } else {
     saveRDS(model_to_rds_payload(model), path)

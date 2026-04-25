@@ -12,11 +12,13 @@
 #'   Defaults to `1e-5`.
 #' @param fix_u Logical. If `TRUE` (the default), hold u parameters fixed
 #'   during EM — only m is updated. Set to `FALSE` to also estimate u.
+#'   Only supported with `estimator_mode = "independent"`.
 #' @param fix_m Logical. If `TRUE`, hold m parameters fixed during EM.
 #'   Defaults to `FALSE`. At least one of `fix_u` and `fix_m` must be
-#'   `FALSE`, otherwise the algorithm cannot learn anything.
+#'   `FALSE`, otherwise the algorithm cannot learn anything. Only supported
+#'   with `estimator_mode = "independent"`.
 #' @param max_iterations Maximum number of EM iterations. Defaults to
-#'   `25L`. The loop stops early when convergence is reached.
+#'   `100L`. The loop stops early when convergence is reached.
 #' @param fix_prior Logical. If `TRUE`, hold the prior (probability that
 #'   two random records match) fixed during EM iterations.
 #'   Defaults to `FALSE`.
@@ -25,10 +27,15 @@
 #'   frequency variation). If `FALSE`, EM runs on individual pairs and
 #'   incorporates per-pair TF adjustments in the E-step, matching
 #'   splink's default behaviour. Only matters when at least one
-#'   comparison has `term_frequency = TRUE`.
+#'   comparison has `term_frequency = TRUE`. Only supported with
+#'   `estimator_mode = "independent"`.
 #' @param derive_prior Logical. If `TRUE`, derive the prior from the
 #'   trained parameter values after EM completes and store it in the
-#'   model. Defaults to `FALSE`.
+#'   model. Defaults to `FALSE`. Only supported with
+#'   `estimator_mode = "independent"`.
+#' @param estimator_mode Estimator to use. `"independent"` keeps the
+#'   conditionally independent Fellegi-Sunter EM estimator. `"dependency-aware"`
+#'   fits log-linear matched and unmatched comparison-pattern distributions.
 #' @param ... Reserved for future options.
 #'
 #' @return An updated `il_model` with trained m and u parameters.
@@ -86,19 +93,22 @@
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_estimate_em <- function(model, blocking, convergence = 1e-5,
                            fix_u = TRUE, fix_m = FALSE,
-                           max_iterations = 25L,
+                           max_iterations = 100L,
                            fix_prior = FALSE,
                            estimate_without_tf = TRUE,
-                           derive_prior = FALSE, ...) {
+                           derive_prior = FALSE,
+                           estimator_mode = c('independent', 'dependency-aware'),
+                           ...) {
+  fix_u_supplied <- !missing(fix_u)
+  fix_m_supplied <- !missing(fix_m)
+  estimate_without_tf_supplied <- !missing(estimate_without_tf)
+  estimator_mode <- match.arg(estimator_mode)
   validate_il_model(model)
   if (!is.numeric(max_iterations) || length(max_iterations) != 1L ||
     max_iterations < 1L || max_iterations != as.integer(max_iterations)) {
     cli::cli_abort('{.arg max_iterations} must be a positive integer.')
   }
   max_iterations <- as.integer(max_iterations)
-  if (fix_u && fix_m) {
-    cli::cli_abort('At least one of {.arg fix_u} and {.arg fix_m} must be {.code FALSE}.')
-  }
   comparisons <- model$spec$comparisons
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
   n_comp <- length(comp_names)
@@ -107,6 +117,26 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
   has_tf <- any(vapply(comparisons, function(c) {
     isTRUE(c$method$term_frequency)
   }, logical(1)))
+
+  if (identical(estimator_mode, 'dependency-aware')) {
+    return(il_estimate_em_dependency_aware(
+      model = model,
+      blocking = blocking,
+      convergence = convergence,
+      max_iterations = max_iterations,
+      fix_prior = fix_prior,
+      fix_u_supplied = fix_u_supplied,
+      fix_m_supplied = fix_m_supplied,
+      estimate_without_tf_supplied = estimate_without_tf_supplied,
+      derive_prior = derive_prior,
+      has_tf = has_tf
+    ))
+  }
+
+  if (fix_u && fix_m) {
+    cli::cli_abort('At least one of {.arg fix_u} and {.arg fix_m} must be {.code FALSE}.')
+  }
+
   use_pair_level <- !estimate_without_tf && has_tf
 
   # For pair-level EM, retrieve individual pairs with TF data

@@ -74,6 +74,11 @@ il_waterfall <- function(pairs, which = 1L) {
   }
 
   row <- pairs[which, ]
+  if (identical(model$params$estimator_mode, 'dependency-aware')) {
+    cli::cli_abort(
+      '{.fn il_waterfall} decomposes fieldwise independent weights and is not supported for dependency-aware scores.'
+    )
+  }
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
   comp_names <- vapply(comparisons, function(c) c$columns, character(1))
