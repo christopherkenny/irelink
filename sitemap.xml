@@ -82,6 +82,8 @@
 <url><loc>http://christophertkenny.com/irelink/reference/il_comparison_vectors.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_completeness.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_confusion_matrix.html</loc></url>
+<url><loc>http://christophertkenny.com/irelink/reference/il_constrain_m.html</loc></url>
+<url><loc>http://christophertkenny.com/irelink/reference/il_constraints.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_count_pairs.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_deterministic_link.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_errors.html</loc></url>
@@ -100,6 +102,9 @@
 <url><loc>http://christophertkenny.com/irelink/reference/il_parameters.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_phonetic_chart.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_precision_recall.html</loc></url>
+<url><loc>http://christophertkenny.com/irelink/reference/il_prior_m.html</loc></url>
+<url><loc>http://christophertkenny.com/irelink/reference/il_prior_prevalence.html</loc></url>
+<url><loc>http://christophertkenny.com/irelink/reference/il_priors.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_profile.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_regex_extract.html</loc></url>
 <url><loc>http://christophertkenny.com/irelink/reference/il_register_tf.html</loc></url>

@@ -128,6 +128,12 @@ probabilistic record linkage engine into idiomatic R.
   `derive_prior`, and `estimate_without_tf` parameters.
 - [`il_estimate_prior()`](http://christophertkenny.com/irelink/reference/il_estimate_prior.md)
   sets the prior match probability.
+- [`il_prior_prevalence()`](http://christophertkenny.com/irelink/reference/il_prior_prevalence.md)
+  and
+  [`il_prior_m()`](http://christophertkenny.com/irelink/reference/il_prior_m.md)
+  add regularizing custom priors for EM;
+  [`il_constrain_m()`](http://christophertkenny.com/irelink/reference/il_constrain_m.md)
+  adds explicit fixed matched-class constraints.
 - [`il_estimate_m_from_labels()`](http://christophertkenny.com/irelink/reference/il_estimate_m_from_labels.md)
   and
   [`il_estimate_m_from_column()`](http://christophertkenny.com/irelink/reference/il_estimate_m_from_column.md)

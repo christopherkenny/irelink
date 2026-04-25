@@ -176,12 +176,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 855       cluster_133      7          0.163 
-#> 2 668       cluster_133      6          0.140 
-#> 3 973       cluster_133      1          0.0233
-#> 4 857       cluster_133      2          0.0465
-#> 5 853       cluster_133      2          0.0465
-#> 6 919       cluster_133      2          0.0465
+#> 1 973       cluster_133      1          0.0233
+#> 2 667       cluster_133      9          0.209 
+#> 3 673       cluster_133      6          0.140 
+#> 4 856       cluster_133      6          0.140 
+#> 5 972       cluster_133      4          0.0930
+#> 6 974       cluster_133      3          0.0698
 ```
 
 Records with unusually high degree relative to their cluster size may be

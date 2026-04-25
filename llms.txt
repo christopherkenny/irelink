@@ -300,6 +300,12 @@ Create and train a probabilistic linkage model.
   : Train Parameters via Expectation-Maximisation
 - [`il_estimate_prior()`](http://christophertkenny.com/irelink/reference/il_estimate_prior.md)
   : Estimate the Prior Match Probability
+- [`il_prior_prevalence()`](http://christophertkenny.com/irelink/reference/il_prior_prevalence.md)
+  : Add a Prevalence Prior
+- [`il_prior_m()`](http://christophertkenny.com/irelink/reference/il_prior_m.md)
+  : Add a Matched-Class Comparison Prior
+- [`il_constrain_m()`](http://christophertkenny.com/irelink/reference/il_constrain_m.md)
+  : Add a Fixed Matched-Class Constraint
 - [`il_estimate_m_from_column()`](http://christophertkenny.com/irelink/reference/il_estimate_m_from_column.md)
   : Estimate Match (m) Parameters from a Label Column
 - [`il_estimate_m_from_labels()`](http://christophertkenny.com/irelink/reference/il_estimate_m_from_labels.md)
@@ -328,6 +334,10 @@ Examine parameters, weights, and training diagnostics.
 
 - [`il_parameters()`](http://christophertkenny.com/irelink/reference/il_parameters.md)
   : Extract Model Parameters
+- [`il_priors()`](http://christophertkenny.com/irelink/reference/il_priors.md)
+  : Inspect Model Priors
+- [`il_constraints()`](http://christophertkenny.com/irelink/reference/il_constraints.md)
+  : Inspect Model Constraints
 - [`il_weights()`](http://christophertkenny.com/irelink/reference/il_weights.md)
   : Extract Match Weights by Comparison Level
 - [`il_training_history()`](http://christophertkenny.com/irelink/reference/il_training_history.md)
