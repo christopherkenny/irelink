@@ -982,7 +982,7 @@ This is not a splink feature.
 The core idea is that for linking, we should take the best linkings, sorted by highest posterior matches.
 In cases of ties, break first by the smaller row index of the first dataset and then by the smaller row index of the second.
 
-When you are done, write a summary to `inst/38-greedy-matching.md`.
+When you are done, write a summary to `inst/refs/37-greedy-matching.md`.
 
 ## Custom priors (Codex GPT-5.5 medium)
 
@@ -1009,11 +1009,11 @@ Implement the full feature set as described:
 - save/load round-trip coverage for the new metadata.
 
 If you discover a genuine blocker that prevents implementing one part of the spec, do not silently omit it.
-Leave the code in a coherent state, document the blocker in `inst/39-custom-priors.md`, and make sure unsupported combinations raise clear errors.
+Leave the code in a coherent state, document the blocker in `inst/refs/38-custom-priors.md`, and make sure unsupported combinations raise clear errors.
 
 Update user-facing docs as needed.
 
-When you are done, write a summary to `inst/39-custom-priors.md`.
+When you are done, write a summary to `inst/refs/38-custom-priors.md`.
 
 ## Dependency-aware scoring (Codex GPT-5.5 medium)
 
@@ -1036,11 +1036,11 @@ Implement the full dependency-aware scoring feature:
 - add focused tests for dependent-field behavior, missing states, compatible train-vs-score pattern tables, unsupported combinations, and save/load round-tripping.
 
 If you discover a genuine blocker that prevents implementing one part of the spec, do not silently omit it.
-Leave the code in a coherent state, document the blocker in `inst/40-dependency-aware-scoring.md`, and make sure unsupported combinations raise clear errors.
+Leave the code in a coherent state, document the blocker in `inst/refs/39-dependency-aware-scoring.md`, and make sure unsupported combinations raise clear errors.
 
 Update user-facing docs as needed.
 
-When you are done, write a summary to `inst/40-dependency-aware-scoring.md`.
+When you are done, write a summary to `inst/refs/39-dependency-aware-scoring.md`.
 
 ## Summary (Codex GPT-5.5 medium)
 
@@ -1048,5 +1048,15 @@ Can you look at the code for greedy matching for clustering, the support for cus
 Use that to write a summary of the steps that are taken.
 This can be written for an expert on record linkage.
 Do not trust the docs, only the code.
-Write it to inst/refs/41-eric-features.md.
+Write it to inst/refs/40-eric-features.md.
 The markdown should be written to be human readable, with linebreaks only at the end of sentences.
+
+# Update docs (GPT-5.4 high)
+
+Write a stage-10-notes.md summary doc on the recent "Testing at Scale" stage.
+It should cover `inst/refs/29`--`inst/refs/36` with links.
+
+Write a stage-11-notes.md summary doc on `inst/refs/37`--`inst/refs/40` with links.
+Call this the "Requested Features" stage.
+
+Keep the style very close to an executive summary with references for easy searching later, like how the other stage notes are written.
