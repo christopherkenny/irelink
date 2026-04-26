@@ -148,16 +148,16 @@ metrics$clusters
 #> # A tibble: 116 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralisation
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_115       8      24   0.857                 0.190 
-#>  2 cluster_326       4       4   0.667                 0.667 
-#>  3 cluster_792       7      15   0.714                 0.4   
-#>  4 cluster_867       3       3   1                     0     
-#>  5 cluster_924       8      28   1                     0     
-#>  6 cluster_10       13      35   0.449                 0.258 
-#>  7 cluster_142      46     204   0.197                 0.236 
-#>  8 cluster_15        5      10   0.95                  0.0833
-#>  9 cluster_252       9      32   0.889                 0.143 
-#> 10 cluster_38        5      10   1                     0     
+#>  1 cluster_133      44     146   0.154                  0.350
+#>  2 cluster_338       3       2   0.667                  1    
+#>  3 cluster_476       2       1   1                     NA    
+#>  4 cluster_674       8      18   0.643                  0.286
+#>  5 cluster_825       9      22   0.597                  0.196
+#>  6 cluster_874       2       1   1                     NA    
+#>  7 cluster_905       2       1   1                     NA    
+#>  8 cluster_91        5       9   0.9                    0.167
+#>  9 cluster_122       6      13   0.867                  0.2  
+#> 10 cluster_194      10      35   0.778                  0.139
 #> # ℹ 106 more rows
 ```
 
@@ -176,12 +176,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 855       cluster_133      7          0.163 
-#> 2 243       cluster_133      3          0.0698
-#> 3 857       cluster_133      2          0.0465
-#> 4 136       cluster_133     10          0.233 
-#> 5 853       cluster_133      2          0.0465
-#> 6 919       cluster_133      2          0.0465
+#> 1 974       cluster_133      3          0.0698
+#> 2 138       cluster_133     10          0.233 
+#> 3 670       cluster_133     12          0.279 
+#> 4 789       cluster_133     10          0.233 
+#> 5 790       cluster_133      4          0.0930
+#> 6 852       cluster_133      2          0.0465
 ```
 
 Records with unusually high degree relative to their cluster size may be
