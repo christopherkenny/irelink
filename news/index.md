@@ -125,7 +125,12 @@ probabilistic record linkage engine into idiomatic R.
 - [`il_estimate_em()`](http://christophertkenny.com/irelink/reference/il_estimate_em.md)
   runs the Fellegi-Sunter EM algorithm with configurable
   `max_iterations`, `convergence`, `fix_u`, `fix_m`, `fix_prior`,
-  `derive_prior`, and `estimate_without_tf` parameters.
+  `derive_prior`, `estimate_without_tf`, and `estimator_mode`
+  parameters.
+- `estimator_mode = "dependency-aware"` fits log-linear matched and
+  unmatched comparison-pattern distributions over aggregated gamma
+  counts, preserving missing comparison states as explicit pattern
+  levels.
 - [`il_estimate_prior()`](http://christophertkenny.com/irelink/reference/il_estimate_prior.md)
   sets the prior match probability.
 - [`il_prior_prevalence()`](http://christophertkenny.com/irelink/reference/il_prior_prevalence.md)
@@ -150,6 +155,10 @@ probabilistic record linkage engine into idiomatic R.
   in-database table.
 - [`il_score_missing_edges()`](http://christophertkenny.com/irelink/reference/il_score_missing_edges.md)
   enumerates and scores unscored within-cluster pairs.
+- [`il_score_patterns()`](http://christophertkenny.com/irelink/reference/il_score_patterns.md)
+  scores compatible comparison-pattern tables, including
+  dependency-aware pattern tables larger than the table used for
+  fitting.
 - [`il_deterministic_link()`](http://christophertkenny.com/irelink/reference/il_deterministic_link.md)
   performs exact-match linking without training.
 - [`il_find_matches()`](http://christophertkenny.com/irelink/reference/il_find_matches.md)

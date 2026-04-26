@@ -325,6 +325,8 @@ Score record pairs and resolve them into linked entities.
   : Deterministic Record Linkage
 - [`il_find_matches()`](http://christophertkenny.com/irelink/reference/il_find_matches.md)
   : Find Matches for New Records
+- [`il_score_patterns()`](http://christophertkenny.com/irelink/reference/il_score_patterns.md)
+  : Score Comparison Patterns
 - [`il_score_missing_edges()`](http://christophertkenny.com/irelink/reference/il_score_missing_edges.md)
   : Score Missing Edges Within Clusters
 

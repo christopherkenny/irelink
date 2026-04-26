@@ -92,7 +92,9 @@
 <ul><li>
 <code><a href="../reference/il_estimate_u.html">il_estimate_u()</a></code> estimates non-match probabilities by sampling random pairs.</li>
 <li>
-<code><a href="../reference/il_estimate_em.html">il_estimate_em()</a></code> runs the Fellegi-Sunter EM algorithm with configurable <code>max_iterations</code>, <code>convergence</code>, <code>fix_u</code>, <code>fix_m</code>, <code>fix_prior</code>, <code>derive_prior</code>, and <code>estimate_without_tf</code> parameters.</li>
+<code><a href="../reference/il_estimate_em.html">il_estimate_em()</a></code> runs the Fellegi-Sunter EM algorithm with configurable <code>max_iterations</code>, <code>convergence</code>, <code>fix_u</code>, <code>fix_m</code>, <code>fix_prior</code>, <code>derive_prior</code>, <code>estimate_without_tf</code>, and <code>estimator_mode</code> parameters.</li>
+<li>
+<code>estimator_mode = "dependency-aware"</code> fits log-linear matched and unmatched comparison-pattern distributions over aggregated gamma counts, preserving missing comparison states as explicit pattern levels.</li>
 <li>
 <code><a href="../reference/il_estimate_prior.html">il_estimate_prior()</a></code> sets the prior match probability.</li>
 <li>
@@ -110,6 +112,8 @@
 <code>collect = FALSE</code> returns an <code>il_compared_lazy</code> object backed by an in-database table.</li>
 <li>
 <code><a href="../reference/il_score_missing_edges.html">il_score_missing_edges()</a></code> enumerates and scores unscored within-cluster pairs.</li>
+<li>
+<code><a href="../reference/il_score_patterns.html">il_score_patterns()</a></code> scores compatible comparison-pattern tables, including dependency-aware pattern tables larger than the table used for fitting.</li>
 <li>
 <code><a href="../reference/il_deterministic_link.html">il_deterministic_link()</a></code> performs exact-match linking without training.</li>
 <li>

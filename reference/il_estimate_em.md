@@ -14,10 +14,11 @@ il_estimate_em(
   convergence = 1e-05,
   fix_u = TRUE,
   fix_m = FALSE,
-  max_iterations = 25L,
+  max_iterations = 100L,
   fix_prior = FALSE,
   estimate_without_tf = TRUE,
   derive_prior = FALSE,
+  estimator_mode = c("independent", "dependency-aware"),
   ...
 )
 ```
@@ -42,17 +43,19 @@ il_estimate_em(
 - fix_u:
 
   Logical. If `TRUE` (the default), hold u parameters fixed during EM —
-  only m is updated. Set to `FALSE` to also estimate u.
+  only m is updated. Set to `FALSE` to also estimate u. Only supported
+  with `estimator_mode = "independent"`.
 
 - fix_m:
 
   Logical. If `TRUE`, hold m parameters fixed during EM. Defaults to
   `FALSE`. At least one of `fix_u` and `fix_m` must be `FALSE`,
-  otherwise the algorithm cannot learn anything.
+  otherwise the algorithm cannot learn anything. Only supported with
+  `estimator_mode = "independent"`.
 
 - max_iterations:
 
-  Maximum number of EM iterations. Defaults to `25L`. The loop stops
+  Maximum number of EM iterations. Defaults to `100L`. The loop stops
   early when convergence is reached.
 
 - fix_prior:
@@ -66,12 +69,20 @@ il_estimate_em(
   counts (fast, but ignores per-pair term frequency variation). If
   `FALSE`, EM runs on individual pairs and incorporates per-pair TF
   adjustments in the E-step, matching splink's default behaviour. Only
-  matters when at least one comparison has `term_frequency = TRUE`.
+  matters when at least one comparison has `term_frequency = TRUE`. Only
+  supported with `estimator_mode = "independent"`.
 
 - derive_prior:
 
   Logical. If `TRUE`, derive the prior from the trained parameter values
   after EM completes and store it in the model. Defaults to `FALSE`.
+  Only supported with `estimator_mode = "independent"`.
+
+- estimator_mode:
+
+  Estimator to use. `"independent"` keeps the conditionally independent
+  Fellegi-Sunter EM estimator. `"dependency-aware"` fits log-linear
+  matched and unmatched comparison-pattern distributions.
 
 - ...:
 

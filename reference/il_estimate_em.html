@@ -64,10 +64,11 @@ call updates the model cumulatively.</p>
 <span>  convergence <span class="op">=</span> <span class="fl">1e-05</span>,</span>
 <span>  fix_u <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  fix_m <span class="op">=</span> <span class="cn">FALSE</span>,</span>
-<span>  max_iterations <span class="op">=</span> <span class="fl">25L</span>,</span>
+<span>  max_iterations <span class="op">=</span> <span class="fl">100L</span>,</span>
 <span>  fix_prior <span class="op">=</span> <span class="cn">FALSE</span>,</span>
 <span>  estimate_without_tf <span class="op">=</span> <span class="cn">TRUE</span>,</span>
 <span>  derive_prior <span class="op">=</span> <span class="cn">FALSE</span>,</span>
+<span>  estimator_mode <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"independent"</span>, <span class="st">"dependency-aware"</span><span class="op">)</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -92,18 +93,20 @@ Defaults to <code>1e-5</code>.</p></dd>
 
 <dt id="arg-fix-u">fix_u<a class="anchor" aria-label="anchor" href="#arg-fix-u"></a></dt>
 <dd><p>Logical. If <code>TRUE</code> (the default), hold u parameters fixed
-during EM — only m is updated. Set to <code>FALSE</code> to also estimate u.</p></dd>
+during EM — only m is updated. Set to <code>FALSE</code> to also estimate u.
+Only supported with <code>estimator_mode = "independent"</code>.</p></dd>
 
 
 <dt id="arg-fix-m">fix_m<a class="anchor" aria-label="anchor" href="#arg-fix-m"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, hold m parameters fixed during EM.
 Defaults to <code>FALSE</code>. At least one of <code>fix_u</code> and <code>fix_m</code> must be
-<code>FALSE</code>, otherwise the algorithm cannot learn anything.</p></dd>
+<code>FALSE</code>, otherwise the algorithm cannot learn anything. Only supported
+with <code>estimator_mode = "independent"</code>.</p></dd>
 
 
 <dt id="arg-max-iterations">max_iterations<a class="anchor" aria-label="anchor" href="#arg-max-iterations"></a></dt>
 <dd><p>Maximum number of EM iterations. Defaults to
-<code>25L</code>. The loop stops early when convergence is reached.</p></dd>
+<code>100L</code>. The loop stops early when convergence is reached.</p></dd>
 
 
 <dt id="arg-fix-prior">fix_prior<a class="anchor" aria-label="anchor" href="#arg-fix-prior"></a></dt>
@@ -118,13 +121,21 @@ on aggregated gamma-pattern counts (fast, but ignores per-pair term
 frequency variation). If <code>FALSE</code>, EM runs on individual pairs and
 incorporates per-pair TF adjustments in the E-step, matching
 splink's default behaviour. Only matters when at least one
-comparison has <code>term_frequency = TRUE</code>.</p></dd>
+comparison has <code>term_frequency = TRUE</code>. Only supported with
+<code>estimator_mode = "independent"</code>.</p></dd>
 
 
 <dt id="arg-derive-prior">derive_prior<a class="anchor" aria-label="anchor" href="#arg-derive-prior"></a></dt>
 <dd><p>Logical. If <code>TRUE</code>, derive the prior from the
 trained parameter values after EM completes and store it in the
-model. Defaults to <code>FALSE</code>.</p></dd>
+model. Defaults to <code>FALSE</code>. Only supported with
+<code>estimator_mode = "independent"</code>.</p></dd>
+
+
+<dt id="arg-estimator-mode">estimator_mode<a class="anchor" aria-label="anchor" href="#arg-estimator-mode"></a></dt>
+<dd><p>Estimator to use. <code>"independent"</code> keeps the
+conditionally independent Fellegi-Sunter EM estimator. <code>"dependency-aware"</code>
+fits log-linear matched and unmatched comparison-pattern distributions.</p></dd>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
