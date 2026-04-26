@@ -1042,10 +1042,11 @@ Update user-facing docs as needed.
 
 When you are done, write a summary to `inst/40-dependency-aware-scoring.md`.
 
-## Summary
+## Summary (Codex GPT-5.5 medium)
 
 Can you look at the code for greedy matching for clustering, the support for custom priors, and the conditional dependency weakening for EM.
 Use that to write a summary of the steps that are taken.
 This can be written for an expert on record linkage.
 Do not trust the docs, only the code.
 Write it to inst/refs/41-eric-features.md.
+The markdown should be written to be human readable, with linebreaks only at the end of sentences.
