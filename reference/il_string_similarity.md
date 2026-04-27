@@ -22,8 +22,8 @@ il_string_similarity(a, b)
 
 ## Value
 
-A single-row tibble with columns `jaro`, `jaro_winkler`, `levenshtein`,
-`damerau_levenshtein`, and `jaccard`.
+A single-row tibble with columns `jaro_winkler`, `jaro`, `levenshtein`,
+`jaccard`, and `cosine`.
 
 ## Examples
 

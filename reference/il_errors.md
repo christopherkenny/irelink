@@ -33,8 +33,9 @@ il_errors(model, labels = NULL, threshold = 0.85, labels_col = NULL)
 
 ## Value
 
-A tibble of misclassified pairs with columns `id_l`, `id_r`,
-`match_weight`, `match_prob`, `true_label`, and `error_type`.
+A tibble of misclassified pairs with columns `unique_id_l`,
+`unique_id_r`, `match_weight`, `match_probability`, `true_label`, and
+`error_type`.
 
 ## Examples
 

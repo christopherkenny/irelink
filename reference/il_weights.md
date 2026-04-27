@@ -21,8 +21,8 @@ il_weights(model)
 
 ## Value
 
-A tibble with columns `comparison`, `level`, `m_prob`, `u_prob`, and
-`weight`.
+A tibble with columns `comparison`, `gamma_level`, `m_prob`, `u_prob`,
+and `weight`.
 
 ## Examples
 

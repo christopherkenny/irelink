@@ -30,8 +30,8 @@ il_accuracy(model, labels = NULL, labels_col = NULL)
 ## Value
 
 A tibble with one row per threshold, containing columns `threshold`,
-`tp`, `fp`, `fn`, `tn`, `precision`, `recall`, `f1`, `f2`, `f0_5`,
-`specificity`, `npv`, `accuracy`, `p4`, and `phi`.
+`tp`, `fp`, `fn`, `tn`, `fn_blocking_miss`, `precision`, `recall`, `f1`,
+`f2`, `f0_5`, `specificity`, `npv`, `accuracy`, `p4`, and `phi`.
 
 ## Examples
 

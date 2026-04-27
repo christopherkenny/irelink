@@ -20,8 +20,8 @@ il_training_history(model)
 
 ## Value
 
-A tibble with columns `session`, `iteration`, `comparison`, `level`, and
-`value`.
+A tibble with columns `session`, `iteration`, `comparison`,
+`gamma_level`, and `value`.
 
 ## Examples
 

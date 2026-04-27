@@ -31,8 +31,7 @@ il_compare_records(record_a, record_b, spec, con = NULL)
 
 ## Value
 
-A single-row tibble with match weight, match probability, and
-per-comparison gamma values.
+A single-row tibble of per-comparison gamma values.
 
 ## Examples
 

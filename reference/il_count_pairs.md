@@ -33,8 +33,8 @@ il_count_pairs(.data, ..., con = NULL, link_type = c("dedupe", "link"))
 
 ## Value
 
-A tibble with columns `rule`, `pairs_generated`, `cumulative_pairs`, and
-`pct_of_cartesian`.
+A tibble with columns `rule` and `n_pairs`. When blocking rules are
+supplied, it also includes `cumulative_pairs` and `pct_of_cartesian`.
 
 ## Examples
 

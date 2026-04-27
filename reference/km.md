@@ -15,7 +15,7 @@ km(n)
 
 - n:
 
-  A positive numeric value.
+  A non-negative numeric value.
 
 ## Value
 

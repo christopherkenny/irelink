@@ -1,10 +1,10 @@
 # Personal Name Comparison
 
 A pre-built domain comparison for personal names. Combines exact
-matching, Jaro-Winkler, and Jaro levels with thresholds tuned for
-typical name variation. Optionally adds a Soundex phonetic level as a
-final fallback before the else level, which helps catch names that sound
-similar but are spelled differently (e.g., Smith/Smyth).
+matching and Jaro-Winkler levels with thresholds tuned for typical name
+variation. Optionally adds a Soundex phonetic level as a final fallback
+before the else level, which helps catch names that sound similar but
+are spelled differently (e.g., Smith/Smyth).
 
 ## Usage
 
