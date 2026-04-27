@@ -1069,3 +1069,92 @@ Review every function with an Rd.
 If you find mismatches, update them in the documents.
 
 Write a summary of edits to `inst/refs/41-docs-review.md`.
+
+# Upkeep planning (Codex GPT-5.5 medium)
+
+You are working on a record linkage package in R.
+It is a derivative product of splink (../splink).
+
+We have heavily matched against splink's version 4.
+Python does not have a CRAN-equivalent, which allows for larger breaking changes across time.
+Splink is working on version 5 (https://github.com/moj-analytical-services/splink/tree/splink_5_dev)
+
+Look at the changelog and identify major things that would need to be updated.
+
+This is the summary of the changes from the release page:
+
+Splink 5 - Remove implicit cache by @RobinL in #2847
+Splink 5 - Explicit cache table mgt fns by @RobinL in #2848
+Splink 5 - Remove salting by @RobinL in #2849
+Splink 5 - Add chunking by @RobinL in #2850
+Splink5 - Bayes factors to match weights final by @RobinL in #2851
+Drop athena by @ADBond in #2858
+Minor fixes by @RobinL in #2859
+Update changelog by @RobinL in #2860
+remove code coverage by @RobinL in #2861
+Merge - splink 4 to 5 by @ADBond in #2862
+Merge/master into splink5 2025 12 17 by @RobinL in #2865
+Update tests for splinkdataframes_everywhere by @RobinL in #2866
+Splink 5: Register SplinkDataFrames using db_api before passing to Splink functions by @RobinL in #2863
+Merge master to Splink 5 by @ADBond in #2880
+Drop pandas as a required dependancy - core working version by @ADBond in #2883
+Optimise train u by @RobinL in #2870
+Notebooks to jupytext by @ADBond in #2899
+Makefile & simplifcation of dependency groups by @ADBond in #2908
+Add register_blocked_pairs_for_predict function to table management by @RobinL in #2915
+Merge splink 4 to 5 by @ADBond in #2923
+added filtered neighbours table to list of tables for Spark to persist by @aymonwuolanne in #2928
+Merge/splink 4 to 5 by @RobinL in #2932
+To arrow and duckdb tables by @ADBond in #2916
+Depandas estimate u by @ADBond in #2937
+Merge/splink 4 to 5 by @RobinL in #2939
+SplinkChart by @ADBond in #2941
+(Some) structured chart records by @ADBond in #2940
+Fix dashboards to work with mw_ not bf by @RobinL in #2952
+Simplify blocking by @RobinL in #2935
+Match key and unique id quoting fixes by @RobinL in #2955
+TF Adjustment chart without pandas + SplinkChart by @ADBond in #2956
+Finalise API of computation of blocked pairs workflow by @RobinL in #2957
+Revert simplify blocking and match key quoting by @RobinL in #2958
+A bit less pandas in tests by @ADBond in #2969
+Change linker.misc.query_sql to output SplinkDataFrame by default by @ADBond in #2970
+:dependabot: uv(deps-dev): Bump sqlalchemy from 2.0.47 to 2.0.48 by @dependabot[bot] in #2953
+:dependabot: github-actions(deps): Bump astral-sh/setup-uv from 7.3.0 to 7.3.1 by @dependabot[bot] in #2954
+:dependabot: github-actions(deps): Bump actions/dependency-review-action from 4.8.3 to 4.9.0 by @dependabot[bot] in #2964
+:dependabot: github-actions(deps): Bump actions/upload-artifact from 6.0.0 to 7.0.0 by @dependabot[bot] in #2951
+:dependabot: uv(deps): Bump tornado from 6.5.4 to 6.5.5 by @dependabot[bot] in #2968
+:dependabot: uv(deps-dev): Bump mkdocs-material from 9.7.3 to 9.7.4 by @dependabot[bot] in #2965
+ty visibility by @ADBond in #2971
+port blocking_select_only_blocking_cols to splink_5 by @RobinL in #2972
+remove_select_star_at_start_of_pipeline_for_aliasing splink5 port by @RobinL in #2973
+merge up Optimise link only exploding blocking rules to splink 5 by @RobinL in #2974
+port restore_splink_4_0_15_behaviour_for_min_source_dataset to splink5 by @RobinL in #2975
+Marker/master up to 2a67972 by @RobinL in #2976
+fix issue 2949 by @RobinL in #2977
+Mergeup/2977 source dataset hardcoded rather than using settings in estimate u splink5 by @RobinL in #2978
+bump for dev2 release by @RobinL in #2979
+
+:dependabot: github-actions(deps): Bump github/codeql-action from 4.32.4 to 4.32.6 by @dependabot[bot] in #2980
+:dependabot: uv(deps-dev): Bump mkdocs-material from 9.7.4 to 9.7.5 by @dependabot[bot] in #2984
+Depandas - blocking analysis & tests batch 2 by @ADBond in #2985
+:dependabot: github-actions(deps): Bump astral-sh/setup-uv from 7.3.1 to 7.6.0 by @dependabot[bot] in #2986
+Remove TestHelper.convert frame() by @ADBond in #2987
+:dependabot: uv(deps-dev): Bump sqlglot from 29.0.1 to 30.0.2 by @dependabot[bot] in #2989
+Publish via Trusted Publishing by @ADBond in #2990
+Merge 4 -> 5 by @ADBond in #2996
+Emit untrained warnings once only by @RobinL in #3003
+Join on term frequencies at predict() stage rather than precomputing by @RobinL in #3010
+json schema no longer exists by @RobinL in #3012
+Better formatting of emitted sql v2 by @RobinL in #3014
+Allow profiling of the SQL executed in Duckdb and Spark pipelines by @RobinL in #3021
+Improve blocking counts sql by @RobinL in #3016
+Alternative version of improving u training. by @RobinL in #3025
+bump version for 5.0.0.dev3 release by @RobinL in #3026
+
+Write up a document `41-maintenance-investigation.md`.
+This should explain our approach for how to update to keep feature parity.
+Note that we have already diverged a bit:
+
+  - lack of interactive graphs
+  - using DBI instead of custom database backends
+  - additional statistical features, like custom priors and EM with dependence
