@@ -7,8 +7,8 @@
 #' @param a A character string.
 #' @param b A character string.
 #'
-#' @return A single-row tibble with columns `jaro`, `jaro_winkler`,
-#'   `levenshtein`, `damerau_levenshtein`, and `jaccard`.
+#' @return A single-row tibble with columns `jaro_winkler`, `jaro`,
+#'   `levenshtein`, `jaccard`, and `cosine`.
 #' @export
 #'
 #' @examples

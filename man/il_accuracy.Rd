@@ -18,8 +18,9 @@ labels are derived automatically via \code{\link[=labels_from_column]{labels_fro
 }
 \value{
 A tibble with one row per threshold, containing columns
-\code{threshold}, \code{tp}, \code{fp}, \code{fn}, \code{tn}, \code{precision}, \code{recall}, \code{f1},
-\code{f2}, \code{f0_5}, \code{specificity}, \code{npv}, \code{accuracy}, \code{p4}, and \code{phi}.
+\code{threshold}, \code{tp}, \code{fp}, \code{fn}, \code{tn}, \code{fn_blocking_miss},
+\code{precision}, \code{recall}, \code{f1}, \code{f2}, \code{f0_5}, \code{specificity}, \code{npv},
+\code{accuracy}, \code{p4}, and \code{phi}.
 }
 \description{
 Computes a full suite of classification metrics at a range of

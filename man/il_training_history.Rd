@@ -11,7 +11,7 @@ il_training_history(model)
 }
 \value{
 A tibble with columns \code{session}, \code{iteration}, \code{comparison},
-\code{level}, and \code{value}.
+\code{gamma_level}, and \code{value}.
 }
 \description{
 Returns a tidy tibble of parameter estimates at each EM iteration,

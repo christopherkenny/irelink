@@ -19,8 +19,7 @@ second record.}
 DuckDB connection is created and closed on exit.}
 }
 \value{
-A single-row tibble with match weight, match probability, and
-per-comparison gamma values.
+A single-row tibble of per-comparison gamma values.
 }
 \description{
 Scores a single pair of records against a specification without

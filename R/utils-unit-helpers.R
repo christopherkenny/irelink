@@ -59,7 +59,7 @@ format_unit_helper <- function(x) {
 #' of days. Inspired by [gt::px()] and [gt::pct()]. Use inside
 #' [cl_date_diff()] for self-documenting, unit-safe thresholds.
 #'
-#' @param n A positive numeric value.
+#' @param n A non-negative numeric value.
 #'
 #' @return A tagged numeric with class `il_days`.
 #' @export
@@ -78,7 +78,7 @@ days <- function(n) {
 #' of months. Use inside [cl_date_diff()] for self-documenting
 #' thresholds.
 #'
-#' @param n A positive numeric value.
+#' @param n A non-negative numeric value.
 #'
 #' @return A tagged numeric with class `il_months`.
 #' @export
@@ -96,7 +96,7 @@ months <- function(n) {
 #' A tagged-value constructor that marks a numeric threshold as a number
 #' of years. Use inside [cl_date_diff()] for self-documenting thresholds.
 #'
-#' @param n A positive numeric value.
+#' @param n A non-negative numeric value.
 #'
 #' @return A tagged numeric with class `il_years`.
 #' @export
@@ -115,7 +115,7 @@ years <- function(n) {
 #' of hours. Use inside [cl_time_diff()] for self-documenting,
 #' unit-safe thresholds.
 #'
-#' @param n A positive numeric value.
+#' @param n A non-negative numeric value.
 #'
 #' @return A tagged numeric with class `il_hours`.
 #' @export
@@ -134,7 +134,7 @@ hours <- function(n) {
 #' of minutes. Use inside [cl_time_diff()] for self-documenting
 #' thresholds.
 #'
-#' @param n A positive numeric value.
+#' @param n A non-negative numeric value.
 #'
 #' @return A tagged numeric with class `il_minutes`.
 #' @export
@@ -153,7 +153,7 @@ minutes <- function(n) {
 #' of seconds. Use inside [cl_time_diff()] for self-documenting
 #' thresholds.
 #'
-#' @param n A positive numeric value.
+#' @param n A non-negative numeric value.
 #'
 #' @return A tagged numeric with class `il_seconds`.
 #' @export
@@ -190,7 +190,7 @@ print.il_seconds <- function(x, ...) {
 #' in kilometres. Use inside [cl_distance_km()] for self-documenting
 #' thresholds.
 #'
-#' @param n A positive numeric value.
+#' @param n A non-negative numeric value.
 #'
 #' @return A tagged numeric with class `il_km`.
 #' @export
@@ -208,7 +208,7 @@ km <- function(n) {
 #' A tagged-value constructor that marks a numeric threshold as a distance
 #' in miles. Converted to kilometres internally by [cl_distance_km()].
 #'
-#' @param n A positive numeric value.
+#' @param n A non-negative numeric value.
 #'
 #' @return A tagged numeric with class `il_mi`.
 #' @export

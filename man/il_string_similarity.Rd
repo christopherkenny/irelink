@@ -12,8 +12,8 @@ il_string_similarity(a, b)
 \item{b}{A character string.}
 }
 \value{
-A single-row tibble with columns \code{jaro}, \code{jaro_winkler},
-\code{levenshtein}, \code{damerau_levenshtein}, and \code{jaccard}.
+A single-row tibble with columns \code{jaro_winkler}, \code{jaro},
+\code{levenshtein}, \code{jaccard}, and \code{cosine}.
 }
 \description{
 Computes multiple string-similarity metrics between two strings in a

@@ -19,8 +19,9 @@ additional datasets for linkage.}
 \item{link_type}{One of \code{"dedupe"} (default) or \code{"link"}.}
 }
 \value{
-A tibble with columns \code{rule}, \code{pairs_generated},
-\code{cumulative_pairs}, and \code{pct_of_cartesian}.
+A tibble with columns \code{rule} and \code{n_pairs}. When blocking rules
+are supplied, it also includes \code{cumulative_pairs} and
+\code{pct_of_cartesian}.
 }
 \description{
 Estimates how many record pairs each blocking rule generates without

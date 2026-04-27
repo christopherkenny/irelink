@@ -6,7 +6,7 @@
 #'
 #' @param model A trained `il_model` object.
 #'
-#' @return A tibble with columns `comparison`, `level`, `m_prob`,
+#' @return A tibble with columns `comparison`, `gamma_level`, `m_prob`,
 #'   `u_prob`, and `weight`.
 #' @export
 #'

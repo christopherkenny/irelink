@@ -7,7 +7,7 @@
 seconds(n)
 }
 \arguments{
-\item{n}{A positive numeric value.}
+\item{n}{A non-negative numeric value.}
 }
 \value{
 A tagged numeric with class \code{il_seconds}.

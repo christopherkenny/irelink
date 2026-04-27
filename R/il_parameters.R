@@ -5,8 +5,9 @@
 #'
 #' @param model A trained `il_model` object.
 #'
-#' @return A tibble with columns `comparison`, `level`, `m_prob`, and
-#'   `u_prob`.
+#' @return For independent models, a tibble with columns `comparison`,
+#'   `gamma_level`, `m`, and `u`. For dependency-aware models, the fitted
+#'   training-pattern table used for scoring.
 #' @export
 #'
 #' @examples

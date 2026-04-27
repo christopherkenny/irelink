@@ -10,8 +10,9 @@ il_parameters(model)
 \item{model}{A trained \code{il_model} object.}
 }
 \value{
-A tibble with columns \code{comparison}, \code{level}, \code{m_prob}, and
-\code{u_prob}.
+For independent models, a tibble with columns \code{comparison},
+\code{gamma_level}, \code{m}, and \code{u}. For dependency-aware models, the fitted
+training-pattern table used for scoring.
 }
 \description{
 Returns a tidy tibble of m and u probabilities for every comparison

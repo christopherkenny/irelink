@@ -12,8 +12,9 @@
 #'   `tbl_lazy`.
 #' @param link_type One of `"dedupe"` (default) or `"link"`.
 #'
-#' @return A tibble with columns `rule`, `pairs_generated`,
-#'   `cumulative_pairs`, and `pct_of_cartesian`.
+#' @return A tibble with columns `rule` and `n_pairs`. When blocking rules
+#'   are supplied, it also includes `cumulative_pairs` and
+#'   `pct_of_cartesian`.
 #' @export
 #'
 #' @examples

@@ -12,8 +12,7 @@
 #' @param con A DBI connection object. If `NULL` (default), a temporary
 #'   DuckDB connection is created and closed on exit.
 #'
-#' @return A single-row tibble with match weight, match probability, and
-#'   per-comparison gamma values.
+#' @return A single-row tibble of per-comparison gamma values.
 #' @export
 #'
 #' @examples

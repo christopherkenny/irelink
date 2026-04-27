@@ -1060,3 +1060,12 @@ Write a stage-11-notes.md summary doc on `inst/refs/37`--`inst/refs/40` with lin
 Call this the "Requested Features" stage.
 
 Keep the style very close to an executive summary with references for easy searching later, like how the other stage notes are written.
+
+## Verify docs (GPT-5.4 high)
+
+Perform a doc review.
+Check that the docs for each function accurately reflect the actions taken by the code.
+Review every function with an Rd.
+If you find mismatches, update them in the documents.
+
+Write a summary of edits to `inst/refs/41-docs-review.md`.

@@ -19,8 +19,9 @@ as matches. Defaults to \code{0.85}.}
 containing ground-truth cluster/entity IDs.}
 }
 \value{
-A tibble of misclassified pairs with columns \code{id_l}, \code{id_r},
-\code{match_weight}, \code{match_prob}, \code{true_label}, and \code{error_type}.
+A tibble of misclassified pairs with columns \code{unique_id_l},
+\code{unique_id_r}, \code{match_weight}, \code{match_probability}, \code{true_label},
+and \code{error_type}.
 }
 \description{
 Compares model predictions against labelled pairs and returns all
