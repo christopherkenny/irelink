@@ -75,7 +75,7 @@ il_deterministic_link <- function(.data, ..., spec, con = NULL,
   comparisons <- spec$comparisons
   blocking_rules <- spec$blocking_rules
 
-  tbl_name <- '__il_det_data'
+  tbl_name <- il_scratch_table_name('det_data')
   reg <- register_data(.data, con = con, tbl_name = tbl_name)
   con <- reg$con
   on.exit(drop_registered(con, tbl_name), add = TRUE)

@@ -83,7 +83,7 @@ il_estimate_m_from_labels <- function(model, labels) {
 
   if (dialect_has_fuzzy_sql(dialect)) {
     # SQL-first: upload match labels, JOIN to data, compute gammas, aggregate
-    lbl_tbl <- '__il_m_labels'
+    lbl_tbl <- il_table_name(model, 'm_labels', il_table_suffix())
     lbl_df <- data.frame(
       uid_l = as.character(match_pairs$unique_id_l),
       uid_r = as.character(match_pairs$unique_id_r),

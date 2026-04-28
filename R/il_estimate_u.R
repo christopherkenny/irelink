@@ -8,6 +8,14 @@
 #' @param model An `il_model` object (piped in).
 #' @param max_pairs Maximum number of random pairs to sample. Defaults to
 #'   `1e6`.
+#' @param min_count_per_level Optional integer. When set, chunked estimation
+#'   stops once every comparison level has been observed at least this many
+#'   times, or once `max_pairs` has been sampled.
+#' @param chunk_size Optional integer number of pairs to score per chunk. When
+#'   set, u estimation accumulates gamma counts across chunks instead of using
+#'   one aggregate query.
+#' @param profile_sql Logical. If `TRUE`, store lightweight SQL timing metadata
+#'   in `model$params$sql_profile`.
 #'
 #' @return An updated `il_model` with estimated u parameters.
 #' @export
@@ -61,9 +69,41 @@
 #'
 #' model <- il_estimate_u(model)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_estimate_u <- function(model, max_pairs = 1e6) {
+il_estimate_u <- function(model, max_pairs = 1e6,
+                          min_count_per_level = NULL,
+                          chunk_size = NULL,
+                          profile_sql = FALSE) {
   validate_il_model(model)
-  result <- get_random_pairs_with_gammas(model, max_pairs = max_pairs)
+  profile <- il_new_sql_profile(profile_sql)
+  max_pairs <- validate_positive_count(max_pairs, 'max_pairs')
+  if (!is.null(min_count_per_level)) {
+    min_count_per_level <- validate_positive_count(
+      min_count_per_level, 'min_count_per_level'
+    )
+  }
+  if (!is.null(chunk_size)) {
+    chunk_size <- validate_positive_count(chunk_size, 'chunk_size')
+  }
+  use_chunked <- !is.null(min_count_per_level) || !is.null(chunk_size)
+  if (use_chunked) {
+    if (is.null(chunk_size)) {
+      chunk_size <- min(max_pairs, 100000L)
+    }
+    result <- get_random_pair_gamma_counts_chunked(
+      model,
+      max_pairs = max_pairs,
+      chunk_size = chunk_size,
+      min_count_per_level = min_count_per_level,
+      profile = profile
+    )
+  } else {
+    result <- get_random_pairs_with_gammas(model,
+      max_pairs = max_pairs,
+      profile = profile
+    )
+    result$stopped_early <- FALSE
+    result$n_chunks <- 1L
+  }
 
   if (result$n_pairs == 0L) {
     cli::cli_abort('No pairs available for u estimation.')
@@ -113,5 +153,26 @@ il_estimate_u <- function(model, max_pairs = 1e6) {
   }
 
   model$params$comparisons <- params_tbl
+  model$params$u_estimation <- list(
+    n_pairs_sampled = n_pairs,
+    stopped_early = isTRUE(result$stopped_early),
+    min_count_per_level = min_count_per_level,
+    chunk_size = if (use_chunked) chunk_size else NULL,
+    max_pairs = max_pairs,
+    n_chunks = result$n_chunks %||% NA_integer_
+  )
+  if (isTRUE(profile_sql)) {
+    model$params$sql_profile <- il_sql_profile_entries(profile)
+  }
   model
+}
+
+#' Validate count-like scalar arguments
+#' @noRd
+validate_positive_count <- function(x, arg) {
+  if (!is.numeric(x) || length(x) != 1L || is.na(x) ||
+    !is.finite(x) || x <= 0) {
+    cli::cli_abort('{.arg {arg}} must be a positive finite number.')
+  }
+  as.integer(x)
 }

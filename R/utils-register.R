@@ -1,6 +1,116 @@
 # Internal helper for normalizing data input to a database table reference.
 # Supports data.frames, tbl_lazy (dbplyr), and character table name strings.
 
+.il_table_counter <- new.env(parent = emptyenv())
+.il_table_counter$n <- 0L
+
+#' Generate a model table prefix
+#' @return Character prefix beginning with "__il_".
+#' @noRd
+il_new_table_prefix <- function() {
+  .il_table_counter$n <- .il_table_counter$n + 1L
+  paste0('__il_', Sys.getpid(), '_', .il_table_counter$n)
+}
+
+#' Generate a short unique table suffix
+#' @return Character suffix.
+#' @noRd
+il_table_suffix <- function() {
+  .il_table_counter$n <- .il_table_counter$n + 1L
+  as.character(.il_table_counter$n)
+}
+
+#' Build a table name scoped to an il_model
+#' @param model An il_model object.
+#' @param purpose Short table purpose.
+#' @param suffix Optional suffix.
+#' @return Character table name.
+#' @noRd
+il_table_name <- function(model, purpose, suffix = NULL) {
+  prefix <- model$data$table_prefix %||% il_new_table_prefix()
+  parts <- c(prefix, purpose, suffix)
+  paste(parts[!is.na(parts) & nzchar(parts)], collapse = '_')
+}
+
+#' Build a unique package scratch table name
+#' @param purpose Short table purpose.
+#' @param suffix Optional suffix.
+#' @return Character table name beginning with "__il_".
+#' @noRd
+il_scratch_table_name <- function(purpose, suffix = NULL) {
+  suffix <- suffix %||% il_table_suffix()
+  paste(c('__il', purpose, Sys.getpid(), suffix), collapse = '_')
+}
+
+#' Does a table belong to a model prefix?
+#' @param model An il_model object.
+#' @param tbl_name Character table name.
+#' @return Logical.
+#' @noRd
+il_table_belongs_to_model <- function(model, tbl_name) {
+  prefix <- model$data$table_prefix
+  !is.null(prefix) && startsWith(tbl_name, paste0(prefix, '_'))
+}
+
+#' Track a table in model metadata
+#' @param model An il_model object.
+#' @param tbl_name Character table name.
+#' @param owner One of "model", "call", or "lazy".
+#' @return Updated model.
+#' @noRd
+il_track_table <- function(model, tbl_name,
+                           owner = c('model', 'call', 'lazy')) {
+  owner <- match.arg(owner)
+  if (is.null(model$data$tables)) {
+    model$data$tables <- data.frame(
+      table = character(), owner = character(),
+      stringsAsFactors = FALSE
+    )
+  }
+  existing <- model$data$tables$table == tbl_name
+  if (any(existing)) {
+    model$data$tables$owner[existing] <- owner
+  } else {
+    model$data$tables <- rbind(
+      model$data$tables,
+      data.frame(table = tbl_name, owner = owner, stringsAsFactors = FALSE)
+    )
+  }
+  model
+}
+
+#' Drop tracked model tables
+#' @param model An il_model object.
+#' @param owner Optional owner filter.
+#' @return Updated model.
+#' @noRd
+il_drop_tracked <- function(model, owner = NULL) {
+  con <- model$con
+  if (is.null(con) || !DBI::dbIsValid(con)) {
+    return(model)
+  }
+  tracked <- model$data$tables
+  if (is.null(tracked) || nrow(tracked) == 0L) {
+    return(model)
+  }
+  if (!is.null(owner)) {
+    tracked <- tracked[tracked$owner %in% owner, , drop = FALSE]
+  }
+  for (tbl in unique(tracked$table)) {
+    drop_registered(con, tbl)
+  }
+  if (is.null(owner)) {
+    model$data$tables <- model$data$tables[0, , drop = FALSE]
+  } else {
+    model$data$tables <- model$data$tables[
+      !model$data$tables$table %in% tracked$table,
+      ,
+      drop = FALSE
+    ]
+  }
+  model
+}
+
 #' Normalize data input to a database table reference
 #'
 #' Accepts a data.frame, a dbplyr `tbl_lazy`, or a character table name

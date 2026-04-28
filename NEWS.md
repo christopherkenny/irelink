@@ -6,7 +6,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 
 - `il_spec()`, `il_compare()`, and `il_block_on()` define the linkage model declaratively: which fields to compare, how to compare them, and which blocking rules to apply.
 - `il_model()` binds a spec to data and a DBI connection.
-- `predict()` scores all candidate pairs above a match-probability threshold (or match-weight threshold via `threshold_match_weight`).
+- `predict()` scores all candidate pairs above a match-probability threshold (or an evidence-only match-weight threshold via `threshold_match_weight`).
 - `il_cluster()` resolves scored pairs into entity clusters via connected components (using igraph) or single-best-link (with `source_dataset` for cross-source filtering).
 
 ## Comparison library
@@ -36,22 +36,24 @@ Initial development release, translating Python's [splink](https://github.com/mo
 
 ## Training
 
-- `il_estimate_u()` estimates non-match probabilities by sampling random pairs.
+- `il_estimate_u()` estimates non-match probabilities by sampling random pairs, with optional chunked estimation through `chunk_size` and early stopping through `min_count_per_level`.
 - `il_estimate_em()` runs the Fellegi-Sunter EM algorithm with configurable `max_iterations`, `convergence`, `fix_u`, `fix_m`, `fix_prior`, `derive_prior`, `estimate_without_tf`, and `estimator_mode` parameters.
 - `estimator_mode = "dependency-aware"` fits log-linear matched and unmatched comparison-pattern distributions over aggregated gamma counts, preserving missing comparison states as explicit pattern levels.
-- `il_estimate_prior()` sets the prior match probability.
+- `il_estimate_prior()` sets the prior match probability from deterministic matching rules, counting unique blocked pairs across overlapping rules.
 - `il_prior_prevalence()` and `il_prior_m()` add regularizing custom priors for EM; `il_constrain_m()` adds explicit fixed matched-class constraints.
 - `il_estimate_m_from_labels()` and `il_estimate_m_from_column()` initialise parameters from ground-truth labels.
 
 ## Prediction
 
-- `predict()` supports both `threshold` (match probability) and `threshold_match_weight` (log₂ Bayes factor) filtering.
+- `predict()` supports both `threshold` (match probability) and `threshold_match_weight` (evidence-only log2 Bayes factor) filtering.
+- Prediction output includes evidence-only `match_weight`, prior-inclusive `total_match_weight`, and posterior `match_probability`.
 - `include_fields = TRUE` joins all source columns into the scored output.
-- `collect = FALSE` returns an `il_compared_lazy` object backed by an in-database table.
+- `collect = FALSE` returns an `il_compared_lazy` object backed by a model-scoped in-database table.
 - `il_score_missing_edges()` enumerates and scores unscored within-cluster pairs.
 - `il_score_patterns()` scores compatible comparison-pattern tables, including dependency-aware pattern tables larger than the table used for fitting.
 - `il_deterministic_link()` performs exact-match linking without training.
 - `il_find_matches()` scores a set of probe records against existing data.
+- `profile_sql = TRUE` on `predict()` attaches lightweight SQL timing metadata to collected predictions or lazy prediction objects.
 
 ## Diagnostics and evaluation
 
@@ -71,8 +73,8 @@ Initial development release, translating Python's [splink](https://github.com/mo
 - `il_comparator_score()` computes batch string similarity across a DataFrame with SQL-side scoring on DuckDB/PostgreSQL.
 - `il_comparator_threshold_chart()` visualises match rates at multiple similarity thresholds.
 - `il_phonetic_chart()` produces a Soundex agreement heatmap.
-- `il_tf_chart()` visualises term frequency distributions with labelled most/least common values.
-- `il_register_tf()` registers pre-computed term frequency tables in the database.
+- `il_tf_chart()` visualises model-specific term frequency distributions with labelled most/least common values.
+- `il_register_tf()` registers pre-computed term frequency tables in the database and returns the updated model.
 
 ## Visualisation
 
@@ -91,11 +93,14 @@ Initial development release, translating Python's [splink](https://github.com/mo
 - All computation runs inside a DBI-compatible database: DuckDB (recommended), SQLite, or PostgreSQL.
 - `il_save()` and `il_load()` support both RDS files and Splink settings JSON.
 - `il_attach()` reattaches a saved model to different data or connections.
-- `il_cleanup()` removes temporary tables from the database.
+- `il_cleanup()` removes temporary tables owned by a single model, making it safe for shared DBI connections with multiple live models.
+- `il_cleanup_all()` removes all package-owned temporary tables from a connection for exploratory sessions and failed runs.
 
 ## Performance
 
 - Gamma computation is pushed into DuckDB using native C++ string similarity functions.
 - SQLite is retained as a fallback with R-side gamma computation via `stringdist`.
 - SQL-native connected components for DuckDB/PostgreSQL; igraph fallback for SQLite.
+- Term-frequency, lazy prediction, and scratch tables use generated model-scoped names to avoid collisions on shared connections.
+- `profile_sql = TRUE` on `il_estimate_u()`, `il_estimate_prior()`, and `predict()` records lightweight SQL timing metadata for performance investigation.
 - End-to-end benchmarks against an R-side SQLite baseline: 1,000 records in 1.4 s (2.1× faster), 5,000 records in 19.5 s (1.6×), 10,000 records in 61.4 s (2.6×). Speedup grows with dataset size.

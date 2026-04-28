@@ -96,7 +96,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
       new_records[[col]] <- NA_character_
     }
   }
-  tbl_new <- '__il_find_new'
+  tbl_new <- il_table_name(model, 'find_new', il_table_suffix())
   reg <- register_data(new_records,
     con = con, tbl_name = tbl_new,
     add_unique_id = TRUE
@@ -115,7 +115,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
 
     # TF SELECT expressions
     tf_cols <- tf_columns(comparisons)
-    tf_select <- sql_tf_select_exprs(tf_cols)
+    tf_select <- sql_tf_select_exprs(tf_cols, model$data$tf_tables)
     if (!is.null(tf_select)) {
       gamma_select <- paste(gamma_select, tf_select, sep = ', ')
     }
@@ -143,21 +143,24 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     }
     sql <- glue::glue('SELECT DISTINCT * FROM ({inner}) AS pairs')
     if (dependency_aware) {
+      score_tbl <- il_table_name(model, 'find_dependency_scores', il_table_suffix())
       prepared <- prepare_dependency_scored_query(
         model,
         gamma_sql = sql,
         threshold = threshold,
-        score_tbl = '__il_find_dependency_scores'
+        score_tbl = score_tbl
       )
       on.exit(drop_registered(con, prepared$score_tbl), add = TRUE)
       if (is.null(prepared$scored_sql)) {
         return(tibble::tibble(
           unique_id_l = character(0), unique_id_r = character(0),
-          match_weight = numeric(0), match_probability = numeric(0)
+          match_weight = numeric(0), total_match_weight = numeric(0),
+          match_probability = numeric(0)
         ))
       }
       scored_sql <- glue::glue(
-        'SELECT unique_id_l, unique_id_r, match_weight, match_probability ',
+        'SELECT unique_id_l, unique_id_r, match_weight, total_match_weight, ',
+        'match_probability ',
         'FROM ({prepared$scored_sql}) AS scored'
       )
       result <- tibble::as_tibble(DBI::dbGetQuery(con, scored_sql))
@@ -167,7 +170,8 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
       if (nrow(result_raw) == 0L) {
         return(tibble::tibble(
           unique_id_l = character(0), unique_id_r = character(0),
-          match_weight = numeric(0), match_probability = numeric(0)
+          match_weight = numeric(0), total_match_weight = numeric(0),
+          match_probability = numeric(0)
         ))
       }
 
@@ -197,6 +201,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
         unique_id_l = result_raw$l_unique_id,
         unique_id_r = result_raw$r_unique_id,
         match_weight = match_weight,
+        total_match_weight = total_match_weight(match_weight, prior),
         match_probability = match_probability
       )
     }
@@ -236,7 +241,8 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     if (length(all_pair_frames) == 0L) {
       return(tibble::tibble(
         unique_id_l = character(0), unique_id_r = character(0),
-        match_weight = numeric(0), match_probability = numeric(0)
+        match_weight = numeric(0), total_match_weight = numeric(0),
+        match_probability = numeric(0)
       ))
     }
 
@@ -250,6 +256,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
         gamma_mat, comp_names, model$params$dependency_aware
       )
       match_weight <- scored_patterns$match_weight
+      total_mw <- scored_patterns$total_match_weight
       match_probability <- scored_patterns$match_probability
     } else {
       match_weight <- score_gamma_matrix(gamma_mat, mu)
@@ -262,6 +269,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
         match_weight <- match_weight + tf_adj
       }
 
+      total_mw <- total_match_weight(match_weight, prior)
       match_probability <- weight_to_probability(match_weight, prior)
     }
 
@@ -269,6 +277,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
       unique_id_l = pairs$l_unique_id,
       unique_id_r = pairs$r_unique_id,
       match_weight = match_weight,
+      total_match_weight = total_mw,
       match_probability = match_probability
     )
   }
@@ -278,7 +287,8 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
   if (nrow(result) == 0L) {
     return(tibble::tibble(
       unique_id_l = character(0), unique_id_r = character(0),
-      match_weight = numeric(0), match_probability = numeric(0)
+      match_weight = numeric(0), total_match_weight = numeric(0),
+      match_probability = numeric(0)
     ))
   }
 

@@ -33,4 +33,6 @@ head(predictions, 5)
 clusters <- il_cluster(predictions, threshold = 0.5)
 head(clusters, 5)
 
+il_cleanup(model)
+il_cleanup_all(con)
 dbDisconnect(con, shutdown = TRUE)

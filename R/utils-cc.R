@@ -7,11 +7,14 @@
 # Typical convergence: 3-7 iterations even for large graphs.
 
 # Table names used by the CC algorithm
-cc_tbl <- function(name) paste0('__il_cc_', name)
+cc_tbl <- function(name, prefix = NULL) {
+  prefix <- prefix %||% '__il_cc'
+  paste0(prefix, '_', name)
+}
 
 #' Upload an edge list to the database for clustering
 #'
-#' Creates a minimal `__il_cc_edges` table with just the two ID columns
+#' Creates a minimal connected-component edge table with just the two ID columns
 #' and optional match_probability for threshold filtering.
 #'
 #' @param con DBI connection.
@@ -20,7 +23,7 @@ cc_tbl <- function(name) paste0('__il_cc_', name)
 #'   match probability are uploaded.
 #' @return The table name (character).
 #' @noRd
-cc_upload_edges <- function(con, pairs, threshold = NULL) {
+cc_upload_edges <- function(con, pairs, threshold = NULL, prefix = NULL) {
   if (!is.null(threshold)) {
     pairs <- pairs[which(pairs$match_probability >= threshold), , drop = FALSE]
   }
@@ -32,7 +35,7 @@ cc_upload_edges <- function(con, pairs, threshold = NULL) {
   if ('match_probability' %in% names(pairs)) {
     edges$match_probability <- pairs$match_probability
   }
-  tbl <- cc_tbl('edges')
+  tbl <- cc_tbl('edges', prefix)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
   DBI::dbWriteTable(con, tbl, edges)
   tbl
@@ -41,16 +44,16 @@ cc_upload_edges <- function(con, pairs, threshold = NULL) {
 #' Initialise the CC algorithm tables
 #'
 #' Creates:
-#' - `__il_cc_neighbours`: bidirectional edges (each edge in both directions)
-#' - `__il_cc_representatives`: initial representative = self for every node
+#' - neighbours: bidirectional edges (each edge in both directions)
+#' - representatives: initial representative = self for every node
 #'
 #' @param con DBI connection.
 #' @param edges_tbl Name of the edges table.
 #' @return Invisibly, the representative table name.
 #' @noRd
-cc_initialise <- function(con, edges_tbl) {
-  neighbours_tbl <- cc_tbl('neighbours')
-  repr_tbl <- cc_tbl('representatives')
+cc_initialise <- function(con, edges_tbl, prefix = NULL) {
+  neighbours_tbl <- cc_tbl('neighbours', prefix)
+  repr_tbl <- cc_tbl('representatives', prefix)
 
   # Bidirectional edge list
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {neighbours_tbl}'))
@@ -91,14 +94,14 @@ cc_initialise <- function(con, edges_tbl) {
 #' @return A list with `stable_tbl` and `unstable_tbl` names, and
 #'   `n_remaining` (number of cross-cluster edges remaining).
 #' @noRd
-cc_iterate <- function(con, iteration) {
-  neighbours_tbl <- cc_tbl('neighbours')
-  repr_tbl <- cc_tbl('representatives')
-  updates_tbl <- cc_tbl('rep_updates')
-  new_repr_tbl <- cc_tbl(paste0('repr_', iteration))
-  stable_tbl <- cc_tbl(paste0('stable_', iteration))
-  unstable_tbl <- cc_tbl(paste0('unstable_', iteration))
-  new_neighbours_tbl <- cc_tbl(paste0('neighbours_', iteration))
+cc_iterate <- function(con, iteration, prefix = NULL) {
+  neighbours_tbl <- cc_tbl('neighbours', prefix)
+  repr_tbl <- cc_tbl('representatives', prefix)
+  updates_tbl <- cc_tbl('rep_updates', prefix)
+  new_repr_tbl <- cc_tbl(paste0('repr_', iteration), prefix)
+  stable_tbl <- cc_tbl(paste0('stable_', iteration), prefix)
+  unstable_tbl <- cc_tbl(paste0('unstable_', iteration), prefix)
+  new_neighbours_tbl <- cc_tbl(paste0('neighbours_', iteration), prefix)
 
   # Step 1: Compute new representatives (min across neighbours + self)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {updates_tbl}'))
@@ -186,13 +189,13 @@ cc_iterate <- function(con, iteration) {
 #' @return A tibble with columns `node_id` and `cluster_id`.
 #' @noRd
 solve_cc_sql <- function(con, edges_tbl, max_iterations = 100L,
-                         collect = TRUE) {
+                         collect = TRUE, prefix = NULL) {
   # Check for empty edge set
   n_edges <- DBI::dbGetQuery(
     con, glue::glue('SELECT COUNT(*) AS n FROM {edges_tbl}')
   )$n
   if (n_edges == 0L) {
-    output_tbl <- cc_tbl('output')
+    output_tbl <- cc_tbl('output', prefix)
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
     DBI::dbExecute(con, glue::glue(
       'CREATE TABLE {output_tbl} AS ',
@@ -206,18 +209,18 @@ solve_cc_sql <- function(con, edges_tbl, max_iterations = 100L,
     ))
   }
 
-  cc_initialise(con, edges_tbl)
+  cc_initialise(con, edges_tbl, prefix = prefix)
 
   stable_tables <- character(0)
   for (i in seq_len(max_iterations)) {
-    result <- cc_iterate(con, i)
+    result <- cc_iterate(con, i, prefix = prefix)
     stable_tables <- c(stable_tables, result$stable_tbl)
 
     if (result$n_remaining == 0L) break
   }
 
   # Include any remaining unstable nodes (final iteration's representatives)
-  repr_tbl <- cc_tbl('representatives')
+  repr_tbl <- cc_tbl('representatives', prefix)
 
   # Merge all stable tables + remaining unstable
   all_tables <- c(stable_tables, repr_tbl)
@@ -226,7 +229,7 @@ solve_cc_sql <- function(con, edges_tbl, max_iterations = 100L,
   }, character(1))
   union_sql <- paste(union_parts, collapse = ' UNION ALL ')
 
-  output_tbl <- cc_tbl('output')
+  output_tbl <- cc_tbl('output', prefix)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
   DBI::dbExecute(con, glue::glue(
     'CREATE TABLE {output_tbl} AS {union_sql}'
@@ -238,7 +241,7 @@ solve_cc_sql <- function(con, edges_tbl, max_iterations = 100L,
   }
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {repr_tbl}'))
   DBI::dbExecute(con, glue::glue(
-    'DROP TABLE IF EXISTS {cc_tbl("neighbours")}'
+    'DROP TABLE IF EXISTS {cc_tbl("neighbours", prefix)}'
   ))
 
   if (!collect) {
@@ -262,8 +265,9 @@ solve_cc_sql <- function(con, edges_tbl, max_iterations = 100L,
 #'   unique_id_r, match_probability).
 #' @return Name of the filtered edges table.
 #' @noRd
-sql_best_link_filter <- function(con, edges_tbl, ties_method = 'lowest_id') {
-  filtered_tbl <- cc_tbl('best_link')
+sql_best_link_filter <- function(con, edges_tbl, ties_method = 'lowest_id',
+                                 prefix = NULL) {
+  filtered_tbl <- cc_tbl('best_link', prefix)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {filtered_tbl}'))
 
   if (ties_method == 'drop') {
@@ -359,12 +363,13 @@ sql_best_link_filter <- function(con, edges_tbl, ties_method = 'lowest_id') {
 solve_one_to_one_sql <- function(con, edges_tbl, source_dataset,
                                  ties_method = 'lowest_id',
                                  max_iterations = 100L,
-                                 collect = TRUE) {
-  oto_repr <- cc_tbl('oto_repr')
-  oto_src <- cc_tbl('oto_src')
-  oto_cluster_ds <- cc_tbl('oto_cluster_ds')
-  oto_ranked <- cc_tbl('oto_ranked')
-  oto_merged <- cc_tbl('oto_merged')
+                                 collect = TRUE,
+                                 prefix = NULL) {
+  oto_repr <- cc_tbl('oto_repr', prefix)
+  oto_src <- cc_tbl('oto_src', prefix)
+  oto_cluster_ds <- cc_tbl('oto_cluster_ds', prefix)
+  oto_ranked <- cc_tbl('oto_ranked', prefix)
+  oto_merged <- cc_tbl('oto_merged', prefix)
 
   # Upload source dataset mapping
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_src}'))
@@ -486,7 +491,7 @@ solve_one_to_one_sql <- function(con, edges_tbl, source_dataset,
     ))
   }
 
-  output_tbl <- cc_tbl('output')
+  output_tbl <- cc_tbl('output', prefix)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
   DBI::dbExecute(con, glue::glue(
     'CREATE TABLE {output_tbl} AS ',
@@ -656,9 +661,9 @@ solve_one_to_one_r <- function(pairs, source_dataset,
 #' @param edges_tbl Name of the original edges table.
 #' @return Name of the node metrics table.
 #' @noRd
-sql_node_metrics <- function(con, cc_output_tbl, edges_tbl) {
-  bidir_tbl <- cc_tbl('bidir_edges')
-  node_metrics_tbl <- cc_tbl('node_metrics')
+sql_node_metrics <- function(con, cc_output_tbl, edges_tbl, prefix = NULL) {
+  bidir_tbl <- cc_tbl('bidir_edges', prefix)
+  node_metrics_tbl <- cc_tbl('node_metrics', prefix)
 
   # Build bidirectional edges for degree computation
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {bidir_tbl}'))
@@ -694,8 +699,8 @@ sql_node_metrics <- function(con, cc_output_tbl, edges_tbl) {
 #' @param node_metrics_tbl Name of the node metrics table.
 #' @return Name of the cluster metrics table.
 #' @noRd
-sql_cluster_metrics <- function(con, node_metrics_tbl) {
-  cluster_tbl <- cc_tbl('cluster_metrics')
+sql_cluster_metrics <- function(con, node_metrics_tbl, prefix = NULL) {
+  cluster_tbl <- cc_tbl('cluster_metrics', prefix)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {cluster_tbl}'))
   DBI::dbExecute(con, glue::glue(
     'CREATE TABLE {cluster_tbl} AS ',

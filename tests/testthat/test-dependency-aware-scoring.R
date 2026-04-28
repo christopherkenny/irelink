@@ -289,3 +289,49 @@ test_that('dependency-aware il_find_matches scores through the SQL pattern looku
   expect_true(all(is.finite(matches$match_weight)))
   expect_true(all(matches$match_probability > 0 & matches$match_probability < 1))
 })
+
+test_that('dependency-aware SQL score lookups do not use shared table names', {
+  skip_if_not_installed('duckdb')
+
+  con <- DBI::dbConnect(duckdb::duckdb())
+  withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
+
+  df <- data.frame(
+    unique_id = 1:6,
+    a = c('x', 'x', 'x', 'y', 'z', 'z'),
+    b = c('p', 'p', 'q', 'q', 'r', 's')
+  )
+  model <- make_dependency_model(df, con) |>
+    il_estimate_em(
+      block_on(.where = '1=1'),
+      max_iterations = 10L,
+      estimator_mode = 'dependency-aware'
+    )
+
+  DBI::dbWriteTable(
+    con,
+    '__il_dependency_scores',
+    data.frame(marker = 'predict sentinel')
+  )
+  DBI::dbWriteTable(
+    con,
+    '__il_find_dependency_scores',
+    data.frame(marker = 'find sentinel')
+  )
+
+  invisible(predict(model, threshold = 0))
+  invisible(il_find_matches(
+    model,
+    data.frame(a = 'x', b = 'p'),
+    threshold = 0
+  ))
+
+  expect_equal(
+    DBI::dbReadTable(con, '__il_dependency_scores')$marker,
+    'predict sentinel'
+  )
+  expect_equal(
+    DBI::dbReadTable(con, '__il_find_dependency_scores')$marker,
+    'find sentinel'
+  )
+})

@@ -144,7 +144,8 @@ cluster_assignments_lazy_sql <- function(pairs, threshold = NULL,
 
   con <- pairs$con
   predicted_tbl <- pairs$predicted_tbl
-  edges_tbl <- cc_tbl('edges')
+  cc_prefix <- il_scratch_table_name('cc')
+  edges_tbl <- cc_tbl('edges', cc_prefix)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
 
   threshold_where <- ''
@@ -166,22 +167,25 @@ cluster_assignments_lazy_sql <- function(pairs, threshold = NULL,
         edges_tbl,
         source_dataset = source_dataset,
         ties_method = ties_method,
-        collect = FALSE
+        collect = FALSE,
+        prefix = cc_prefix
       )
     } else {
-      filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method)
+      filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method,
+        prefix = cc_prefix
+      )
       DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
       DBI::dbExecute(con, glue::glue(
         'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
       ))
-      solve_cc_sql(con, edges_tbl, collect = FALSE)
+      solve_cc_sql(con, edges_tbl, collect = FALSE, prefix = cc_prefix)
     }
   } else {
-    solve_cc_sql(con, edges_tbl, collect = FALSE)
+    solve_cc_sql(con, edges_tbl, collect = FALSE, prefix = cc_prefix)
   }
   on.exit(drop_registered(con, cc_output_tbl), add = TRUE)
 
-  final_tbl <- cc_tbl('cluster_eval')
+  final_tbl <- cc_tbl('cluster_eval', cc_prefix)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {final_tbl}'))
   sql <- paste0(
     'CREATE TABLE ', final_tbl, ' AS ',

@@ -33,9 +33,9 @@ il_tf_chart <- function(model, col, n_most_freq = 10L, n_least_freq = 5L) {
   }
 
   con <- model$con
-  tf_tbl <- paste0('__il_tf_', col)
+  tf_tbl <- model$data$tf_tables[[col]]
 
-  if (is.null(con) || !DBI::dbExistsTable(con, tf_tbl)) {
+  if (is.null(tf_tbl) || is.null(con) || !DBI::dbExistsTable(con, tf_tbl)) {
     cli::cli_abort(
       'No term frequency table found for column {.field {col}}. \\
        Ensure {.code term_frequency = TRUE} is set in the comparison \\

@@ -44,4 +44,5 @@ il_count_pairs(
   con = con
 )
 
+il_cleanup_all(con)
 dbDisconnect(con, shutdown = TRUE)

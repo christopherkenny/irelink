@@ -12,6 +12,7 @@
   collect = TRUE,
   include_fields = FALSE,
   greedy = FALSE,
+  profile_sql = FALSE,
   ...
 )
 }
@@ -23,8 +24,8 @@ match probability at or above this threshold are returned. Defaults
 to \code{0.85}. Ignored when \code{threshold_match_weight} is set.}
 
 \item{threshold_match_weight}{Optional numeric value. When set, pairs
-are filtered on match weight (log₂ Bayes factor) instead of
-probability. Typical values range from about −5 to +30. Overrides
+are filtered on evidence-only match weight (log2 Bayes factor) instead
+of probability. Typical values range from about -5 to +30. Overrides
 \code{threshold}.}
 
 \item{type}{One of \code{"pairs"} (default) to return scored pairs, or
@@ -34,7 +35,7 @@ probability. Typical values range from about −5 to +30. Overrides
 into an in-memory tibble.
 If \code{FALSE}, scoring is performed entirely in-database and the
 result is a lightweight \code{il_compared_lazy} reference that
-\code{\link[=il_cluster]{il_cluster()}} can consume directly — avoiding the round-trip of
+\code{\link[=il_cluster]{il_cluster()}} can consume directly, avoiding the round-trip of
 collecting millions of rows into R and re-uploading them.
 Requires a DuckDB or PostgreSQL backend.}
 
@@ -48,19 +49,25 @@ for link models. Defaults to \code{FALSE}, returning all above-threshold
 candidate pairs. Greedy matching sorts pairs by descending posterior
 match probability, then by left and right row order.}
 
+\item{profile_sql}{Logical. If \code{TRUE}, attach lightweight SQL timing
+metadata to collected predictions or include it on lazy predictions.}
+
 \item{...}{Additional arguments passed to the generic.}
 }
 \value{
 When \code{collect = TRUE}: an \code{il_compared} tibble with one row
 per candidate pair, including columns for record IDs, match weight,
-match probability, and per-comparison gamma values.
+total match weight, match probability, and per-comparison gamma values.
+\code{match_weight} is the evidence-only log2 Bayes factor. The additive
+prior term is exposed separately through \code{total_match_weight}, whose
+value is \code{match_weight + log2(prior / (1 - prior))}.
 When \code{collect = FALSE}: an \code{il_compared_lazy} object referencing the
 scored pairs table in the database.
 }
 \description{
 Generates and scores all candidate record pairs that pass the blocking
 rules, returning those above the match-probability threshold. This is
-an S3 method for \code{\link[stats:predict]{stats::predict()}} — the same generic used for \code{lm},
+an S3 method for \code{\link[stats:predict]{stats::predict()}}, the same generic used for \code{lm},
 \code{glm}, and tidymodels objects.
 }
 \examples{

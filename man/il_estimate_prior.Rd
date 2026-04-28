@@ -4,7 +4,7 @@
 \alias{il_estimate_prior}
 \title{Estimate the Prior Match Probability}
 \usage{
-il_estimate_prior(model, ..., recall = 0.7)
+il_estimate_prior(model, ..., recall = 0.7, profile_sql = FALSE)
 }
 \arguments{
 \item{model}{An \code{il_model} object (piped in).}
@@ -14,6 +14,9 @@ deterministic matching criteria.}
 
 \item{recall}{A numeric value between 0 and 1 representing the assumed
 recall of the deterministic rules. Defaults to \code{0.7}.}
+
+\item{profile_sql}{Logical. If \code{TRUE}, store lightweight SQL timing metadata
+in \code{model$params$sql_profile}.}
 }
 \value{
 An updated \code{il_model} with the estimated prior.

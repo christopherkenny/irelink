@@ -51,8 +51,13 @@ il_model <- function(
 
   validate_il_spec(spec)
 
+  table_prefix <- il_new_table_prefix()
+
   # Register primary data (normalizes all input types)
-  reg_l <- register_data(.data, con = con, tbl_name = '__il_data_l')
+  reg_l <- register_data(
+    .data, con = con,
+    tbl_name = paste0(table_prefix, '_data_l')
+  )
   con <- reg_l$con
 
   # Register phonetic SQL macros if any transforms require them
@@ -82,7 +87,7 @@ il_model <- function(
     reg_r <- register_data(
       extra_inputs[[1]],
       con = con,
-      tbl_name = '__il_data_r'
+      tbl_name = paste0(table_prefix, '_data_r')
     )
     tbl_name_r <- reg_r$tbl_name
     n_records_r <- reg_r$n_records
@@ -93,7 +98,13 @@ il_model <- function(
     n_records_r = n_records_r,
     tbl_l = reg_l$tbl_name,
     tbl_r = tbl_name_r,
-    columns = reg_l$columns
+    columns = reg_l$columns,
+    table_prefix = table_prefix,
+    tables = data.frame(
+      table = c(reg_l$tbl_name, tbl_name_r)[!is.na(c(reg_l$tbl_name, tbl_name_r))],
+      owner = 'model',
+      stringsAsFactors = FALSE
+    )
   )
 
   new_il_model(
@@ -158,8 +169,13 @@ il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
   link_type <- match.arg(link_type, c('dedupe', 'link', 'link_and_dedupe'))
   extra_inputs <- list(...)
 
+  table_prefix <- il_new_table_prefix()
+
   # Register primary data
-  reg_l <- register_data(.data, con = con, tbl_name = '__il_data_l')
+  reg_l <- register_data(
+    .data, con = con,
+    tbl_name = paste0(table_prefix, '_data_l')
+  )
   con <- reg_l$con
 
   # Register phonetic SQL macros if needed
@@ -189,7 +205,7 @@ il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
     reg_r <- register_data(
       extra_inputs[[1]],
       con = con,
-      tbl_name = '__il_data_r'
+      tbl_name = paste0(table_prefix, '_data_r')
     )
     tbl_name_r <- reg_r$tbl_name
     n_records_r <- reg_r$n_records
@@ -200,7 +216,13 @@ il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
     n_records_r = n_records_r,
     tbl_l = reg_l$tbl_name,
     tbl_r = tbl_name_r,
-    columns = reg_l$columns
+    columns = reg_l$columns,
+    table_prefix = table_prefix,
+    tables = data.frame(
+      table = c(reg_l$tbl_name, tbl_name_r)[!is.na(c(reg_l$tbl_name, tbl_name_r))],
+      owner = 'model',
+      stringsAsFactors = FALSE
+    )
   )
 
   model$data <- data_info

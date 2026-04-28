@@ -514,7 +514,8 @@ sql_array_min_distance_case <- function(level, col, null_guard) {
 #' @return A SQL query string.
 #' @noRd
 build_gamma_query <- function(model, blocking_rules, limit = NULL,
-                              deduplicate = FALSE) {
+                              deduplicate = FALSE,
+                              blocked_pairs_tbl = NULL) {
   con <- model$con
   dialect <- detect_dialect(con)
   tbl_l <- model$data$tbl_l
@@ -532,9 +533,21 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL,
 
   # TF SELECT expressions (scalar subqueries against pre-computed TF tables)
   tf_cols <- tf_columns(comparisons)
-  tf_select <- sql_tf_select_exprs(tf_cols)
+  tf_select <- sql_tf_select_exprs(tf_cols, model$data$tf_tables)
   if (!is.null(tf_select)) {
     gamma_select <- paste(gamma_select, tf_select, sep = ', ')
+  }
+
+  if (!is.null(blocked_pairs_tbl)) {
+    sql <- build_gamma_query_from_blocked_pairs(
+      model,
+      blocked_pairs_tbl = blocked_pairs_tbl,
+      gamma_select = gamma_select
+    )
+    if (!is.null(limit)) {
+      sql <- glue::glue('{sql} LIMIT {as.integer(limit)}')
+    }
+    return(sql)
   }
 
   select_prefix <- glue::glue(
@@ -606,6 +619,37 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL,
   }
 
   sql
+}
+
+#' Build gamma SQL from a materialized blocked-pairs table
+#' @noRd
+build_gamma_query_from_blocked_pairs <- function(model, blocked_pairs_tbl,
+                                                 gamma_select) {
+  tbl_l <- model$data$tbl_l
+  tbl_r <- model$data$tbl_r %||% tbl_l
+  has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
+  combos <- if (has_two_tables) {
+    list(
+      list(source_l = 'l', source_r = 'r', from_l = tbl_l, from_r = tbl_r),
+      list(source_l = 'l', source_r = 'l', from_l = tbl_l, from_r = tbl_l),
+      list(source_l = 'r', source_r = 'r', from_l = tbl_r, from_r = tbl_r)
+    )
+  } else {
+    list(list(source_l = 'l', source_r = 'l', from_l = tbl_l, from_r = tbl_l))
+  }
+
+  parts <- vapply(combos, function(combo) {
+    glue::glue(
+      'SELECT b.l_unique_id, b.r_unique_id, {gamma_select} ',
+      'FROM {blocked_pairs_tbl} b ',
+      'INNER JOIN {combo$from_l} l ON l.unique_id = b.l_unique_id ',
+      'INNER JOIN {combo$from_r} r ON r.unique_id = b.r_unique_id ',
+      "WHERE b.source_l = '{combo$source_l}' ",
+      "AND b.source_r = '{combo$source_r}'"
+    )
+  }, character(1))
+
+  glue::glue('SELECT DISTINCT * FROM ({paste(parts, collapse = " UNION ALL ")}) AS pairs')
 }
 
 #' Build the list of (from_l, from_r, join_cond) table-pair combos
@@ -903,6 +947,78 @@ count_blocked_pairs <- function(con, tbl_l, tbl_r, where, dedupe = TRUE) {
   as.numeric(res$n[1])
 }
 
+#' Build SQL for unique blocked-pair rows across blocking rules
+#'
+#' @param tbl_l Left table name.
+#' @param tbl_r Right table name.
+#' @param rule An il_blocking_rule object.
+#' @param link_type One of "dedupe", "link", or "link_and_dedupe".
+#' @param has_two_tables Logical; TRUE when tbl_l and tbl_r differ.
+#' @param dialect SQL dialect string.
+#' @return SQL selecting source/id columns for blocked pairs.
+#' @noRd
+blocked_pair_rows_sql <- function(tbl_l, tbl_r, rule, link_type,
+                                  has_two_tables, dialect) {
+  block_where <- build_blocking_condition(rule$columns, rule$where,
+    transform = rule$transform,
+    dialect = dialect
+  )
+  table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
+  parts <- vapply(seq_along(table_pairs), function(i) {
+    tp <- table_pairs[[i]]
+    source_l <- if (identical(tp$from_l, tbl_l)) 'l' else 'r'
+    source_r <- if (identical(tp$from_r, tbl_l)) 'l' else 'r'
+    from_l <- sql_explode_from(tp$from_l, rule$explode, dialect)
+    from_r <- sql_explode_from(tp$from_r, rule$explode, dialect)
+    where_parts <- c(tp$join_cond)
+    if (nzchar(block_where)) {
+      where_parts <- c(where_parts, block_where)
+    }
+    where_clause <- paste(where_parts, collapse = ' AND ')
+    glue::glue(
+      "SELECT '{source_l}' AS source_l, l.unique_id AS unique_id_l, ",
+      "'{source_r}' AS source_r, r.unique_id AS unique_id_r ",
+      'FROM {from_l} l, {from_r} r ',
+      'WHERE {where_clause}'
+    )
+  }, character(1))
+  paste(parts, collapse = ' UNION ALL ')
+}
+
+#' Count unique blocked pairs across all deterministic rules
+#'
+#' Unlike summing per-rule counts, this counts a pair only once even when it is
+#' produced by multiple blocking rules.
+#'
+#' @param con A DBI connection.
+#' @param tbl_l Left table name.
+#' @param tbl_r Right table name.
+#' @param rules List of il_blocking_rule objects.
+#' @param link_type One of "dedupe", "link", or "link_and_dedupe".
+#' @param dialect SQL dialect string.
+#' @return Numeric count of unique blocked pairs.
+#' @noRd
+count_unique_blocked_pairs <- function(con, tbl_l, tbl_r, rules, link_type,
+                                       dialect, profile = NULL) {
+  has_two_tables <- !is.null(tbl_r) && !identical(tbl_r, tbl_l)
+  tbl_r <- tbl_r %||% tbl_l
+  parts <- vapply(rules, function(rule) {
+    blocked_pair_rows_sql(tbl_l, tbl_r, rule, link_type, has_two_tables, dialect)
+  }, character(1))
+  union_sql <- paste(parts, collapse = ' UNION ALL ')
+  sql <- glue::glue(
+    'SELECT COUNT(*) AS n FROM (',
+    'SELECT DISTINCT source_l, unique_id_l, source_r, unique_id_r ',
+    'FROM ({union_sql}) AS blocked_pairs',
+    ') AS unique_blocked_pairs'
+  )
+  res <- il_db_get_query(con, sql,
+    step = 'estimate_prior.count_unique_blocked_pairs',
+    profile = profile
+  )
+  as.numeric(res$n[1])
+}
+
 # --- SQL-side scoring helpers (lazy prediction pipeline) --------------------
 
 #' Generate a CASE expression for one comparison's match-weight contribution
@@ -990,7 +1106,8 @@ sql_tf_adj_expr <- function(col, max_level, u_exact,
 #' @return A SQL query string.
 #' @noRd
 build_scored_query <- function(model, threshold = 0.85,
-                               threshold_match_weight = NULL) {
+                               threshold_match_weight = NULL,
+                               blocked_pairs_tbl = NULL) {
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
   prior <- safe_prior(model)
@@ -998,7 +1115,9 @@ build_scored_query <- function(model, threshold = 0.85,
   blocking_rules <- model$spec$blocking_rules
 
   mu <- extract_mu_vectors(params, comp_names)
-  gamma_sql <- build_gamma_query(model, blocking_rules)
+  gamma_sql <- build_gamma_query(model, blocking_rules,
+    blocked_pairs_tbl = blocked_pairs_tbl
+  )
 
   # Per-comparison weight CASE expressions
   weight_parts <- vapply(seq_along(comparisons), function(j) {
@@ -1030,6 +1149,7 @@ build_scored_query <- function(model, threshold = 0.85,
   weight_expr <- paste(all_weight_parts, collapse = ' + ')
 
   log_prior_odds <- log(prior / (1 - prior))
+  prior_weight <- prior_match_weight(prior)
   ln2 <- log(2)
 
   gamma_cols <- paste0('gamma_', comp_names)
@@ -1062,6 +1182,7 @@ build_scored_query <- function(model, threshold = 0.85,
   glue::glue(
     'SELECT DISTINCT unique_id_l, unique_id_r, {gamma_select}, ',
     'match_weight{outer_tf_adj}, ',
+    '(match_weight + {prior_weight}) AS total_match_weight, ',
     '1.0 / (1.0 + EXP(-({log_prior_odds} + match_weight * {ln2}))) ',
     'AS match_probability ',
     'FROM (',
@@ -1176,6 +1297,7 @@ greedy_result_columns <- function(model) {
     paste0('gamma_', comp_names),
     'match_weight',
     if (length(tf_cols) > 0L) paste0('tf_adj_', tf_cols) else character(0),
+    'total_match_weight',
     'match_probability'
   )
 }

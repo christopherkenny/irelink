@@ -23,6 +23,10 @@ spec <- il_spec() |>
   il_block_on(surname) |>
   il_block_on(first_name)
 con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+on.exit({
+  il_cleanup_all(con)
+  DBI::dbDisconnect(con)
+})
 model <- il_model(df, spec = spec, con = con)
 
 # U estimation breakdown
@@ -39,7 +43,7 @@ gamma_times <- lapply(seq_along(spec$comparisons), \(j) {
 }) |> dplyr::bind_rows()
 
 # EM breakdown
-model <- il_estimate_u(model)
+model <- il_estimate_u(model, profile_sql = TRUE)
 t4 <- system.time(pairs_em <- irelink:::get_blocked_pairs(model, block_on(surname)))["elapsed"]
 t5 <- system.time(gm_em <- irelink:::compute_gamma_matrix(pairs_em, spec$comparisons))["elapsed"]
 
@@ -91,8 +95,6 @@ t11 <- system.time({
   pair_key <- paste(all_pairs$l_unique_id, all_pairs$r_unique_id, sep = "||")
   pairs_dedup <- all_pairs[!duplicated(pair_key), , drop = FALSE]
 })["elapsed"]
-
-DBI::dbDisconnect(con)
 
 tibble::tibble(
   stage = c(

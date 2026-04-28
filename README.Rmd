@@ -66,7 +66,8 @@ model <- il_estimate_u(model)
 model <- il_estimate_em(model, block_on(surname))
 ```
 
-`predict()` scores all candidate pairs and returns those above the threshold.
+`predict()` scores all candidate pairs and returns those above the match-probability threshold.
+The returned `match_weight` is the evidence-only log2 Bayes factor; `total_match_weight` adds the prior odds used to compute `match_probability`.
 `il_cluster()` groups the matched pairs into deduplicated entities.
 
 ```{r dedup-predict}
@@ -75,8 +76,8 @@ clusters <- il_cluster(pairs)
 clusters
 ```
 
-`il_cleanup()` drops the temporary tables that `irelink` wrote to the database.
-Always call it when you're done to avoid leaving stale tables in your connection.
+`il_cleanup()` drops the temporary tables owned by this model.
+Use `il_cleanup_all(con)` as an interactive escape hatch when a failed or exploratory session may have left several `irelink` models' tables behind.
 
 ```{r dedup-cleanup}
 il_cleanup(model)
@@ -124,7 +125,7 @@ pairs <- predict(model, threshold = 0.5)
 pairs
 ```
 
-As in the prior example, `il_cleanup()` drops the temporary tables that `irelink` wrote to the database.
+As in the prior example, `il_cleanup()` drops this model's temporary tables.
 
 ```{r link-cleanup}
 il_cleanup(model)

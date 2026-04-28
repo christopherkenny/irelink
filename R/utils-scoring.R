@@ -152,6 +152,29 @@ weight_to_probability <- function(match_weight, prior) {
   1 / (1 + exp(-log_odds))
 }
 
+#' Convert a prior match probability to a log2 prior-odds weight
+#'
+#' `match_weight` is kept as evidence-only log2 Bayes factor. This helper
+#' computes the additive prior term used for posterior/total match weight.
+#'
+#' @param prior Scalar prior match probability.
+#' @return Numeric scalar log2 prior odds.
+#' @noRd
+prior_match_weight <- function(prior) {
+  prior <- clamp_probability(prior)
+  log2(prior / (1 - prior))
+}
+
+#' Add prior odds to evidence-only match weights
+#'
+#' @param match_weight Numeric vector of evidence-only log2 Bayes factors.
+#' @param prior Scalar prior match probability.
+#' @return Numeric vector of posterior log2 odds.
+#' @noRd
+total_match_weight <- function(match_weight, prior) {
+  match_weight + prior_match_weight(prior)
+}
+
 #' Compute per-comparison contribution for a single gamma vector
 #'
 #' Used by [il_waterfall()] to decompose a match weight into parts.

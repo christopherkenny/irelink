@@ -121,14 +121,17 @@ il_cluster <- function(pairs, threshold = NULL,
 #' @noRd
 cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id',
                         source_dataset = NULL) {
-  edges_tbl <- cc_upload_edges(con, pairs, threshold = threshold)
+  cc_prefix <- il_scratch_table_name('cc')
+  edges_tbl <- cc_upload_edges(con, pairs, threshold = threshold,
+    prefix = cc_prefix
+  )
 
   if (method == 'best_link') {
     if (!is.null(source_dataset)) {
       # Iterative one-to-one: merge clusters step-by-step, re-evaluating
       # dataset constraints after each merge (splink's approach).
       result <- solve_one_to_one_sql(
-        con, edges_tbl, source_dataset, ties_method
+        con, edges_tbl, source_dataset, ties_method, prefix = cc_prefix
       )
       DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
 
@@ -151,14 +154,16 @@ cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id'
         cluster_id = result$cluster_id
       ))
     }
-    filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method)
+    filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method,
+      prefix = cc_prefix
+    )
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
     DBI::dbExecute(con, glue::glue(
       'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
     ))
   }
 
-  result <- solve_cc_sql(con, edges_tbl)
+  result <- solve_cc_sql(con, edges_tbl, prefix = cc_prefix)
 
   # Collect any isolated IDs not in edges (all unique IDs from pairs)
   all_ids <- unique(c(
@@ -310,9 +315,10 @@ cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
                          source_dataset = NULL) {
   con <- pairs$con
   predicted_tbl <- pairs$predicted_tbl
+  cc_prefix <- il_scratch_table_name('cc')
 
   # Create edges table directly from the predicted table
-  edges_tbl <- cc_tbl('edges')
+  edges_tbl <- cc_tbl('edges', cc_prefix)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
 
   threshold_where <- ''
@@ -330,7 +336,7 @@ cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
     if (!is.null(source_dataset)) {
       # Iterative one-to-one clustering
       result <- solve_one_to_one_sql(
-        con, edges_tbl, source_dataset, ties_method
+        con, edges_tbl, source_dataset, ties_method, prefix = cc_prefix
       )
       DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
 
@@ -356,14 +362,16 @@ cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
         cluster_id = result$cluster_id
       ))
     }
-    filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method)
+    filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method,
+      prefix = cc_prefix
+    )
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
     DBI::dbExecute(con, glue::glue(
       'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
     ))
   }
 
-  result <- solve_cc_sql(con, edges_tbl)
+  result <- solve_cc_sql(con, edges_tbl, prefix = cc_prefix)
 
   # Collect all unique IDs from the predicted table for isolated-node detection
   all_ids <- DBI::dbGetQuery(con, glue::glue(
@@ -431,7 +439,8 @@ filter_same_source <- function(pairs, source_dataset) {
 #' SQL-path: filter edges where both endpoints are from the same source
 #' @noRd
 sql_filter_same_source <- function(con, edges_tbl, source_dataset) {
-  sd_tbl <- cc_tbl('source_ds')
+  cc_prefix <- il_scratch_table_name('cc')
+  sd_tbl <- cc_tbl('source_ds', cc_prefix)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {sd_tbl}'))
   sd_df <- data.frame(
     unique_id = names(source_dataset),
@@ -440,7 +449,7 @@ sql_filter_same_source <- function(con, edges_tbl, source_dataset) {
   )
   DBI::dbWriteTable(con, sd_tbl, sd_df)
 
-  filtered_tbl <- cc_tbl('edges_ds_filtered')
+  filtered_tbl <- cc_tbl('edges_ds_filtered', cc_prefix)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {filtered_tbl}'))
   DBI::dbExecute(con, glue::glue(
     'CREATE TABLE {filtered_tbl} AS ',

@@ -261,3 +261,7 @@ errors[errors$error_type == 'false_negative', ]
 il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
+
+`il_cleanup(model)` is model-scoped. If an interactive run failed before you
+kept the model object, call `il_cleanup_all(con)` to remove all `irelink`
+tables from the connection before disconnecting.

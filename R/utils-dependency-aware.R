@@ -375,10 +375,12 @@ dependency_pattern_score <- function(pattern_mat, comp_names, state) {
   log_match <- log(prior) + log(p_m)
   log_nonmatch <- log1p(-prior) + log(p_u)
   posterior <- posterior_from_logs(log_match, log_nonmatch)
+  match_weight <- log2(p_m / p_u)
   tibble::tibble(
     p_gamma_m = p_m,
     p_gamma_u = p_u,
-    match_weight = log2(p_m / p_u),
+    match_weight = match_weight,
+    total_match_weight = total_match_weight(match_weight, prior),
     match_probability = posterior
   )
 }
@@ -435,7 +437,9 @@ dependency_collect_patterns_sql <- function(model, gamma_sql) {
 }
 
 dependency_write_score_lookup <- function(model, patterns,
-                                          score_tbl = '__il_dependency_scores') {
+                                          score_tbl = NULL) {
+  score_tbl <- score_tbl %||%
+    il_table_name(model, 'dependency_scores', il_table_suffix())
   state <- model$params$dependency_aware
   if (is.null(state)) {
     cli::cli_abort('Model does not contain dependency-aware estimator state.')
@@ -447,7 +451,7 @@ dependency_write_score_lookup <- function(model, patterns,
   scored <- dependency_pattern_score(pattern_mat, state$comparison_names, state)
   lookup <- tibble::as_tibble(cbind(
     patterns[, gamma_cols, drop = FALSE],
-    scored[, c('match_weight', 'match_probability')]
+    scored[, c('match_weight', 'total_match_weight', 'match_probability')]
   ))
   drop_registered(model$con, score_tbl)
   DBI::dbWriteTable(model$con, score_tbl, as.data.frame(lookup), overwrite = TRUE)
@@ -473,7 +477,8 @@ build_dependency_scored_query <- function(model, gamma_sql, score_tbl,
   glue::glue(
     'SELECT DISTINCT gamma_pairs.l_unique_id AS unique_id_l, ',
     'gamma_pairs.r_unique_id AS unique_id_r, ',
-    '{gamma_select}, scores.match_weight, scores.match_probability ',
+    '{gamma_select}, scores.match_weight, scores.total_match_weight, ',
+    'scores.match_probability ',
     'FROM ({gamma_sql}) AS gamma_pairs ',
     'INNER JOIN {score_tbl} AS scores ON {join_clause} ',
     '{where_clause}'
@@ -483,7 +488,9 @@ build_dependency_scored_query <- function(model, gamma_sql, score_tbl,
 prepare_dependency_scored_query <- function(model, gamma_sql,
                                             threshold = 0.85,
                                             threshold_match_weight = NULL,
-                                            score_tbl = '__il_dependency_scores') {
+                                            score_tbl = NULL) {
+  score_tbl <- score_tbl %||%
+    il_table_name(model, 'dependency_scores', il_table_suffix())
   patterns <- dependency_collect_patterns_sql(model, gamma_sql)
   if (nrow(patterns) == 0L) {
     return(list(scored_sql = NULL, score_tbl = score_tbl))
@@ -512,7 +519,7 @@ prepare_dependency_scored_query <- function(model, gamma_sql,
 #'   the model comparisons or gamma columns named `gamma_<comparison>`.
 #'
 #' @return A tibble containing the input columns plus `match_weight` and
-#'   `match_probability`.
+#'   `total_match_weight`, and `match_probability`.
 #' @export
 il_score_patterns <- function(model, patterns) {
   validate_il_model(model)
@@ -544,6 +551,7 @@ il_score_patterns <- function(model, patterns) {
     patterns,
     tibble::tibble(
       match_weight = match_weight,
+      total_match_weight = total_match_weight(match_weight, safe_prior(model)),
       match_probability = weight_to_probability(match_weight, safe_prior(model))
     )
   ))

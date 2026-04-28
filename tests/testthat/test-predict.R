@@ -65,8 +65,28 @@ test_that('predict() output has required columns', {
   model <- make_trained_model(con)
   pairs <- predict(model)
 
-  required_cols <- c('unique_id_l', 'unique_id_r', 'match_weight', 'match_probability')
+  required_cols <- c(
+    'unique_id_l', 'unique_id_r', 'match_weight',
+    'total_match_weight', 'match_probability'
+  )
   expect_true(all(required_cols %in% names(pairs)))
+})
+
+test_that('predict() keeps evidence and prior match weights explicit', {
+  skip_if_not_installed('RSQLite')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  model <- make_trained_model(con)
+  pairs <- predict(model, threshold = 0.0)
+
+  prior_weight <- log2(model$params$prior / (1 - model$params$prior))
+  expect_equal(pairs$total_match_weight, pairs$match_weight + prior_weight)
+  expect_equal(
+    pairs$match_probability,
+    1 / (1 + 2^(-pairs$total_match_weight))
+  )
 })
 
 test_that('predict() threshold filters out low-probability pairs', {
@@ -239,6 +259,7 @@ test_that('predict(greedy = TRUE, collect = FALSE) returns a lazy one-to-one res
   expect_s3_class(lazy, 'il_compared_lazy')
   expect_equal(greedy_pairs$unique_id_l, collected$unique_id_l)
   expect_equal(greedy_pairs$unique_id_r, collected$unique_id_r)
+  expect_equal(greedy_pairs$total_match_weight, collected$total_match_weight)
   expect_equal(length(unique(greedy_pairs$unique_id_l)), nrow(greedy_pairs))
   expect_equal(length(unique(greedy_pairs$unique_id_r)), nrow(greedy_pairs))
 })

@@ -38,7 +38,7 @@ il_comparator_score <- function(.data, col_1, col_2, con = NULL) {
 #' SQL-path comparator score
 #' @noRd
 comparator_score_sql <- function(.data, col_1, col_2, con) {
-  tbl_name <- '__il_comparator_tmp'
+  tbl_name <- il_scratch_table_name('comparator')
   if (is.data.frame(.data)) {
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl_name}'))
     DBI::dbWriteTable(con, tbl_name, .data)
@@ -224,7 +224,7 @@ il_phonetic_chart <- function(.data, col_1, col_2, con = NULL) {
     detect_dialect(con) %in% c('duckdb', 'postgres')
 
   if (use_sql) {
-    tbl_name <- '__il_phonetic_tmp'
+    tbl_name <- il_scratch_table_name('phonetic')
     if (is.data.frame(.data)) {
       DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl_name}'))
       DBI::dbWriteTable(con, tbl_name, .data)

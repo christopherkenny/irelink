@@ -198,7 +198,7 @@ inspect_idx <- predictions |>
 
 predictions |>
   slice(inspect_idx) |>
-  select(unique_id_l, unique_id_r, match_weight, match_probability)
+  select(unique_id_l, unique_id_r, match_weight, total_match_weight, match_probability)
 ```
 
 ```{r waterfall-plot}
@@ -303,5 +303,6 @@ errs |>
 
 ```{r cleanup}
 il_cleanup(model)
+il_cleanup_all(con)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

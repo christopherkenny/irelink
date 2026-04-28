@@ -59,7 +59,7 @@ il_completeness <- function(..., con = NULL) {
   results <- list()
 
   for (i in seq_along(inputs)) {
-    tbl_name <- paste0('__il_completeness_', i)
+    tbl_name <- il_scratch_table_name(paste0('completeness_', i))
     reg <- register_data(inputs[[i]],
       con = con, tbl_name = tbl_name,
       add_unique_id = FALSE

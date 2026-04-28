@@ -56,7 +56,7 @@ il_largest_blocks <- function(.data, rule, n = 5L, con = NULL,
     )
   }
 
-  tbl_name <- '__il_largest_tmp'
+  tbl_name <- il_scratch_table_name('largest')
   reg <- register_data(.data,
     con = con, tbl_name = tbl_name,
     add_unique_id = FALSE

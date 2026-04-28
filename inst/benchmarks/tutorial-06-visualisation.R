@@ -41,4 +41,6 @@ autoplot(predictions, which = 1)
 # Cluster and inspect
 clusters <- il_cluster(predictions, threshold = 0.5)
 
+il_cleanup(model)
+il_cleanup_all(con)
 dbDisconnect(con, shutdown = TRUE)

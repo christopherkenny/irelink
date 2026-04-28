@@ -55,6 +55,85 @@ test_that('il_estimate_u() produces reasonable u values', {
   expect_true(all(params$u >= 0 & params$u <= 1, na.rm = TRUE))
 })
 
+test_that('il_estimate_u() can stop chunked sampling after every level is observed', {
+  skip_if_not_installed('RSQLite')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- data.frame(unique_id = 1:3, key = c('a', 'a', 'b'))
+  spec <- il_spec() |>
+    il_compare(key, cl_exact())
+
+  model <- il_model(df, spec = spec, con = con) |>
+    il_estimate_u(
+      max_pairs = 10,
+      chunk_size = 1,
+      min_count_per_level = 1
+    )
+
+  expect_true(model$params$u_estimation$stopped_early)
+  expect_lt(model$params$u_estimation$n_pairs_sampled, 10)
+  expect_equal(model$params$u_estimation$n_pairs_sampled, 2)
+})
+
+test_that('chunked il_estimate_u() matches unchunked output for one full chunk', {
+  skip_if_not_installed('RSQLite')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  base <- make_test_model(con)
+  unchunked <- il_estimate_u(base, max_pairs = 15)
+  chunked <- il_estimate_u(base, max_pairs = 15, chunk_size = 15)
+
+  expect_equal(
+    dplyr::arrange(il_parameters(chunked), comparison, gamma_level)$u,
+    dplyr::arrange(il_parameters(unchunked), comparison, gamma_level)$u
+  )
+  expect_false(chunked$params$u_estimation$stopped_early)
+  expect_equal(chunked$params$u_estimation$n_chunks, 1)
+})
+
+test_that('chunked il_estimate_u() supports link mode with two tables', {
+  skip_if_not_installed('RSQLite')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df_l <- data.frame(unique_id = 1:2, key = c('a', 'b'))
+  df_r <- data.frame(unique_id = 10:12, key = c('a', 'b', 'c'))
+  spec <- il_spec() |>
+    il_compare(key, cl_exact())
+
+  model <- il_model(df_l, df_r,
+    spec = spec, con = con, link_type = 'link'
+  ) |>
+    il_estimate_u(max_pairs = 6, chunk_size = 2)
+
+  expect_equal(model$params$u_estimation$n_pairs_sampled, 6)
+  expect_equal(sum(il_parameters(model)$u), 1)
+})
+
+test_that('il_estimate_u() keeps unobserved gamma levels with a u floor', {
+  skip_if_not_installed('RSQLite')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- data.frame(unique_id = 1:3, name = c('abc', 'xyz', 'uvw'))
+  spec <- il_spec() |>
+    il_compare(name, cl_levenshtein(0, 1))
+
+  model <- il_model(df, spec = spec, con = con) |>
+    il_estimate_u(max_pairs = 3, chunk_size = 2)
+
+  params <- il_parameters(model)
+  expect_equal(sort(params$gamma_level), 0:2)
+  expect_equal(params$u[params$gamma_level == 1], 1e-6)
+  expect_equal(params$u[params$gamma_level == 2], 1e-6)
+})
+
 # --- il_estimate_em() -----------------------------------------------------
 # From: test_expectation_maximisation.py, test_correctness_of_convergence.py
 
@@ -143,7 +222,62 @@ test_that('il_estimate_prior() returns a valid probability', {
     il_estimate_prior(block_on(first_name), block_on(surname), recall = 1.0)
 
   expect_s3_class(model, 'il_model')
-  # The estimated prior should be a probability in [0, 1]
+  # The two rules produce the same four unique pairs; they should not be
+  # counted twice. Total dedupe pairs are 6 * 5 / 2 = 15.
+  expect_equal(model$params$prior, 4 / 15)
+})
+
+test_that('il_estimate_prior() validates recall', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- data.frame(unique_id = 1:2, name = c('a', 'a'))
+  spec <- il_spec() |>
+    il_compare(name, cl_exact()) |>
+    il_block_on(name)
+  model <- il_model(df, spec = spec, con = con)
+
+  expect_error(il_estimate_prior(model, block_on(name), recall = 0))
+  expect_error(il_estimate_prior(model, block_on(name), recall = 1.1))
+  expect_error(il_estimate_prior(model, block_on(name), recall = NA_real_))
+  expect_error(il_estimate_prior(model, block_on(name), recall = Inf))
+})
+
+test_that('il_estimate_prior() counts unique blocked pairs for link mode', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df_l <- data.frame(unique_id = 1:2, name = c('a', 'b'))
+  df_r <- data.frame(unique_id = 1:2, name = c('a', 'a'))
+  spec <- il_spec() |>
+    il_compare(name, cl_exact()) |>
+    il_block_on(name)
+
+  model <- il_model(df_l, df_r, spec = spec, con = con, link_type = 'link') |>
+    il_estimate_prior(block_on(name), recall = 1.0)
+
+  expect_equal(model$params$prior, 2 / 4)
+})
+
+test_that('il_estimate_prior() uses link_and_dedupe denominator', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df_l <- data.frame(unique_id = 1:2, name = c('a', 'a'))
+  df_r <- data.frame(unique_id = 1:2, name = c('a', 'c'))
+  spec <- il_spec() |>
+    il_compare(name, cl_exact()) |>
+    il_block_on(name)
+
+  model <- il_model(
+    df_l, df_r,
+    spec = spec, con = con, link_type = 'link_and_dedupe'
+  ) |>
+    il_estimate_prior(block_on(name), recall = 1.0)
+
+  # 2 cross-table pairs plus 1 within-left pair over
+  # 2*2 cross + 1 within-left + 1 within-right possible pairs.
+  expect_equal(model$params$prior, 3 / 6)
 })
 
 # --- il_estimate_m_from_labels() ------------------------------------------

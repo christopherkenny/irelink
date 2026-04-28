@@ -99,13 +99,13 @@ il_weights(model)
 
 ## Step 4: Predict
 
-`predict()` scores every candidate pair and returns those above a match-weight threshold:
+`predict()` scores every candidate pair and returns those above a match-probability threshold:
 ```{r predict}
 pairs <- predict(model, threshold = 0.5)
 head(pairs)
 ```
 
-Each row is a candidate pair with columns for the left and right record identifiers, the per-comparison gamma values, and the overall match weight and probability.
+Each row is a candidate pair with columns for the left and right record identifiers, the per-comparison gamma values, the evidence-only `match_weight`, the prior-inclusive `total_match_weight`, and the posterior `match_probability`.
 
 ## Step 5: Cluster
 
@@ -162,7 +162,7 @@ If you have labelled data (pairs known to be matches or non-matches), `irelink` 
 
 ## Cleaning up
 
-When you are done, release the database resources:
+When you are done, release the model-owned database resources. In an interactive session with abandoned models, use `il_cleanup_all(con)` before disconnecting to drop every `irelink` table on the connection.
 
 ```{r cleanup}
 il_cleanup(model)

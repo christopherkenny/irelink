@@ -27,11 +27,12 @@ test_that('compute_tf_tables() creates TF lookup table in the database', {
   model <- make_tf_model(con)
 
   # The TF table should exist
-  expect_true(DBI::dbExistsTable(con, '__il_tf_city'))
+  expect_true(DBI::dbExistsTable(con, model$data$tf_tables[['city']]))
 
   # And be registered in the model
 
   expect_true('city' %in% names(model$data$tf_tables))
+  expect_true(startsWith(model$data$tf_tables[['city']], model$data$table_prefix))
 })
 
 test_that('TF table has correct frequencies', {
@@ -39,7 +40,7 @@ test_that('TF table has correct frequencies', {
   withr::defer(test_discon(con))
 
   model <- make_tf_model(con)
-  tf <- DBI::dbReadTable(con, '__il_tf_city')
+  tf <- DBI::dbReadTable(con, model$data$tf_tables[['city']])
 
   # Sort by city name for stable assertions
   tf <- tf[order(tf$city), ]
@@ -288,20 +289,43 @@ test_that('No TF tables created when no comparisons use TF', {
   expect_null(model$data$tf_tables)
 })
 
+test_that('TF tables are model-specific on a shared connection', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  model_a <- make_tf_model(con)
+  model_b <- make_tf_model(con)
+
+  tf_a <- model_a$data$tf_tables[['city']]
+  tf_b <- model_b$data$tf_tables[['city']]
+
+  expect_false(identical(tf_a, tf_b))
+  expect_true(DBI::dbExistsTable(con, tf_a))
+  expect_true(DBI::dbExistsTable(con, tf_b))
+
+  il_cleanup(model_a)
+
+  expect_false(DBI::dbExistsTable(con, tf_a))
+  expect_true(DBI::dbExistsTable(con, tf_b))
+})
+
 # --- SQL TF select expressions -----------------------------------------------
 
 test_that('sql_tf_select_exprs() generates correct SQL fragments', {
-  exprs <- sql_tf_select_exprs(c('city', 'name'))
+  exprs <- sql_tf_select_exprs(
+    c('city', 'name'),
+    list(city = '__x_tf_city', name = '__x_tf_name')
+  )
   expect_true(grepl('tf_city_l', exprs))
   expect_true(grepl('tf_city_r', exprs))
   expect_true(grepl('tf_name_l', exprs))
   expect_true(grepl('tf_name_r', exprs))
-  expect_true(grepl('__il_tf_city', exprs))
-  expect_true(grepl('__il_tf_name', exprs))
+  expect_true(grepl('__x_tf_city', exprs))
+  expect_true(grepl('__x_tf_name', exprs))
 })
 
 test_that('sql_tf_select_exprs() returns NULL for empty input', {
-  expect_null(sql_tf_select_exprs(character(0)))
+  expect_null(sql_tf_select_exprs(character(0), list()))
 })
 
 # --- TF one-sided NULL: SQL vs R path consistency ----------------------------

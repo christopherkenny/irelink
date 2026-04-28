@@ -35,10 +35,17 @@ run_benchmark <- function(n) {
     il_block_on(first_name)
 
   con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
-  on.exit(DBI::dbDisconnect(con))
+  on.exit({
+    il_cleanup_all(con)
+    DBI::dbDisconnect(con)
+  })
 
   t_model   <- system.time(model <- il_model(df, spec = spec, con = con))["elapsed"]
-  t_u       <- system.time(model <- il_estimate_u(model, max_pairs = min(n * (n - 1) / 2, 1e6)))["elapsed"]
+  t_u       <- system.time(model <- il_estimate_u(
+    model,
+    max_pairs = min(n * (n - 1) / 2, 1e6),
+    chunk_size = 250000
+  ))["elapsed"]
   t_em      <- system.time(model <- il_estimate_em(model, block_on(surname)))["elapsed"]
   t_predict <- system.time(pairs <- predict(model, threshold = 0.5))["elapsed"]
   t_cluster <- if (nrow(pairs) > 0) system.time(il_cluster(pairs))["elapsed"] else 0

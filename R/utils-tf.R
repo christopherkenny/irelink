@@ -18,9 +18,9 @@ tf_columns <- function(comparisons) {
 
 #' Compute and store term frequency lookup tables in the database
 #'
-#' For each comparison with `term_frequency = TRUE`, creates a table
-#' `__il_tf_<col>` containing `(<col>, tf_<col>)` where `tf_<col>` is the
-#' proportion of non-NULL records with that value.
+#' For each comparison with `term_frequency = TRUE`, creates a model-scoped
+#' table containing `(<col>, tf_<col>)` where `tf_<col>` is the proportion of
+#' non-NULL records with that value.
 #'
 #' @param model An il_model object (with data already uploaded).
 #' @return The model, with `model$data$tf_tables` populated.
@@ -39,7 +39,7 @@ compute_tf_tables <- function(model) {
 
   tf_tables <- list()
   for (col in tf_cols) {
-    tf_tbl <- paste0('__il_tf_', col)
+    tf_tbl <- il_table_name(model, 'tf', col)
 
     if (!is.null(tbl_r)) {
       # Link mode: compute from union of both tables
@@ -71,24 +71,34 @@ compute_tf_tables <- function(model) {
   }
 
   model$data$tf_tables <- tf_tables
+  for (tbl in unname(tf_tables)) {
+    model <- il_track_table(model, tbl, owner = 'model')
+  }
   model
 }
 
 #' Generate SQL SELECT expressions for term frequency columns
 #'
 #' Produces scalar subqueries that look up TF values for left and right
-#' records from the pre-computed `__il_tf_<col>` tables.
+#' records from the pre-computed model-specific TF tables.
 #'
 #' @param tf_cols Character vector of column names with TF enabled.
+#' @param tf_tables Named list mapping TF columns to table names.
 #' @return A SQL fragment for the SELECT clause, or NULL if no TF columns.
 #' @noRd
-sql_tf_select_exprs <- function(tf_cols) {
+sql_tf_select_exprs <- function(tf_cols, tf_tables) {
   if (length(tf_cols) == 0L) {
     return(NULL)
   }
+  if (is.null(tf_tables) || !all(tf_cols %in% names(tf_tables))) {
+    missing <- setdiff(tf_cols, names(tf_tables %||% list()))
+    cli::cli_abort(
+      'Missing term-frequency table registration for column{?s} {.field {missing}}.'
+    )
+  }
   exprs <- character(0)
   for (col in tf_cols) {
-    tf_tbl <- paste0('__il_tf_', col)
+    tf_tbl <- tf_tables[[col]]
     exprs <- c(
       exprs,
       glue::glue(
@@ -228,7 +238,12 @@ lookup_tf_r <- function(model, pairs, tf_cols) {
   tf_data <- data.frame(row.names = seq_len(nrow(pairs)))
 
   for (col in tf_cols) {
-    tf_tbl <- paste0('__il_tf_', col)
+    tf_tbl <- model$data$tf_tables[[col]]
+    if (is.null(tf_tbl)) {
+      cli::cli_abort(
+        'Missing term-frequency table registration for column {.field {col}}.'
+      )
+    }
     tf_df <- DBI::dbReadTable(con, tf_tbl)
     tf_col_name <- paste0('tf_', col)
 

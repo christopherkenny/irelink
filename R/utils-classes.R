@@ -205,7 +205,8 @@ add_class <- function(x, cls) {
 #' @return An `il_compared_lazy` S3 object.
 #' @noRd
 new_il_compared_lazy <- function(con, predicted_tbl, model,
-                                 threshold = 0.85, n_pairs = NULL) {
+                                 threshold = 0.85, n_pairs = NULL,
+                                 sql_profile = NULL) {
   if (is.null(n_pairs)) {
     n_pairs <- DBI::dbGetQuery(
       con, glue::glue('SELECT COUNT(*) AS n FROM {predicted_tbl}')
@@ -217,7 +218,8 @@ new_il_compared_lazy <- function(con, predicted_tbl, model,
       predicted_tbl = predicted_tbl,
       model = model,
       threshold = threshold,
-      n_pairs = as.integer(n_pairs)
+      n_pairs = as.integer(n_pairs),
+      sql_profile = sql_profile
     ),
     class = 'il_compared_lazy'
   )

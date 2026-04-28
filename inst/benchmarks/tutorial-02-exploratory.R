@@ -25,4 +25,5 @@ il_profile(df, first_name, surname, con = con, bottom_n = 5)
 # Combined top + bottom view
 il_profile(df, city, con = con, top_n = 10, bottom_n = 5)
 
+il_cleanup_all(con)
 dbDisconnect(con, shutdown = TRUE)

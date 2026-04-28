@@ -79,7 +79,7 @@ il_count_pairs <- function(.data, ..., con = NULL,
     }
   }
 
-  tbl_l <- '__il_pairs_l'
+  tbl_l <- il_scratch_table_name('pairs_l')
   reg_l <- register_data(.data,
     con = con, tbl_name = tbl_l,
     add_unique_id = TRUE
@@ -91,7 +91,7 @@ il_count_pairs <- function(.data, ..., con = NULL,
   register_phonetic_macros(con)
 
   if (link_type == 'link' && length(extra_inputs) > 0L) {
-    tbl_r <- '__il_pairs_r'
+    tbl_r <- il_scratch_table_name('pairs_r')
     reg_r <- register_data(extra_inputs[[1]],
       con = con, tbl_name = tbl_r,
       add_unique_id = TRUE

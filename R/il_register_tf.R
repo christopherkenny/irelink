@@ -15,8 +15,7 @@
 #' @param overwrite Logical. If `TRUE`, overwrite an existing TF table
 #'   for this column. Defaults to `FALSE`.
 #'
-#' @return The model (invisibly), with the TF table registered in the
-#'   database.
+#' @return The updated model, with the TF table registered in the database.
 #' @export
 #'
 #' @examples
@@ -45,7 +44,10 @@ il_register_tf <- function(model, col, tf_data, overwrite = FALSE) {
   }
 
   con <- model$con
-  tf_tbl <- paste0('__il_tf_', col)
+  if (is.null(model$data$tf_tables)) {
+    model$data$tf_tables <- list()
+  }
+  tf_tbl <- model$data$tf_tables[[col]] %||% il_table_name(model, 'tf', col)
 
   tbl_exists <- tf_tbl %in% DBI::dbListTables(con)
   if (tbl_exists && !overwrite) {
@@ -58,11 +60,8 @@ il_register_tf <- function(model, col, tf_data, overwrite = FALSE) {
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tf_tbl}'))
   DBI::dbWriteTable(con, tf_tbl, tf_data[, expected_cols])
 
-  # Update model TF table registry
-  if (is.null(model$data$tf_tables)) {
-    model$data$tf_tables <- list()
-  }
   model$data$tf_tables[[col]] <- tf_tbl
+  model <- il_track_table(model, tf_tbl, owner = 'model')
 
-  invisible(model)
+  model
 }

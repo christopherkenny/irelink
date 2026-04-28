@@ -44,7 +44,7 @@ il_suggest_blocking <- function(.data, columns = NULL, con = NULL,
   link_type <- match.arg(link_type)
   max_depth <- as.integer(max_depth)
 
-  tbl_name <- '__il_suggest'
+  tbl_name <- il_scratch_table_name('suggest')
   reg <- register_data(.data,
     con = con, tbl_name = tbl_name,
     add_unique_id = TRUE
@@ -195,7 +195,7 @@ il_find_blocking_below <- function(.data, max_pairs, columns = NULL,
 #' block_from_labels(fake_1000, fake_1000_labels, con = con)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 block_from_labels <- function(.data, labels, columns = NULL, con = NULL) {
-  tbl_name <- '__il_bfl'
+  tbl_name <- il_scratch_table_name('bfl')
   reg <- register_data(.data,
     con = con, tbl_name = tbl_name,
     add_unique_id = TRUE

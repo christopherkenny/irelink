@@ -63,7 +63,7 @@
 il_profile <- function(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL) {
   col_exprs <- rlang::enquos(...)
 
-  tbl_name <- '__il_profile_tmp'
+  tbl_name <- il_scratch_table_name('profile')
   reg <- register_data(.data,
     con = con, tbl_name = tbl_name,
     add_unique_id = FALSE

@@ -10,6 +10,8 @@
 #'   deterministic matching criteria.
 #' @param recall A numeric value between 0 and 1 representing the assumed
 #'   recall of the deterministic rules. Defaults to `0.7`.
+#' @param profile_sql Logical. If `TRUE`, store lightweight SQL timing metadata
+#'   in `model$params$sql_profile`.
 #'
 #' @return An updated `il_model` with the estimated prior.
 #' @export
@@ -63,43 +65,58 @@
 #'
 #' model <- il_estimate_prior(model, block_on(first_name, surname, dob))
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_estimate_prior <- function(model, ..., recall = 0.7) {
+il_estimate_prior <- function(model, ..., recall = 0.7, profile_sql = FALSE) {
   validate_il_model(model)
+  profile <- il_new_sql_profile(profile_sql)
   rules <- list(...)
 
   if (length(rules) == 0L) {
     cli::cli_abort('{.fn il_estimate_prior} requires at least one blocking rule.')
   }
+  if (!is.numeric(recall) || length(recall) != 1L || !is.finite(recall) ||
+      recall <= 0 || recall > 1) {
+    cli::cli_abort('{.arg recall} must be a finite number with 0 < recall <= 1.')
+  }
+  invalid_rules <- !vapply(rules, inherits, logical(1), 'il_blocking_rule')
+  if (any(invalid_rules)) {
+    cli::cli_abort(
+      '{.fn il_estimate_prior} only accepts blocking rules created by {.fn block_on}.'
+    )
+  }
 
   con <- model$con
   tbl <- model$data$tbl_l
+  tbl_r <- model$data$tbl_r %||% tbl
   n_total <- as.numeric(model$data$n_records_l)
 
   if (model$link_type == 'dedupe') {
     total_pairs <- n_total * (n_total - 1) / 2
+  } else if (model$link_type == 'link_and_dedupe') {
+    n_r <- as.numeric(model$data$n_records_r %||% n_total)
+    total_pairs <- (n_total * n_r) +
+      (n_total * (n_total - 1) / 2) +
+      (n_r * (n_r - 1) / 2)
   } else {
     n_r <- as.numeric(model$data$n_records_r %||% n_total)
     total_pairs <- n_total * n_r
   }
 
-  # Count pairs produced by each blocking rule
-  n_blocked <- 0L
-  for (rule in rules) {
-    if (!inherits(rule, 'il_blocking_rule')) next
-    tbl_r <- if (model$link_type == 'dedupe') tbl else (model$data$tbl_r %||% tbl)
-    where <- build_blocking_condition(rule$columns, rule$where,
-      transform = rule$transform,
-      dialect = detect_dialect(con)
-    )
-    n_blocked <- n_blocked + count_blocked_pairs(
-      con, tbl, tbl_r, where,
-      dedupe = (model$link_type == 'dedupe')
-    )
-  }
+  n_blocked <- count_unique_blocked_pairs(
+    con = con,
+    tbl_l = tbl,
+    tbl_r = tbl_r,
+    rules = rules,
+    link_type = model$link_type %||% 'dedupe',
+    dialect = detect_dialect(con),
+    profile = profile
+  )
 
   estimated_matches <- n_blocked / recall
   prior <- min(max(estimated_matches / total_pairs, 1e-6), 1 - 1e-6)
 
   model$params$prior <- prior
+  if (isTRUE(profile_sql)) {
+    model$params$sql_profile <- il_sql_profile_entries(profile)
+  }
   model
 }

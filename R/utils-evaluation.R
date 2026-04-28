@@ -192,7 +192,7 @@ score_labeled_pairs <- function(model, labels) {
 
   if (dialect_has_fuzzy_sql(dialect)) {
     # SQL-first: upload labels, JOIN to data, compute gammas AND score in SQL
-    lbl_tbl <- '__il_eval_labels'
+    lbl_tbl <- il_table_name(model, 'eval_labels', il_table_suffix())
     lbl_df <- data.frame(
       pair_idx = seq_len(nrow(labels)),
       uid_l = id_l,

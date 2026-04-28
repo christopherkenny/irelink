@@ -16,8 +16,10 @@ test_that('il_register_tf writes TF table to database', {
   )
   model <- il_register_tf(model, 'first_name', tf)
 
-  expect_true('__il_tf_first_name' %in% DBI::dbListTables(con))
-  stored <- DBI::dbReadTable(con, '__il_tf_first_name')
+  tf_tbl <- model$data$tf_tables[['first_name']]
+  expect_true(tf_tbl %in% DBI::dbListTables(con))
+  expect_true(startsWith(tf_tbl, model$data$table_prefix))
+  stored <- DBI::dbReadTable(con, tf_tbl)
   expect_equal(nrow(stored), 3)
   expect_true('tf_first_name' %in% names(stored))
 })
@@ -55,5 +57,5 @@ test_that('il_register_tf prevents overwrite by default', {
   expect_error(il_register_tf(model, 'first_name', tf))
   # But overwrite = TRUE should work
   model <- il_register_tf(model, 'first_name', tf, overwrite = TRUE)
-  expect_true('__il_tf_first_name' %in% DBI::dbListTables(con))
+  expect_true(model$data$tf_tables[['first_name']] %in% DBI::dbListTables(con))
 })

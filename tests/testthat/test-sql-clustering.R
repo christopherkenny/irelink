@@ -208,11 +208,10 @@ test_that('SQL CC: cleanup removes temp tables', {
 
   clusters <- il_cluster(pairs)
 
-  # After clustering, intermediate tables should not linger
-  # (only __il_cc_output and __il_cc_edges may remain)
-  cc_tables <- grep('^__il_cc_', DBI::dbListTables(con), value = TRUE)
+  # After clustering, intermediate tables should not linger.
+  cc_tables <- grep('^__il_cc', DBI::dbListTables(con), value = TRUE)
   for (tbl in cc_tables) DBI::dbExecute(con, paste('DROP TABLE IF EXISTS', tbl))
   tables <- DBI::dbListTables(con)
-  cc_tables <- tables[grepl('^__il_cc_', tables)]
+  cc_tables <- tables[grepl('^__il_cc', tables)]
   expect_equal(length(cc_tables), 0)
 })

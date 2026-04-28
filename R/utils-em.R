@@ -168,7 +168,8 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
 #' @return A list with `counts` (data frame of gamma columns + `n`) and
 #'   `n_pairs` (total sampled pairs).
 #' @noRd
-get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
+get_random_pairs_with_gammas <- function(model, max_pairs = 1e6,
+                                         profile = NULL) {
   con <- model$con
   dialect <- detect_dialect(con)
   comparisons <- model$spec$comparisons
@@ -204,7 +205,10 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
       'SELECT * FROM ({inner}) AS pairs LIMIT {max_pairs}',
       ') AS sampled GROUP BY {group_by_clause}'
     )
-    result <- DBI::dbGetQuery(con, sql)
+    result <- il_db_get_query(con, sql,
+      step = 'estimate_u.random_pair_gamma_counts',
+      profile = profile
+    )
     if (nrow(result) == 0L) {
       return(list(counts = result, n_pairs = 0L))
     }
@@ -227,6 +231,243 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6) {
   names(counts_df) <- gamma_cols
   counts <- stats::aggregate(list(n = rep(1L, n_pairs)), by = counts_df, FUN = sum)
   list(counts = counts, n_pairs = n_pairs)
+}
+
+#' Get random-pair gamma counts in chunks
+#'
+#' Accumulates the same gamma-pattern counts as
+#' `get_random_pairs_with_gammas()`, but queries or processes at most
+#' `chunk_size` candidate pairs at a time and can stop early once every
+#' comparison level has enough support.
+#'
+#' @param model An il_model object.
+#' @param max_pairs Maximum pairs to sample.
+#' @param chunk_size Number of pairs per chunk.
+#' @param min_count_per_level Optional early-stop support target.
+#' @return A list with `counts`, `n_pairs`, `stopped_early`, and `n_chunks`.
+#' @noRd
+get_random_pair_gamma_counts_chunked <- function(model, max_pairs,
+                                                 chunk_size,
+                                                 min_count_per_level = NULL,
+                                                 profile = NULL) {
+  con <- model$con
+  dialect <- detect_dialect(con)
+  comparisons <- model$spec$comparisons
+  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  gamma_cols <- paste0('gamma_', comp_names)
+
+  counts <- empty_gamma_counts(gamma_cols)
+  n_pairs <- 0L
+  n_chunks <- 0L
+  stopped_early <- FALSE
+
+  if (dialect_has_fuzzy_sql(dialect)) {
+    tbl_l <- model$data$tbl_l
+    tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
+    link_type <- model$link_type %||% 'dedupe'
+    has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
+
+    gamma_exprs <- vapply(comparisons, function(comp) {
+      expr <- sql_gamma_case(comp, dialect)
+      glue::glue('{expr} AS gamma_{comp$columns}')
+    }, character(1))
+    gamma_select <- paste(gamma_exprs, collapse = ', ')
+    group_by_clause <- paste(gamma_cols, collapse = ', ')
+
+    table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
+    parts <- vapply(table_pairs, function(tp) {
+      glue::glue(
+        'SELECT {gamma_select} ',
+        'FROM {tp$from_l} l, {tp$from_r} r ',
+        'WHERE {tp$join_cond}'
+      )
+    }, character(1))
+    inner <- paste(parts, collapse = ' UNION ALL ')
+
+    offset <- 0L
+    while (n_pairs < max_pairs) {
+      this_limit <- min(chunk_size, max_pairs - n_pairs)
+      sql <- glue::glue(
+        'SELECT {group_by_clause}, COUNT(*) AS n FROM (',
+        'SELECT * FROM ({inner}) AS pairs ',
+        'LIMIT {this_limit} OFFSET {offset}',
+        ') AS sampled GROUP BY {group_by_clause}'
+      )
+      chunk_counts <- il_db_get_query(con, sql,
+        step = 'estimate_u.random_pair_gamma_counts_chunk',
+        profile = profile
+      )
+      chunk_n <- if (nrow(chunk_counts) == 0L) 0L else sum(chunk_counts$n)
+      if (chunk_n == 0L) break
+      counts <- combine_gamma_counts(counts, chunk_counts, gamma_cols)
+      n_pairs <- n_pairs + chunk_n
+      n_chunks <- n_chunks + 1L
+      offset <- offset + chunk_n
+      if (gamma_support_met(
+        counts, comparisons, comp_names, min_count_per_level
+      )) {
+        stopped_early <- TRUE
+        break
+      }
+    }
+    return(list(
+      counts = counts,
+      n_pairs = n_pairs,
+      stopped_early = stopped_early,
+      n_chunks = n_chunks
+    ))
+  }
+
+  pairs <- get_all_pairs(model, max_pairs = max_pairs)
+  if (nrow(pairs) == 0L) {
+    return(list(
+      counts = counts,
+      n_pairs = 0L,
+      stopped_early = FALSE,
+      n_chunks = 0L
+    ))
+  }
+  start <- 1L
+  while (start <= nrow(pairs) && n_pairs < max_pairs) {
+    end <- min(start + chunk_size - 1L, nrow(pairs), max_pairs)
+    chunk_pairs <- pairs[start:end, , drop = FALSE]
+    gamma_mat <- compute_gamma_matrix(chunk_pairs, comparisons)
+    chunk_counts <- gamma_matrix_counts(gamma_mat, gamma_cols)
+    counts <- combine_gamma_counts(counts, chunk_counts, gamma_cols)
+    chunk_n <- nrow(gamma_mat)
+    n_pairs <- n_pairs + chunk_n
+    n_chunks <- n_chunks + 1L
+    if (gamma_support_met(
+      counts, comparisons, comp_names, min_count_per_level
+    )) {
+      stopped_early <- TRUE
+      break
+    }
+    start <- end + 1L
+  }
+
+  list(
+    counts = counts,
+    n_pairs = n_pairs,
+    stopped_early = stopped_early,
+    n_chunks = n_chunks
+  )
+}
+
+#' Register a materialized blocked-pairs table for a model
+#'
+#' The table contains unique pair identifiers only, not source fields:
+#' `source_l`, `l_unique_id`, `source_r`, and `r_unique_id`.
+#'
+#' @param model An il_model object.
+#' @param blocking_rules Blocking rules to materialize.
+#' @param purpose Registry name, usually "predict".
+#' @param overwrite If FALSE, create a uniquely suffixed table. If TRUE, reuse
+#'   and replace the purpose-specific table.
+#' @return The updated model.
+#' @noRd
+register_blocked_pairs <- function(model, blocking_rules = model$spec$blocking_rules,
+                                   purpose = 'predict', overwrite = FALSE) {
+  validate_il_model(model)
+  if (!is.list(blocking_rules)) {
+    cli::cli_abort('{.arg blocking_rules} must be a list of blocking rules.')
+  }
+  if (length(blocking_rules) == 0L) {
+    cli::cli_abort('At least one blocking rule is required to register blocked pairs.')
+  }
+  bad <- !vapply(blocking_rules, inherits, logical(1), what = 'il_blocking_rule')
+  if (any(bad)) {
+    cli::cli_abort('{.arg blocking_rules} must contain only {.cls il_blocking_rule} objects.')
+  }
+
+  con <- model$con
+  dialect <- detect_dialect(con)
+  tbl_l <- model$data$tbl_l
+  tbl_r <- model$data$tbl_r %||% tbl_l
+  link_type <- model$link_type %||% 'dedupe'
+  has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
+  suffix <- if (isTRUE(overwrite)) NULL else il_table_suffix()
+  tbl <- il_table_name(model, paste0('blocked_pairs_', purpose), suffix)
+
+  parts <- vapply(blocking_rules, function(rule) {
+    blocked_pair_rows_sql(tbl_l, tbl_r, rule, link_type, has_two_tables, dialect)
+  }, character(1))
+  union_sql <- paste(parts, collapse = ' UNION ALL ')
+  sql <- glue::glue(
+    'CREATE TABLE {tbl} AS ',
+    'SELECT DISTINCT source_l, unique_id_l AS l_unique_id, ',
+    'source_r, unique_id_r AS r_unique_id ',
+    'FROM ({union_sql}) AS blocked_pairs'
+  )
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
+  DBI::dbExecute(con, sql)
+
+  if (is.null(model$data$blocked_pairs)) {
+    model$data$blocked_pairs <- list()
+  }
+  model$data$blocked_pairs[[purpose]] <- tbl
+  model <- il_track_table(model, tbl, owner = 'model')
+  model
+}
+
+#' Empty gamma-count table
+#' @noRd
+empty_gamma_counts <- function(gamma_cols) {
+  as.data.frame(matrix(
+    integer(0),
+    nrow = 0, ncol = length(gamma_cols) + 1L,
+    dimnames = list(NULL, c(gamma_cols, 'n'))
+  ))
+}
+
+#' Aggregate a gamma matrix into pattern counts
+#' @noRd
+gamma_matrix_counts <- function(gamma_mat, gamma_cols) {
+  if (nrow(gamma_mat) == 0L) {
+    return(empty_gamma_counts(gamma_cols))
+  }
+  counts_df <- as.data.frame(gamma_mat)
+  names(counts_df) <- gamma_cols
+  stats::aggregate(list(n = rep(1L, nrow(gamma_mat))), by = counts_df, FUN = sum)
+}
+
+#' Combine gamma-pattern count tables
+#' @noRd
+combine_gamma_counts <- function(current, chunk, gamma_cols) {
+  if (nrow(chunk) == 0L) return(current)
+  if (nrow(current) == 0L) {
+    chunk <- chunk[, c(gamma_cols, 'n'), drop = FALSE]
+    return(chunk)
+  }
+  combined <- rbind(
+    current[, c(gamma_cols, 'n'), drop = FALSE],
+    chunk[, c(gamma_cols, 'n'), drop = FALSE]
+  )
+  stats::aggregate(list(n = combined$n),
+    by = combined[, gamma_cols, drop = FALSE],
+    FUN = sum
+  )
+}
+
+#' Test whether all comparison levels have enough sampled support
+#' @noRd
+gamma_support_met <- function(counts, comparisons, comp_names,
+                              min_count_per_level) {
+  if (is.null(min_count_per_level) || nrow(counts) == 0L) {
+    return(FALSE)
+  }
+  for (j in seq_along(comp_names)) {
+    gcol <- paste0('gamma_', comp_names[j])
+    if (gcol %in% names(counts)) counts[[gcol]][is.na(counts[[gcol]])] <- 0L
+    n_levels <- n_gamma_levels(comparisons[[j]]$method)
+    for (k in seq(0L, n_levels - 1L)) {
+      count_k <- sum(counts$n[counts[[gcol]] == k], na.rm = TRUE)
+      if (count_k < min_count_per_level) {
+        return(FALSE)
+      }
+    }
+  }
+  TRUE
 }
 
 #' Compute multi-level gamma for a pair of values

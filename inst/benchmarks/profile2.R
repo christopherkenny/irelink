@@ -23,6 +23,10 @@ spec <- il_spec() |>
   il_block_on(surname) |>
   il_block_on(first_name)
 con <- DBI::dbConnect(RSQLite::SQLite(), ":memory:")
+on.exit({
+  il_cleanup_all(con)
+  DBI::dbDisconnect(con)
+})
 model <- il_model(df, spec = spec, con = con) |>
   il_estimate_u() |>
   il_estimate_em(block_on(surname))
@@ -42,8 +46,6 @@ lapply(c(5, 50), \(n_new) {
   t <- system.time(res <- il_find_matches(model, make_new_recs(n_new)))["elapsed"]
   tibble::tibble(n_new = n_new, elapsed = t, n_matches = nrow(res))
 }) |> dplyr::bind_rows()
-
-DBI::dbDisconnect(con)
 
 # igraph vs union-find clustering
 if (requireNamespace("igraph", quietly = TRUE)) {

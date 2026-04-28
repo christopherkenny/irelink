@@ -60,4 +60,6 @@ if (nrow(predictions) > 0) {
 # Unlinkables (splink: unlinkables_chart)
 il_unlinkables(model)
 
+il_cleanup(model)
+il_cleanup_all(con)
 dbDisconnect(con, shutdown = TRUE)

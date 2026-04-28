@@ -50,7 +50,8 @@ il_score_missing_edges <- function(model, pairs, clusters,
   if (length(missing_l) == 0L) {
     empty <- tibble::tibble(
       unique_id_l = character(0), unique_id_r = character(0),
-      match_weight = numeric(0), match_probability = numeric(0)
+      match_weight = numeric(0), total_match_weight = numeric(0),
+      match_probability = numeric(0)
     )
     return(new_il_compared(empty, model = model))
   }
@@ -108,9 +109,11 @@ score_specific_pairs <- function(model, id_l, id_r, threshold = 0) {
       gamma_mat, comp_names, model$params$dependency_aware
     )
     match_weight <- scored_patterns$match_weight
+    total_mw <- scored_patterns$total_match_weight
     match_probability <- scored_patterns$match_probability
   } else {
     match_weight <- score_gamma_matrix(gamma_mat, mu)
+    total_mw <- total_match_weight(match_weight, prior)
     match_probability <- weight_to_probability(match_weight, prior)
   }
 
@@ -118,6 +121,7 @@ score_specific_pairs <- function(model, id_l, id_r, threshold = 0) {
     unique_id_l = id_l,
     unique_id_r = id_r,
     match_weight = match_weight,
+    total_match_weight = total_mw,
     match_probability = match_probability
   )
 

@@ -4,13 +4,30 @@
 \alias{il_estimate_u}
 \title{Estimate Non-Match (u) Parameters}
 \usage{
-il_estimate_u(model, max_pairs = 1e+06)
+il_estimate_u(
+  model,
+  max_pairs = 1e+06,
+  min_count_per_level = NULL,
+  chunk_size = NULL,
+  profile_sql = FALSE
+)
 }
 \arguments{
 \item{model}{An \code{il_model} object (piped in).}
 
 \item{max_pairs}{Maximum number of random pairs to sample. Defaults to
 \code{1e6}.}
+
+\item{min_count_per_level}{Optional integer. When set, chunked estimation
+stops once every comparison level has been observed at least this many
+times, or once \code{max_pairs} has been sampled.}
+
+\item{chunk_size}{Optional integer number of pairs to score per chunk. When
+set, u estimation accumulates gamma counts across chunks instead of using
+one aggregate query.}
+
+\item{profile_sql}{Logical. If \code{TRUE}, store lightweight SQL timing metadata
+in \code{model$params$sql_profile}.}
 }
 \value{
 An updated \code{il_model} with estimated u parameters.

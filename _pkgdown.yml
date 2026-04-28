@@ -175,6 +175,7 @@ reference:
       - il_load
       - il_attach
       - il_cleanup
+      - il_cleanup_all
       - irelink-package
 
   - title: "Datasets"

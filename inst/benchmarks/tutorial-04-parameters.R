@@ -59,4 +59,6 @@ il_unlinkables(model)
 # Save model (splink: save_model_to_json)
 il_save(model, tempfile(fileext = ".json"), overwrite = TRUE)
 
+il_cleanup(model)
+il_cleanup_all(con)
 dbDisconnect(con, shutdown = TRUE)

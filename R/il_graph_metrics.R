@@ -87,8 +87,10 @@ il_graph_metrics <- function(pairs, clusters) {
 #' SQL-path graph metrics
 #' @noRd
 graph_metrics_sql <- function(con, pairs, clusters) {
+  cc_prefix <- il_scratch_table_name('cc')
+
   # Upload edges
-  edges_tbl <- cc_tbl('metrics_edges')
+  edges_tbl <- cc_tbl('metrics_edges', cc_prefix)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
   edges_df <- data.frame(
     unique_id_l = as.character(pairs$unique_id_l),
@@ -100,7 +102,7 @@ graph_metrics_sql <- function(con, pairs, clusters) {
   DBI::dbWriteTable(con, edges_tbl, edges_df)
 
   # Upload cluster assignments
-  cc_tbl_name <- cc_tbl('metrics_cc')
+  cc_tbl_name <- cc_tbl('metrics_cc', cc_prefix)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {cc_tbl_name}'))
   cc_df <- data.frame(
     node_id = as.character(clusters$unique_id),
@@ -110,7 +112,7 @@ graph_metrics_sql <- function(con, pairs, clusters) {
   DBI::dbWriteTable(con, cc_tbl_name, cc_df)
 
   # Node metrics via SQL
-  nm_tbl <- sql_node_metrics(con, cc_tbl_name, edges_tbl)
+  nm_tbl <- sql_node_metrics(con, cc_tbl_name, edges_tbl, prefix = cc_prefix)
   nodes_raw <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {nm_tbl}'))
   cluster_size <- as.integer(nodes_raw$cluster_size)
   node_degree <- as.integer(nodes_raw$node_degree)
@@ -126,7 +128,7 @@ graph_metrics_sql <- function(con, pairs, clusters) {
   )
 
   # Cluster metrics via SQL
-  cm_tbl <- sql_cluster_metrics(con, nm_tbl)
+  cm_tbl <- sql_cluster_metrics(con, nm_tbl, prefix = cc_prefix)
   clusters_raw <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {cm_tbl}'))
   cluster_tbl <- tibble::tibble(
     cluster_id = clusters_raw$cluster_id,

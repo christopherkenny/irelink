@@ -1,8 +1,9 @@
-#' Remove Temporary Tables from Database
+#' Remove Model-Owned Temporary Tables from Database
 #'
-#' Cleans up all temporary tables created by irelink in the database
-#' backend. Call this when you are finished with a linkage session to
-#' free database resources.
+#' Cleans up the temporary tables owned by a single `il_model`. This is safe
+#' to call on a shared DBI connection containing other live `irelink` models.
+#' Use [il_cleanup_all()] only when you explicitly want to remove every
+#' `irelink` table from the connection.
 #'
 #' @param model An `il_model` object whose connection and tables should
 #'   be cleaned up.
@@ -68,9 +69,54 @@ il_cleanup <- function(model) {
     return(invisible(model))
   }
   tables <- DBI::dbListTables(con)
-  il_tables <- tables[grepl('^__il_', tables)]
+  tracked <- character(0)
+  if (!is.null(model$data$tables) && nrow(model$data$tables) > 0L) {
+    tracked <- model$data$tables$table
+  }
+  known <- c(
+    model$data$tbl_l,
+    model$data$tbl_r,
+    unlist(model$data$tf_tables %||% list(), use.names = FALSE),
+    tracked
+  )
+  prefix <- model$data$table_prefix
+  prefixed <- if (!is.null(prefix)) {
+    tables[startsWith(tables, paste0(prefix, '_'))]
+  } else {
+    character(0)
+  }
+  il_tables <- unique(c(known[!is.na(known)], prefixed))
   for (tbl in il_tables) {
     drop_registered(con, tbl)
   }
   invisible(model)
+}
+
+#' Remove All irelink Temporary Tables from a Database
+#'
+#' Drops every table or view whose name starts with `__il_` from a DBI
+#' connection. This is intended as an explicit interactive escape hatch after
+#' failed runs or exploratory sessions. Prefer [il_cleanup()] when cleaning up a
+#' specific live model on a shared connection.
+#'
+#' @param con A DBI connection.
+#'
+#' @return `con`, invisibly.
+#' @export
+#'
+#' @examples
+#' con <- DBI::dbConnect(duckdb::duckdb())
+#' # ... exploratory work that may have created several irelink models ...
+#' il_cleanup_all(con)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
+il_cleanup_all <- function(con) {
+  if (is.null(con) || !DBI::dbIsValid(con)) {
+    return(invisible(con))
+  }
+  tables <- DBI::dbListTables(con)
+  il_tables <- tables[grepl('^__il_', tables)]
+  for (tbl in il_tables) {
+    drop_registered(con, tbl)
+  }
+  invisible(con)
 }

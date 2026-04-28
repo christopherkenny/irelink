@@ -10,8 +10,8 @@
 #'   match probability at or above this threshold are returned. Defaults
 #'   to `0.85`. Ignored when `threshold_match_weight` is set.
 #' @param threshold_match_weight Optional numeric value. When set, pairs
-#'   are filtered on match weight (log₂ Bayes factor) instead of
-#'   probability. Typical values range from about −5 to +30. Overrides
+#'   are filtered on evidence-only match weight (log2 Bayes factor) instead
+#'   of probability. Typical values range from about -5 to +30. Overrides
 #'   `threshold`.
 #' @param type One of `"pairs"` (default) to return scored pairs, or
 #'   `"weights"` to return match weights on a log-2 Bayes-factor scale.
@@ -19,7 +19,7 @@
 #'   into an in-memory tibble.
 #'   If `FALSE`, scoring is performed entirely in-database and the
 #'   result is a lightweight `il_compared_lazy` reference that
-#'   [il_cluster()] can consume directly — avoiding the round-trip of
+#'   [il_cluster()] can consume directly, avoiding the round-trip of
 #'   collecting millions of rows into R and re-uploading them.
 #'   Requires a DuckDB or PostgreSQL backend.
 #' @param include_fields If `TRUE`, the original column values from both
@@ -30,11 +30,16 @@
 #'   for link models. Defaults to `FALSE`, returning all above-threshold
 #'   candidate pairs. Greedy matching sorts pairs by descending posterior
 #'   match probability, then by left and right row order.
+#' @param profile_sql Logical. If `TRUE`, attach lightweight SQL timing
+#'   metadata to collected predictions or include it on lazy predictions.
 #' @param ... Additional arguments passed to the generic.
 #'
 #' @return When `collect = TRUE`: an `il_compared` tibble with one row
 #'   per candidate pair, including columns for record IDs, match weight,
-#'   match probability, and per-comparison gamma values.
+#'   total match weight, match probability, and per-comparison gamma values.
+#'   `match_weight` is the evidence-only log2 Bayes factor. The additive
+#'   prior term is exposed separately through `total_match_weight`, whose
+#'   value is `match_weight + log2(prior / (1 - prior))`.
 #'   When `collect = FALSE`: an `il_compared_lazy` object referencing the
 #'   scored pairs table in the database.
 #' @export
@@ -96,6 +101,7 @@ predict.il_model <- function(object, threshold = 0.85,
                              collect = TRUE,
                              include_fields = FALSE,
                              greedy = FALSE,
+                             profile_sql = FALSE,
                              ...) {
   type <- match.arg(type)
   validate_il_model(object)
@@ -115,6 +121,7 @@ predict.il_model <- function(object, threshold = 0.85,
   }
 
   blocking_rules <- object$spec$blocking_rules
+  profile <- il_new_sql_profile(profile_sql)
 
   # Lazy path: push scoring entirely into SQL
   if (!collect) {
@@ -127,7 +134,8 @@ predict.il_model <- function(object, threshold = 0.85,
     return(predict_lazy(object, threshold,
       threshold_match_weight = threshold_match_weight,
       include_fields = include_fields,
-      greedy = greedy
+      greedy = greedy,
+      profile = profile
     ))
   }
 
@@ -140,26 +148,32 @@ predict.il_model <- function(object, threshold = 0.85,
       'dependency-aware'
     )
     if (dependency_aware) {
-      gamma_sql <- build_gamma_query(object, blocking_rules)
+      gamma_sql <- build_gamma_query(
+        object, blocking_rules,
+        blocked_pairs_tbl = object$data$blocked_pairs[['predict']] %||% NULL
+      )
+      score_tbl <- il_table_name(object, 'dependency_scores', il_table_suffix())
       prepared <- prepare_dependency_scored_query(
         object,
         gamma_sql = gamma_sql,
         threshold = threshold,
         threshold_match_weight = threshold_match_weight,
-        score_tbl = '__il_dependency_scores'
+        score_tbl = score_tbl
       )
       on.exit(drop_registered(object$con, prepared$score_tbl), add = TRUE)
       if (is.null(prepared$scored_sql)) {
         empty <- tibble::tibble(
           unique_id_l = integer(0), unique_id_r = integer(0),
-          match_weight = numeric(0), match_probability = numeric(0)
+          match_weight = numeric(0), total_match_weight = numeric(0),
+          match_probability = numeric(0)
         )
         return(new_il_compared(empty, model = object))
       }
       scored_sql <- prepared$scored_sql
     } else {
       scored_sql <- build_scored_query(object, threshold,
-        threshold_match_weight = threshold_match_weight
+        threshold_match_weight = threshold_match_weight,
+        blocked_pairs_tbl = object$data$blocked_pairs[['predict']] %||% NULL
       )
     }
     if (greedy) {
@@ -168,15 +182,23 @@ predict.il_model <- function(object, threshold = 0.85,
     if (include_fields) {
       scored_sql <- build_fields_join_query(object, scored_sql)
     }
-    result <- tibble::as_tibble(DBI::dbGetQuery(object$con, scored_sql))
+    result <- tibble::as_tibble(il_db_get_query(object$con, scored_sql,
+      step = 'predict.collect',
+      profile = profile
+    ))
     if (nrow(result) == 0L) {
       empty <- tibble::tibble(
         unique_id_l = integer(0), unique_id_r = integer(0),
-        match_weight = numeric(0), match_probability = numeric(0)
+        match_weight = numeric(0), total_match_weight = numeric(0),
+        match_probability = numeric(0)
       )
-      return(new_il_compared(empty, model = object))
+      compared <- new_il_compared(empty, model = object)
+      attr(compared, 'sql_profile') <- il_sql_profile_entries(profile)
+      return(compared)
     }
-    return(new_il_compared(result, model = object))
+    compared <- new_il_compared(result, model = object)
+    attr(compared, 'sql_profile') <- il_sql_profile_entries(profile)
+    return(compared)
   }
 
   # R-side fallback for SQLite and other backends
@@ -192,7 +214,8 @@ predict.il_model <- function(object, threshold = 0.85,
   if (nrow(gamma_mat) == 0L) {
     empty <- tibble::tibble(
       unique_id_l = integer(0), unique_id_r = integer(0),
-      match_weight = numeric(0), match_probability = numeric(0)
+      match_weight = numeric(0), total_match_weight = numeric(0),
+      match_probability = numeric(0)
     )
     return(new_il_compared(empty, model = object))
   }
@@ -203,6 +226,7 @@ predict.il_model <- function(object, threshold = 0.85,
       gamma_mat, comp_names, object$params$dependency_aware
     )
     match_weight <- scored_patterns$match_weight
+    total_mw <- scored_patterns$total_match_weight
     match_probability <- scored_patterns$match_probability
     tf_adj_list <- NULL
   } else {
@@ -222,6 +246,7 @@ predict.il_model <- function(object, threshold = 0.85,
       )
     }
 
+    total_mw <- total_match_weight(match_weight, prior)
     match_probability <- weight_to_probability(match_weight, prior)
   }
 
@@ -229,6 +254,7 @@ predict.il_model <- function(object, threshold = 0.85,
     unique_id_l = ids$l_unique_id,
     unique_id_r = ids$r_unique_id,
     match_weight = match_weight,
+    total_match_weight = total_mw,
     match_probability = match_probability
   )
   for (j in seq_len(n_comp)) {
@@ -267,47 +293,59 @@ predict.il_model <- function(object, threshold = 0.85,
 #'
 #' @param model A trained il_model.
 #' @param threshold Numeric match-probability threshold.
-#' @param threshold_match_weight Optional numeric match-weight threshold.
+#' @param threshold_match_weight Optional numeric evidence-only match-weight
+#'   threshold.
 #' @return An `il_compared_lazy` object.
 #' @noRd
 predict_lazy <- function(model, threshold, threshold_match_weight = NULL,
                          include_fields = FALSE,
-                         greedy = FALSE) {
+                         greedy = FALSE,
+                         profile = NULL) {
   con <- model$con
-  predicted_tbl <- '__il_predicted'
+  predicted_tbl <- il_table_name(model, 'predicted', il_table_suffix())
+  lazy_model <- il_track_table(model, predicted_tbl, owner = 'lazy')
   dependency_aware <- identical(model$params$estimator_mode, 'dependency-aware')
   if (dependency_aware) {
-    gamma_sql <- build_gamma_query(model, model$spec$blocking_rules)
+    gamma_sql <- build_gamma_query(
+      model, model$spec$blocking_rules,
+      blocked_pairs_tbl = model$data$blocked_pairs[['predict']] %||% NULL
+    )
+    score_tbl <- il_table_name(model, 'dependency_scores', il_table_suffix())
     prepared <- prepare_dependency_scored_query(
       model,
       gamma_sql = gamma_sql,
       threshold = threshold,
       threshold_match_weight = threshold_match_weight,
-      score_tbl = '__il_dependency_scores'
+      score_tbl = score_tbl
     )
     on.exit(drop_registered(con, prepared$score_tbl), add = TRUE)
     if (is.null(prepared$scored_sql)) {
-      DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {predicted_tbl}'))
-      DBI::dbExecute(con, glue::glue(
+      il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {predicted_tbl}'),
+        step = 'predict_lazy.drop_empty', profile = profile
+      )
+      il_db_execute(con, glue::glue(
         'CREATE TABLE {predicted_tbl} AS ',
         'SELECT CAST(NULL AS INTEGER) AS unique_id_l, ',
         'CAST(NULL AS INTEGER) AS unique_id_r, ',
         'CAST(NULL AS DOUBLE) AS match_weight, ',
+        'CAST(NULL AS DOUBLE) AS total_match_weight, ',
         'CAST(NULL AS DOUBLE) AS match_probability ',
         'WHERE FALSE'
-      ))
+      ), step = 'predict_lazy.create_empty', profile = profile)
       return(new_il_compared_lazy(
         con = con,
         predicted_tbl = predicted_tbl,
-        model = model,
+        model = lazy_model,
         threshold = threshold,
-        n_pairs = 0L
+        n_pairs = 0L,
+        sql_profile = il_sql_profile_entries(profile)
       ))
     }
     scored_sql <- prepared$scored_sql
   } else {
     scored_sql <- build_scored_query(model, threshold,
-      threshold_match_weight = threshold_match_weight
+      threshold_match_weight = threshold_match_weight,
+      blocked_pairs_tbl = model$data$blocked_pairs[['predict']] %||% NULL
     )
   }
   if (greedy) {
@@ -317,15 +355,18 @@ predict_lazy <- function(model, threshold, threshold_match_weight = NULL,
     scored_sql <- build_fields_join_query(model, scored_sql)
   }
 
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {predicted_tbl}'))
-  DBI::dbExecute(con, glue::glue(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {predicted_tbl}'),
+    step = 'predict_lazy.drop', profile = profile
+  )
+  il_db_execute(con, glue::glue(
     'CREATE TABLE {predicted_tbl} AS {scored_sql}'
-  ))
+  ), step = 'predict_lazy.create', profile = profile)
   new_il_compared_lazy(
     con = con,
     predicted_tbl = predicted_tbl,
-    model = model,
-    threshold = threshold
+    model = lazy_model,
+    threshold = threshold,
+    sql_profile = il_sql_profile_entries(profile)
   )
 }
 
@@ -453,7 +494,7 @@ join_original_fields <- function(result, model) {
 
   if (dialect_has_fuzzy_sql(dialect)) {
     # SQL JOIN path: upload result IDs to temp table, JOIN to source data
-    tmp_tbl <- '__il_field_join'
+    tmp_tbl <- il_table_name(model, 'field_join', il_table_suffix())
     id_df <- data.frame(
       row_idx = seq_len(nrow(result)),
       uid_l = as.character(result$unique_id_l),
