@@ -81,11 +81,12 @@ that return a pre-configured set of levels.
 
 ## Persistence
 
-| splink (Python)                       | irelink (R)            |
-|---------------------------------------|------------------------|
-| `linker.misc.save_model_to_json(...)` | `il_save(model, path)` |
-| `load_model_from_json(...)`           | `il_load(path)`        |
-| *no direct equivalent*                | `il_cleanup(model)`    |
+| splink (Python)                                | irelink (R)            |
+|------------------------------------------------|------------------------|
+| `linker.misc.save_model_to_json(...)`          | `il_save(model, path)` |
+| `load_model_from_json(...)`                    | `il_load(path)`        |
+| `delete_tables_created_by_splink_from_db(...)` | `il_cleanup_all(con)`  |
+| *model-scoped cleanup*                         | `il_cleanup(model)`    |
 
 ## Blocking rules
 
@@ -170,6 +171,11 @@ clusters <- il_cluster(pairs)
 il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
+
+Splink’s prediction `match_weight` includes the prior odds. In
+`irelink`, `match_weight` is evidence-only and `total_match_weight` is
+the prior-inclusive log2 odds. Probability thresholds are portable;
+match-weight thresholds need that prior adjustment.
 
 ## Example: finding matches against new records
 

@@ -141,26 +141,27 @@ il_weights(model)
 ## Step 4: Predict
 
 [`predict()`](https://rdrr.io/r/stats/predict.html) scores every
-candidate pair and returns those above a match-weight threshold:
+candidate pair and returns those above a match-probability threshold:
 
 ``` r
 pairs <- predict(model, threshold = 0.5)
 head(pairs)
-#> # A tibble: 6 × 7
+#> # A tibble: 6 × 8
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob match_weight
 #>         <int>       <int>            <int>         <int>     <int>        <dbl>
 #> 1           2          12                2             1         0         1.64
 #> 2           2          11                2             2         1         8.76
-#> 3           8          17                1             2         1         7.49
-#> 4          19          20                2             2         0         3.86
-#> 5           5          15                2             2         1         8.76
-#> 6           6          15                2             2         1         8.76
-#> # ℹ 1 more variable: match_probability <dbl>
+#> 3           3          14                2             2         0         3.86
+#> 4           4          14                2             2         0         3.86
+#> 5           7          17                2             2         1         8.76
+#> 6          13          14                2             2         0         3.86
+#> # ℹ 2 more variables: total_match_weight <dbl>, match_probability <dbl>
 ```
 
 Each row is a candidate pair with columns for the left and right record
-identifiers, the per-comparison gamma values, and the overall match
-weight and probability.
+identifiers, the per-comparison gamma values, the evidence-only
+`match_weight`, the prior-inclusive `total_match_weight`, and the
+posterior `match_probability`.
 
 ## Step 5: Cluster
 
@@ -174,12 +175,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 5         cluster_15
-#> 2 6         cluster_15
-#> 3 3         cluster_13
-#> 4 17        cluster_17
-#> 5 15        cluster_15
-#> 6 14        cluster_13
+#> 1 3         cluster_13
+#> 2 14        cluster_13
+#> 3 5         cluster_15
+#> 4 6         cluster_15
+#> 5 17        cluster_17
+#> 6 15        cluster_15
 ```
 
 Each record is assigned a `cluster_id`. Records sharing the same cluster
@@ -235,7 +236,9 @@ If you have labelled data (pairs known to be matches or non-matches),
 
 ## Cleaning up
 
-When you are done, release the database resources:
+When you are done, release the model-owned database resources. In an
+interactive session with abandoned models, use `il_cleanup_all(con)`
+before disconnecting to drop every `irelink` table on the connection.
 
 ``` r
 il_cleanup(model)

@@ -52,7 +52,7 @@
 <li>
 <code><a href="../reference/il_model.html">il_model()</a></code> binds a spec to data and a DBI connection.</li>
 <li>
-<code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> scores all candidate pairs above a match-probability threshold (or match-weight threshold via <code>threshold_match_weight</code>).</li>
+<code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> scores all candidate pairs above a match-probability threshold (or an evidence-only match-weight threshold via <code>threshold_match_weight</code>).</li>
 <li>
 <code><a href="../reference/il_cluster.html">il_cluster()</a></code> resolves scored pairs into entity clusters via connected components (using igraph) or single-best-link (with <code>source_dataset</code> for cross-source filtering).</li>
 </ul></div>
@@ -90,13 +90,13 @@
 <div class="section level3">
 <h3 id="training-0-0-0-9000">Training<a class="anchor" aria-label="anchor" href="#training-0-0-0-9000"></a></h3>
 <ul><li>
-<code><a href="../reference/il_estimate_u.html">il_estimate_u()</a></code> estimates non-match probabilities by sampling random pairs.</li>
+<code><a href="../reference/il_estimate_u.html">il_estimate_u()</a></code> estimates non-match probabilities by sampling random pairs, with optional chunked estimation through <code>chunk_size</code> and early stopping through <code>min_count_per_level</code>.</li>
 <li>
 <code><a href="../reference/il_estimate_em.html">il_estimate_em()</a></code> runs the Fellegi-Sunter EM algorithm with configurable <code>max_iterations</code>, <code>convergence</code>, <code>fix_u</code>, <code>fix_m</code>, <code>fix_prior</code>, <code>derive_prior</code>, <code>estimate_without_tf</code>, and <code>estimator_mode</code> parameters.</li>
 <li>
 <code>estimator_mode = "dependency-aware"</code> fits log-linear matched and unmatched comparison-pattern distributions over aggregated gamma counts, preserving missing comparison states as explicit pattern levels.</li>
 <li>
-<code><a href="../reference/il_estimate_prior.html">il_estimate_prior()</a></code> sets the prior match probability.</li>
+<code><a href="../reference/il_estimate_prior.html">il_estimate_prior()</a></code> sets the prior match probability from deterministic matching rules, counting unique blocked pairs across overlapping rules.</li>
 <li>
 <code><a href="../reference/il_prior_prevalence.html">il_prior_prevalence()</a></code> and <code><a href="../reference/il_prior_m.html">il_prior_m()</a></code> add regularizing custom priors for EM; <code><a href="../reference/il_constrain_m.html">il_constrain_m()</a></code> adds explicit fixed matched-class constraints.</li>
 <li>
@@ -105,11 +105,12 @@
 <div class="section level3">
 <h3 id="prediction-0-0-0-9000">Prediction<a class="anchor" aria-label="anchor" href="#prediction-0-0-0-9000"></a></h3>
 <ul><li>
-<code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> supports both <code>threshold</code> (match probability) and <code>threshold_match_weight</code> (log₂ Bayes factor) filtering.</li>
+<code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> supports both <code>threshold</code> (match probability) and <code>threshold_match_weight</code> (evidence-only log2 Bayes factor) filtering.</li>
+<li>Prediction output includes evidence-only <code>match_weight</code>, prior-inclusive <code>total_match_weight</code>, and posterior <code>match_probability</code>.</li>
 <li>
 <code>include_fields = TRUE</code> joins all source columns into the scored output.</li>
 <li>
-<code>collect = FALSE</code> returns an <code>il_compared_lazy</code> object backed by an in-database table.</li>
+<code>collect = FALSE</code> returns an <code>il_compared_lazy</code> object backed by a model-scoped in-database table.</li>
 <li>
 <code><a href="../reference/il_score_missing_edges.html">il_score_missing_edges()</a></code> enumerates and scores unscored within-cluster pairs.</li>
 <li>
@@ -118,6 +119,8 @@
 <code><a href="../reference/il_deterministic_link.html">il_deterministic_link()</a></code> performs exact-match linking without training.</li>
 <li>
 <code><a href="../reference/il_find_matches.html">il_find_matches()</a></code> scores a set of probe records against existing data.</li>
+<li>
+<code>profile_sql = TRUE</code> on <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> attaches lightweight SQL timing metadata to collected predictions or lazy prediction objects.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="diagnostics-and-evaluation-0-0-0-9000">Diagnostics and evaluation<a class="anchor" aria-label="anchor" href="#diagnostics-and-evaluation-0-0-0-9000"></a></h3>
@@ -151,9 +154,9 @@
 <li>
 <code><a href="../reference/il_phonetic_chart.html">il_phonetic_chart()</a></code> produces a Soundex agreement heatmap.</li>
 <li>
-<code><a href="../reference/il_tf_chart.html">il_tf_chart()</a></code> visualises term frequency distributions with labelled most/least common values.</li>
+<code><a href="../reference/il_tf_chart.html">il_tf_chart()</a></code> visualises model-specific term frequency distributions with labelled most/least common values.</li>
 <li>
-<code><a href="../reference/il_register_tf.html">il_register_tf()</a></code> registers pre-computed term frequency tables in the database.</li>
+<code><a href="../reference/il_register_tf.html">il_register_tf()</a></code> registers pre-computed term frequency tables in the database and returns the updated model.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="visualisation-0-0-0-9000">Visualisation<a class="anchor" aria-label="anchor" href="#visualisation-0-0-0-9000"></a></h3>
@@ -180,13 +183,18 @@
 <li>
 <code><a href="../reference/il_attach.html">il_attach()</a></code> reattaches a saved model to different data or connections.</li>
 <li>
-<code><a href="../reference/il_cleanup.html">il_cleanup()</a></code> removes temporary tables from the database.</li>
+<code><a href="../reference/il_cleanup.html">il_cleanup()</a></code> removes temporary tables owned by a single model, making it safe for shared DBI connections with multiple live models.</li>
+<li>
+<code><a href="../reference/il_cleanup_all.html">il_cleanup_all()</a></code> removes all package-owned temporary tables from a connection for exploratory sessions and failed runs.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="performance-0-0-0-9000">Performance<a class="anchor" aria-label="anchor" href="#performance-0-0-0-9000"></a></h3>
 <ul><li>Gamma computation is pushed into DuckDB using native C++ string similarity functions.</li>
 <li>SQLite is retained as a fallback with R-side gamma computation via <code>stringdist</code>.</li>
 <li>SQL-native connected components for DuckDB/PostgreSQL; igraph fallback for SQLite.</li>
+<li>Term-frequency, lazy prediction, and scratch tables use generated model-scoped names to avoid collisions on shared connections.</li>
+<li>
+<code>profile_sql = TRUE</code> on <code><a href="../reference/il_estimate_u.html">il_estimate_u()</a></code>, <code><a href="../reference/il_estimate_prior.html">il_estimate_prior()</a></code>, and <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> records lightweight SQL timing metadata for performance investigation.</li>
 <li>End-to-end benchmarks against an R-side SQLite baseline: 1,000 records in 1.4 s (2.1× faster), 5,000 records in 19.5 s (1.6×), 10,000 records in 61.4 s (2.6×). Speedup grows with dataset size.</li>
 </ul></div>
 </div>

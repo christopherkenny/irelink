@@ -269,7 +269,13 @@ EM:</p>
 <span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 8</span> surname              2 0.027<span style="text-decoration: underline;">2</span> 0.001<span style="text-decoration: underline;">58</span></span></span>
 <span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 9</span> surname              3 0.069<span style="text-decoration: underline;">2</span> 0.002<span style="text-decoration: underline;">47</span></span></span>
 <span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;">10</span> surname              4 0.460  0.009<span style="text-decoration: underline;">51</span></span></span>
-<span><span class="co">#&gt;      comparisons: <span style="color: #949494;"># ℹ 13 more rows</span></span></span></code></pre></div>
+<span><span class="co">#&gt;      comparisons: <span style="color: #949494;"># ℹ 13 more rows</span></span></span>
+<span><span class="co">#&gt;     u_estimation: 1e+05</span></span>
+<span><span class="co">#&gt;      u_estimation: FALSE</span></span>
+<span><span class="co">#&gt;      u_estimation: NULL</span></span>
+<span><span class="co">#&gt;      u_estimation: NULL</span></span>
+<span><span class="co">#&gt;      u_estimation: 100000</span></span>
+<span><span class="co">#&gt;      u_estimation: 1</span></span></code></pre></div>
 <p>The match weights chart shows the discriminative power of each
 comparison:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
@@ -296,17 +302,17 @@ re-apply the model without retraining:</p>
 <span><span class="va">loaded</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_load.html">il_load</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
 <span><span class="va">model2</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_attach.html">il_attach</a></span><span class="op">(</span><span class="va">loaded</span>, <span class="va">fake_1000</span>, con <span class="op">=</span> <span class="va">con2</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model2</span>, threshold <span class="op">=</span> <span class="fl">0.85</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 10</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 11</span></span></span>
 <span><span class="co">#&gt;   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob gamma_city</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           0           3                4            -<span style="color: #BB0000;">1</span>         5          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           6          11                4             4         2          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           2           3                4             4         2          0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>          10          11                4             4         2          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>          27          30                4             1         2          1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>          28          30                4            -<span style="color: #BB0000;">1</span>         2          1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>          38          42                4             4         5          0</span></span>
-<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 4 more variables: gamma_email &lt;int&gt;, match_weight &lt;dbl&gt;, tf_adj_city &lt;dbl&gt;,</span></span></span>
-<span><span class="co">#&gt; <span style="color: #949494;">#   match_probability &lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>          33          36                4             4         5          1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>          38          42                4             4         5          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>          40          42                4             4         2          1</span></span>
+<span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: gamma_email &lt;int&gt;, match_weight &lt;dbl&gt;, tf_adj_city &lt;dbl&gt;,</span></span></span>
+<span><span class="co">#&gt; <span style="color: #949494;">#   total_match_weight &lt;dbl&gt;, match_probability &lt;dbl&gt;</span></span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con2</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
 <p>This pattern supports the common production workflow: train once on a
 representative sample, save the model, and re-apply as new data
@@ -335,12 +341,12 @@ arrives.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 61        cluster_58 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 932       cluster_924</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 944       cluster_941</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 954       cluster_947</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 780       cluster_777</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 66        cluster_63</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 262       cluster_261</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 751       cluster_744</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 782       cluster_777</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 783       cluster_777</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 242       cluster_237</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 554       cluster_550</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>
@@ -439,6 +445,10 @@ threshold:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><code>il_cleanup(model)</code> is model-scoped. If an interactive run
+failed before you kept the model object, call
+<code>il_cleanup_all(con)</code> to remove all <code>irelink</code>
+tables from the connection before disconnecting.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

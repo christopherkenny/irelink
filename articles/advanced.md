@@ -110,7 +110,7 @@ materialising millions of rows would exhaust memory.
 ``` r
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,946 pairs in table __il_predicted (threshold = 0.5)
+#> <il_compared_lazy> 2,946 pairs in table __il_8698_1_predicted_4 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -127,7 +127,37 @@ and
 [`il_waterfall()`](http://christophertkenny.com/irelink/reference/il_waterfall.md)
 collect automatically when needed, so downstream analysis code is
 unchanged. Use the lazy path any time candidate-pair counts exceed
-available memory.
+available memory. The lazy prediction table is model-scoped;
+`il_cleanup(model)` removes it along with the model’s source and
+term-frequency tables.
+
+## Chunked u estimation and SQL profiling
+
+For larger datasets,
+[`il_estimate_u()`](http://christophertkenny.com/irelink/reference/il_estimate_u.md)
+can accumulate random-pair gamma counts in chunks and stop once every
+comparison level has enough support:
+
+``` r
+model <- il_estimate_u(
+  model,
+  max_pairs = 5e6,
+  chunk_size = 250000,
+  min_count_per_level = 100
+)
+model$params$u_estimation
+```
+
+When investigating database performance, set `profile_sql = TRUE` on
+[`il_estimate_u()`](http://christophertkenny.com/irelink/reference/il_estimate_u.md),
+[`il_estimate_prior()`](http://christophertkenny.com/irelink/reference/il_estimate_prior.md),
+or [`predict()`](https://rdrr.io/r/stats/predict.html) to collect
+lightweight SQL timing metadata:
+
+``` r
+pairs <- predict(model, threshold = 0.5, profile_sql = TRUE)
+attr(pairs, 'sql_profile')
+```
 
 ## Cluster diagnostics
 
@@ -148,16 +178,16 @@ metrics$clusters
 #> # A tibble: 116 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralisation
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_164      32     140   0.282                  0.559
-#>  2 cluster_172      18      52   0.340                  0.544
-#>  3 cluster_176      26     122   0.375                  0.287
-#>  4 cluster_186       5       8   0.8                    0.333
-#>  5 cluster_244       8      22   0.786                  0.286
-#>  6 cluster_428       3       2   0.667                  1    
-#>  7 cluster_440       9      27   0.75                   0.161
-#>  8 cluster_58        5      10   1                      0    
-#>  9 cluster_612       2       1   1                     NA    
-#> 10 cluster_871       3       3   1                      0    
+#>  1 cluster_115       8      24   0.857                  0.190
+#>  2 cluster_326       4       4   0.667                  0.667
+#>  3 cluster_792       7      15   0.714                  0.4  
+#>  4 cluster_867       3       3   1                      0    
+#>  5 cluster_924       8      28   1                      0    
+#>  6 cluster_229       8      28   1                      0    
+#>  7 cluster_237       6      15   1                      0    
+#>  8 cluster_261       4       6   1                      0    
+#>  9 cluster_603       9      29   0.806                  0.25 
+#> 10 cluster_13       14      40   0.440                  0.205
 #> # ℹ 106 more rows
 ```
 
@@ -176,12 +206,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 995       cluster_164      8           0.258
-#> 2 166       cluster_164      8           0.258
-#> 3 994       cluster_164     10           0.323
-#> 4 48        cluster_164      4           0.129
-#> 5 169       cluster_164      6           0.194
-#> 6 996       cluster_164      6           0.194
+#> 1 363       cluster_133      6          0.140 
+#> 2 853       cluster_133      2          0.0465
+#> 3 670       cluster_133     12          0.279 
+#> 4 790       cluster_133      4          0.0930
+#> 5 855       cluster_133      7          0.163 
+#> 6 852       cluster_133      2          0.0465
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -273,26 +303,26 @@ new_df <- data.frame(
 
 matches <- il_find_matches(model, new_df, threshold = 0.5)
 matches
-#> # A tibble: 17 × 4
-#>    unique_id_l unique_id_r match_weight match_probability
-#>          <int>       <int>        <dbl>             <dbl>
-#>  1           1         237         2.54             0.926
-#>  2           1         239         1.46             0.855
-#>  3           1         364         1.46             0.855
-#>  4           1         365         1.46             0.855
-#>  5           1         241         1.46             0.855
-#>  6           1         242         1.46             0.855
-#>  7           1         362         2.54             0.926
-#>  8           1         366         1.46             0.855
-#>  9           1         367         1.46             0.855
-#> 10           1         789         2.67             0.932
-#> 11           2         858         1.47             0.856
-#> 12           1         240         1.46             0.855
-#> 13           1         363         1.46             0.855
-#> 14           2         859         2.55             0.927
-#> 15           2         864         1.47             0.856
-#> 16           1         238         2.67             0.932
-#> 17           1         791         1.46             0.855
+#> # A tibble: 17 × 5
+#>    unique_id_l unique_id_r match_weight total_match_weight match_probability
+#>          <int>       <int>        <dbl>              <dbl>             <dbl>
+#>  1           2         858         1.47               2.57             0.856
+#>  2           1         240         1.46               2.56             0.855
+#>  3           1         363         1.46               2.56             0.855
+#>  4           2         859         2.55               3.66             0.927
+#>  5           2         864         1.47               2.57             0.856
+#>  6           1         238         2.67               3.77             0.932
+#>  7           1         791         1.46               2.56             0.855
+#>  8           1         237         2.54               3.64             0.926
+#>  9           1         239         1.46               2.56             0.855
+#> 10           1         364         1.46               2.56             0.855
+#> 11           1         365         1.46               2.56             0.855
+#> 12           1         241         1.46               2.56             0.855
+#> 13           1         242         1.46               2.56             0.855
+#> 14           1         362         2.54               3.64             0.926
+#> 15           1         366         1.46               2.56             0.855
+#> 16           1         367         1.46               2.56             0.855
+#> 17           1         789         2.67               3.77             0.932
 ```
 
 Each row is a (new record, existing record) pair. `unique_id_l`
@@ -308,6 +338,12 @@ load a saved model, attach it to the current database, and call
 for each incoming batch of new records.
 
 ## Cleanup
+
+`il_cleanup(model)` only removes tables owned by that model, so it is
+safe when several models share the same connection.
+`il_cleanup_all(con)` is broader and is best reserved for failed runs or
+exploratory sessions where you want to clear every `irelink` table
+before disconnecting.
 
 ``` r
 il_cleanup(model)

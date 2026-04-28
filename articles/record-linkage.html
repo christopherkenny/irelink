@@ -256,12 +256,12 @@ matching:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id  </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 4219      cluster_1973</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 2271      cluster_2271</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 2348      cluster_2348</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 1940      cluster_1940</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 2640      cluster_2640</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 1505      cluster_1505</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 4179      cluster_146 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 1137      cluster_1137</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 3699      cluster_3348</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 1845      cluster_1845</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 3264      cluster_3253</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 955       cluster_1974</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>
@@ -328,6 +328,10 @@ IDs and build pairwise labels:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p><code>il_cleanup(model)</code> is model-scoped. If an interactive run
+failed before you kept the model object, call
+<code>il_cleanup_all(con)</code> to remove all <code>irelink</code>
+tables from the connection before disconnecting.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

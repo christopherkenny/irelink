@@ -280,7 +280,9 @@ Save, load, and manage linkage models and resources.
 - [`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md)
   : Attach a Saved Model to Fresh Data
 - [`il_cleanup()`](http://christophertkenny.com/irelink/reference/il_cleanup.md)
-  : Remove Temporary Tables from Database
+  : Remove Model-Owned Temporary Tables from Database
+- [`il_cleanup_all()`](http://christophertkenny.com/irelink/reference/il_cleanup_all.md)
+  : Remove All irelink Temporary Tables from a Database
 - [`irelink`](http://christophertkenny.com/irelink/reference/irelink-package.md)
   [`irelink-package`](http://christophertkenny.com/irelink/reference/irelink-package.md)
   : irelink: Fast Probabilistic Record Linkage

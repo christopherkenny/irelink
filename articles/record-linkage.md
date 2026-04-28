@@ -203,12 +203,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id  
 #>   <chr>     <chr>       
-#> 1 4219      cluster_1973
-#> 2 2271      cluster_2271
-#> 3 2348      cluster_2348
-#> 4 1940      cluster_1940
-#> 5 2640      cluster_2640
-#> 6 1505      cluster_1505
+#> 1 4179      cluster_146 
+#> 2 1137      cluster_1137
+#> 3 3699      cluster_3348
+#> 4 1845      cluster_1845
+#> 5 3264      cluster_3253
+#> 6 955       cluster_1974
 ```
 
 ## Evaluate against ground truth
@@ -282,3 +282,7 @@ autoplot(pr)
 il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
+
+`il_cleanup(model)` is model-scoped. If an interactive run failed before
+you kept the model object, call `il_cleanup_all(con)` to remove all
+`irelink` tables from the connection before disconnecting.

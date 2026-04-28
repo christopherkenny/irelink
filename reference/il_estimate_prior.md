@@ -8,7 +8,7 @@ rate before more detailed parameter estimation.
 ## Usage
 
 ``` r
-il_estimate_prior(model, ..., recall = 0.7)
+il_estimate_prior(model, ..., recall = 0.7, profile_sql = FALSE)
 ```
 
 ## Arguments
@@ -27,6 +27,11 @@ il_estimate_prior(model, ..., recall = 0.7)
 
   A numeric value between 0 and 1 representing the assumed recall of the
   deterministic rules. Defaults to `0.7`.
+
+- profile_sql:
+
+  Logical. If `TRUE`, store lightweight SQL timing metadata in
+  `model$params$sql_profile`.
 
 ## Value
 

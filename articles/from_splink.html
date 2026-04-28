@@ -414,6 +414,10 @@ functions that return a pre-configured set of levels.</p>
 <h2 id="persistence">Persistence<a class="anchor" aria-label="anchor" href="#persistence"></a>
 </h2>
 <table class="table">
+<colgroup>
+<col width="56%">
+<col width="43%">
+</colgroup>
 <thead><tr class="header">
 <th>splink (Python)</th>
 <th>irelink (R)</th>
@@ -428,7 +432,11 @@ functions that return a pre-configured set of levels.</p>
 <td><code>il_load(path)</code></td>
 </tr>
 <tr class="odd">
-<td><em>no direct equivalent</em></td>
+<td><code>delete_tables_created_by_splink_from_db(...)</code></td>
+<td><code>il_cleanup_all(con)</code></td>
+</tr>
+<tr class="even">
+<td><em>model-scoped cleanup</em></td>
 <td><code>il_cleanup(model)</code></td>
 </tr>
 </tbody>
@@ -510,6 +518,11 @@ functions.</p>
 <span></span>
 <span><span class="fu"><a href="../reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
+<p>Splink’s prediction <code>match_weight</code> includes the prior
+odds. In <code>irelink</code>, <code>match_weight</code> is
+evidence-only and <code>total_match_weight</code> is the prior-inclusive
+log2 odds. Probability thresholds are portable; match-weight thresholds
+need that prior adjustment.</p>
 </div>
 <div class="section level2">
 <h2 id="example-finding-matches-against-new-records">Example: finding matches against new records<a class="anchor" aria-label="anchor" href="#example-finding-matches-against-new-records"></a>

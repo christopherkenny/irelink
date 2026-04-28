@@ -182,7 +182,7 @@ summary(model)
 #>   Blocking rules: 4
 #> 
 #>   Parameters:
-#>     prior: 0.0003162747
+#>     prior: 0.000316278
 #>     comparisons: # A tibble: 25 × 4
 #>      comparisons:    comparison gamma_level      m        u
 #>      comparisons:    <chr>            <int>  <dbl>    <dbl>
@@ -197,6 +197,12 @@ summary(model)
 #>      comparisons:  9 surname              3 0.0944 0.000230
 #>      comparisons: 10 surname              4 0.776  0.000963
 #>      comparisons: # ℹ 15 more rows
+#>     u_estimation: 5e+06
+#>      u_estimation: FALSE
+#>      u_estimation: NULL
+#>      u_estimation: NULL
+#>      u_estimation: 5000000
+#>      u_estimation: 1
 ```
 
 ``` r
@@ -222,23 +228,23 @@ autoplot(il_unlinkables(model))
 ``` r
 predictions <- predict(model, threshold = 0.5)
 predictions
-#> # A tibble: 176,945 × 12
-#>    unique_id_l  unique_id_r gamma_first_name gamma_surname gamma_dob
-#>  * <chr>        <chr>                  <int>         <int>     <int>
-#>  1 Q18530939-2  Q18530939-9                4             4         5
-#>  2 Q18530939-3  Q18530939-9                4             4         5
-#>  3 Q18530939-4  Q18530939-9                4             4         5
-#>  4 Q18530939-6  Q18530939-9                2             4         5
-#>  5 Q18530939-14 Q18530939-9                3             4         5
-#>  6 Q3285335-12  Q3285335-3                 4             4         5
-#>  7 Q4423153-1   Q4423153-4                 4             4         5
-#>  8 Q4423153-3   Q4423153-4                 4             4         5
-#>  9 Q472639-1    Q472639-4                  4             4         5
-#> 10 Q472639-3    Q472639-4                  0             4         5
+#> # A tibble: 176,945 × 13
+#>    unique_id_l  unique_id_r  gamma_first_name gamma_surname gamma_dob
+#>  * <chr>        <chr>                   <int>         <int>     <int>
+#>  1 Q2296770-1   Q2296770-15                 0             4         5
+#>  2 Q21464185-1  Q21464185-4                 4             4         5
+#>  3 Q2516590-1   Q2516590-3                  4             4         5
+#>  4 Q2516590-2   Q2516590-3                  4             4         5
+#>  5 Q55455287-1  Q55455287-12                4             4         5
+#>  6 Q55455287-10 Q55455287-12                4             4         5
+#>  7 Q631006-1    Q631006-2                   4             4         5
+#>  8 Q3750927-1   Q3750927-3                  1             4         5
+#>  9 Q3750927-2   Q3750927-3                  1             4         5
+#> 10 Q18672658-3  Q18672658-9                 4             4         5
 #> # ℹ 176,935 more rows
-#> # ℹ 7 more variables: gamma_postcode_fake <int>, gamma_birth_place <int>,
+#> # ℹ 8 more variables: gamma_postcode_fake <int>, gamma_birth_place <int>,
 #> #   gamma_occupation <int>, match_weight <dbl>, tf_adj_birth_place <dbl>,
-#> #   tf_adj_occupation <dbl>, match_probability <dbl>
+#> #   tf_adj_occupation <dbl>, total_match_weight <dbl>, match_probability <dbl>
 ```
 
 ``` r
@@ -259,18 +265,18 @@ autoplot(predictions, which = 1)
 clusters <- il_cluster(predictions, threshold = 0.95)
 clusters
 #> # A tibble: 41,218 × 2
-#>    unique_id    cluster_id          
-#>    <chr>        <chr>               
-#>  1 Q6759722-3   cluster_Q6759722-1  
-#>  2 Q7901261-2   cluster_Q7901261-1  
-#>  3 Q3275944-2   cluster_Q3275944-1  
-#>  4 Q3275944-4   cluster_Q3275944-1  
-#>  5 Q4666575-7   cluster_Q4666575-1  
-#>  6 Q43131396-12 cluster_Q43131396-1 
-#>  7 Q15997294-11 cluster_Q15997294-11
-#>  8 Q52155700-10 cluster_Q52155700-1 
-#>  9 Q55982-3     cluster_Q55982-1    
-#> 10 Q2164405-3   cluster_Q2164405-1  
+#>    unique_id    cluster_id         
+#>    <chr>        <chr>              
+#>  1 Q21464185-1  cluster_Q21464185-1
+#>  2 Q2516590-2   cluster_Q2516590-1 
+#>  3 Q55455287-1  cluster_Q55455287-1
+#>  4 Q55455287-10 cluster_Q55455287-1
+#>  5 Q631006-1    cluster_Q631006-1  
+#>  6 Q18672658-3  cluster_Q18672658-1
+#>  7 Q7149918-10  cluster_Q7149918-1 
+#>  8 Q27919030-1  cluster_Q27919030-1
+#>  9 Q3526548-3   cluster_Q3526548-1 
+#> 10 Q18530939-10 cluster_Q18530939-1
 #> # ℹ 41,208 more rows
 ```
 
@@ -323,16 +329,16 @@ errors[errors$error_type == 'false_positive', ]
 #> # A tibble: 97 × 6
 #>    unique_id_l unique_id_r match_weight match_probability true_label error_type 
 #>    <chr>       <chr>              <dbl>             <dbl> <lgl>      <chr>      
-#>  1 Q48818396-2 Q48818466-1         35.7             1.000 FALSE      false_posi…
-#>  2 Q15176618-6 Q8005070-2          23.5             1.000 FALSE      false_posi…
-#>  3 Q15176618-6 Q8005070-1          23.5             1.000 FALSE      false_posi…
-#>  4 Q336670-3   Q3784946-1          37.3             1.000 FALSE      false_posi…
-#>  5 Q17627000-2 Q24845632-1         23.0             1.000 FALSE      false_posi…
-#>  6 Q3568485-5  Q3568487-2          40.7             1.000 FALSE      false_posi…
+#>  1 Q336670-3   Q3784946-2          37.3             1.000 FALSE      false_posi…
+#>  2 Q336670-3   Q3784946-1          37.3             1.000 FALSE      false_posi…
+#>  3 Q15176618-6 Q8005070-4          32.3             1.000 FALSE      false_posi…
+#>  4 Q15176618-6 Q8005070-2          23.5             1.000 FALSE      false_posi…
+#>  5 Q2248538-2  Q3752751-2          27.2             1.000 FALSE      false_posi…
+#>  6 Q2248538-2  Q3752751-1          27.2             1.000 FALSE      false_posi…
 #>  7 Q15990139-3 Q3752751-2          21.9             0.999 FALSE      false_posi…
-#>  8 Q15990139-3 Q3752751-1          21.9             0.999 FALSE      false_posi…
-#>  9 Q7528045-2  Q7528085-8          22.5             0.999 FALSE      false_posi…
-#> 10 Q7528045-3  Q7528085-7          24.5             1.000 FALSE      false_posi…
+#>  8 Q15990139-4 Q3752751-2          21.9             0.999 FALSE      false_posi…
+#>  9 Q15990139-4 Q3752751-1          21.9             0.999 FALSE      false_posi…
+#> 10 Q17627000-2 Q24845632-1         23.0             1.000 FALSE      false_posi…
 #> # ℹ 87 more rows
 ```
 
@@ -345,16 +351,16 @@ errors[errors$error_type == 'false_negative', ]
 #> # A tibble: 68,411 × 6
 #>    unique_id_l  unique_id_r match_weight match_probability true_label error_type
 #>    <chr>        <chr>              <dbl>             <dbl> <lgl>      <chr>     
-#>  1 Q472639-3    Q472639-9           10.8             0.357 TRUE       false_neg…
-#>  2 Q28094247-15 Q28094247-4         10.8             0.357 TRUE       false_neg…
-#>  3 Q1608197-21  Q1608197-3          10.8             0.357 TRUE       false_neg…
-#>  4 Q4720275-5   Q4720275-8          10.8             0.357 TRUE       false_neg…
-#>  5 Q18671640-10 Q18671640-…         10.8             0.357 TRUE       false_neg…
-#>  6 Q549786-5    Q549786-9           10.8             0.357 TRUE       false_neg…
-#>  7 Q11277367-5  Q11277367-8         10.8             0.357 TRUE       false_neg…
-#>  8 Q28094263-10 Q28094263-9         10.8             0.357 TRUE       false_neg…
-#>  9 Q5725110-3   Q5725110-5          10.8             0.357 TRUE       false_neg…
-#> 10 Q6224239-13  Q6224239-9          10.8             0.357 TRUE       false_neg…
+#>  1 Q19975438-11 Q19975438-…         10.8             0.357 TRUE       false_neg…
+#>  2 Q2579750-6   Q2579750-7          10.8             0.357 TRUE       false_neg…
+#>  3 Q2579750-1   Q2579750-6          10.8             0.357 TRUE       false_neg…
+#>  4 Q984217-11   Q984217-6           10.8             0.357 TRUE       false_neg…
+#>  5 Q88466480-12 Q88466480-3         10.8             0.357 TRUE       false_neg…
+#>  6 Q315989-6    Q315989-8           10.8             0.357 TRUE       false_neg…
+#>  7 Q4120572-3   Q4120572-9          10.8             0.357 TRUE       false_neg…
+#>  8 Q16238716-4  Q16238716-8         10.8             0.357 TRUE       false_neg…
+#>  9 Q16238716-14 Q16238716-6         10.8             0.357 TRUE       false_neg…
+#> 10 Q46745547-13 Q46745547-4         10.8             0.357 TRUE       false_neg…
 #> # ℹ 68,401 more rows
 ```
 
@@ -364,3 +370,7 @@ errors[errors$error_type == 'false_negative', ]
 il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
+
+`il_cleanup(model)` is model-scoped. If an interactive run failed before
+you kept the model object, call `il_cleanup_all(con)` to remove all
+`irelink` tables from the connection before disconnecting.

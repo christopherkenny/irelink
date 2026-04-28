@@ -8,7 +8,13 @@ observed level frequencies approximate the u distribution.
 ## Usage
 
 ``` r
-il_estimate_u(model, max_pairs = 1e+06)
+il_estimate_u(
+  model,
+  max_pairs = 1e+06,
+  min_count_per_level = NULL,
+  chunk_size = NULL,
+  profile_sql = FALSE
+)
 ```
 
 ## Arguments
@@ -20,6 +26,23 @@ il_estimate_u(model, max_pairs = 1e+06)
 - max_pairs:
 
   Maximum number of random pairs to sample. Defaults to `1e6`.
+
+- min_count_per_level:
+
+  Optional integer. When set, chunked estimation stops once every
+  comparison level has been observed at least this many times, or once
+  `max_pairs` has been sampled.
+
+- chunk_size:
+
+  Optional integer number of pairs to score per chunk. When set, u
+  estimation accumulates gamma counts across chunks instead of using one
+  aggregate query.
+
+- profile_sql:
+
+  Logical. If `TRUE`, store lightweight SQL timing metadata in
+  `model$params$sql_profile`.
 
 ## Value
 

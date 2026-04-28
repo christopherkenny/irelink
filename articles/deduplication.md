@@ -221,6 +221,12 @@ summary(model)
 #>      comparisons:  9 surname              3 0.0692 0.00247
 #>      comparisons: 10 surname              4 0.460  0.00951
 #>      comparisons: # ℹ 13 more rows
+#>     u_estimation: 1e+05
+#>      u_estimation: FALSE
+#>      u_estimation: NULL
+#>      u_estimation: NULL
+#>      u_estimation: 100000
+#>      u_estimation: 1
 ```
 
 The match weights chart shows the discriminative power of each
@@ -261,17 +267,17 @@ con2 <- DBI::dbConnect(duckdb::duckdb())
 loaded <- il_load(path)
 model2 <- il_attach(loaded, fake_1000, con = con2)
 head(predict(model2, threshold = 0.85))
-#> # A tibble: 6 × 10
+#> # A tibble: 6 × 11
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob gamma_city
 #>         <int>       <int>            <int>         <int>     <int>      <int>
 #> 1           0           3                4            -1         5          0
-#> 2           6          11                4             4         2          0
+#> 2           2           3                4             4         2          0
 #> 3          10          11                4             4         2          0
-#> 4          27          30                4             1         2          1
-#> 5          28          30                4            -1         2          1
-#> 6          38          42                4             4         5          0
-#> # ℹ 4 more variables: gamma_email <int>, match_weight <dbl>, tf_adj_city <dbl>,
-#> #   match_probability <dbl>
+#> 4          33          36                4             4         5          1
+#> 5          38          42                4             4         5          0
+#> 6          40          42                4             4         2          1
+#> # ℹ 5 more variables: gamma_email <int>, match_weight <dbl>, tf_adj_city <dbl>,
+#> #   total_match_weight <dbl>, match_probability <dbl>
 DBI::dbDisconnect(con2, shutdown = TRUE)
 ```
 
@@ -312,12 +318,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 61        cluster_58 
-#> 2 932       cluster_924
-#> 3 944       cluster_941
-#> 4 954       cluster_947
-#> 5 780       cluster_777
-#> 6 66        cluster_63
+#> 1 262       cluster_261
+#> 2 751       cluster_744
+#> 3 782       cluster_777
+#> 4 783       cluster_777
+#> 5 242       cluster_237
+#> 6 554       cluster_550
 ```
 
 ## Evaluate against ground truth
@@ -424,3 +430,7 @@ autoplot(unlink)
 il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
+
+`il_cleanup(model)` is model-scoped. If an interactive run failed before
+you kept the model object, call `il_cleanup_all(con)` to remove all
+`irelink` tables from the connection before disconnecting.

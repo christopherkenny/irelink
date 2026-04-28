@@ -58,7 +58,13 @@ observed level frequencies approximate the u distribution.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">il_estimate_u</span><span class="op">(</span><span class="va">model</span>, max_pairs <span class="op">=</span> <span class="fl">1e+06</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">il_estimate_u</span><span class="op">(</span></span>
+<span>  <span class="va">model</span>,</span>
+<span>  max_pairs <span class="op">=</span> <span class="fl">1e+06</span>,</span>
+<span>  min_count_per_level <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  chunk_size <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  profile_sql <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -72,6 +78,23 @@ observed level frequencies approximate the u distribution.</p>
 <dt id="arg-max-pairs">max_pairs<a class="anchor" aria-label="anchor" href="#arg-max-pairs"></a></dt>
 <dd><p>Maximum number of random pairs to sample. Defaults to
 <code>1e6</code>.</p></dd>
+
+
+<dt id="arg-min-count-per-level">min_count_per_level<a class="anchor" aria-label="anchor" href="#arg-min-count-per-level"></a></dt>
+<dd><p>Optional integer. When set, chunked estimation
+stops once every comparison level has been observed at least this many
+times, or once <code>max_pairs</code> has been sampled.</p></dd>
+
+
+<dt id="arg-chunk-size">chunk_size<a class="anchor" aria-label="anchor" href="#arg-chunk-size"></a></dt>
+<dd><p>Optional integer number of pairs to score per chunk. When
+set, u estimation accumulates gamma counts across chunks instead of using
+one aggregate query.</p></dd>
+
+
+<dt id="arg-profile-sql">profile_sql<a class="anchor" aria-label="anchor" href="#arg-profile-sql"></a></dt>
+<dd><p>Logical. If <code>TRUE</code>, store lightweight SQL timing metadata
+in <code>model$params$sql_profile</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">

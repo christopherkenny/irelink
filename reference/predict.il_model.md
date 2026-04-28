@@ -2,8 +2,9 @@
 
 Generates and scores all candidate record pairs that pass the blocking
 rules, returning those above the match-probability threshold. This is an
-S3 method for [`stats::predict()`](https://rdrr.io/r/stats/predict.html)
-— the same generic used for `lm`, `glm`, and tidymodels objects.
+S3 method for
+[`stats::predict()`](https://rdrr.io/r/stats/predict.html), the same
+generic used for `lm`, `glm`, and tidymodels objects.
 
 ## Usage
 
@@ -17,6 +18,7 @@ predict(
   collect = TRUE,
   include_fields = FALSE,
   greedy = FALSE,
+  profile_sql = FALSE,
   ...
 )
 ```
@@ -35,9 +37,9 @@ predict(
 
 - threshold_match_weight:
 
-  Optional numeric value. When set, pairs are filtered on match weight
-  (log₂ Bayes factor) instead of probability. Typical values range from
-  about −5 to +30. Overrides `threshold`.
+  Optional numeric value. When set, pairs are filtered on evidence-only
+  match weight (log2 Bayes factor) instead of probability. Typical
+  values range from about -5 to +30. Overrides `threshold`.
 
 - type:
 
@@ -50,7 +52,7 @@ predict(
   tibble. If `FALSE`, scoring is performed entirely in-database and the
   result is a lightweight `il_compared_lazy` reference that
   [`il_cluster()`](http://christophertkenny.com/irelink/reference/il_cluster.md)
-  can consume directly — avoiding the round-trip of collecting millions
+  can consume directly, avoiding the round-trip of collecting millions
   of rows into R and re-uploading them. Requires a DuckDB or PostgreSQL
   backend.
 
@@ -68,6 +70,11 @@ predict(
   pairs. Greedy matching sorts pairs by descending posterior match
   probability, then by left and right row order.
 
+- profile_sql:
+
+  Logical. If `TRUE`, attach lightweight SQL timing metadata to
+  collected predictions or include it on lazy predictions.
+
 - ...:
 
   Additional arguments passed to the generic.
@@ -75,10 +82,13 @@ predict(
 ## Value
 
 When `collect = TRUE`: an `il_compared` tibble with one row per
-candidate pair, including columns for record IDs, match weight, match
-probability, and per-comparison gamma values. When `collect = FALSE`: an
-`il_compared_lazy` object referencing the scored pairs table in the
-database.
+candidate pair, including columns for record IDs, match weight, total
+match weight, match probability, and per-comparison gamma values.
+`match_weight` is the evidence-only log2 Bayes factor. The additive
+prior term is exposed separately through `total_match_weight`, whose
+value is `match_weight + log2(prior / (1 - prior))`. When
+`collect = FALSE`: an `il_compared_lazy` object referencing the scored
+pairs table in the database.
 
 ## Examples
 

@@ -87,11 +87,6 @@
 <p>Find duplicate records within a single dataset. The bundled <code>fake_20</code> dataset provides a small example for experimentation. <code>irelink</code> pushes data into a SQL database for efficient pair generation, so you need a DBI connection. Here we use an in-memory DuckDB instance.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://christophertkenny.com/irelink/">irelink</a></span><span class="op">)</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; Attaching package: 'irelink'</span></span>
-<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
-<span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt;     months</span></span>
 <span></span>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="va">fake_20</span></span>
 <span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -106,29 +101,35 @@
 <span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_model.html">il_model</a></span><span class="op">(</span><span class="va">df</span>, spec <span class="op">=</span> <span class="va">spec</span>, con <span class="op">=</span> <span class="va">con</span><span class="op">)</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_estimate_u.html">il_estimate_u</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
-<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
-<p><code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> scores all candidate pairs and returns those above the threshold. <code><a href="reference/il_cluster.html">il_cluster()</a></code> groups the matched pairs into deduplicated entities.</p>
+<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; EM trained: first_name and dob | skipped (blocked on): surname</span></span></code></pre></div>
+<p><code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> scores all candidate pairs and returns those above the match-probability threshold. The returned <code>match_weight</code> is the evidence-only log2 Bayes factor; <code>total_match_weight</code> adds the prior odds used to compute <code>match_probability</code>. <code><a href="reference/il_cluster.html">il_cluster()</a></code> groups the matched pairs into deduplicated entities.</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">pairs</span><span class="op">)</span></span>
 <span><span class="va">clusters</span></span>
-<span><span class="co">#&gt; # A tibble: 13 × 2</span></span>
+<span><span class="co">#&gt; # A tibble: 18 × 2</span></span>
 <span><span class="co">#&gt;    unique_id cluster_id</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;     &lt;chr&gt;     </span></span>
-<span><span class="co">#&gt;  1 5         cluster_1 </span></span>
-<span><span class="co">#&gt;  2 3         cluster_2 </span></span>
-<span><span class="co">#&gt;  3 4         cluster_2 </span></span>
-<span><span class="co">#&gt;  4 9         cluster_3 </span></span>
-<span><span class="co">#&gt;  5 2         cluster_4 </span></span>
-<span><span class="co">#&gt;  6 7         cluster_5 </span></span>
-<span><span class="co">#&gt;  7 1         cluster_4 </span></span>
-<span><span class="co">#&gt;  8 6         cluster_1 </span></span>
-<span><span class="co">#&gt;  9 15        cluster_1 </span></span>
-<span><span class="co">#&gt; 10 13        cluster_2 </span></span>
-<span><span class="co">#&gt; 11 19        cluster_3 </span></span>
-<span><span class="co">#&gt; 12 11        cluster_4 </span></span>
-<span><span class="co">#&gt; 13 17        cluster_5</span></span></code></pre></div>
-<p><code><a href="reference/il_cleanup.html">il_cleanup()</a></code> drops the temporary tables that <code>irelink</code> wrote to the database. Always call it when you’re done to avoid leaving stale tables in your connection.</p>
+<span><span class="co">#&gt;  1 10        cluster_10</span></span>
+<span><span class="co">#&gt;  2 4         cluster_13</span></span>
+<span><span class="co">#&gt;  3 17        cluster_17</span></span>
+<span><span class="co">#&gt;  4 3         cluster_13</span></span>
+<span><span class="co">#&gt;  5 9         cluster_10</span></span>
+<span><span class="co">#&gt;  6 13        cluster_13</span></span>
+<span><span class="co">#&gt;  7 7         cluster_17</span></span>
+<span><span class="co">#&gt;  8 20        cluster_10</span></span>
+<span><span class="co">#&gt;  9 5         cluster_15</span></span>
+<span><span class="co">#&gt; 10 15        cluster_15</span></span>
+<span><span class="co">#&gt; 11 14        cluster_13</span></span>
+<span><span class="co">#&gt; 12 6         cluster_15</span></span>
+<span><span class="co">#&gt; 13 8         cluster_17</span></span>
+<span><span class="co">#&gt; 14 19        cluster_10</span></span>
+<span><span class="co">#&gt; 15 12        cluster_1 </span></span>
+<span><span class="co">#&gt; 16 11        cluster_1 </span></span>
+<span><span class="co">#&gt; 17 2         cluster_1 </span></span>
+<span><span class="co">#&gt; 18 1         cluster_1</span></span></code></pre></div>
+<p><code><a href="reference/il_cleanup.html">il_cleanup()</a></code> drops the temporary tables owned by this model. Use <code>il_cleanup_all(con)</code> as an interactive escape hatch when a failed or exploratory session may have left several <code>irelink</code> models’ tables behind.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -159,27 +160,21 @@
 <span>  link_type <span class="op">=</span> <span class="st">"link"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_estimate_u.html">il_estimate_u</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
-<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; EM trained: given_name and date_of_birth | skipped (blocked on): surname</span></span></code></pre></div>
 <p>Each row in the result is a candidate match between a record in <code>df_a</code> and a record in <code>df_b</code>, scored by match probability.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span><span class="va">pairs</span></span>
-<span><span class="co">#&gt; # A tibble: 104 × 7</span></span>
-<span><span class="co">#&gt;    unique_id_l unique_id_r match_weight match_probability gamma_given_name</span></span>
-<span><span class="co">#&gt;  *       &lt;int&gt;       &lt;int&gt;        &lt;dbl&gt;             &lt;dbl&gt;            &lt;int&gt;</span></span>
-<span><span class="co">#&gt;  1          81         198         7.84             0.923                0</span></span>
-<span><span class="co">#&gt;  2          98          94         7.84             0.923                0</span></span>
-<span><span class="co">#&gt;  3         165          59        16.1              1.000                0</span></span>
-<span><span class="co">#&gt;  4         179         162         7.84             0.923                0</span></span>
-<span><span class="co">#&gt;  5         152          51         7.84             0.923                0</span></span>
-<span><span class="co">#&gt;  6           3          24         7.84             0.923                0</span></span>
-<span><span class="co">#&gt;  7          42          24         7.84             0.923                0</span></span>
-<span><span class="co">#&gt;  8          42         179         7.84             0.923                0</span></span>
-<span><span class="co">#&gt;  9          59         145         7.84             0.923                0</span></span>
-<span><span class="co">#&gt; 10          70         152         7.84             0.923                0</span></span>
-<span><span class="co">#&gt; # ℹ 94 more rows</span></span>
-<span><span class="co">#&gt; # ℹ 2 more variables: gamma_surname &lt;int&gt;, gamma_date_of_birth &lt;int&gt;</span></span></code></pre></div>
-<p>As in the prior example, <code><a href="reference/il_cleanup.html">il_cleanup()</a></code> drops the temporary tables that <code>irelink</code> wrote to the database.</p>
+<span><span class="co">#&gt; # A tibble: 3 × 8</span></span>
+<span><span class="co">#&gt;   unique_id_l unique_id_r gamma_given_name gamma_surname gamma_date_of_birth</span></span>
+<span><span class="co">#&gt; *       &lt;int&gt;       &lt;int&gt;            &lt;int&gt;         &lt;int&gt;               &lt;int&gt;</span></span>
+<span><span class="co">#&gt; 1         165          59                0             2                   1</span></span>
+<span><span class="co">#&gt; 2          24         160                0             2                   1</span></span>
+<span><span class="co">#&gt; 3          29          77                0             2                   1</span></span>
+<span><span class="co">#&gt; # ℹ 3 more variables: match_weight &lt;dbl&gt;, total_match_weight &lt;dbl&gt;,</span></span>
+<span><span class="co">#&gt; #   match_probability &lt;dbl&gt;</span></span></code></pre></div>
+<p>As in the prior example, <code><a href="reference/il_cleanup.html">il_cleanup()</a></code> drops this model’s temporary tables.</p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>

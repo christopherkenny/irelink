@@ -17,8 +17,8 @@ probabilistic record linkage engine into idiomatic R.
 - [`il_model()`](http://christophertkenny.com/irelink/reference/il_model.md)
   binds a spec to data and a DBI connection.
 - [`predict()`](https://rdrr.io/r/stats/predict.html) scores all
-  candidate pairs above a match-probability threshold (or match-weight
-  threshold via `threshold_match_weight`).
+  candidate pairs above a match-probability threshold (or an
+  evidence-only match-weight threshold via `threshold_match_weight`).
 - [`il_cluster()`](http://christophertkenny.com/irelink/reference/il_cluster.md)
   resolves scored pairs into entity clusters via connected components
   (using igraph) or single-best-link (with `source_dataset` for
@@ -121,7 +121,9 @@ probabilistic record linkage engine into idiomatic R.
 ### Training
 
 - [`il_estimate_u()`](http://christophertkenny.com/irelink/reference/il_estimate_u.md)
-  estimates non-match probabilities by sampling random pairs.
+  estimates non-match probabilities by sampling random pairs, with
+  optional chunked estimation through `chunk_size` and early stopping
+  through `min_count_per_level`.
 - [`il_estimate_em()`](http://christophertkenny.com/irelink/reference/il_estimate_em.md)
   runs the Fellegi-Sunter EM algorithm with configurable
   `max_iterations`, `convergence`, `fix_u`, `fix_m`, `fix_prior`,
@@ -132,7 +134,8 @@ probabilistic record linkage engine into idiomatic R.
   counts, preserving missing comparison states as explicit pattern
   levels.
 - [`il_estimate_prior()`](http://christophertkenny.com/irelink/reference/il_estimate_prior.md)
-  sets the prior match probability.
+  sets the prior match probability from deterministic matching rules,
+  counting unique blocked pairs across overlapping rules.
 - [`il_prior_prevalence()`](http://christophertkenny.com/irelink/reference/il_prior_prevalence.md)
   and
   [`il_prior_m()`](http://christophertkenny.com/irelink/reference/il_prior_m.md)
@@ -147,12 +150,15 @@ probabilistic record linkage engine into idiomatic R.
 ### Prediction
 
 - [`predict()`](https://rdrr.io/r/stats/predict.html) supports both
-  `threshold` (match probability) and `threshold_match_weight` (log₂
-  Bayes factor) filtering.
+  `threshold` (match probability) and `threshold_match_weight`
+  (evidence-only log2 Bayes factor) filtering.
+- Prediction output includes evidence-only `match_weight`,
+  prior-inclusive `total_match_weight`, and posterior
+  `match_probability`.
 - `include_fields = TRUE` joins all source columns into the scored
   output.
-- `collect = FALSE` returns an `il_compared_lazy` object backed by an
-  in-database table.
+- `collect = FALSE` returns an `il_compared_lazy` object backed by a
+  model-scoped in-database table.
 - [`il_score_missing_edges()`](http://christophertkenny.com/irelink/reference/il_score_missing_edges.md)
   enumerates and scores unscored within-cluster pairs.
 - [`il_score_patterns()`](http://christophertkenny.com/irelink/reference/il_score_patterns.md)
@@ -163,6 +169,10 @@ probabilistic record linkage engine into idiomatic R.
   performs exact-match linking without training.
 - [`il_find_matches()`](http://christophertkenny.com/irelink/reference/il_find_matches.md)
   scores a set of probe records against existing data.
+- `profile_sql = TRUE` on
+  [`predict()`](https://rdrr.io/r/stats/predict.html) attaches
+  lightweight SQL timing metadata to collected predictions or lazy
+  prediction objects.
 
 ### Diagnostics and evaluation
 
@@ -208,10 +218,11 @@ probabilistic record linkage engine into idiomatic R.
 - [`il_phonetic_chart()`](http://christophertkenny.com/irelink/reference/il_phonetic_chart.md)
   produces a Soundex agreement heatmap.
 - [`il_tf_chart()`](http://christophertkenny.com/irelink/reference/il_tf_chart.md)
-  visualises term frequency distributions with labelled most/least
-  common values.
+  visualises model-specific term frequency distributions with labelled
+  most/least common values.
 - [`il_register_tf()`](http://christophertkenny.com/irelink/reference/il_register_tf.md)
-  registers pre-computed term frequency tables in the database.
+  registers pre-computed term frequency tables in the database and
+  returns the updated model.
 
 ### Visualisation
 
@@ -242,7 +253,11 @@ probabilistic record linkage engine into idiomatic R.
 - [`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md)
   reattaches a saved model to different data or connections.
 - [`il_cleanup()`](http://christophertkenny.com/irelink/reference/il_cleanup.md)
-  removes temporary tables from the database.
+  removes temporary tables owned by a single model, making it safe for
+  shared DBI connections with multiple live models.
+- [`il_cleanup_all()`](http://christophertkenny.com/irelink/reference/il_cleanup_all.md)
+  removes all package-owned temporary tables from a connection for
+  exploratory sessions and failed runs.
 
 ### Performance
 
@@ -252,6 +267,13 @@ probabilistic record linkage engine into idiomatic R.
   `stringdist`.
 - SQL-native connected components for DuckDB/PostgreSQL; igraph fallback
   for SQLite.
+- Term-frequency, lazy prediction, and scratch tables use generated
+  model-scoped names to avoid collisions on shared connections.
+- `profile_sql = TRUE` on
+  [`il_estimate_u()`](http://christophertkenny.com/irelink/reference/il_estimate_u.md),
+  [`il_estimate_prior()`](http://christophertkenny.com/irelink/reference/il_estimate_prior.md),
+  and [`predict()`](https://rdrr.io/r/stats/predict.html) records
+  lightweight SQL timing metadata for performance investigation.
 - End-to-end benchmarks against an R-side SQLite baseline: 1,000 records
   in 1.4 s (2.1× faster), 5,000 records in 19.5 s (1.6×), 10,000 records
   in 61.4 s (2.6×). Speedup grows with dataset size.

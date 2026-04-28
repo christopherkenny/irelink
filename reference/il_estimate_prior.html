@@ -58,7 +58,7 @@ base rate before more detailed parameter estimation.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">il_estimate_prior</span><span class="op">(</span><span class="va">model</span>, <span class="va">...</span>, recall <span class="op">=</span> <span class="fl">0.7</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">il_estimate_prior</span><span class="op">(</span><span class="va">model</span>, <span class="va">...</span>, recall <span class="op">=</span> <span class="fl">0.7</span>, profile_sql <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -77,6 +77,11 @@ deterministic matching criteria.</p></dd>
 <dt id="arg-recall">recall<a class="anchor" aria-label="anchor" href="#arg-recall"></a></dt>
 <dd><p>A numeric value between 0 and 1 representing the assumed
 recall of the deterministic rules. Defaults to <code>0.7</code>.</p></dd>
+
+
+<dt id="arg-profile-sql">profile_sql<a class="anchor" aria-label="anchor" href="#arg-profile-sql"></a></dt>
+<dd><p>Logical. If <code>TRUE</code>, store lightweight SQL timing metadata
+in <code>model$params$sql_profile</code>.</p></dd>
 
 </dl></div>
     <div class="section level2">
