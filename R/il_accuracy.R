@@ -79,7 +79,7 @@ il_accuracy <- function(model, labels = NULL, labels_col = NULL) {
   actual_positive <- scored$actual_positive
   found_by_blocking <- scored$found_by_blocking
 
-  thresholds <- sort(unique(c(label_probs, 1)))
+  thresholds <- sort(unique(c(0, label_probs, 1)))
 
   results <- lapply(thresholds, function(t) {
     counts <- compute_confusion_counts(

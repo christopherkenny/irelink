@@ -28,7 +28,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 
 ## Blocking
 
-- `il_block_on()` and `block_on()` for equality-based and custom SQL blocking rules.
+- `il_block_on()` and `block_on()` for equality-based and custom SQL blocking rules, with per-column transform support via formula syntax (`col ~ transform`, e.g. `first_name ~ il_substr(1, 3)`) or a named-list `.transform` for programmatic construction.
 - `.explode` parameter for array-valued blocking columns (generates `UNNEST` subqueries for DuckDB/PostgreSQL).
 - `il_suggest_blocking()` ranks candidate blocking rules by pair-reduction, coverage, and balanced score.
 - `il_find_blocking_below()` finds blocking rule combinations below a pair count ceiling.
