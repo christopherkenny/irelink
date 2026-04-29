@@ -73,8 +73,12 @@ conditions inside one call are AND-ed.</p>
 
 
 <dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>&lt;<code><a href="https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html" class="external-link">tidy-select</a></code>&gt; Columns for
-equality blocking (AND-ed within one call).</p></dd>
+<dd><p>Columns for equality blocking (AND-ed within one call).
+Each entry is either:</p><ul><li><p>A bare column name, e.g. <code>surname</code>.</p></li>
+<li><p>A <code>column ~ transform</code> formula, e.g. <code>first_name ~ il_substr(1, 3)</code>,
+which applies the transform to that column before the equality check.
+Mix bare names and formulas freely within one call.</p></li>
+</ul></dd>
 
 
 <dt id="arg--where">.where<a class="anchor" aria-label="anchor" href="#arg--where"></a></dt>
@@ -83,10 +87,10 @@ conditions. Defaults to <code>NULL</code>.</p></dd>
 
 
 <dt id="arg--transform">.transform<a class="anchor" aria-label="anchor" href="#arg--transform"></a></dt>
-<dd><p>An optional transform function applied to both
-left and right column values before the equality check. Useful
-for phonetic blocking — see <a href="phonetic.html">il_soundex</a>, <a href="phonetic.html">il_metaphone</a>, and
-<a href="phonetic.html">il_dmetaphone</a>.</p></dd>
+<dd><p>An optional transform applied to every column that does
+not already have a formula transform. Can be a single function (e.g.
+<a href="phonetic.html">il_soundex</a>) or a named list of functions for per-column transforms.
+Formula transforms in <code>...</code> take precedence over <code>.transform</code>.</p></dd>
 
 
 <dt id="arg--explode">.explode<a class="anchor" aria-label="anchor" href="#arg--explode"></a></dt>
@@ -112,7 +116,15 @@ PostgreSQL backend. Defaults to <code>NULL</code>.</p></dd>
 <span class="r-in"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">il_block_on</span><span class="op">(</span><span class="va">state</span>, <span class="va">year</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>
-<span class="r-in"><span><span class="co"># Phonetic blocking: group similar-sounding names</span></span></span>
+<span class="r-in"><span><span class="co"># Per-column substring blocking with formula syntax</span></span></span>
+<span class="r-in"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">il_block_on</span><span class="op">(</span><span class="va">first_name</span> <span class="op">~</span> <span class="fu"><a href="il_substr.html">il_substr</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>, <span class="va">surname</span> <span class="op">~</span> <span class="fu"><a href="il_substr.html">il_substr</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">4</span><span class="op">)</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Mix: substr on one column, plain match on another</span></span></span>
+<span class="r-in"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
+<span class="r-in"><span>  <span class="fu">il_block_on</span><span class="op">(</span><span class="va">postcode_fake</span> <span class="op">~</span> <span class="fu"><a href="il_substr.html">il_substr</a></span><span class="op">(</span><span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>, <span class="va">dob</span><span class="op">)</span></span></span>
+<span class="r-in"><span></span></span>
+<span class="r-in"><span><span class="co"># Same transform on all columns</span></span></span>
 <span class="r-in"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu">il_block_on</span><span class="op">(</span><span class="va">first_name</span>, .transform <span class="op">=</span> <span class="va">il_soundex</span><span class="op">)</span></span></span>
 <span class="r-in"><span></span></span>

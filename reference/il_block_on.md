@@ -21,8 +21,14 @@ il_block_on(spec, ..., .where = NULL, .transform = NULL, .explode = NULL)
 
 - ...:
 
-  \<[`tidy-select`](https://dplyr.tidyverse.org/reference/dplyr_tidy_select.html)\>
-  Columns for equality blocking (AND-ed within one call).
+  Columns for equality blocking (AND-ed within one call). Each entry is
+  either:
+
+  - A bare column name, e.g. `surname`.
+
+  - A `column ~ transform` formula, e.g. `first_name ~ il_substr(1, 3)`,
+    which applies the transform to that column before the equality
+    check. Mix bare names and formulas freely within one call.
 
 - .where:
 
@@ -31,12 +37,11 @@ il_block_on(spec, ..., .where = NULL, .transform = NULL, .explode = NULL)
 
 - .transform:
 
-  An optional transform function applied to both left and right column
-  values before the equality check. Useful for phonetic blocking — see
-  [il_soundex](http://christophertkenny.com/irelink/reference/phonetic.md),
-  [il_metaphone](http://christophertkenny.com/irelink/reference/phonetic.md),
-  and
-  [il_dmetaphone](http://christophertkenny.com/irelink/reference/phonetic.md).
+  An optional transform applied to every column that does not already
+  have a formula transform. Can be a single function (e.g.
+  [il_soundex](http://christophertkenny.com/irelink/reference/phonetic.md))
+  or a named list of functions for per-column transforms. Formula
+  transforms in `...` take precedence over `.transform`.
 
 - .explode:
 
@@ -61,7 +66,15 @@ spec <- il_spec() |>
 spec <- il_spec() |>
   il_block_on(state, year)
 
-# Phonetic blocking: group similar-sounding names
+# Per-column substring blocking with formula syntax
+spec <- il_spec() |>
+  il_block_on(first_name ~ il_substr(1, 3), surname ~ il_substr(1, 4))
+
+# Mix: substr on one column, plain match on another
+spec <- il_spec() |>
+  il_block_on(postcode_fake ~ il_substr(1, 3), dob)
+
+# Same transform on all columns
 spec <- il_spec() |>
   il_block_on(first_name, .transform = il_soundex)
 

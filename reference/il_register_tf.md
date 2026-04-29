@@ -32,7 +32,7 @@ il_register_tf(model, col, tf_data, overwrite = FALSE)
 
 ## Value
 
-The model (invisibly), with the TF table registered in the database.
+The updated model, with the TF table registered in the database.
 
 ## Details
 

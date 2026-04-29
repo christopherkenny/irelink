@@ -24,4 +24,4 @@ il_score_patterns(model, patterns)
 ## Value
 
 A tibble containing the input columns plus `match_weight` and
-`match_probability`.
+`total_match_weight`, and `match_probability`.

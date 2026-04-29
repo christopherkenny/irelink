@@ -21,8 +21,10 @@ block_on(..., .where = NULL, .transform = NULL, .explode = NULL)
 
 - ...:
 
-  Unquoted column names. Columns are AND-ed within a single `block_on()`
-  call.
+  Column names (bare or `column ~ transform` formulas). See
+  [`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md)
+  for details on the formula syntax. Columns are AND-ed within a single
+  `block_on()` call.
 
 - .where:
 
@@ -33,12 +35,10 @@ block_on(..., .where = NULL, .transform = NULL, .explode = NULL)
 
 - .transform:
 
-  An optional transform function applied to both left and right column
-  values before the equality check. See
-  [il_soundex](http://christophertkenny.com/irelink/reference/phonetic.md),
-  [il_metaphone](http://christophertkenny.com/irelink/reference/phonetic.md),
-  and
-  [il_dmetaphone](http://christophertkenny.com/irelink/reference/phonetic.md).
+  An optional transform applied to every column that does not already
+  have a formula transform. See
+  [`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md)
+  for details.
 
 - .explode:
 
@@ -56,8 +56,7 @@ A blocking-rule object for use in training verbs.
 ``` r
 block_on(first_name, surname)
 #> $columns
-#>                           
-#> "first_name"    "surname" 
+#> [1] "first_name" "surname"   
 #> 
 #> $where
 #> NULL
@@ -74,8 +73,7 @@ block_on(first_name, surname)
 # Fuzzy SQL conditions
 block_on(first_name, .where = 'levenshtein(l.dob, r.dob) <= 1')
 #> $columns
-#>              
-#> "first_name" 
+#> [1] "first_name"
 #> 
 #> $where
 #> [1] "levenshtein(l.dob, r.dob) <= 1"
@@ -92,8 +90,7 @@ block_on(first_name, .where = 'levenshtein(l.dob, r.dob) <= 1')
 # Phonetic blocking
 block_on(first_name, .transform = il_soundex)
 #> $columns
-#>              
-#> "first_name" 
+#> [1] "first_name"
 #> 
 #> $where
 #> NULL
@@ -103,8 +100,58 @@ block_on(first_name, .transform = il_soundex)
 #> {
 #>     vapply(x, soundex_one, character(1), USE.NAMES = FALSE)
 #> }
-#> <bytecode: 0x55e21fb03290>
+#> <bytecode: 0x55b352080a10>
 #> <environment: namespace:irelink>
+#> 
+#> $explode
+#> NULL
+#> 
+#> attr(,"class")
+#> [1] "il_blocking_rule"
+
+# Per-column substring blocking
+block_on(first_name ~ il_substr(1, 3), surname ~ il_substr(1, 4))
+#> $columns
+#> [1] "first_name" "surname"   
+#> 
+#> $where
+#> NULL
+#> 
+#> $transform
+#> $transform$first_name
+#> function (x) 
+#> substr(x, start, start + length - 1L)
+#> <bytecode: 0x55b351e15d70>
+#> <environment: 0x55b351e18cc0>
+#> attr(,"transform_type")
+#> [1] "il_substr"
+#> attr(,"params")
+#> attr(,"params")$start
+#> [1] 1
+#> 
+#> attr(,"params")$length
+#> [1] 3
+#> 
+#> attr(,"class")
+#> [1] "il_column_transform" "function"           
+#> 
+#> $transform$surname
+#> function (x) 
+#> substr(x, start, start + length - 1L)
+#> <bytecode: 0x55b351e15d70>
+#> <environment: 0x55b351e20f00>
+#> attr(,"transform_type")
+#> [1] "il_substr"
+#> attr(,"params")
+#> attr(,"params")$start
+#> [1] 1
+#> 
+#> attr(,"params")$length
+#> [1] 4
+#> 
+#> attr(,"class")
+#> [1] "il_column_transform" "function"           
+#> 
 #> 
 #> $explode
 #> NULL
