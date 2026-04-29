@@ -13,7 +13,7 @@ il_cleanup_all(con)
 \code{con}, invisibly.
 }
 \description{
-Drops every table or view whose name starts with \code{__il_} from a DBI
+Drops every table or view whose name starts with \verb{__il_} from a DBI
 connection. This is intended as an explicit interactive escape hatch after
 failed runs or exploratory sessions. Prefer \code{\link[=il_cleanup]{il_cleanup()}} when cleaning up a
 specific live model on a shared connection.

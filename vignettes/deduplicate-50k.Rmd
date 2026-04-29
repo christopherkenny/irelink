@@ -107,10 +107,16 @@ spec <- il_spec() |>
   il_compare(postcode_fake, cl_postcode()) |>
   il_compare(birth_place, cl_exact(term_frequency = TRUE)) |>
   il_compare(occupation, cl_exact(term_frequency = TRUE)) |>
+  il_block_on(first_name ~ il_substr(1, 3), surname ~ il_substr(1, 4)) |>
   il_block_on(surname, dob) |>
   il_block_on(first_name, dob) |>
-  il_block_on(first_name, surname) |>
-  il_block_on(dob, birth_place)
+  il_block_on(postcode_fake, first_name) |>
+  il_block_on(postcode_fake, surname) |>
+  il_block_on(dob, birth_place) |>
+  il_block_on(postcode_fake ~ il_substr(1, 3), dob) |>
+  il_block_on(postcode_fake ~ il_substr(1, 3), first_name) |>
+  il_block_on(postcode_fake ~ il_substr(1, 3), surname) |>
+  il_block_on(first_name ~ il_substr(1, 2), surname ~ il_substr(1, 2), dob ~ il_substr(1, 4))
 
 spec
 ```

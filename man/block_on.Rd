@@ -7,17 +7,17 @@
 block_on(..., .where = NULL, .transform = NULL, .explode = NULL)
 }
 \arguments{
-\item{...}{Unquoted column names. Columns are AND-ed within a single
-\code{block_on()} call.}
+\item{...}{Column names (bare or \code{column ~ transform} formulas). See
+\code{\link[=il_block_on]{il_block_on()}} for details on the formula syntax. Columns are AND-ed
+within a single \code{block_on()} call.}
 
 \item{.where}{An optional raw SQL string for non-equality blocking
 conditions (e.g., \code{"levenshtein(l.dob, r.dob) <= 1"}). When
 supplied alongside column names, the column equalities and the SQL
 condition are AND-ed together.}
 
-\item{.transform}{An optional transform function applied to both
-left and right column values before the equality check. See
-\link{il_soundex}, \link{il_metaphone}, and \link{il_dmetaphone}.}
+\item{.transform}{An optional transform applied to every column that does
+not already have a formula transform. See \code{\link[=il_block_on]{il_block_on()}} for details.}
 
 \item{.explode}{An optional character vector of array column names to
 unnest before blocking. See \code{\link[=il_block_on]{il_block_on()}} for details.}
@@ -40,4 +40,7 @@ block_on(first_name, .where = 'levenshtein(l.dob, r.dob) <= 1')
 
 # Phonetic blocking
 block_on(first_name, .transform = il_soundex)
+
+# Per-column substring blocking
+block_on(first_name ~ il_substr(1, 3), surname ~ il_substr(1, 4))
 }

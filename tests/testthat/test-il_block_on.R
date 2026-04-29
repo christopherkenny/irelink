@@ -80,6 +80,118 @@ test_that('block_on() with multiple columns creates an AND rule', {
   expect_true(!is.null(rule))
 })
 
+# --- Formula syntax (col ~ transform) ------------------------------------
+
+test_that('il_block_on() accepts formula syntax for per-column transforms', {
+  spec <- il_spec() |>
+    il_block_on(first_name ~ il_substr(1, 3), surname ~ il_substr(1, 4))
+  expect_s3_class(spec, 'il_spec')
+  expect_length(spec$blocking_rules, 1)
+  rule <- spec$blocking_rules[[1]]
+  expect_equal(rule$columns, c('first_name', 'surname'))
+  expect_true(is.list(rule$transform))
+  expect_s3_class(rule$transform[['first_name']], 'il_column_transform')
+  expect_s3_class(rule$transform[['surname']], 'il_column_transform')
+})
+
+test_that('il_block_on() mixes bare columns and formula transforms', {
+  spec <- il_spec() |>
+    il_block_on(postcode_fake ~ il_substr(1, 3), dob)
+  rule <- spec$blocking_rules[[1]]
+  expect_equal(rule$columns, c('postcode_fake', 'dob'))
+  expect_s3_class(rule$transform[['postcode_fake']], 'il_column_transform')
+  expect_null(rule$transform[['dob']])
+})
+
+test_that('block_on() accepts formula syntax', {
+  rule <- block_on(first_name ~ il_substr(1, 2), surname ~ il_substr(1, 2))
+  expect_s3_class(rule, 'il_blocking_rule')
+  expect_true(is.list(rule$transform))
+})
+
+test_that('il_block_on() errors on one-sided formula', {
+  expect_snapshot(
+    error = TRUE,
+    il_block_on(il_spec(), ~ il_substr(1, 3))
+  )
+})
+
+test_that('il_block_on() errors on non-symbol LHS in formula', {
+  expect_snapshot(
+    error = TRUE,
+    il_block_on(il_spec(), 'first_name' ~ il_substr(1, 3))
+  )
+})
+
+test_that('il_block_on() errors when formula RHS is not a function', {
+  expect_snapshot(
+    error = TRUE,
+    il_block_on(il_spec(), first_name ~ 'not_a_transform')
+  )
+})
+
+test_that('formula transforms generate correct SQL', {
+  spec <- il_spec() |>
+    il_block_on(first_name ~ il_substr(1, 3), surname ~ il_substr(1, 4))
+  rule <- spec$blocking_rules[[1]]
+  sql <- build_blocking_condition(
+    rule$columns,
+    transform = rule$transform,
+    dialect = 'duckdb'
+  )
+  expect_match(sql, 'SUBSTRING(l.first_name, 1, 3)', fixed = TRUE)
+  expect_match(sql, 'SUBSTRING(r.first_name, 1, 3)', fixed = TRUE)
+  expect_match(sql, 'SUBSTRING(l.surname, 1, 4)', fixed = TRUE)
+  expect_match(sql, 'SUBSTRING(r.surname, 1, 4)', fixed = TRUE)
+})
+
+test_that('mixed formula+bare generates correct SQL', {
+  spec <- il_spec() |>
+    il_block_on(postcode_fake ~ il_substr(1, 3), dob)
+  rule <- spec$blocking_rules[[1]]
+  sql <- build_blocking_condition(
+    rule$columns,
+    transform = rule$transform,
+    dialect = 'duckdb'
+  )
+  expect_match(sql, 'SUBSTRING(l.postcode_fake, 1, 3)', fixed = TRUE)
+  expect_match(sql, 'l.dob = r.dob', fixed = TRUE)
+})
+
+test_that('print.il_spec shows per-column formula transforms', {
+  spec <- il_spec() |>
+    il_block_on(first_name ~ il_substr(1, 3), surname ~ il_substr(1, 4))
+  expect_output(print(spec), 'il_substr(1,3)', fixed = TRUE)
+  expect_output(print(spec), 'il_substr(1,4)', fixed = TRUE)
+})
+
+# --- .transform named list (programmatic API) --------------------------------
+
+test_that('il_block_on() accepts a named list .transform', {
+  spec <- il_spec() |>
+    il_block_on(
+      first_name, surname,
+      .transform = list(first_name = il_substr(1, 3), surname = il_substr(1, 4))
+    )
+  expect_s3_class(spec, 'il_spec')
+  expect_length(spec$blocking_rules, 1)
+  expect_true(is.list(spec$blocking_rules[[1]]$transform))
+})
+
+test_that('il_block_on() errors on unnamed list .transform', {
+  expect_snapshot(
+    error = TRUE,
+    il_block_on(il_spec(), first_name, .transform = list(il_substr(1, 3)))
+  )
+})
+
+test_that('il_block_on() errors on list with non-function entries', {
+  expect_snapshot(
+    error = TRUE,
+    il_block_on(il_spec(), first_name, .transform = list(first_name = 'not_a_function'))
+  )
+})
+
 # --- Full spec composition: compare + block --------------------------------
 
 test_that('a complete spec can be built with pipes', {

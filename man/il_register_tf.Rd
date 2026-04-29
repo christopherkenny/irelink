@@ -17,8 +17,7 @@ il_register_tf(model, col, tf_data, overwrite = FALSE)
 for this column. Defaults to \code{FALSE}.}
 }
 \value{
-The model (invisibly), with the TF table registered in the
-database.
+The updated model, with the TF table registered in the database.
 }
 \description{
 Allows you to supply pre-computed term frequency lookup tables

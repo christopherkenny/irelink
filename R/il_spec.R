@@ -55,7 +55,20 @@ print.il_spec <- function(x, ...) {
       has_cols <- length(rule$columns) > 0L
       has_where <- !is.null(rule$where) && !is.na(rule$where) && nzchar(rule$where)
       has_tf <- !is.null(rule$transform)
-      tf_label <- if (has_tf) {
+      col_labels <- if (has_tf && is.list(rule$transform)) {
+        vapply(rule$columns, function(col) {
+          tf <- rule$transform[[col]]
+          if (!is.null(tf)) {
+            nm <- transform_to_name(tf)
+            if (!is.null(nm)) paste0(col, ' [', nm, ']') else col
+          } else {
+            col
+          }
+        }, character(1))
+      } else {
+        rule$columns
+      }
+      tf_label <- if (has_tf && !is.list(rule$transform)) {
         nm <- transform_to_name(rule$transform)
         if (!is.null(nm)) paste0(' [', nm, ']') else ''
       } else {
@@ -63,13 +76,13 @@ print.il_spec <- function(x, ...) {
       }
       rule_label <- if (has_cols && has_where) {
         paste0(
-          paste(rule$columns, collapse = ', '),
+          paste(col_labels, collapse = ', '),
           tf_label,
           ' + WHERE ',
           rule$where
         )
       } else if (has_cols) {
-        paste0(paste(rule$columns, collapse = ', '), tf_label)
+        paste0(paste(col_labels, collapse = ', '), tf_label)
       } else if (has_where) {
         paste0('WHERE ', rule$where)
       } else {

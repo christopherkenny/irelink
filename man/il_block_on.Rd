@@ -9,16 +9,22 @@ il_block_on(spec, ..., .where = NULL, .transform = NULL, .explode = NULL)
 \arguments{
 \item{spec}{An \code{il_spec} object (piped in).}
 
-\item{...}{<\code{\link[dplyr:dplyr_tidy_select]{tidy-select}}> Columns for
-equality blocking (AND-ed within one call).}
+\item{...}{Columns for equality blocking (AND-ed within one call).
+Each entry is either:
+\itemize{
+\item A bare column name, e.g. \code{surname}.
+\item A \code{column ~ transform} formula, e.g. \code{first_name ~ il_substr(1, 3)},
+which applies the transform to that column before the equality check.
+Mix bare names and formulas freely within one call.
+}}
 
 \item{.where}{An optional raw SQL string for non-equality blocking
 conditions. Defaults to \code{NULL}.}
 
-\item{.transform}{An optional transform function applied to both
-left and right column values before the equality check. Useful
-for phonetic blocking — see \link{il_soundex}, \link{il_metaphone}, and
-\link{il_dmetaphone}.}
+\item{.transform}{An optional transform applied to every column that does
+not already have a formula transform. Can be a single function (e.g.
+\link{il_soundex}) or a named list of functions for per-column transforms.
+Formula transforms in \code{...} take precedence over \code{.transform}.}
 
 \item{.explode}{An optional character vector of column names containing
 arrays (list columns) to unnest before blocking. Each array element
@@ -45,7 +51,15 @@ spec <- il_spec() |>
 spec <- il_spec() |>
   il_block_on(state, year)
 
-# Phonetic blocking: group similar-sounding names
+# Per-column substring blocking with formula syntax
+spec <- il_spec() |>
+  il_block_on(first_name ~ il_substr(1, 3), surname ~ il_substr(1, 4))
+
+# Mix: substr on one column, plain match on another
+spec <- il_spec() |>
+  il_block_on(postcode_fake ~ il_substr(1, 3), dob)
+
+# Same transform on all columns
 spec <- il_spec() |>
   il_block_on(first_name, .transform = il_soundex)
 

@@ -101,9 +101,15 @@ transform_to_sql_fn <- function(transform) {
 }
 
 
-#' Map an R function to a serializable name
+#' Map an R function (or named list of functions) to a serializable name
 #' @noRd
 transform_to_name <- function(transform) {
+  if (is.list(transform)) {
+    parts <- vapply(names(transform), function(nm) {
+      paste0(nm, ': ', transform_to_name(transform[[nm]]))
+    }, character(1))
+    return(paste(parts, collapse = ', '))
+  }
   if (is_transform_chain(transform)) {
     names <- vapply(
       attr(transform, 'transforms'), transform_to_name,
@@ -138,6 +144,37 @@ transform_to_name <- function(transform) {
   }
   cli::cli_warn('Custom transform cannot be serialized; it will be lost on save/load.')
   NULL
+}
+
+#' Validate the .transform argument for il_block_on / block_on
+#' @noRd
+validate_transform_arg <- function(transform) {
+  if (is.null(transform) || is.function(transform)) {
+    return(invisible(NULL))
+  }
+  if (is.list(transform)) {
+    if (is.null(names(transform)) || any(!nzchar(names(transform)))) {
+      cli::cli_abort(
+        '{.arg .transform} list must be fully named (one name per column transform).',
+        class = 'il_error_type'
+      )
+    }
+    bad <- !vapply(transform, is.function, logical(1))
+    if (any(bad)) {
+      cli::cli_abort(
+        'All entries in {.arg .transform} list must be functions.',
+        class = 'il_error_type'
+      )
+    }
+    return(invisible(NULL))
+  }
+  cli::cli_abort(
+    paste0(
+      '{.arg .transform} must be a function, a named list of functions, ',
+      'or {.code NULL}, not {.obj_type_friendly {(transform)}}.'
+    ),
+    class = 'il_error_type'
+  )
 }
 
 #' Is this a phonetic transform function?
@@ -910,8 +947,9 @@ build_blocking_condition <- function(columns, where = NULL, transform = NULL,
   parts <- character(0)
   if (length(columns) > 0L) {
     parts <- vapply(columns, function(col) {
-      lcol <- sql_transform_col(glue::glue('l.{col}'), transform, dialect)
-      rcol <- sql_transform_col(glue::glue('r.{col}'), transform, dialect)
+      col_tf <- if (is.list(transform)) transform[[col]] else transform
+      lcol <- sql_transform_col(glue::glue('l.{col}'), col_tf, dialect)
+      rcol <- sql_transform_col(glue::glue('r.{col}'), col_tf, dialect)
       glue::glue('{lcol} = {rcol}')
     }, character(1))
   }
