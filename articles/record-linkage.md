@@ -203,12 +203,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id  
 #>   <chr>     <chr>       
-#> 1 3670      cluster_1845
-#> 2 4855      cluster_2517
-#> 3 2637      cluster_2637
-#> 4 2970      cluster_2709
-#> 5 1271      cluster_1271
-#> 6 3671      cluster_3248
+#> 1 256       cluster_256 
+#> 2 258       cluster_2348
+#> 3 3348      cluster_3348
+#> 4 3717      cluster_2034
+#> 5 2792      cluster_200 
+#> 6 3248      cluster_3248
 ```
 
 ## Evaluate against ground truth
