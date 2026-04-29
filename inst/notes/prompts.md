@@ -1158,3 +1158,17 @@ Note that we have already diverged a bit:
   - lack of interactive graphs
   - using DBI instead of custom database backends
   - additional statistical features, like custom priors and EM with dependence
+
+
+# Interactives (Claude Code Sonnet 4.6 medium; Codex GPT-5.5 medium)
+
+You are working on a record linkage package in R.
+It is a derivative product of splink (../splink).
+
+We have previously ignored interactive graphs, purposely and explicitly.
+At this point, I want to explore the possibility of supporting an extremely lightweight version, using Quarto and OJS.
+
+Take a look at splink and its interactive graphs.
+Assess the feasibility of implementing this in a very lightweight way without taking on any new formal dependencies, just Quarto as a suggests.
+
+When you are done, write a summary to `inst/refs/[43/44]-interactive-feasibility.md`.
