@@ -110,7 +110,7 @@ materialising millions of rows would exhaust memory.
 ``` r
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,946 pairs in table __il_8788_1_predicted_4 (threshold = 0.5)
+#> <il_compared_lazy> 2,946 pairs in table __il_8650_1_predicted_4 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -178,16 +178,16 @@ metrics$clusters
 #> # A tibble: 116 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralisation
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_10       13      35   0.449                 0.258 
-#>  2 cluster_142      46     204   0.197                 0.236 
-#>  3 cluster_15        5      10   0.95                  0.0833
-#>  4 cluster_252       9      32   0.889                 0.143 
-#>  5 cluster_38        5      10   1                     0     
-#>  6 cluster_409       4       6   1                     0     
-#>  7 cluster_550       8      26   0.929                 0.0952
-#>  8 cluster_581      10      38   0.833                 0.208 
-#>  9 cluster_684       2       1   1                    NA     
-#> 10 cluster_738       6      15   1                     0     
+#>  1 cluster_115       8      24   0.857                  0.190
+#>  2 cluster_326       4       4   0.667                  0.667
+#>  3 cluster_792       7      15   0.714                  0.4  
+#>  4 cluster_867       3       3   1                      0    
+#>  5 cluster_924       8      28   1                      0    
+#>  6 cluster_229       8      28   1                      0    
+#>  7 cluster_237       6      15   1                      0    
+#>  8 cluster_261       4       6   1                      0    
+#>  9 cluster_603       9      29   0.806                  0.25 
+#> 10 cluster_105       9      23   0.639                  0.304
 #> # ℹ 106 more rows
 ```
 
@@ -207,10 +207,10 @@ head(metrics$nodes)
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
 #> 1 171       cluster_164      6          0.194 
-#> 2 995       cluster_164      8          0.258 
-#> 3 167       cluster_164      7          0.226 
-#> 4 48        cluster_164      4          0.129 
-#> 5 169       cluster_164      6          0.194 
+#> 2 993       cluster_164      8          0.258 
+#> 3 458       cluster_164     10          0.323 
+#> 4 167       cluster_164      7          0.226 
+#> 5 48        cluster_164      4          0.129 
 #> 6 462       cluster_164      2          0.0645
 ```
 
