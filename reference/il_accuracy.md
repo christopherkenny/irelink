@@ -91,11 +91,12 @@ labels <- data.frame(
 )
 
 il_accuracy(model, labels = labels)
-#> # A tibble: 2 × 16
+#> # A tibble: 3 × 16
 #>   threshold    tp    fp    fn    tn fn_blocking_miss precision recall    f1
 #>       <dbl> <int> <int> <int> <int>            <int>     <dbl>  <dbl> <dbl>
-#> 1     0.998     1     1     0     0                0       0.5      1 0.667
-#> 2     1         0     0     1     1                0       1        0 0    
+#> 1     0         1     1     0     0                0       0.5      1 0.667
+#> 2     0.998     1     1     0     0                0       0.5      1 0.667
+#> 3     1         0     0     1     1                0       1        0 0    
 #> # ℹ 7 more variables: f2 <dbl>, f0_5 <dbl>, specificity <dbl>, npv <dbl>,
 #> #   accuracy <dbl>, p4 <dbl>, phi <dbl>
 DBI::dbDisconnect(con, shutdown = TRUE)

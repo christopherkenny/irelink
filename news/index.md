@@ -107,7 +107,10 @@ probabilistic record linkage engine into idiomatic R.
 - [`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md)
   and
   [`block_on()`](http://christophertkenny.com/irelink/reference/block_on.md)
-  for equality-based and custom SQL blocking rules.
+  for equality-based and custom SQL blocking rules, with per-column
+  transform support via formula syntax (`col ~ transform`,
+  e.g. `first_name ~ il_substr(1, 3)`) or a named-list `.transform` for
+  programmatic construction.
 - `.explode` parameter for array-valued blocking columns (generates
   `UNNEST` subqueries for DuckDB/PostgreSQL).
 - [`il_suggest_blocking()`](http://christophertkenny.com/irelink/reference/il_suggest_blocking.md)
