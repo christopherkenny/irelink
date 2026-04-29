@@ -74,7 +74,7 @@ il_estimate_prior <- function(model, ..., recall = 0.7, profile_sql = FALSE) {
     cli::cli_abort('{.fn il_estimate_prior} requires at least one blocking rule.')
   }
   if (!is.numeric(recall) || length(recall) != 1L || !is.finite(recall) ||
-      recall <= 0 || recall > 1) {
+    recall <= 0 || recall > 1) {
     cli::cli_abort('{.arg recall} must be a finite number with 0 < recall <= 1.')
   }
   invalid_rules <- !vapply(rules, inherits, logical(1), 'il_blocking_rule')

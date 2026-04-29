@@ -3,7 +3,9 @@
 #' Create a SQL profile collector
 #' @noRd
 il_new_sql_profile <- function(enabled = FALSE) {
-  if (!isTRUE(enabled)) return(NULL)
+  if (!isTRUE(enabled)) {
+    return(NULL)
+  }
   env <- new.env(parent = emptyenv())
   env$entries <- list()
   env
@@ -13,7 +15,9 @@ il_new_sql_profile <- function(enabled = FALSE) {
 #' @noRd
 il_profile_append <- function(profile, step, elapsed, rows = NA_integer_,
                               statement = NULL) {
-  if (is.null(profile)) return(invisible(NULL))
+  if (is.null(profile)) {
+    return(invisible(NULL))
+  }
   profile$entries[[length(profile$entries) + 1L]] <- list(
     step = step %||% NA_character_,
     elapsed = as.numeric(elapsed),
@@ -43,7 +47,8 @@ il_db_execute <- function(con, sql, step = NULL, profile = NULL) {
   timing <- system.time({
     result <- DBI::dbExecute(con, sql)
   })
-  il_profile_append(profile, step, timing[['elapsed']], rows = result,
+  il_profile_append(profile, step, timing[['elapsed']],
+    rows = result,
     statement = sql
   )
   result
@@ -55,7 +60,8 @@ il_db_get_query <- function(con, sql, step = NULL, profile = NULL) {
   timing <- system.time({
     result <- DBI::dbGetQuery(con, sql)
   })
-  il_profile_append(profile, step, timing[['elapsed']], rows = nrow(result),
+  il_profile_append(profile, step, timing[['elapsed']],
+    rows = nrow(result),
     statement = sql
   )
   result

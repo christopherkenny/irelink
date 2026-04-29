@@ -212,7 +212,7 @@ autoplot.il_roc <- function(object, ...) {
       x = 'False Positive Rate',
       y = 'True Positive Rate'
     ) +
-    ggplot2::coord_equal() +
+    ggplot2::coord_equal(xlim = c(0, 1), ylim = c(0, 1)) +
     ggplot2::theme_minimal()
 }
 

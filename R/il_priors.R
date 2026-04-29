@@ -13,7 +13,8 @@
 il_prior_prevalence <- function(model, probability, strength = NULL) {
   validate_il_model(model)
   probability <- validate_probability_scalar(
-    probability, 'probability', allow_boundary = FALSE
+    probability, 'probability',
+    allow_boundary = FALSE
   )
   strength <- validate_strength(strength)
 
@@ -55,7 +56,8 @@ il_prior_m <- function(model, col, exact = NULL, levels = NULL,
   remainder <- match.arg(remainder)
 
   dist <- prior_distribution(
-    model, col, exact = exact, levels = levels, remainder = remainder,
+    model, col,
+    exact = exact, levels = levels, remainder = remainder,
     full_for_exact = TRUE
   )
   row <- tibble::tibble(
@@ -90,7 +92,8 @@ il_constrain_m <- function(model, col, exact = NULL, levels = NULL) {
   col <- as.character(rlang::ensym(col))
 
   dist <- prior_distribution(
-    model, col, exact = exact, levels = levels, remainder = 'current',
+    model, col,
+    exact = exact, levels = levels, remainder = 'current',
     full_for_exact = FALSE
   )
   row <- tibble::tibble(

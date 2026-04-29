@@ -103,8 +103,7 @@ il_drop_tracked <- function(model, owner = NULL) {
     model$data$tables <- model$data$tables[0, , drop = FALSE]
   } else {
     model$data$tables <- model$data$tables[
-      !model$data$tables$table %in% tracked$table,
-      ,
+      !model$data$tables$table %in% tracked$table, ,
       drop = FALSE
     ]
   }

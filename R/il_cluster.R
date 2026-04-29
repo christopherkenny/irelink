@@ -122,7 +122,8 @@ il_cluster <- function(pairs, threshold = NULL,
 cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id',
                         source_dataset = NULL) {
   cc_prefix <- il_scratch_table_name('cc')
-  edges_tbl <- cc_upload_edges(con, pairs, threshold = threshold,
+  edges_tbl <- cc_upload_edges(con, pairs,
+    threshold = threshold,
     prefix = cc_prefix
   )
 
@@ -131,7 +132,8 @@ cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id'
       # Iterative one-to-one: merge clusters step-by-step, re-evaluating
       # dataset constraints after each merge (splink's approach).
       result <- solve_one_to_one_sql(
-        con, edges_tbl, source_dataset, ties_method, prefix = cc_prefix
+        con, edges_tbl, source_dataset, ties_method,
+        prefix = cc_prefix
       )
       DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
 
@@ -336,7 +338,8 @@ cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
     if (!is.null(source_dataset)) {
       # Iterative one-to-one clustering
       result <- solve_one_to_one_sql(
-        con, edges_tbl, source_dataset, ties_method, prefix = cc_prefix
+        con, edges_tbl, source_dataset, ties_method,
+        prefix = cc_prefix
       )
       DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
 

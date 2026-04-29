@@ -434,7 +434,9 @@ gamma_matrix_counts <- function(gamma_mat, gamma_cols) {
 #' Combine gamma-pattern count tables
 #' @noRd
 combine_gamma_counts <- function(current, chunk, gamma_cols) {
-  if (nrow(chunk) == 0L) return(current)
+  if (nrow(chunk) == 0L) {
+    return(current)
+  }
   if (nrow(current) == 0L) {
     chunk <- chunk[, c(gamma_cols, 'n'), drop = FALSE]
     return(chunk)

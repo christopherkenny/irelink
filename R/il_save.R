@@ -383,8 +383,7 @@ matching_param_row <- function(params, comparison, gamma_level) {
   }
   rows <- params[
     params$comparison == comparison &
-      params$gamma_level == gamma_level,
-    ,
+      params$gamma_level == gamma_level, ,
     drop = FALSE
   ]
   if (nrow(rows) == 0L) {
@@ -578,8 +577,7 @@ splink_json_to_params <- function(comparisons, prior = NULL) {
   if (length(rows) > 0L) {
     out$comparisons <- do.call(rbind, rows)
     out$comparisons <- out$comparisons[
-      order(out$comparisons$comparison, out$comparisons$gamma_level),
-      ,
+      order(out$comparisons$comparison, out$comparisons$gamma_level), ,
       drop = FALSE
     ]
   }
@@ -588,4 +586,3 @@ splink_json_to_params <- function(comparisons, prior = NULL) {
   }
   out
 }
-

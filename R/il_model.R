@@ -55,7 +55,8 @@ il_model <- function(
 
   # Register primary data (normalizes all input types)
   reg_l <- register_data(
-    .data, con = con,
+    .data,
+    con = con,
     tbl_name = paste0(table_prefix, '_data_l')
   )
   con <- reg_l$con
@@ -173,7 +174,8 @@ il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
 
   # Register primary data
   reg_l <- register_data(
-    .data, con = con,
+    .data,
+    con = con,
     tbl_name = paste0(table_prefix, '_data_l')
   )
   con <- reg_l$con
