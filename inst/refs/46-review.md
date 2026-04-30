@@ -25,25 +25,13 @@ irelink separates the declarative spec (`il_spec`) from the trained model
 
 ## What splink has that irelink appears to lack
 
-1. **`compare_two_records()`** — Real-time single-pair scoring without a batch
-predict. Useful for debugging and interactive exploration. irelink has
-`il_waterfall()` which is adjacent, but it works on already-scored pairs.
-
-2. **`find_matches_to_new_records()`** — Incremental/streaming: link new records
-into an existing trained model without re-scoring everything. irelink has
-`il_attach()` for model reuse but it re-predicts all pairs.
-
-3. **`cluster_studio_dashboard()`** — Interactive HTML cluster visualization for
+1. **`cluster_studio_dashboard()`** — Interactive HTML cluster visualization for
 spot-checking. irelink has `autoplot()` methods but no equivalent interactive
 dashboard.
 
-4. **`threshold_selection_tool()`** — Interactive tool to pick a threshold vs.
+2. **`threshold_selection_tool()`** — Interactive tool to pick a threshold vs.
 precision/recall curve. irelink has `il_roc()` and `il_precision_recall()` which
 serve the same purpose via ggplot, but not interactive.
-
-5. **`ColumnExpression` class** — A way to pass arbitrary column transformations
-into blocking rules inline. irelink has the `transform` argument on
-`il_block_on()`, which is similar but less composable.
 
 ## What irelink has beyond splink
 
@@ -74,15 +62,13 @@ confuse users coming from splink.
 and consistent. splink's `comparison_library.*` is more discoverable via
 autocomplete in Python but harder to type.
 
-**Missing interactivity:** splink's interactive HTML charts
-(`cluster_studio_dashboard`, `threshold_selection_tool`) are a significant UX
-advantage that irelink's static ggplot2 outputs don't match. Given R's ecosystem,
-Shiny-based equivalents or htmlwidgets would be the natural path.
+**Missing interactivity:** splink's `cluster_studio_dashboard` is the one
+meaningful gap — an interactive cluster browser for spot-checking results.
+irelink's static `autoplot()` methods are otherwise sufficient. A Shiny-based
+equivalent would be the natural path in R.
 
 ## Bottom line
 
 Functionally irelink covers ~85–90% of splink's surface with some genuine
 additions (blocking suggestion, unlinkables, richer string similarity diagnostics).
-The main gaps are the interactive/incremental features: real-time single-pair
-scoring, incremental `find_matches_to_new_records`, and the interactive cluster
-dashboard.
+The main gap is the interactive cluster dashboard; everything else is covered.
