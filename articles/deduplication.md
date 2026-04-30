@@ -12,6 +12,7 @@ other realistic data-quality issues.
 ## Setup
 
 ``` r
+
 library(irelink)
 #> 
 #> Attaching package: 'irelink'
@@ -24,6 +25,7 @@ library(ggplot2)
 ## Explore the data
 
 ``` r
+
 df <- fake_1000
 head(df)
 #> # A tibble: 6 × 7
@@ -46,6 +48,7 @@ Before building a model, profile the data to understand its completeness
 and value distributions:
 
 ``` r
+
 con <- DBI::dbConnect(duckdb::duckdb())
 comp <- il_completeness(df, con = con)
 comp
@@ -62,6 +65,7 @@ comp
 ```
 
 ``` r
+
 autoplot(comp)
 ```
 
@@ -71,6 +75,7 @@ Check column value distributions to inform blocking and comparison
 choices:
 
 ``` r
+
 il_profile(df[, c('first_name', 'surname', 'city')], con = con, top_n = 5)
 #> # A tibble: 15 × 3
 #>    column     value          n
@@ -100,6 +105,7 @@ has high `n_distinct` (narrow blocks, fewer pairs) and high `coverage`
 (few missing values):
 
 ``` r
+
 il_suggest_blocking(df, con = con)
 #> # A tibble: 6 × 6
 #>   rule       n_distinct coverage n_pairs pct_of_cartesian score
@@ -123,6 +129,7 @@ similarity, dates of birth use the
 helper, and city uses exact matching with term-frequency adjustments:
 
 ``` r
+
 spec <- il_spec() |>
   il_compare(first_name, cl_name()) |>
   il_compare(surname, cl_name()) |>
@@ -150,6 +157,7 @@ spec
 Estimate how many pairs each blocking rule generates:
 
 ``` r
+
 il_count_pairs(
   df,
   block_on(first_name),
@@ -168,12 +176,14 @@ il_count_pairs(
 ## Train the model
 
 ``` r
+
 model <- il_model(df, spec = spec, con = con)
 ```
 
 Estimate the prior match probability using deterministic rules:
 
 ``` r
+
 model <- il_estimate_prior(
   model,
   block_on(first_name, surname),
@@ -185,6 +195,7 @@ model <- il_estimate_prior(
 Estimate u-probabilities from random pairs and m-probabilities via EM:
 
 ``` r
+
 model <- il_estimate_u(model, max_pairs = 1e5)
 model <- il_estimate_em(model, block_on(first_name))
 #> EM trained: surname, dob, city, and
@@ -197,6 +208,7 @@ model <- il_estimate_em(model, block_on(dob))
 ## Inspect the trained model
 
 ``` r
+
 summary(model)
 #> irelink Model
 #>   Status: Trained
@@ -233,6 +245,7 @@ The match weights chart shows the discriminative power of each
 comparison:
 
 ``` r
+
 autoplot(model)
 ```
 
@@ -241,6 +254,7 @@ autoplot(model)
 The parameter chart shows the raw m and u probabilities:
 
 ``` r
+
 autoplot(model, type = 'parameters')
 ```
 
@@ -253,6 +267,7 @@ saved file stores the spec and trained parameters so you can re-apply
 the model without retraining:
 
 ``` r
+
 path <- tempfile(fileext = '.rds')
 il_save(model, path)
 ```
@@ -263,6 +278,7 @@ and
 [`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md):
 
 ``` r
+
 con2 <- DBI::dbConnect(duckdb::duckdb())
 loaded <- il_load(path)
 model2 <- il_attach(loaded, fake_1000, con = con2)
@@ -270,12 +286,12 @@ head(predict(model2, threshold = 0.85))
 #> # A tibble: 6 × 11
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob gamma_city
 #>         <int>       <int>            <int>         <int>     <int>      <int>
-#> 1           0           3                4            -1         5          0
-#> 2           2           3                4             4         2          0
-#> 3          10          11                4             4         2          0
-#> 4          33          36                4             4         5          1
-#> 5          38          42                4             4         5          0
-#> 6          40          42                4             4         2          1
+#> 1         479         481                4             4         5          0
+#> 2         508         512                4            -1         3          1
+#> 3         509         512                4             2         3          1
+#> 4         535         536                4            -1         2          1
+#> 5         664         667                4             4         5          0
+#> 6          69          71                4             2         5          0
 #> # ℹ 5 more variables: gamma_email <int>, match_weight <dbl>, tf_adj_city <dbl>,
 #> #   total_match_weight <dbl>, match_probability <dbl>
 DBI::dbDisconnect(con2, shutdown = TRUE)
@@ -289,6 +305,7 @@ representative sample, save the model, and re-apply as new data arrives.
 Score all candidate pairs and apply a probability threshold:
 
 ``` r
+
 predictions <- predict(model, threshold = 0.5)
 nrow(predictions)
 #> [1] 2946
@@ -297,6 +314,7 @@ nrow(predictions)
 View the match-weight distribution:
 
 ``` r
+
 autoplot(predictions)
 ```
 
@@ -305,6 +323,7 @@ autoplot(predictions)
 Inspect how individual pairs are scored with a waterfall chart:
 
 ``` r
+
 autoplot(predictions, which = 1)
 ```
 
@@ -313,17 +332,18 @@ autoplot(predictions, which = 1)
 Resolve pairwise links into entity clusters:
 
 ``` r
+
 clusters <- il_cluster(predictions, threshold = 0.85)
 head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 236       cluster_229
-#> 2 533       cluster_527
-#> 3 701       cluster_694
-#> 4 965       cluster_960
-#> 5 233       cluster_229
-#> 6 571       cluster_566
+#> 1 700       cluster_694
+#> 2 931       cluster_924
+#> 3 929       cluster_924
+#> 4 122       cluster_122
+#> 5 257       cluster_252
+#> 6 570       cluster_566
 ```
 
 ## Evaluate against ground truth
@@ -332,6 +352,7 @@ The `cluster` column in the original data provides ground-truth entity
 labels. Convert these to pairwise labels for evaluation:
 
 ``` r
+
 # Use the bundled clerical labels from splink
 labels_raw <- fake_1000_labels
 
@@ -351,6 +372,7 @@ sum(labels$is_match)
 ### Accuracy metrics
 
 ``` r
+
 acc <- il_accuracy(model, labels = labels)
 acc
 #> # A tibble: 419 × 16
@@ -372,6 +394,7 @@ acc
 ```
 
 ``` r
+
 autoplot(acc)
 ```
 
@@ -380,6 +403,7 @@ autoplot(acc)
 ### ROC curve
 
 ``` r
+
 roc <- il_roc(model, labels = labels)
 autoplot(roc)
 ```
@@ -389,6 +413,7 @@ autoplot(roc)
 ### Precision–recall curve
 
 ``` r
+
 pr <- il_precision_recall(model, labels = labels)
 autoplot(pr)
 ```
@@ -400,6 +425,7 @@ autoplot(pr)
 Examine false positives and false negatives at a specific threshold:
 
 ``` r
+
 errors <- il_errors(model, labels = labels, threshold = 0.85)
 head(errors)
 #> # A tibble: 6 × 6
@@ -418,6 +444,7 @@ head(errors)
 How many records cannot be linked at each threshold?
 
 ``` r
+
 unlink <- il_unlinkables(model)
 autoplot(unlink)
 ```
@@ -427,6 +454,7 @@ autoplot(unlink)
 ## Cleanup
 
 ``` r
+
 il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

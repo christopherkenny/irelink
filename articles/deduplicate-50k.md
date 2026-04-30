@@ -15,6 +15,7 @@ data URL are both available.
 ## Load the data
 
 ``` r
+
 library(irelink)
 #> 
 #> Attaching package: 'irelink'
@@ -48,10 +49,12 @@ Profile completeness and value distributions to inform blocking and
 comparison choices:
 
 ``` r
+
 con <- DBI::dbConnect(duckdb::duckdb())
 ```
 
 ``` r
+
 df |>
   il_completeness(con = con) |>
   autoplot()
@@ -60,6 +63,7 @@ df |>
 ![](deduplicate-50k_files/figure-html/completeness-1.png)
 
 ``` r
+
 il_profile(df, first_name, surname, dob, birth_place, con = con, top_n = 8)
 #> # A tibble: 32 × 3
 #>    column     value       n
@@ -80,6 +84,7 @@ il_profile(df, first_name, surname, dob, birth_place, con = con, top_n = 8)
 ## Choose blocking rules
 
 ``` r
+
 il_suggest_blocking(df, con = con)
 #> # A tibble: 10 × 6
 #>    rule              n_distinct coverage   n_pairs pct_of_cartesian score
@@ -100,6 +105,7 @@ The `cumulative_pairs` column shows the total unique pairs across all
 rules so far:
 
 ``` r
+
 il_count_pairs(
   df,
   block_on(surname, dob),
@@ -123,6 +129,7 @@ Term-frequency adjustment is applied to `birth_place` and `occupation`
 so common values (e.g., “London”) receive less weight than rare ones:
 
 ``` r
+
 spec <- il_spec() |>
   il_compare(first_name, cl_name()) |>
   il_compare(surname, cl_name()) |>
@@ -166,6 +173,7 @@ spec
 ## Train the model
 
 ``` r
+
 model <- df |>
   il_model(spec = spec, con = con) |>
   il_estimate_prior(
@@ -185,6 +193,7 @@ model <- df |>
 ## Inspect the trained model
 
 ``` r
+
 summary(model)
 #> irelink Model
 #>   Status: Trained
@@ -218,18 +227,21 @@ summary(model)
 ```
 
 ``` r
+
 autoplot(model)
 ```
 
 ![](deduplicate-50k_files/figure-html/weights-plot-1.png)
 
 ``` r
+
 autoplot(model, type = 'parameters')
 ```
 
 ![](deduplicate-50k_files/figure-html/params-plot-1.png)
 
 ``` r
+
 autoplot(il_unlinkables(model))
 ```
 
@@ -238,21 +250,22 @@ autoplot(il_unlinkables(model))
 ## Predict
 
 ``` r
+
 predictions <- predict(model, threshold = 0.5)
 predictions
 #> # A tibble: 244,230 × 13
-#>    unique_id_l  unique_id_r gamma_first_name gamma_surname gamma_dob
-#>  * <chr>        <chr>                  <int>         <int>     <int>
-#>  1 Q15960716-1  Q15960716-4                4             4         4
-#>  2 Q15960716-13 Q15960716-4                4             4        -1
-#>  3 Q2385895-20  Q28037657-5                3             4        -1
-#>  4 Q15909904-12 Q15909904-3                4             4         4
-#>  5 Q6180874-10  Q6180874-2                 4             4         4
-#>  6 Q6180874-12  Q6180874-2                 4             4         5
-#>  7 Q1512-4      Q1512-6                    4             4         4
-#>  8 Q1512-10     Q1512-6                    4             4        -1
-#>  9 Q18730385-3  Q18730385-7                4             4         5
-#> 10 Q18730385-10 Q18730385-7                4             4         5
+#>    unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob
+#>  * <chr>       <chr>                  <int>         <int>     <int>
+#>  1 Q6778933-7  Q6778933-9                 1             4        -1
+#>  2 Q6778933-13 Q6778933-9                 2             4        -1
+#>  3 Q6778933-14 Q6778933-9                 4             4        -1
+#>  4 Q6778933-20 Q6778933-9                 4             4        -1
+#>  5 Q19974624-1 Q19974624-2                4             4         5
+#>  6 Q11310775-1 Q11310775-2                4             4         5
+#>  7 Q80545628-2 Q80545628-6                4             4         4
+#>  8 Q80545628-3 Q80545628-6                4             4         5
+#>  9 Q80545628-4 Q80545628-6                4             4         5
+#> 10 Q7518881-2  Q7518881-6                 4             4         5
 #> # ℹ 244,220 more rows
 #> # ℹ 8 more variables: gamma_postcode_fake <int>, gamma_birth_place <int>,
 #> #   gamma_occupation <int>, match_weight <dbl>, tf_adj_birth_place <dbl>,
@@ -260,12 +273,14 @@ predictions
 ```
 
 ``` r
+
 autoplot(predictions)
 ```
 
 ![](deduplicate-50k_files/figure-html/histogram-1.png)
 
 ``` r
+
 autoplot(predictions, which = 1)
 ```
 
@@ -274,27 +289,29 @@ autoplot(predictions, which = 1)
 ## Cluster
 
 ``` r
+
 clusters <- il_cluster(predictions, threshold = 0.95)
 clusters
 #> # A tibble: 46,220 × 2
-#>    unique_id    cluster_id         
-#>    <chr>        <chr>              
-#>  1 Q1356371-1   cluster_Q1356371-1 
-#>  2 Q1356371-11  cluster_Q1356371-1 
-#>  3 Q1356371-12  cluster_Q1356371-1 
-#>  4 Q2917652-10  cluster_Q2917652-1 
-#>  5 Q30564605-1  cluster_Q30564605-1
-#>  6 Q30564605-10 cluster_Q30564605-1
-#>  7 Q5082941-5   cluster_Q5082941-1 
-#>  8 Q5082941-14  cluster_Q5082941-1 
-#>  9 Q3052363-1   cluster_Q3052363-1 
-#> 10 Q3052363-12  cluster_Q3052363-1 
+#>    unique_id   cluster_id         
+#>    <chr>       <chr>              
+#>  1 Q19974624-1 cluster_Q19974624-1
+#>  2 Q11310775-1 cluster_Q11310775-1
+#>  3 Q7518881-2  cluster_Q7518881-1 
+#>  4 Q7518881-4  cluster_Q7518881-1 
+#>  5 Q4468457-2  cluster_Q4468457-1 
+#>  6 Q4468457-4  cluster_Q4468457-1 
+#>  7 Q28037638-1 cluster_Q28037638-1
+#>  8 Q5081613-6  cluster_Q5081613-1 
+#>  9 Q5081613-7  cluster_Q5081613-1 
+#> 10 Q5081613-11 cluster_Q5081613-1 
 #> # ℹ 46,210 more rows
 ```
 
 ## Evaluate against ground truth
 
 ``` r
+
 acc <- il_accuracy(model, labels_col = 'cluster')
 acc
 #> # A tibble: 3,524 × 16
@@ -316,18 +333,21 @@ acc
 ```
 
 ``` r
+
 autoplot(acc)
 ```
 
 ![](deduplicate-50k_files/figure-html/accuracy-plot-1.png)
 
 ``` r
+
 autoplot(il_roc(model, labels_col = 'cluster'))
 ```
 
 ![](deduplicate-50k_files/figure-html/roc-1.png)
 
 ``` r
+
 autoplot(il_precision_recall(model, labels_col = 'cluster'))
 ```
 
@@ -336,21 +356,22 @@ autoplot(il_precision_recall(model, labels_col = 'cluster'))
 ### Error inspection
 
 ``` r
+
 errors <- il_errors(model, labels_col = 'cluster', threshold = 0.999)
 errors[errors$error_type == 'false_positive', ]
 #> # A tibble: 433 × 6
 #>    unique_id_l unique_id_r  match_weight match_probability true_label error_type
 #>    <chr>       <chr>               <dbl>             <dbl> <lgl>      <chr>     
-#>  1 Q3568485-2  Q3568487-2           40.2             1.000 FALSE      false_pos…
-#>  2 Q3568485-5  Q3568487-2           40.7             1.000 FALSE      false_pos…
-#>  3 Q3568485-5  Q3568487-1           40.7             1.000 FALSE      false_pos…
-#>  4 Q15176618-4 Q8005070-4           27.9             1.000 FALSE      false_pos…
-#>  5 Q2638280-20 Q6208797-7           21.6             0.999 FALSE      false_pos…
-#>  6 Q1173539-1  Q21466991-2          23.1             1.000 FALSE      false_pos…
-#>  7 Q1173539-1  Q21466991-1          23.1             1.000 FALSE      false_pos…
-#>  8 Q4913072-9  Q8019882-1           21.6             0.999 FALSE      false_pos…
-#>  9 Q15069215-1 Q56024611-11         21.6             0.999 FALSE      false_pos…
-#> 10 Q2579285-1  Q5919650-2           22.3             0.999 FALSE      false_pos…
+#>  1 Q17627000-2 Q24845632-3          22.5             0.999 FALSE      false_pos…
+#>  2 Q17627000-1 Q24845632-8          22.8             1.000 FALSE      false_pos…
+#>  3 Q15176618-4 Q8005070-4           27.9             1.000 FALSE      false_pos…
+#>  4 Q2638280-20 Q6208797-7           21.6             0.999 FALSE      false_pos…
+#>  5 Q1173539-1  Q21466991-2          23.1             1.000 FALSE      false_pos…
+#>  6 Q1173539-1  Q21466991-1          23.1             1.000 FALSE      false_pos…
+#>  7 Q4913072-9  Q8019882-1           21.6             0.999 FALSE      false_pos…
+#>  8 Q15069215-1 Q56024611-11         21.6             0.999 FALSE      false_pos…
+#>  9 Q2579285-1  Q5919650-2           22.3             0.999 FALSE      false_pos…
+#> 10 Q28054162-8 Q6252444-17          21.7             0.999 FALSE      false_pos…
 #> # ℹ 423 more rows
 ```
 
@@ -358,27 +379,29 @@ Some false negatives will be because the true pair was never generated
 by any blocking rule:
 
 ``` r
+
 errors <- il_errors(model, labels_col = 'cluster', threshold = 0.5)
 errors[errors$error_type == 'false_negative', ]
 #> # A tibble: 68,411 × 6
 #>    unique_id_l  unique_id_r match_weight match_probability true_label error_type
 #>    <chr>        <chr>              <dbl>             <dbl> <lgl>      <chr>     
-#>  1 Q4799142-15  Q4799142-20        10.0              0.250 TRUE       false_neg…
-#>  2 Q7593650-6   Q7593650-8         10.4              0.304 TRUE       false_neg…
-#>  3 Q28094321-10 Q28094321-…        11.5              0.475 TRUE       false_neg…
-#>  4 Q7412648-10  Q7412648-19        11.5              0.475 TRUE       false_neg…
-#>  5 Q23020821-10 Q23020821-…        10.4              0.304 TRUE       false_neg…
-#>  6 Q8016642-13  Q8016642-4          9.78             0.218 TRUE       false_neg…
-#>  7 Q8016642-12  Q8016642-3         10.8              0.353 TRUE       false_neg…
-#>  8 Q4786825-3   Q4786825-5         10.0              0.250 TRUE       false_neg…
-#>  9 Q3752751-3   Q3752751-6         10.8              0.353 TRUE       false_neg…
-#> 10 Q62605189-14 Q62605189-…        10.9              0.370 TRUE       false_neg…
+#>  1 Q30145265-12 Q30145265-…         9.78           0.218   TRUE       false_neg…
+#>  2 Q7326404-15  Q7326404-16         3.19           0.00288 TRUE       false_neg…
+#>  3 Q15485597-17 Q15485597-…        11.5            0.475   TRUE       false_neg…
+#>  4 Q105737087-… Q105737087…        10.8            0.353   TRUE       false_neg…
+#>  5 Q43139971-5  Q43139971-9        10.8            0.353   TRUE       false_neg…
+#>  6 Q98761006-11 Q98761006-…        10.0            0.250   TRUE       false_neg…
+#>  7 Q15967510-17 Q15967510-8        10.4            0.304   TRUE       false_neg…
+#>  8 Q16211711-11 Q16211711-9         9.07           0.145   TRUE       false_neg…
+#>  9 Q21461612-13 Q21461612-…        11.5            0.475   TRUE       false_neg…
+#> 10 Q5077354-13  Q5077354-8         10.8            0.353   TRUE       false_neg…
 #> # ℹ 68,401 more rows
 ```
 
 ## Cleanup
 
 ``` r
+
 il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

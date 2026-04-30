@@ -10,6 +10,7 @@ Train a complete model on `fake_1000` that will be reused across
 sections.
 
 ``` r
+
 library(irelink)
 #> 
 #> Attaching package: 'irelink'
@@ -57,6 +58,7 @@ returns the m and u parameter estimates at each EM iteration across all
 training sessions. Plot it to check whether parameters have converged:
 
 ``` r
+
 hist <- il_training_history(model)
 autoplot(hist)
 ```
@@ -75,6 +77,7 @@ full prediction pass. Use it to diagnose why a known match scores too
 low or a non-match scores too high.
 
 ``` r
+
 rec_a <- fake_1000[1, ]
 rec_b <- fake_1000[5, ]
 
@@ -93,6 +96,7 @@ For a visual breakdown of how per-field gamma values sum to an overall
 match decision, draw a waterfall chart for any pair in the scored set:
 
 ``` r
+
 autoplot(pairs, which = 1)
 ```
 
@@ -108,15 +112,17 @@ entirely in SQL, avoiding a costly round-trip for datasets where
 materialising millions of rows would exhaust memory.
 
 ``` r
+
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,946 pairs in table __il_8653_1_predicted_4 (threshold = 0.5)
+#> <il_compared_lazy> 2,946 pairs in table __il_8936_1_predicted_4 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
 [`il_cluster()`](http://christophertkenny.com/irelink/reference/il_cluster.md):
 
 ``` r
+
 clusters_lazy <- il_cluster(pairs_lazy, threshold = 0.85)
 nrow(clusters_lazy)
 #> [1] 956
@@ -139,6 +145,7 @@ can accumulate random-pair gamma counts in chunks and stop once every
 comparison level has enough support:
 
 ``` r
+
 model <- il_estimate_u(
   model,
   max_pairs = 5e6,
@@ -155,6 +162,7 @@ or [`predict()`](https://rdrr.io/r/stats/predict.html) to collect
 lightweight SQL timing metadata:
 
 ``` r
+
 pairs <- predict(model, threshold = 0.5, profile_sql = TRUE)
 attr(pairs, 'sql_profile')
 ```
@@ -167,6 +175,7 @@ graph. Use it to spot over-generous thresholds (clusters that are too
 large) or sparse connectivity (clusters with unexpectedly low density).
 
 ``` r
+
 metrics <- il_graph_metrics(pairs, clusters)
 ```
 
@@ -174,20 +183,21 @@ The cluster table reports size and internal edge density (edges /
 maximum possible edges for a cluster of that size):
 
 ``` r
+
 metrics$clusters
 #> # A tibble: 116 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralisation
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_115       8      24   0.857                 0.190 
-#>  2 cluster_326       4       4   0.667                 0.667 
-#>  3 cluster_792       7      15   0.714                 0.4   
-#>  4 cluster_867       3       3   1                     0     
-#>  5 cluster_924       8      28   1                     0     
-#>  6 cluster_10       13      35   0.449                 0.258 
-#>  7 cluster_142      46     204   0.197                 0.236 
-#>  8 cluster_15        5      10   0.95                  0.0833
-#>  9 cluster_252       9      32   0.889                 0.143 
-#> 10 cluster_38        5      10   1                     0     
+#>  1 cluster_10       13      35   0.449                 0.258 
+#>  2 cluster_142      46     204   0.197                 0.236 
+#>  3 cluster_15        5      10   0.95                  0.0833
+#>  4 cluster_252       9      32   0.889                 0.143 
+#>  5 cluster_38        5      10   1                     0     
+#>  6 cluster_409       4       6   1                     0     
+#>  7 cluster_550       8      26   0.929                 0.0952
+#>  8 cluster_581      10      38   0.833                 0.208 
+#>  9 cluster_684       2       1   1                    NA     
+#> 10 cluster_738       6      15   1                     0     
 #> # ℹ 106 more rows
 ```
 
@@ -202,16 +212,17 @@ The node table shows how many links each record participates in
 (degree):
 
 ``` r
+
 head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 973       cluster_133      1          0.0233
-#> 2 918       cluster_133      2          0.0465
-#> 3 856       cluster_133      6          0.140 
-#> 4 673       cluster_133      6          0.140 
-#> 5 857       cluster_133      2          0.0465
-#> 6 853       cluster_133      2          0.0465
+#> 1 363       cluster_133      6          0.140 
+#> 2 853       cluster_133      2          0.0465
+#> 3 670       cluster_133     12          0.279 
+#> 4 790       cluster_133      4          0.0930
+#> 5 855       cluster_133      7          0.163 
+#> 6 852       cluster_133      2          0.0465
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -228,6 +239,7 @@ or
 to group names by phonetic code instead of exact spelling.
 
 ``` r
+
 spec_phon <- il_spec() |>
   il_compare(first_name, cl_name()) |>
   il_compare(surname, cl_name()) |>
@@ -240,6 +252,7 @@ Use the same `.transform` argument when specifying the blocking rule for
 an EM training pass:
 
 ``` r
+
 model_phon <- il_model(df, spec = spec_phon, con = con)
 model_phon <- il_estimate_u(model_phon, max_pairs = 1e5)
 model_phon <- il_estimate_em(
@@ -263,6 +276,7 @@ applies a function to both values before scoring. Use it to normalise
 case or strip whitespace before a similarity comparison:
 
 ``` r
+
 spec_tr <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7), transform = tolower) |>
   il_compare(surname, cl_jaro_winkler(0.9, 0.7), transform = tolower) |>
@@ -293,6 +307,7 @@ without retraining. It applies the same blocking rules and comparison
 spec:
 
 ``` r
+
 new_df <- data.frame(
   first_name = c('Jhon', 'Alice'),
   surname    = c('Smith', 'Jones'),
@@ -346,6 +361,7 @@ exploratory sessions where you want to clear every `irelink` table
 before disconnecting.
 
 ``` r
+
 il_cleanup(model)
 il_cleanup(model_phon)
 il_cleanup(model_tr)

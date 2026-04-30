@@ -11,6 +11,7 @@ the `rec_id` column: records sharing the same base number (e.g.,
 ## Setup
 
 ``` r
+
 library(irelink)
 #> 
 #> Attaching package: 'irelink'
@@ -23,6 +24,7 @@ library(ggplot2)
 ## Load the data
 
 ``` r
+
 head(febrl4a)
 #> # A tibble: 6 × 11
 #>   rec_id    given_name surname street_number address_1 address_2 suburb postcode
@@ -53,6 +55,7 @@ Check completeness across both tables. Table B has more missing values
 due to the corruption process:
 
 ``` r
+
 con <- DBI::dbConnect(duckdb::duckdb())
 comp <- il_completeness(febrl4a, febrl4b, con = con)
 comp
@@ -73,6 +76,7 @@ comp
 ```
 
 ``` r
+
 autoplot(comp)
 ```
 
@@ -85,6 +89,7 @@ creating the model. Comparisons use name similarity, date-of-birth
 matching, and postcode exact matching:
 
 ``` r
+
 spec <- il_spec() |>
   il_compare(given_name, cl_name()) |>
   il_compare(surname, cl_name()) |>
@@ -110,6 +115,7 @@ spec
 Create a link-type model with both tables:
 
 ``` r
+
 model <- il_model(
   febrl4a, febrl4b,
   spec = spec,
@@ -130,6 +136,7 @@ model
 Estimate prior match probability, u-probabilities, and run EM:
 
 ``` r
+
 model <- il_estimate_prior(
   model,
   block_on(given_name, surname),
@@ -149,18 +156,21 @@ model <- il_estimate_em(model, block_on(suburb))
 ## Inspect the model
 
 ``` r
+
 autoplot(model)
 ```
 
 ![](record-linkage_files/figure-html/weights-1.png)
 
 ``` r
+
 autoplot(model, type = 'parameters')
 ```
 
 ![](record-linkage_files/figure-html/params-1.png)
 
 ``` r
+
 il_weights(model)
 #> # A tibble: 14 × 5
 #>    comparison    gamma_level  m_prob  u_prob weight
@@ -184,12 +194,14 @@ il_weights(model)
 ## Predict and cluster
 
 ``` r
+
 predictions <- predict(model, threshold = 0.5)
 nrow(predictions)
 #> [1] 4993
 ```
 
 ``` r
+
 autoplot(predictions)
 ```
 
@@ -198,17 +210,18 @@ autoplot(predictions)
 Cluster the pairs to resolve entities:
 
 ``` r
+
 clusters <- il_cluster(predictions, threshold = 0.85)
 head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id  
 #>   <chr>     <chr>       
-#> 1 4311      cluster_323 
-#> 2 1768      cluster_1158
-#> 3 4936      cluster_194 
-#> 4 2453      cluster_2271
-#> 5 4417      cluster_4417
-#> 6 749       cluster_2072
+#> 1 505       cluster_2317
+#> 2 174       cluster_174 
+#> 3 195       cluster_195 
+#> 4 1765      cluster_1765
+#> 5 4170      cluster_4170
+#> 6 4852      cluster_2292
 ```
 
 ## Evaluate against ground truth
@@ -217,6 +230,7 @@ The `rec_id` column encodes ground truth. Extract entity IDs and build
 pairwise labels:
 
 ``` r
+
 # Extract entity number from rec_id (e.g., "rec-1070-org" -> "1070")
 entity_a <- sub('^rec-(\\d+)-org$', '\\1', febrl4a$rec_id)
 entity_b <- sub('^rec-(\\d+)-dup-\\d+$', '\\1', febrl4b$rec_id)
@@ -254,6 +268,7 @@ sum(labels$is_match)
 ### Accuracy metrics
 
 ``` r
+
 acc <- il_accuracy(model, labels = labels)
 autoplot(acc)
 ```
@@ -263,6 +278,7 @@ autoplot(acc)
 ### ROC and Precision–Recall
 
 ``` r
+
 roc <- il_roc(model, labels = labels)
 autoplot(roc)
 ```
@@ -270,6 +286,7 @@ autoplot(roc)
 ![](record-linkage_files/figure-html/roc-1.png)
 
 ``` r
+
 pr <- il_precision_recall(model, labels = labels)
 autoplot(pr)
 ```
@@ -279,6 +296,7 @@ autoplot(pr)
 ## Cleanup
 
 ``` r
+
 il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

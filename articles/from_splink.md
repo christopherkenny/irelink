@@ -28,26 +28,26 @@ Comparison levels are the building blocks for scoring how similar two
 records are on a given field. Each `cl_*()` function corresponds to a
 splink comparison level class.
 
-| splink (Python)                      | irelink (R)                                                                                            |
-|--------------------------------------|--------------------------------------------------------------------------------------------------------|
-| `ExactMatchLevel`                    | [`cl_exact()`](http://christophertkenny.com/irelink/reference/cl_exact.md)                             |
-| `LevenshteinLevel`                   | [`cl_levenshtein()`](http://christophertkenny.com/irelink/reference/cl_levenshtein.md)                 |
-| `DamerauLevenshteinLevel`            | [`cl_damerau_levenshtein()`](http://christophertkenny.com/irelink/reference/cl_damerau_levenshtein.md) |
-| `JaroLevel`                          | [`cl_jaro()`](http://christophertkenny.com/irelink/reference/cl_jaro.md)                               |
-| `JaroWinklerLevel`                   | [`cl_jaro_winkler()`](http://christophertkenny.com/irelink/reference/cl_jaro_winkler.md)               |
-| `JaccardLevel`                       | [`cl_jaccard()`](http://christophertkenny.com/irelink/reference/cl_jaccard.md)                         |
-| `CosineSimilarityLevel`              | [`cl_cosine()`](http://christophertkenny.com/irelink/reference/cl_cosine.md)                           |
-| `AbsoluteDifferenceLevel`            | [`cl_numeric_diff()`](http://christophertkenny.com/irelink/reference/cl_numeric_diff.md)               |
-| `PercentageDifferenceLevel`          | [`cl_pct_diff()`](http://christophertkenny.com/irelink/reference/cl_pct_diff.md)                       |
-| `AbsoluteTimeDifferenceAtThresholds` | [`cl_date_diff()`](http://christophertkenny.com/irelink/reference/cl_date_diff.md)                     |
-| `DistanceInKMLevel`                  | [`cl_distance_km()`](http://christophertkenny.com/irelink/reference/cl_distance_km.md)                 |
-| `ArrayIntersectLevel`                | [`cl_array_intersect()`](http://christophertkenny.com/irelink/reference/cl_array_intersect.md)         |
-| `CustomLevel`                        | [`cl_custom()`](http://christophertkenny.com/irelink/reference/cl_custom.md)                           |
-| `NullLevel`                          | [`cl_null()`](http://christophertkenny.com/irelink/reference/cl_null.md)                               |
-| `ElseLevel`                          | [`cl_else()`](http://christophertkenny.com/irelink/reference/cl_else.md)                               |
-| `And`                                | [`cl_and()`](http://christophertkenny.com/irelink/reference/cl_and.md)                                 |
-| `Or`                                 | [`cl_or()`](http://christophertkenny.com/irelink/reference/cl_or.md)                                   |
-| `Not`                                | [`cl_not()`](http://christophertkenny.com/irelink/reference/cl_not.md)                                 |
+| splink (Python) | irelink (R) |
+|----|----|
+| `ExactMatchLevel` | [`cl_exact()`](http://christophertkenny.com/irelink/reference/cl_exact.md) |
+| `LevenshteinLevel` | [`cl_levenshtein()`](http://christophertkenny.com/irelink/reference/cl_levenshtein.md) |
+| `DamerauLevenshteinLevel` | [`cl_damerau_levenshtein()`](http://christophertkenny.com/irelink/reference/cl_damerau_levenshtein.md) |
+| `JaroLevel` | [`cl_jaro()`](http://christophertkenny.com/irelink/reference/cl_jaro.md) |
+| `JaroWinklerLevel` | [`cl_jaro_winkler()`](http://christophertkenny.com/irelink/reference/cl_jaro_winkler.md) |
+| `JaccardLevel` | [`cl_jaccard()`](http://christophertkenny.com/irelink/reference/cl_jaccard.md) |
+| `CosineSimilarityLevel` | [`cl_cosine()`](http://christophertkenny.com/irelink/reference/cl_cosine.md) |
+| `AbsoluteDifferenceLevel` | [`cl_numeric_diff()`](http://christophertkenny.com/irelink/reference/cl_numeric_diff.md) |
+| `PercentageDifferenceLevel` | [`cl_pct_diff()`](http://christophertkenny.com/irelink/reference/cl_pct_diff.md) |
+| `AbsoluteTimeDifferenceAtThresholds` | [`cl_date_diff()`](http://christophertkenny.com/irelink/reference/cl_date_diff.md) |
+| `DistanceInKMLevel` | [`cl_distance_km()`](http://christophertkenny.com/irelink/reference/cl_distance_km.md) |
+| `ArrayIntersectLevel` | [`cl_array_intersect()`](http://christophertkenny.com/irelink/reference/cl_array_intersect.md) |
+| `CustomLevel` | [`cl_custom()`](http://christophertkenny.com/irelink/reference/cl_custom.md) |
+| `NullLevel` | [`cl_null()`](http://christophertkenny.com/irelink/reference/cl_null.md) |
+| `ElseLevel` | [`cl_else()`](http://christophertkenny.com/irelink/reference/cl_else.md) |
+| `And` | [`cl_and()`](http://christophertkenny.com/irelink/reference/cl_and.md) |
+| `Or` | [`cl_or()`](http://christophertkenny.com/irelink/reference/cl_or.md) |
+| `Not` | [`cl_not()`](http://christophertkenny.com/irelink/reference/cl_not.md) |
 
 ## Domain-specific comparisons
 
@@ -55,13 +55,13 @@ Splink provides high-level comparison classes that compose multiple
 levels for common field types. In `irelink`, these are helper functions
 that return a pre-configured set of levels.
 
-| splink (Python)             | irelink (R)                                                                                      |
-|-----------------------------|--------------------------------------------------------------------------------------------------|
-| `NameComparison`            | [`cl_name()`](http://christophertkenny.com/irelink/reference/cl_name.md)                         |
+| splink (Python) | irelink (R) |
+|----|----|
+| `NameComparison` | [`cl_name()`](http://christophertkenny.com/irelink/reference/cl_name.md) |
 | `ForenameSurnameComparison` | [`cl_forename_surname()`](http://christophertkenny.com/irelink/reference/cl_forename_surname.md) |
-| `DateOfBirthComparison`     | [`cl_dob()`](http://christophertkenny.com/irelink/reference/cl_dob.md)                           |
-| `EmailComparison`           | [`cl_email()`](http://christophertkenny.com/irelink/reference/cl_email.md)                       |
-| `PostcodeComparison`        | [`cl_postcode()`](http://christophertkenny.com/irelink/reference/cl_postcode.md)                 |
+| `DateOfBirthComparison` | [`cl_dob()`](http://christophertkenny.com/irelink/reference/cl_dob.md) |
+| `EmailComparison` | [`cl_email()`](http://christophertkenny.com/irelink/reference/cl_email.md) |
+| `PostcodeComparison` | [`cl_postcode()`](http://christophertkenny.com/irelink/reference/cl_postcode.md) |
 
 ## Model inspection
 
@@ -73,11 +73,11 @@ that return a pre-configured set of levels.
 
 ## Data profiling
 
-| splink (Python)                                        | irelink (R)                |
-|--------------------------------------------------------|----------------------------|
-| `linker.profile_columns(...)`                          | `il_profile(df, ...)`      |
-| `linker.count_num_comparisons_from_blocking_rule(...)` | `il_count_pairs(df, ...)`  |
-| *completeness profiling*                               | `il_completeness(df, ...)` |
+| splink (Python) | irelink (R) |
+|----|----|
+| `linker.profile_columns(...)` | `il_profile(df, ...)` |
+| `linker.count_num_comparisons_from_blocking_rule(...)` | `il_count_pairs(df, ...)` |
+| *completeness profiling* | `il_completeness(df, ...)` |
 
 ## Persistence
 
@@ -99,6 +99,7 @@ them to a spec with
 or passes them directly to training functions.
 
 ``` r
+
 # irelink — blocking in the spec
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
@@ -149,6 +150,7 @@ clusters = linker.clustering.cluster_pairwise_predictions_at_threshold(
 **irelink (R):**
 
 ``` r
+
 library(irelink)
 
 df <- fake_1000
@@ -193,6 +195,7 @@ results = linker.inference.find_matches_to_new_records(
 **irelink (R):**
 
 ``` r
+
 new_df <- data.frame(
   first_name = "Jhon",
   surname = "Smith",

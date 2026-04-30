@@ -19,6 +19,7 @@ data URLs are both available.
 ## Load the data
 
 ``` r
+
 library(irelink)
 #> 
 #> Attaching package: 'irelink'
@@ -62,10 +63,12 @@ df_destination
 ## Profile the data
 
 ``` r
+
 con <- DBI::dbConnect(duckdb::duckdb())
 ```
 
 ``` r
+
 il_profile(df_origin, memo, transaction_date, amount, con = con, top_n = 8)
 #> # A tibble: 24 × 3
 #>    column           value               n
@@ -91,6 +94,7 @@ generous enough to capture true matches while still reducing the pair
 space dramatically. The rules below use SQL expressions via `.where`:
 
 ``` r
+
 counts <- il_count_pairs(
   df_origin,
   df_destination,
@@ -144,6 +148,7 @@ counts
 ```
 
 ``` r
+
 autoplot(counts)
 ```
 
@@ -156,6 +161,7 @@ The `transaction_date` comparison is one-sided: payments can only
 `destination_date - origin_date` is between 0 and *N* days:
 
 ``` r
+
 spec <- il_spec() |>
   il_compare(amount, cl_pct_diff(0.01, 0.03, 0.10, 0.30)) |>
   il_compare(memo, cl_levenshtein(2, 6, 10)) |>
@@ -217,6 +223,7 @@ spec
 ## Train the model
 
 ``` r
+
 model <- il_model(
   df_origin,
   df_destination,
@@ -235,6 +242,7 @@ model <- il_estimate_u(model, max_pairs = 1e6) |>
 ## Inspect the trained model
 
 ``` r
+
 summary(model)
 #> irelink Model
 #>   Status: Trained
@@ -272,12 +280,14 @@ summary(model)
 ```
 
 ``` r
+
 autoplot(model)
 ```
 
 ![](transactions_files/figure-html/weights-plot-1.png)
 
 ``` r
+
 autoplot(model, type = 'parameters')
 ```
 
@@ -286,6 +296,7 @@ autoplot(model, type = 'parameters')
 ## Predict
 
 ``` r
+
 predictions <- predict(model, threshold = 0.001)
 predictions
 #> # A tibble: 594,672 × 8
@@ -307,12 +318,14 @@ predictions
 ```
 
 ``` r
+
 autoplot(predictions)
 ```
 
 ![](transactions_files/figure-html/histogram-1.png)
 
 ``` r
+
 autoplot(predictions, which = 1)
 ```
 
@@ -321,6 +334,7 @@ autoplot(predictions, which = 1)
 ## Evaluate against ground truth
 
 ``` r
+
 acc <- il_accuracy(model, labels_col = 'ground_truth')
 acc
 #> # A tibble: 102 × 16
@@ -342,6 +356,7 @@ acc
 ```
 
 ``` r
+
 autoplot(acc)
 ```
 
@@ -350,45 +365,48 @@ autoplot(acc)
 ### Error inspection
 
 ``` r
+
 errors <- il_errors(model, labels_col = 'ground_truth', threshold = 0.5)
 errors[errors$error_type == 'false_positive', ]
 #> # A tibble: 43,970 × 6
 #>    unique_id_l unique_id_r match_weight match_probability true_label error_type 
 #>          <dbl>       <dbl>        <dbl>             <dbl> <lgl>      <chr>      
-#>  1        1576        1578        10.3              0.829 FALSE      false_posi…
-#>  2        1807        9105         8.24             0.531 FALSE      false_posi…
-#>  3        3559        4921        10.3              0.829 FALSE      false_posi…
-#>  4        3464       35420         8.24             0.531 FALSE      false_posi…
-#>  5        4985        4993         8.24             0.531 FALSE      false_posi…
-#>  6       11228       11215         8.24             0.531 FALSE      false_posi…
-#>  7       11242       11253        10.3              0.829 FALSE      false_posi…
-#>  8       13696       35765        10.3              0.829 FALSE      false_posi…
-#>  9       27603       27586         8.24             0.531 FALSE      false_posi…
-#> 10       34139       35961         8.24             0.531 FALSE      false_posi…
+#>  1       36781        3174        13.8              0.982 FALSE      false_posi…
+#>  2       35523        8810        10.6              0.851 FALSE      false_posi…
+#>  3       35323       16071         9.70             0.756 FALSE      false_posi…
+#>  4       35586        7877        11.5              0.915 FALSE      false_posi…
+#>  5       35830        5101        11.5              0.915 FALSE      false_posi…
+#>  6       37241       44723         9.29             0.701 FALSE      false_posi…
+#>  7       37614       37631         9.70             0.756 FALSE      false_posi…
+#>  8       38786       38790        14.1              0.985 FALSE      false_posi…
+#>  9       38815       43926         9.70             0.756 FALSE      false_posi…
+#> 10       37803       37809        10.0              0.794 FALSE      false_posi…
 #> # ℹ 43,960 more rows
 ```
 
 ``` r
+
 errors[errors$error_type == 'false_negative', ]
 #> # A tibble: 5,426 × 6
 #>    unique_id_l unique_id_r match_weight match_probability true_label error_type 
 #>          <dbl>       <dbl>        <dbl>             <dbl> <lgl>      <chr>      
-#>  1        6317        6317         4.48          0.0767   TRUE       false_nega…
-#>  2       11394       11394        -2.86          0.000516 TRUE       false_nega…
-#>  3        1723        1723         5.54          0.148    TRUE       false_nega…
-#>  4         601         601         7.90          0.472    TRUE       false_nega…
-#>  5        1346        1346         6.70          0.280    TRUE       false_nega…
-#>  6        1792        1792         1.00          0.00743  TRUE       false_nega…
-#>  7        1945        1945         7.72          0.440    TRUE       false_nega…
-#>  8         896         896         6.43          0.244    TRUE       false_nega…
-#>  9        1381        1381         7.90          0.472    TRUE       false_nega…
-#> 10         444         444         4.13          0.0616   TRUE       false_nega…
+#>  1       37616       37616       -0.337           0.00295 TRUE       false_nega…
+#>  2       38602       38602        5.54            0.148   TRUE       false_nega…
+#>  3       36937       36937        7.72            0.440   TRUE       false_nega…
+#>  4       38533       38533        6.70            0.280   TRUE       false_nega…
+#>  5       38754       38754        7.40            0.387   TRUE       false_nega…
+#>  6       38861       38861        8.05            0.497   TRUE       false_nega…
+#>  7       37250       37250        2.93            0.0277  TRUE       false_nega…
+#>  8       38220       38220        3.24            0.0342  TRUE       false_nega…
+#>  9       37289       37289        1.96            0.0143  TRUE       false_nega…
+#> 10       38093       38093        7.40            0.387   TRUE       false_nega…
 #> # ℹ 5,416 more rows
 ```
 
 ## Cleanup
 
 ``` r
+
 il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

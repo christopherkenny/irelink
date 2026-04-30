@@ -41,6 +41,7 @@ field. Blocking rules limit which record pairs are compared, making
 linkage tractable on large data.
 
 ``` r
+
 library(irelink)
 #> 
 #> Attaching package: 'irelink'
@@ -88,6 +89,7 @@ DBI-compatible connection works. Here we use an in-memory DuckDB
 database:
 
 ``` r
+
 df <- fake_20
 con <- DBI::dbConnect(duckdb::duckdb())
 
@@ -108,6 +110,7 @@ chance two random non-matching records agree on each comparison level)
 from a random sample of pairs:
 
 ``` r
+
 model <- il_estimate_u(model)
 ```
 
@@ -116,6 +119,7 @@ true matches agree on each level). You supply a blocking rule to
 generate the training pairs:
 
 ``` r
+
 model <- il_estimate_em(model, block_on(surname))
 #> EM trained: first_name and dob | skipped (blocked on):
 #> surname
@@ -124,6 +128,7 @@ model <- il_estimate_em(model, block_on(surname))
 You can inspect the learned parameters at any time:
 
 ``` r
+
 il_weights(model)
 #> # A tibble: 8 × 5
 #>   comparison gamma_level m_prob u_prob weight
@@ -144,17 +149,18 @@ il_weights(model)
 candidate pair and returns those above a match-probability threshold:
 
 ``` r
+
 pairs <- predict(model, threshold = 0.5)
 head(pairs)
 #> # A tibble: 6 × 8
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob match_weight
 #>         <int>       <int>            <int>         <int>     <int>        <dbl>
-#> 1           2          12                2             1         0         1.64
-#> 2           2          11                2             2         1         8.76
-#> 3           3          14                2             2         0         3.86
-#> 4           4          14                2             2         0         3.86
-#> 5           7          17                2             2         1         8.76
-#> 6          13          14                2             2         0         3.86
+#> 1           1          11                2             2         1         8.76
+#> 2           8          17                1             2         1         7.49
+#> 3           9          20                2             2         0         3.86
+#> 4          10          20                2             2         0         3.86
+#> 5           1           2                2             2         1         8.76
+#> 6           3          13                2             2         1         8.76
 #> # ℹ 2 more variables: total_match_weight <dbl>, match_probability <dbl>
 ```
 
@@ -170,17 +176,18 @@ resolves pairwise predictions into entity clusters using
 connected-components analysis:
 
 ``` r
+
 clusters <- il_cluster(pairs)
 head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 4         cluster_13
-#> 2 7         cluster_17
-#> 3 13        cluster_13
-#> 4 19        cluster_10
-#> 5 8         cluster_17
-#> 6 9         cluster_10
+#> 1 17        cluster_17
+#> 2 6         cluster_15
+#> 3 15        cluster_15
+#> 4 5         cluster_15
+#> 5 14        cluster_13
+#> 6 3         cluster_13
 ```
 
 Each record is assigned a `cluster_id`. Records sharing the same cluster
@@ -191,34 +198,34 @@ are considered to be the same entity.
 `irelink` ships with a rich library of comparison levels for common
 field types:
 
-| Level                                                                                                  | Use case                      |
-|--------------------------------------------------------------------------------------------------------|-------------------------------|
-| [`cl_exact()`](http://christophertkenny.com/irelink/reference/cl_exact.md)                             | Binary exact match            |
-| [`cl_jaro_winkler()`](http://christophertkenny.com/irelink/reference/cl_jaro_winkler.md)               | Names, short strings          |
-| [`cl_levenshtein()`](http://christophertkenny.com/irelink/reference/cl_levenshtein.md)                 | General fuzzy strings         |
-| [`cl_damerau_levenshtein()`](http://christophertkenny.com/irelink/reference/cl_damerau_levenshtein.md) | Strings with transpositions   |
-| [`cl_jaro()`](http://christophertkenny.com/irelink/reference/cl_jaro.md)                               | Lightweight string similarity |
-| [`cl_jaccard()`](http://christophertkenny.com/irelink/reference/cl_jaccard.md)                         | Token-set overlap             |
-| [`cl_cosine()`](http://christophertkenny.com/irelink/reference/cl_cosine.md)                           | Embedding similarity          |
-| [`cl_numeric_diff()`](http://christophertkenny.com/irelink/reference/cl_numeric_diff.md)               | Numeric fields (e.g., age)    |
-| [`cl_pct_diff()`](http://christophertkenny.com/irelink/reference/cl_pct_diff.md)                       | Percentage difference         |
-| [`cl_date_diff()`](http://christophertkenny.com/irelink/reference/cl_date_diff.md)                     | Date fields                   |
-| [`cl_time_diff()`](http://christophertkenny.com/irelink/reference/cl_time_diff.md)                     | Time fields                   |
-| [`cl_distance_km()`](http://christophertkenny.com/irelink/reference/cl_distance_km.md)                 | Geographic coordinates        |
-| [`cl_array_intersect()`](http://christophertkenny.com/irelink/reference/cl_array_intersect.md)         | Array or set overlap          |
+| Level | Use case |
+|----|----|
+| [`cl_exact()`](http://christophertkenny.com/irelink/reference/cl_exact.md) | Binary exact match |
+| [`cl_jaro_winkler()`](http://christophertkenny.com/irelink/reference/cl_jaro_winkler.md) | Names, short strings |
+| [`cl_levenshtein()`](http://christophertkenny.com/irelink/reference/cl_levenshtein.md) | General fuzzy strings |
+| [`cl_damerau_levenshtein()`](http://christophertkenny.com/irelink/reference/cl_damerau_levenshtein.md) | Strings with transpositions |
+| [`cl_jaro()`](http://christophertkenny.com/irelink/reference/cl_jaro.md) | Lightweight string similarity |
+| [`cl_jaccard()`](http://christophertkenny.com/irelink/reference/cl_jaccard.md) | Token-set overlap |
+| [`cl_cosine()`](http://christophertkenny.com/irelink/reference/cl_cosine.md) | Embedding similarity |
+| [`cl_numeric_diff()`](http://christophertkenny.com/irelink/reference/cl_numeric_diff.md) | Numeric fields (e.g., age) |
+| [`cl_pct_diff()`](http://christophertkenny.com/irelink/reference/cl_pct_diff.md) | Percentage difference |
+| [`cl_date_diff()`](http://christophertkenny.com/irelink/reference/cl_date_diff.md) | Date fields |
+| [`cl_time_diff()`](http://christophertkenny.com/irelink/reference/cl_time_diff.md) | Time fields |
+| [`cl_distance_km()`](http://christophertkenny.com/irelink/reference/cl_distance_km.md) | Geographic coordinates |
+| [`cl_array_intersect()`](http://christophertkenny.com/irelink/reference/cl_array_intersect.md) | Array or set overlap |
 
 For common field types, domain-specific helpers compose multiple levels
 into a single call:
 
-| Helper                                                                                           | Fields                                      |
-|--------------------------------------------------------------------------------------------------|---------------------------------------------|
-| [`cl_name()`](http://christophertkenny.com/irelink/reference/cl_name.md)                         | Generic name field                          |
-| [`cl_first_last_name()`](http://christophertkenny.com/irelink/reference/cl_first_last_name.md)   | First name and last name as separate fields |
-| [`cl_forename_surname()`](http://christophertkenny.com/irelink/reference/cl_forename_surname.md) | Forename and surname with transposition     |
-| [`cl_dob()`](http://christophertkenny.com/irelink/reference/cl_dob.md)                           | Date of birth                               |
-| [`cl_email()`](http://christophertkenny.com/irelink/reference/cl_email.md)                       | Email addresses                             |
-| [`cl_postcode()`](http://christophertkenny.com/irelink/reference/cl_postcode.md)                 | UK postal codes                             |
-| [`cl_zip_code()`](http://christophertkenny.com/irelink/reference/cl_zip_code.md)                 | US ZIP codes                                |
+| Helper | Fields |
+|----|----|
+| [`cl_name()`](http://christophertkenny.com/irelink/reference/cl_name.md) | Generic name field |
+| [`cl_first_last_name()`](http://christophertkenny.com/irelink/reference/cl_first_last_name.md) | First name and last name as separate fields |
+| [`cl_forename_surname()`](http://christophertkenny.com/irelink/reference/cl_forename_surname.md) | Forename and surname with transposition |
+| [`cl_dob()`](http://christophertkenny.com/irelink/reference/cl_dob.md) | Date of birth |
+| [`cl_email()`](http://christophertkenny.com/irelink/reference/cl_email.md) | Email addresses |
+| [`cl_postcode()`](http://christophertkenny.com/irelink/reference/cl_postcode.md) | UK postal codes |
+| [`cl_zip_code()`](http://christophertkenny.com/irelink/reference/cl_zip_code.md) | US ZIP codes |
 
 ## Evaluation
 
@@ -241,6 +248,7 @@ interactive session with abandoned models, use `il_cleanup_all(con)`
 before disconnecting to drop every `irelink` table on the connection.
 
 ``` r
+
 il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

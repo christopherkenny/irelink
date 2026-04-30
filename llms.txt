@@ -19,6 +19,7 @@ idiomatic R.
 You can install the development version of `irelink` like so:
 
 ``` r
+
 pak::pak('christopherkenny/irelink')
 ```
 
@@ -30,6 +31,7 @@ data into a SQL database for efficient pair generation, so you need a
 DBI connection. Here we use an in-memory DuckDB instance.
 
 ``` r
+
 library(irelink)
 
 df <- fake_20
@@ -46,6 +48,7 @@ estimates parameters for non-matching pairs via random sampling, and
 refines the match-weight parameters using Expectation-Maximisation.
 
 ``` r
+
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -68,6 +71,7 @@ returned `match_weight` is the evidence-only log2 Bayes factor;
 groups the matched pairs into deduplicated entities.
 
 ``` r
+
 pairs <- predict(model, threshold = 0.5)
 clusters <- il_cluster(pairs)
 clusters
@@ -101,6 +105,7 @@ exploratory session may have left several `irelink` models’ tables
 behind.
 
 ``` r
+
 il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
@@ -114,6 +119,7 @@ original records and `febrl4b` contains one duplicate per original with
 realistic data-quality errors.
 
 ``` r
+
 # Use a small slice for this quick demo; see vignette("record-linkage") for the full workflow
 df_a <- head(febrl4a, 200)
 df_b <- head(febrl4b, 200)
@@ -127,6 +133,7 @@ and set `link_type = "link"` to tell the model to score only
 cross-dataset pairs, not pairs within the same dataset.
 
 ``` r
+
 spec <- il_spec() |>
   il_compare(given_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_compare(surname, cl_jaro_winkler(0.9, 0.7)) |>
@@ -149,6 +156,7 @@ Each row in the result is a candidate match between a record in `df_a`
 and a record in `df_b`, scored by match probability.
 
 ``` r
+
 pairs <- predict(model, threshold = 0.5)
 pairs
 #> # A tibble: 3 × 8
@@ -166,6 +174,7 @@ As in the prior example,
 drops this model’s temporary tables.
 
 ``` r
+
 il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
