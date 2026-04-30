@@ -1172,3 +1172,9 @@ Take a look at splink and its interactive graphs.
 Assess the feasibility of implementing this in a very lightweight way without taking on any new formal dependencies, just Quarto as a suggests.
 
 When you are done, write a summary to `inst/refs/[43/44]-interactive-feasibility.md`.
+
+# Review (Claude Code Sonnet 4.6 medium)
+
+Review the package surface.
+How does this seem to compare with the python package splink (../splink)?
+Write this to inst/refs/46-review.md.
