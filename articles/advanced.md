@@ -115,7 +115,7 @@ materialising millions of rows would exhaust memory.
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,946 pairs in table __il_8644_1_predicted_4 (threshold = 0.5)
+#> <il_compared_lazy> 2,946 pairs in table __il_8674_1_predicted_4 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -217,12 +217,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 664       cluster_133      5          0.116 
-#> 2 972       cluster_133      4          0.0930
-#> 3 364       cluster_133      6          0.140 
-#> 4 670       cluster_133     12          0.279 
-#> 5 790       cluster_133      4          0.0930
-#> 6 855       cluster_133      7          0.163
+#> 1 459       cluster_164     13          0.419 
+#> 2 716       cluster_164      3          0.0968
+#> 3 48        cluster_164      4          0.129 
+#> 4 171       cluster_164      6          0.194 
+#> 5 169       cluster_164      6          0.194 
+#> 6 167       cluster_164      7          0.226
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -321,23 +321,23 @@ matches
 #> # A tibble: 17 × 5
 #>    unique_id_l unique_id_r match_weight total_match_weight match_probability
 #>          <int>       <int>        <dbl>              <dbl>             <dbl>
-#>  1           1         237         2.54               3.64             0.926
-#>  2           1         239         1.46               2.56             0.855
-#>  3           1         364         1.46               2.56             0.855
-#>  4           1         365         1.46               2.56             0.855
-#>  5           1         241         1.46               2.56             0.855
-#>  6           1         242         1.46               2.56             0.855
-#>  7           1         362         2.54               3.64             0.926
-#>  8           1         366         1.46               2.56             0.855
-#>  9           1         367         1.46               2.56             0.855
-#> 10           1         789         2.67               3.77             0.932
-#> 11           2         858         1.47               2.57             0.856
-#> 12           1         240         1.46               2.56             0.855
-#> 13           1         363         1.46               2.56             0.855
-#> 14           2         859         2.55               3.66             0.927
-#> 15           2         864         1.47               2.57             0.856
-#> 16           1         238         2.67               3.77             0.932
-#> 17           1         791         1.46               2.56             0.855
+#>  1           2         858         1.47               2.57             0.856
+#>  2           1         240         1.46               2.56             0.855
+#>  3           1         363         1.46               2.56             0.855
+#>  4           2         859         2.55               3.66             0.927
+#>  5           2         864         1.47               2.57             0.856
+#>  6           1         238         2.67               3.77             0.932
+#>  7           1         791         1.46               2.56             0.855
+#>  8           1         237         2.54               3.64             0.926
+#>  9           1         239         1.46               2.56             0.855
+#> 10           1         364         1.46               2.56             0.855
+#> 11           1         365         1.46               2.56             0.855
+#> 12           1         241         1.46               2.56             0.855
+#> 13           1         242         1.46               2.56             0.855
+#> 14           1         362         2.54               3.64             0.926
+#> 15           1         366         1.46               2.56             0.855
+#> 16           1         367         1.46               2.56             0.855
+#> 17           1         789         2.67               3.77             0.932
 ```
 
 Each row is a (new record, existing record) pair. `unique_id_l`
