@@ -1183,3 +1183,9 @@ Write this to inst/refs/46-review.md.
 
 Review `inst/refs/46-review.md`.
 Remove any overstatements or comments which would require adding unmaintained packages like `plotly`.
+
+# Review (Claude Code Sonnet 4.6 medium)
+
+I need to start manually reviewing this package.
+Scan the package surface and give me some ideas on how to break this into chunks.
+Write the plan to `inst/refs/47-review-plan.md`.
