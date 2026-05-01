@@ -30,28 +30,28 @@ on.exit({
 model <- il_model(df, spec = spec, con = con)
 
 # U estimation breakdown
-t1 <- system.time(pairs_u <- irelink:::get_all_pairs(model, max_pairs = 1e6))["elapsed"]
-t2 <- system.time(gm <- irelink:::compute_gamma_matrix(pairs_u, spec$comparisons))["elapsed"]
+t1 <- system.time(pairs_u <- get_all_pairs(model, max_pairs = 1e6))["elapsed"]
+t2 <- system.time(gm <- compute_gamma_matrix(pairs_u, spec$comparisons))["elapsed"]
 
 # compute_gamma per method (on u-est pairs)
 gamma_times <- lapply(seq_along(spec$comparisons), \(j) {
   comp <- spec$comparisons[[j]]
   val_l <- pairs_u[[paste0("l_", comp$columns)]]
   val_r <- pairs_u[[paste0("r_", comp$columns)]]
-  t <- system.time(irelink:::compute_gamma(val_l, val_r, comp$method))["elapsed"]
+  t <- system.time(compute_gamma(val_l, val_r, comp$method))["elapsed"]
   tibble::tibble(column = comp$columns, method = comp$method$method, elapsed = t, n_pairs = length(val_l))
 }) |> dplyr::bind_rows()
 
 # EM breakdown
 model <- il_estimate_u(model, profile_sql = TRUE)
-t4 <- system.time(pairs_em <- irelink:::get_blocked_pairs(model, block_on(surname)))["elapsed"]
-t5 <- system.time(gm_em <- irelink:::compute_gamma_matrix(pairs_em, spec$comparisons))["elapsed"]
+t4 <- system.time(pairs_em <- get_blocked_pairs(model, block_on(surname)))["elapsed"]
+t5 <- system.time(gm_em <- compute_gamma_matrix(pairs_em, spec$comparisons))["elapsed"]
 
 # Profile scoring
 comp_names <- vapply(spec$comparisons, \(c) c$columns, character(1))
-t6 <- system.time(mu <- irelink:::extract_mu_vectors(model$params$comparisons, comp_names))["elapsed"]
-t7 <- system.time(mw <- irelink:::score_gamma_matrix(gm_em, mu))["elapsed"]
-t8 <- system.time(irelink:::weight_to_probability(mw, 0.05))["elapsed"]
+t6 <- system.time(mu <- extract_mu_vectors(model$params$comparisons, comp_names))["elapsed"]
+t7 <- system.time(mw <- score_gamma_matrix(gm_em, mu))["elapsed"]
+t8 <- system.time(weight_to_probability(mw, 0.05))["elapsed"]
 
 # EM single iteration (E-step + M-step)
 n_pairs <- nrow(pairs_em)
@@ -89,7 +89,7 @@ t10 <- system.time({
 })["elapsed"]
 
 # Pair deduplication
-all_pairs <- lapply(spec$blocking_rules, \(br) irelink:::get_blocked_pairs(model, br)) |>
+all_pairs <- lapply(spec$blocking_rules, \(br) get_blocked_pairs(model, br)) |>
   dplyr::bind_rows()
 t11 <- system.time({
   pair_key <- paste(all_pairs$l_unique_id, all_pairs$r_unique_id, sep = "||")

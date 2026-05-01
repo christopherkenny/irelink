@@ -42,16 +42,6 @@ il_scratch_table_name <- function(purpose, suffix = NULL) {
   paste(c('__il', purpose, Sys.getpid(), suffix), collapse = '_')
 }
 
-#' Does a table belong to a model prefix?
-#' @param model An il_model object.
-#' @param tbl_name Character table name.
-#' @return Logical.
-#' @noRd
-il_table_belongs_to_model <- function(model, tbl_name) {
-  prefix <- model$data$table_prefix
-  !is.null(prefix) && startsWith(tbl_name, paste0(prefix, '_'))
-}
-
 #' Track a table in model metadata
 #' @param model An il_model object.
 #' @param tbl_name Character table name.
@@ -75,37 +65,6 @@ il_track_table <- function(model, tbl_name,
       model$data$tables,
       data.frame(table = tbl_name, owner = owner, stringsAsFactors = FALSE)
     )
-  }
-  model
-}
-
-#' Drop tracked model tables
-#' @param model An il_model object.
-#' @param owner Optional owner filter.
-#' @return Updated model.
-#' @noRd
-il_drop_tracked <- function(model, owner = NULL) {
-  con <- model$con
-  if (is.null(con) || !DBI::dbIsValid(con)) {
-    return(model)
-  }
-  tracked <- model$data$tables
-  if (is.null(tracked) || nrow(tracked) == 0L) {
-    return(model)
-  }
-  if (!is.null(owner)) {
-    tracked <- tracked[tracked$owner %in% owner, , drop = FALSE]
-  }
-  for (tbl in unique(tracked$table)) {
-    drop_registered(con, tbl)
-  }
-  if (is.null(owner)) {
-    model$data$tables <- model$data$tables[0, , drop = FALSE]
-  } else {
-    model$data$tables <- model$data$tables[
-      !model$data$tables$table %in% tracked$table, ,
-      drop = FALSE
-    ]
   }
   model
 }
