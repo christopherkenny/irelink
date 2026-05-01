@@ -415,8 +415,8 @@ load_json_model <- function(raw) {
   )
   trained <- !is.null(params$comparisons) &&
     nrow(params$comparisons) > 0L &&
-    all(!is.na(params$comparisons$m)) &&
-    all(!is.na(params$comparisons$u))
+    !anyNA(params$comparisons$m) &&
+    !anyNA(params$comparisons$u)
 
   new_il_model(
     spec = spec,

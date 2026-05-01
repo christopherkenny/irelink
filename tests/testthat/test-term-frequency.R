@@ -367,7 +367,7 @@ test_that('TF adjustment handles one-sided NULL city in SQL path (DuckDB)', {
     exact_matches <- pairs_sql[pairs_sql$gamma_city == 1, ]
     if (nrow(exact_matches) > 0) {
       expect_true(
-        all(!is.na(exact_matches$tf_adj_city)),
+        !anyNA(exact_matches$tf_adj_city),
         info = 'TF adjustment should be non-NA for exact matches'
       )
     }

@@ -153,7 +153,7 @@ validate_transform_arg <- function(transform) {
     return(invisible(NULL))
   }
   if (is.list(transform)) {
-    if (is.null(names(transform)) || any(!nzchar(names(transform)))) {
+    if (is.null(names(transform)) || !all(nzchar(names(transform)))) {
       cli::cli_abort(
         '{.arg .transform} list must be fully named (one name per column transform).',
         class = 'il_error_type'

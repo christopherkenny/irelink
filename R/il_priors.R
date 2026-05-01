@@ -191,7 +191,7 @@ prior_distribution <- function(model, col, exact = NULL, levels = NULL,
 
 validate_level_distribution <- function(levels, expected_names) {
   if (!is.numeric(levels) || is.null(names(levels)) ||
-    anyNA(levels) || any(!is.finite(levels)) || any(levels < 0)) {
+    anyNA(levels) || !all(is.finite(levels)) || any(levels < 0)) {
     cli::cli_abort(
       '{.arg levels} must be a named numeric vector of finite non-negative probabilities.'
     )
