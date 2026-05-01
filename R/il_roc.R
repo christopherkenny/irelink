@@ -72,10 +72,21 @@
 il_roc <- function(model, labels = NULL, labels_col = NULL) {
   labels <- resolve_labels(model, labels, labels_col)
   acc <- il_accuracy(model, labels)
-  tibble::tibble(
+  roc <- tibble::tibble(
     threshold = acc$threshold,
     fpr = acc$fp / pmax(acc$fp + acc$tn, 1L),
     tpr = acc$tp / pmax(acc$tp + acc$fn, 1L)
-  ) |>
+  )
+
+  # ROC curves conventionally start at no predicted positives. A threshold of
+  # 1 can still predict records when probabilities are exactly 1.
+  if (!any(roc$fpr == 0 & roc$tpr == 0)) {
+    roc <- rbind(
+      tibble::tibble(threshold = Inf, fpr = 0, tpr = 0),
+      roc
+    )
+  }
+
+  roc |>
     add_class('il_roc')
 }

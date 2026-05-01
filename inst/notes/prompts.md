@@ -1178,3 +1178,8 @@ When you are done, write a summary to `inst/refs/[43/44]-interactive-feasibility
 Review the package surface.
 How does this seem to compare with the python package splink (../splink)?
 Write this to inst/refs/46-review.md.
+
+## Followup (Claude Code Sonnet 4.6 medium)
+
+Review `inst/refs/46-review.md`.
+Remove any overstatements or comments which would require adding unmaintained packages like `plotly`.

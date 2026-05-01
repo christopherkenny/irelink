@@ -33,6 +33,30 @@ test_that('il_roc() returns a tibble with fpr and tpr in [0, 1]', {
   expect_true(all(roc$tpr >= 0 & roc$tpr <= 1))
 })
 
+test_that('il_roc() starts at no predicted positives', {
+  con <- test_con()
+  on.exit(test_discon(con))
+
+  df <- data.frame(
+    unique_id = 1:4,
+    first_name = c('John', 'John', 'Jane', 'June'),
+    surname = c('Smith', 'Smith', 'Doe', 'Dane'),
+    cluster = c(1, 1, 2, 3)
+  )
+
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_compare(surname, cl_exact()) |>
+    il_block_on(first_name)
+
+  model <- il_model(df, spec = spec, con = con)
+  model <- il_estimate_u(model)
+  model <- il_estimate_em(model, block_on(first_name))
+
+  roc <- il_roc(model, labels_col = 'cluster')
+  expect_true(any(roc$fpr == 0 & roc$tpr == 0))
+})
+
 test_that('il_precision_recall() returns tibble with precision and recall in [0, 1]', {
   skip_if_not_installed('RSQLite')
 

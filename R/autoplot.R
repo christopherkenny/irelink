@@ -194,7 +194,7 @@ autoplot.il_accuracy <- function(object, ...) {
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_roc <- function(object, ...) {
-  object <- object[order(object$fpr, -object$tpr), ]
+  object <- object[order(object$fpr, object$tpr), ]
   object |>
     ggplot2::ggplot() +
     ggplot2::geom_line(ggplot2::aes(
