@@ -18,8 +18,7 @@ A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
 Creates a comparison level from a raw SQL expression. Use this when
 none of the built-in \verb{cl_*()} helpers fit. The SQL should reference
 \code{l.} and \code{r.} prefixed column names for the left and right records.
-Analogous to \code{\link[gt:md]{gt::md()}} — a tagged-string helper with processing
-semantics.
+This is a tagged-string helper with processing semantics.
 }
 \examples{
 il_spec() |>

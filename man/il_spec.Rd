@@ -10,7 +10,7 @@ il_spec()
 An \code{il_spec} object with no comparisons or blocking rules.
 }
 \description{
-Initialises a blank \code{il_spec} object onto which comparison layers and
+Initializes a blank \code{il_spec} object onto which comparison layers and
 blocking rules are added with \code{\link[=il_compare]{il_compare()}} and \code{\link[=il_block_on]{il_block_on()}}.
 Analogous to \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} creating an empty canvas.
 }

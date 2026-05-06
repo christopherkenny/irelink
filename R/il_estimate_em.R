@@ -1,7 +1,7 @@
-#' Train Parameters via Expectation-Maximisation
+#' Train Parameters via Expectation-Maximization
 #'
 #' Runs the EM algorithm under a blocking rule to learn m and u parameters
-#' from unlabelled data. Multiple calls with different blocking rules can
+#' from unlabeled data. Multiple calls with different blocking rules can
 #' be chained to train on complementary subsets of record pairs — each
 #' call updates the model cumulatively.
 #'
@@ -26,7 +26,7 @@
 #'   on aggregated gamma-pattern counts (fast, but ignores per-pair term
 #'   frequency variation). If `FALSE`, EM runs on individual pairs and
 #'   incorporates per-pair TF adjustments in the E-step, matching
-#'   splink's default behaviour. Only matters when at least one
+#'   splink's default behavior. Only matters when at least one
 #'   comparison has `term_frequency = TRUE`. Only supported with
 #'   `estimator_mode = "independent"`.
 #' @param derive_prior Logical. If `TRUE`, derive the prior from the

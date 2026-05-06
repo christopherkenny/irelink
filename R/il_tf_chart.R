@@ -1,8 +1,8 @@
 #' Term Frequency Adjustment Chart
 #'
-#' Visualises the distribution of term frequencies for a column in the
+#' Visualizes the distribution of term frequencies for a column in the
 #' model. Shows how individual values shift the match weight via the TF
-#' adjustment (rare values boost the weight; common values penalise it).
+#' adjustment (rare values boost the weight; common values penalize it).
 #'
 #' @param model A trained `il_model` object with `term_frequency = TRUE`
 #'   enabled for at least one comparison column.
@@ -92,7 +92,7 @@ il_tf_chart <- function(model, col, n_most_freq = 10L, n_least_freq = 5L) {
 
 #' Comparator Score Bar Chart
 #'
-#' Visualises the output of [il_string_similarity()] as a horizontal bar
+#' Visualizes the output of [il_string_similarity()] as a horizontal bar
 #' chart, making it easy to compare multiple string-distance metrics at a
 #' glance.
 #'

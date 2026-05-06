@@ -16,7 +16,7 @@
 A \code{ggplot} object.
 }
 \description{
-Visualises the output of \code{\link[=il_string_similarity]{il_string_similarity()}} as a horizontal bar
+Visualizes the output of \code{\link[=il_string_similarity]{il_string_similarity()}} as a horizontal bar
 chart, making it easy to compare multiple string-distance metrics at a
 glance.
 }

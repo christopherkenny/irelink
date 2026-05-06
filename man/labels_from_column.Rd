@@ -22,7 +22,7 @@ A data frame with columns \code{unique_id_l}, \code{unique_id_r}, and
 \description{
 Given a model and a column name containing cluster or entity IDs,
 generates pairwise labels for all predicted pairs. Two records
-sharing the same value in \code{labels_col} are labelled as matches.
+sharing the same value in \code{labels_col} are labeled as matches.
 }
 \details{
 This is a convenience wrapper: instead of manually building a labels

@@ -52,7 +52,7 @@ same stacking pattern as \code{\link[ggplot2:geom_point]{ggplot2::geom_point()}}
 \details{
 \code{col} accepts tidyselect expressions: a bare column name, \code{c(col_a, col_b)}, or helpers such as \code{\link[tidyselect:starts_with]{tidyselect::starts_with()}}. When multiple
 columns are targeted, each receives its own comparison layer with the
-same method, mirroring \code{\link[gt:fmt_number]{gt::fmt_number()}}'s \code{columns} argument.
+same method.
 }
 \examples{
 spec <- il_spec() |>

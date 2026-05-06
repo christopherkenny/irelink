@@ -56,7 +56,7 @@ format_unit_helper <- function(x) {
 #' Create a Duration in Days
 #'
 #' A tagged-value constructor that marks a numeric threshold as a number
-#' of days. Inspired by [gt::px()] and [gt::pct()]. Use inside
+#' of days. Use inside
 #' [cl_date_diff()] for self-documenting, unit-safe thresholds.
 #'
 #' @param n A non-negative numeric value.

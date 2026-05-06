@@ -9,7 +9,7 @@ il_confusion_matrix(model, labels = NULL, threshold = 0.85, labels_col = NULL)
 \arguments{
 \item{model}{A trained \code{il_model} object.}
 
-\item{labels}{A data frame of labelled pairs with a logical or integer
+\item{labels}{A data frame of labeled pairs with a logical or integer
 match indicator. Required unless \code{labels_col} is provided.}
 
 \item{threshold}{A numeric value between 0 and 1 for classifying pairs
@@ -24,9 +24,9 @@ A one-row tibble containing \code{threshold}, \code{tp}, \code{fp}, \code{fn},
 \code{tn}, \code{fn_blocking_miss}, \code{precision}, \code{recall}, and \code{f1}.
 }
 \description{
-Computes the thresholded confusion-matrix counts for labelled pairs.
+Computes the thresholded confusion-matrix counts for labeled pairs.
 Uses the same SQL-first scoring path as \code{\link[=il_accuracy]{il_accuracy()}} on supported
-backends, so labelled pairs do not need to be predicted and collected
+backends, so labeled pairs do not need to be predicted and collected
 in full before evaluation.
 }
 \examples{

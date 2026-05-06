@@ -1,10 +1,10 @@
 #' Accuracy Metrics Across Thresholds
 #'
 #' Computes a full suite of classification metrics at a range of
-#' match-probability thresholds. Requires labelled pairs.
+#' match-probability thresholds. Requires labeled pairs.
 #'
 #' @param model A trained `il_model` object.
-#' @param labels A data frame of labelled pairs with a logical or integer
+#' @param labels A data frame of labeled pairs with a logical or integer
 #'   match indicator. Required unless `labels_col` is provided.
 #' @param labels_col Optional string naming a column in the original data
 #'   containing ground-truth cluster/entity IDs. When provided, pairwise

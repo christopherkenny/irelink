@@ -19,7 +19,7 @@ Defaults to \code{FALSE}.}
 \code{model}, invisibly.
 }
 \description{
-Serialises a trained \code{il_model} object to \code{.json} or \code{.rds}, chosen from
+Serializes a trained \code{il_model} object to \code{.json} or \code{.rds}, chosen from
 \code{path}.
 }
 \details{

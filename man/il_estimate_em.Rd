@@ -2,7 +2,7 @@
 % Please edit documentation in R/il_estimate_em.R
 \name{il_estimate_em}
 \alias{il_estimate_em}
-\title{Train Parameters via Expectation-Maximisation}
+\title{Train Parameters via Expectation-Maximization}
 \usage{
 il_estimate_em(
   model,
@@ -47,7 +47,7 @@ Defaults to \code{FALSE}.}
 on aggregated gamma-pattern counts (fast, but ignores per-pair term
 frequency variation). If \code{FALSE}, EM runs on individual pairs and
 incorporates per-pair TF adjustments in the E-step, matching
-splink's default behaviour. Only matters when at least one
+splink's default behavior. Only matters when at least one
 comparison has \code{term_frequency = TRUE}. Only supported with
 \code{estimator_mode = "independent"}.}
 
@@ -67,7 +67,7 @@ An updated \code{il_model} with trained m and u parameters.
 }
 \description{
 Runs the EM algorithm under a blocking rule to learn m and u parameters
-from unlabelled data. Multiple calls with different blocking rules can
+from unlabeled data. Multiple calls with different blocking rules can
 be chained to train on complementary subsets of record pairs — each
 call updates the model cumulatively.
 }

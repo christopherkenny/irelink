@@ -2,10 +2,10 @@
 #'
 #' Returns a tidy tibble of false-positive rates and true-positive rates
 #' at each match-probability threshold, for plotting an ROC curve.
-#' Requires labelled pairs. Designed for use with [ggplot2::geom_line()].
+#' Requires labeled pairs. Designed for use with [ggplot2::geom_line()].
 #'
 #' @param model A trained `il_model` object.
-#' @param labels A data frame of labelled pairs with a logical or integer
+#' @param labels A data frame of labeled pairs with a logical or integer
 #'   match indicator. Required unless `labels_col` is provided.
 #' @param labels_col Optional string naming a column in the original data
 #'   containing ground-truth cluster/entity IDs.

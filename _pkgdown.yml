@@ -129,7 +129,7 @@ reference:
       - autoplot.il_compared
 
   - title: "Evaluation"
-    desc: "Assess model quality against labelled data."
+    desc: "Assess model quality against labeled data."
     contents:
       - il_accuracy
       - il_confusion_matrix
@@ -153,7 +153,7 @@ reference:
       - block_from_labels
 
   - title: "Data Profiling"
-    desc: "Explore and summarise input data before linkage."
+    desc: "Explore and summarize input data before linkage."
     contents:
       - il_completeness
       - autoplot.il_completeness

@@ -2,7 +2,7 @@
 % Please edit documentation in R/il_model.R
 \name{summary.il_model}
 \alias{summary.il_model}
-\title{Summarise an irelink Model}
+\title{Summarize an irelink Model}
 \usage{
 \method{summary}{il_model}(object, ...)
 }

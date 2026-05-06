@@ -1,11 +1,11 @@
 #' Compute Precision-Recall Curve Data
 #'
 #' Returns a tidy tibble of precision and recall values at each
-#' match-probability threshold. Requires labelled pairs. Designed for use
+#' match-probability threshold. Requires labeled pairs. Designed for use
 #' with [ggplot2::geom_line()].
 #'
 #' @param model A trained `il_model` object.
-#' @param labels A data frame of labelled pairs with a logical or integer
+#' @param labels A data frame of labeled pairs with a logical or integer
 #'   match indicator. Required unless `labels_col` is provided.
 #' @param labels_col Optional string naming a column in the original data
 #'   containing ground-truth cluster/entity IDs.

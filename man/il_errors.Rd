@@ -9,7 +9,7 @@ il_errors(model, labels = NULL, threshold = 0.85, labels_col = NULL)
 \arguments{
 \item{model}{A trained \code{il_model} object.}
 
-\item{labels}{A data frame of labelled pairs with a logical or integer
+\item{labels}{A data frame of labeled pairs with a logical or integer
 match indicator. Required unless \code{labels_col} is provided.}
 
 \item{threshold}{A numeric value between 0 and 1 for classifying pairs
@@ -24,7 +24,7 @@ A tibble of misclassified pairs with columns \code{unique_id_l},
 and \code{error_type}.
 }
 \description{
-Compares model predictions against labelled pairs and returns all
+Compares model predictions against labeled pairs and returns all
 false-positive and false-negative errors at a given threshold. Useful
 for understanding which record pairs the model gets wrong.
 }

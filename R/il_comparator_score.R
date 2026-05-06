@@ -206,7 +206,7 @@ il_comparator_threshold_chart <- function(.data, col_1, col_2,
 
 #' Phonetic Match Chart
 #'
-#' Visualises phonetic coding agreement between two columns. Shows how
+#' Visualizes phonetic coding agreement between two columns. Shows how
 #' Soundex groupings match across pairs.
 #'
 #' @param .data A data frame or character table name.

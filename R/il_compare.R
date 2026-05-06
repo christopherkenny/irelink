@@ -7,7 +7,7 @@
 #' `col` accepts tidyselect expressions: a bare column name, `c(col_a,
 #' col_b)`, or helpers such as [tidyselect::starts_with()]. When multiple
 #' columns are targeted, each receives its own comparison layer with the
-#' same method, mirroring [gt::fmt_number()]'s `columns` argument.
+#' same method.
 #'
 #' @param spec An `il_spec` object (piped in).
 #' @param col <[`tidy-select`][dplyr::dplyr_tidy_select]> Column(s) to

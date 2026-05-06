@@ -4,7 +4,7 @@
 #'
 #' Given a model and a column name containing cluster or entity IDs,
 #' generates pairwise labels for all predicted pairs. Two records
-#' sharing the same value in `labels_col` are labelled as matches.
+#' sharing the same value in `labels_col` are labeled as matches.
 #'
 #' This is a convenience wrapper: instead of manually building a labels
 #' data frame with `unique_id_l`, `unique_id_r`, and `is_match`, you

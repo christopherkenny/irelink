@@ -21,7 +21,7 @@ When datasets lack a shared unique identifier, you must rely on imperfect fields
 Probabilistic record linkage formalises this by estimating the likelihood that two records are a match given how similar they are across multiple fields.
 
 `irelink` implements the Fellegi-Sunter model of probabilistic record linkage.
-Parameters are estimated via unsupervised Expectation-Maximisation, so no labelled training data is required to get started.
+Parameters are estimated via unsupervised Expectation-Maximization, so no labeled training data is required to get started.
 
 ## A typical workflow
 
@@ -84,7 +84,7 @@ First, estimate u-probabilities (the chance two random non-matching records agre
 model <- il_estimate_u(model)
 ```
 
-Then run Expectation-Maximisation to learn m-probabilities (the chance true matches agree on each level).
+Then run Expectation-Maximization to learn m-probabilities (the chance true matches agree on each level).
 You supply a blocking rule to generate the training pairs:
 
 ```{r train-em}
@@ -153,7 +153,7 @@ For common field types, domain-specific helpers compose multiple levels into a s
 
 ## Evaluation
 
-If you have labelled data (pairs known to be matches or non-matches), `irelink` provides tools to assess model quality:
+If you have labeled data (pairs known to be matches or non-matches), `irelink` provides tools to assess model quality:
 
 - `il_accuracy()` — overall accuracy at a threshold
 - `il_precision_recall()` — precision and recall across thresholds

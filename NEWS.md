@@ -32,7 +32,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 - `.explode` parameter for array-valued blocking columns (generates `UNNEST` subqueries for DuckDB/PostgreSQL).
 - `il_suggest_blocking()` ranks candidate blocking rules by pair-reduction, coverage, and balanced score.
 - `il_find_blocking_below()` finds blocking rule combinations below a pair count ceiling.
-- `block_from_labels()` measures per-column recall from labelled pairs.
+- `block_from_labels()` measures per-column recall from labeled pairs.
 
 ## Training
 
@@ -41,7 +41,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 - `estimator_mode = "dependency-aware"` fits log-linear matched and unmatched comparison-pattern distributions over aggregated gamma counts, preserving missing comparison states as explicit pattern levels.
 - `il_estimate_prior()` sets the prior match probability from deterministic matching rules, counting unique blocked pairs across overlapping rules.
 - `il_prior_prevalence()` and `il_prior_m()` add regularizing custom priors for EM; `il_constrain_m()` adds explicit fixed matched-class constraints.
-- `il_estimate_m_from_labels()` and `il_estimate_m_from_column()` initialise parameters from ground-truth labels.
+- `il_estimate_m_from_labels()` and `il_estimate_m_from_column()` initialize parameters from ground-truth labels.
 
 ## Prediction
 
@@ -60,23 +60,23 @@ Initial development release, translating Python's [splink](https://github.com/mo
 - `il_parameters()` and `il_weights()` expose the learned m/u parameters.
 - `il_waterfall()` decomposes a pair's match weight into per-comparison contributions.
 - `il_training_history()` tracks parameter convergence across EM iterations.
-- `il_completeness()` and `il_profile()` summarise data quality; `il_profile()` accepts raw SQL expressions as column definitions (e.g., `"city || left(first_name, 1)"`).
+- `il_completeness()` and `il_profile()` summarize data quality; `il_profile()` accepts raw SQL expressions as column definitions (e.g., `"city || left(first_name, 1)"`).
 - `il_unlinkables()` identifies records that cannot be linked under any blocking rule.
-- `il_accuracy()`, `il_precision_recall()`, and `il_roc()` evaluate performance against labelled data.
+- `il_accuracy()`, `il_precision_recall()`, and `il_roc()` evaluate performance against labeled data.
 - `il_errors()` surfaces false positives and false negatives.
-- `il_graph_metrics()` computes node degree, node centrality, cluster density, cluster centralisation, and bridge detection.
+- `il_graph_metrics()` computes node degree, node centrality, cluster density, cluster centralization, and bridge detection.
 - `il_comparison_vectors()` returns the gamma pattern distribution from a trained model.
 
 ## Data exploration
 
 - `il_string_similarity()` computes 5 string similarity metrics for a single pair.
 - `il_comparator_score()` computes batch string similarity across a DataFrame with SQL-side scoring on DuckDB/PostgreSQL.
-- `il_comparator_threshold_chart()` visualises match rates at multiple similarity thresholds.
+- `il_comparator_threshold_chart()` visualizes match rates at multiple similarity thresholds.
 - `il_phonetic_chart()` produces a Soundex agreement heatmap.
-- `il_tf_chart()` visualises model-specific term frequency distributions with labelled most/least common values.
+- `il_tf_chart()` visualizes model-specific term frequency distributions with labeled most/least common values.
 - `il_register_tf()` registers pre-computed term frequency tables in the database and returns the updated model.
 
-## Visualisation
+## Visualization
 
 - `autoplot()` methods for `il_model`, `il_compared`, `il_training_history`, `il_accuracy`, `il_roc`, `il_precision_recall`, `il_unlinkables`, `il_completeness`, `il_count_pairs`, `il_profile`, `il_string_similarity`, `il_comparator_score`, and `il_comparison_vectors`.
 - All chart types are composable with standard ggplot2 layers.

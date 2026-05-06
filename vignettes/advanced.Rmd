@@ -100,7 +100,7 @@ autoplot(pairs, which = 1)
 than collecting them into R.
 `il_cluster()` detects the lazy reference and runs connected-components
 analysis entirely in SQL, avoiding a costly round-trip for datasets
-where materialising millions of rows would exhaust memory.
+where materializing millions of rows would exhaust memory.
 
 ```{r lazy}
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
@@ -213,7 +213,7 @@ to a spec.
 
 The `transform` argument in `il_compare()` applies a function to both
 values before scoring.
-Use it to normalise case or strip whitespace before a similarity
+Use it to normalize case or strip whitespace before a similarity
 comparison:
 
 ```{r transform-spec}

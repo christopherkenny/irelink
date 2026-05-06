@@ -11,7 +11,7 @@
 implements the Fellegi-Sunter model to identify and link duplicate or
 related records across datasets that lack a shared unique identifier.
 Model parameters are estimated via unsupervised
-Expectation-Maximisation, so no labelled training data is required.
+Expectation-Maximization, so no labeled training data is required.
 Comparison functions cover exact matching, Jaro-Winkler, Levenshtein,
 date differences, and geographic distance, letting you tailor the model
 to your data. Multiple SQL backends are supported through DBI, so the
@@ -49,7 +49,7 @@ restrict which record pairs are generated. Only pairs that share a
 surname or first name are scored, keeping computation manageable.
 `il_estimate_u()` estimates parameters for non-matching pairs via random
 sampling, and `il_estimate_em()` refines the match-weight parameters
-using Expectation-Maximisation.
+using Expectation-Maximization.
 
 ``` r
 spec <- il_spec() |>

@@ -2,7 +2,7 @@
 % Please edit documentation in R/il_suggest_blocking.R
 \name{block_from_labels}
 \alias{block_from_labels}
-\title{Derive Blocking Rules from Labelled Pairs}
+\title{Derive Blocking Rules from Labeled Pairs}
 \usage{
 block_from_labels(.data, labels, columns = NULL, con = NULL)
 }

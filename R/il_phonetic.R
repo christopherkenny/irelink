@@ -7,7 +7,7 @@
 #'
 #' When used as a `transform` argument in [il_block_on()], [block_on()],
 #' or [il_compare()], the computation is pushed into SQL so data is
-#' never materialised into R.
+#' never materialized into R.
 #'
 #' @param x A character vector to encode.
 #'

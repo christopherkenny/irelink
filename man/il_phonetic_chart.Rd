@@ -18,6 +18,6 @@ Soundex in SQL.}
 A \code{ggplot2} object.
 }
 \description{
-Visualises phonetic coding agreement between two columns. Shows how
+Visualizes phonetic coding agreement between two columns. Shows how
 Soundex groupings match across pairs.
 }

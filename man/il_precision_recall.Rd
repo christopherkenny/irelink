@@ -9,7 +9,7 @@ il_precision_recall(model, labels = NULL, labels_col = NULL)
 \arguments{
 \item{model}{A trained \code{il_model} object.}
 
-\item{labels}{A data frame of labelled pairs with a logical or integer
+\item{labels}{A data frame of labeled pairs with a logical or integer
 match indicator. Required unless \code{labels_col} is provided.}
 
 \item{labels_col}{Optional string naming a column in the original data
@@ -20,7 +20,7 @@ A tibble with columns \code{threshold}, \code{precision}, and \code{recall}.
 }
 \description{
 Returns a tidy tibble of precision and recall values at each
-match-probability threshold. Requires labelled pairs. Designed for use
+match-probability threshold. Requires labeled pairs. Designed for use
 with \code{\link[ggplot2:geom_path]{ggplot2::geom_line()}}.
 }
 \examples{

@@ -173,7 +173,7 @@ il_find_blocking_below <- function(.data, max_pairs, columns = NULL,
   below[order(below$n_pairs), ]
 }
 
-#' Derive Blocking Rules from Labelled Pairs
+#' Derive Blocking Rules from Labeled Pairs
 #'
 #' For each column, computes the fraction of true-match pairs that share
 #' the same value (recall). Helps identify which columns make effective

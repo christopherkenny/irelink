@@ -14,7 +14,7 @@ A tagged numeric with class \code{il_days}.
 }
 \description{
 A tagged-value constructor that marks a numeric threshold as a number
-of days. Inspired by \code{\link[gt:px]{gt::px()}} and \code{\link[gt:pct]{gt::pct()}}. Use inside
+of days. Use inside
 \code{\link[=cl_date_diff]{cl_date_diff()}} for self-documenting, unit-safe thresholds.
 }
 \examples{

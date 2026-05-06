@@ -9,7 +9,7 @@ il_roc(model, labels = NULL, labels_col = NULL)
 \arguments{
 \item{model}{A trained \code{il_model} object.}
 
-\item{labels}{A data frame of labelled pairs with a logical or integer
+\item{labels}{A data frame of labeled pairs with a logical or integer
 match indicator. Required unless \code{labels_col} is provided.}
 
 \item{labels_col}{Optional string naming a column in the original data
@@ -21,7 +21,7 @@ A tibble with columns \code{threshold}, \code{fpr}, and \code{tpr}.
 \description{
 Returns a tidy tibble of false-positive rates and true-positive rates
 at each match-probability threshold, for plotting an ROC curve.
-Requires labelled pairs. Designed for use with \code{\link[ggplot2:geom_path]{ggplot2::geom_line()}}.
+Requires labeled pairs. Designed for use with \code{\link[ggplot2:geom_path]{ggplot2::geom_line()}}.
 }
 \examples{
 df <- data.frame(

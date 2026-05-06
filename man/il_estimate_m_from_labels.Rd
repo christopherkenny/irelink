@@ -2,14 +2,14 @@
 % Please edit documentation in R/il_estimate_m_from_labels.R
 \name{il_estimate_m_from_labels}
 \alias{il_estimate_m_from_labels}
-\title{Estimate Match (m) Parameters from Labelled Data}
+\title{Estimate Match (m) Parameters from Labeled Data}
 \usage{
 il_estimate_m_from_labels(model, labels)
 }
 \arguments{
 \item{model}{An \code{il_model} object (piped in).}
 
-\item{labels}{A data frame of labelled pairs with columns identifying
+\item{labels}{A data frame of labeled pairs with columns identifying
 the left record, right record, and a logical or integer match
 indicator.}
 }
@@ -19,7 +19,7 @@ An updated \code{il_model} with estimated m parameters.
 \description{
 Learns the m probabilities (the probability of observing each
 comparison level given that the records \strong{do} match) from a set of
-pre-labelled record pairs. Use this instead of \code{\link[=il_estimate_em]{il_estimate_em()}} when
+pre-labeled record pairs. Use this instead of \code{\link[=il_estimate_em]{il_estimate_em()}} when
 ground-truth labels are available.
 }
 \examples{

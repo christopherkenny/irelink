@@ -14,7 +14,7 @@ origin (\code{-org} suffix).}
 \item{street_number}{Integer. Street number, sometimes missing.}
 \item{address_1}{Character. Primary address line, sometimes missing.}
 \item{address_2}{Character. Secondary address line, often missing.}
-\item{suburb}{Character. Suburb or neighbourhood.}
+\item{suburb}{Character. Suburb or neighborhood.}
 \item{postcode}{Integer. Postal code.}
 \item{state}{Character. Australian state abbreviation.}
 \item{date_of_birth}{Integer. Date of birth as \code{YYYYMMDD} integer,
@@ -25,7 +25,7 @@ sometimes missing.}
 \source{
 Distributed via the splink datasets repository
 (\url{https://github.com/moj-analytical-services/splink_datasets})
-under the MIT licence.
+under the MIT license.
 The FEBRL datasets originate from Christen and Churches (2004)
 and are widely used as record-linkage benchmarks.
 }

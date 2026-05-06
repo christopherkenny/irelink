@@ -1,6 +1,6 @@
 #' Save a Model to Disk
 #'
-#' Serialises a trained `il_model` object to `.json` or `.rds`, chosen from
+#' Serializes a trained `il_model` object to `.json` or `.rds`, chosen from
 #' `path`.
 #'
 #' `.json` writes Splink settings JSON. Other extensions write RDS. The

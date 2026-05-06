@@ -28,7 +28,7 @@ variation.
 \details{
 When used as a \code{transform} argument in \code{\link[=il_block_on]{il_block_on()}}, \code{\link[=block_on]{block_on()}},
 or \code{\link[=il_compare]{il_compare()}}, the computation is pushed into SQL so data is
-never materialised into R.
+never materialized into R.
 \subsection{SQL availability}{\tabular{llll}{
    Function \tab DuckDB \tab PostgreSQL \tab SQLite \cr
    \code{il_soundex} \tab ✓ (macro) \tab ✓ (native) \tab comparisons only (R-side) \cr
