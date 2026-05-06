@@ -85,7 +85,7 @@
 <li>
 <code><a href="../reference/il_find_blocking_below.html">il_find_blocking_below()</a></code> finds blocking rule combinations below a pair count ceiling.</li>
 <li>
-<code><a href="../reference/block_from_labels.html">block_from_labels()</a></code> measures per-column recall from labelled pairs.</li>
+<code><a href="../reference/block_from_labels.html">block_from_labels()</a></code> measures per-column recall from labeled pairs.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="training-0-0-0-9000">Training<a class="anchor" aria-label="anchor" href="#training-0-0-0-9000"></a></h3>
@@ -100,7 +100,7 @@
 <li>
 <code><a href="../reference/il_prior_prevalence.html">il_prior_prevalence()</a></code> and <code><a href="../reference/il_prior_m.html">il_prior_m()</a></code> add regularizing custom priors for EM; <code><a href="../reference/il_constrain_m.html">il_constrain_m()</a></code> adds explicit fixed matched-class constraints.</li>
 <li>
-<code><a href="../reference/il_estimate_m_from_labels.html">il_estimate_m_from_labels()</a></code> and <code><a href="../reference/il_estimate_m_from_column.html">il_estimate_m_from_column()</a></code> initialise parameters from ground-truth labels.</li>
+<code><a href="../reference/il_estimate_m_from_labels.html">il_estimate_m_from_labels()</a></code> and <code><a href="../reference/il_estimate_m_from_column.html">il_estimate_m_from_column()</a></code> initialize parameters from ground-truth labels.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="prediction-0-0-0-9000">Prediction<a class="anchor" aria-label="anchor" href="#prediction-0-0-0-9000"></a></h3>
@@ -131,15 +131,15 @@
 <li>
 <code><a href="../reference/il_training_history.html">il_training_history()</a></code> tracks parameter convergence across EM iterations.</li>
 <li>
-<code><a href="../reference/il_completeness.html">il_completeness()</a></code> and <code><a href="../reference/il_profile.html">il_profile()</a></code> summarise data quality; <code><a href="../reference/il_profile.html">il_profile()</a></code> accepts raw SQL expressions as column definitions (e.g., <code>"city || left(first_name, 1)"</code>).</li>
+<code><a href="../reference/il_completeness.html">il_completeness()</a></code> and <code><a href="../reference/il_profile.html">il_profile()</a></code> summarize data quality; <code><a href="../reference/il_profile.html">il_profile()</a></code> accepts raw SQL expressions as column definitions (e.g., <code>"city || left(first_name, 1)"</code>).</li>
 <li>
 <code><a href="../reference/il_unlinkables.html">il_unlinkables()</a></code> identifies records that cannot be linked under any blocking rule.</li>
 <li>
-<code><a href="../reference/il_accuracy.html">il_accuracy()</a></code>, <code><a href="../reference/il_precision_recall.html">il_precision_recall()</a></code>, and <code><a href="../reference/il_roc.html">il_roc()</a></code> evaluate performance against labelled data.</li>
+<code><a href="../reference/il_accuracy.html">il_accuracy()</a></code>, <code><a href="../reference/il_precision_recall.html">il_precision_recall()</a></code>, and <code><a href="../reference/il_roc.html">il_roc()</a></code> evaluate performance against labeled data.</li>
 <li>
 <code><a href="../reference/il_errors.html">il_errors()</a></code> surfaces false positives and false negatives.</li>
 <li>
-<code><a href="../reference/il_graph_metrics.html">il_graph_metrics()</a></code> computes node degree, node centrality, cluster density, cluster centralisation, and bridge detection.</li>
+<code><a href="../reference/il_graph_metrics.html">il_graph_metrics()</a></code> computes node degree, node centrality, cluster density, cluster centralization, and bridge detection.</li>
 <li>
 <code><a href="../reference/il_comparison_vectors.html">il_comparison_vectors()</a></code> returns the gamma pattern distribution from a trained model.</li>
 </ul></div>
@@ -150,16 +150,16 @@
 <li>
 <code><a href="../reference/il_comparator_score.html">il_comparator_score()</a></code> computes batch string similarity across a DataFrame with SQL-side scoring on DuckDB/PostgreSQL.</li>
 <li>
-<code><a href="../reference/il_comparator_threshold_chart.html">il_comparator_threshold_chart()</a></code> visualises match rates at multiple similarity thresholds.</li>
+<code><a href="../reference/il_comparator_threshold_chart.html">il_comparator_threshold_chart()</a></code> visualizes match rates at multiple similarity thresholds.</li>
 <li>
 <code><a href="../reference/il_phonetic_chart.html">il_phonetic_chart()</a></code> produces a Soundex agreement heatmap.</li>
 <li>
-<code><a href="../reference/il_tf_chart.html">il_tf_chart()</a></code> visualises model-specific term frequency distributions with labelled most/least common values.</li>
+<code><a href="../reference/il_tf_chart.html">il_tf_chart()</a></code> visualizes model-specific term frequency distributions with labeled most/least common values.</li>
 <li>
 <code><a href="../reference/il_register_tf.html">il_register_tf()</a></code> registers pre-computed term frequency tables in the database and returns the updated model.</li>
 </ul></div>
 <div class="section level3">
-<h3 id="visualisation-0-0-0-9000">Visualisation<a class="anchor" aria-label="anchor" href="#visualisation-0-0-0-9000"></a></h3>
+<h3 id="visualization-0-0-0-9000">Visualization<a class="anchor" aria-label="anchor" href="#visualization-0-0-0-9000"></a></h3>
 <ul><li>
 <code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> methods for <code>il_model</code>, <code>il_compared</code>, <code>il_training_history</code>, <code>il_accuracy</code>, <code>il_roc</code>, <code>il_precision_recall</code>, <code>il_unlinkables</code>, <code>il_completeness</code>, <code>il_count_pairs</code>, <code>il_profile</code>, <code>il_string_similarity</code>, <code>il_comparator_score</code>, and <code>il_comparison_vectors</code>.</li>
 <li>All chart types are composable with standard ggplot2 layers.</li>

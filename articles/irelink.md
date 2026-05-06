@@ -12,8 +12,8 @@ are a match given how similar they are across multiple fields.
 
 `irelink` implements the Fellegi-Sunter model of probabilistic record
 linkage. Parameters are estimated via unsupervised
-Expectation-Maximisation, so no labelled training data is required to
-get started.
+Expectation-Maximization, so no labeled training data is required to get
+started.
 
 ## A typical workflow
 
@@ -114,7 +114,7 @@ from a random sample of pairs:
 model <- il_estimate_u(model)
 ```
 
-Then run Expectation-Maximisation to learn m-probabilities (the chance
+Then run Expectation-Maximization to learn m-probabilities (the chance
 true matches agree on each level). You supply a blocking rule to
 generate the training pairs:
 
@@ -155,12 +155,12 @@ head(pairs)
 #> # A tibble: 6 × 8
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob match_weight
 #>         <int>       <int>            <int>         <int>     <int>        <dbl>
-#> 1           2          11                2             2         1         8.76
-#> 2           3          14                2             2         0         3.86
-#> 3           4          14                2             2         0         3.86
-#> 4           7          17                2             2         1         8.76
-#> 5          13          14                2             2         0         3.86
-#> 6          19          20                2             2         0         3.86
+#> 1           1          11                2             2         1         8.76
+#> 2           8          17                1             2         1         7.49
+#> 3           9          20                2             2         0         3.86
+#> 4          10          20                2             2         0         3.86
+#> 5           1           2                2             2         1         8.76
+#> 6           3          13                2             2         1         8.76
 #> # ℹ 2 more variables: total_match_weight <dbl>, match_probability <dbl>
 ```
 
@@ -182,12 +182,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 19        cluster_10
-#> 2 20        cluster_10
-#> 3 4         cluster_13
-#> 4 7         cluster_17
-#> 5 13        cluster_13
-#> 6 8         cluster_17
+#> 1 3         cluster_13
+#> 2 5         cluster_15
+#> 3 6         cluster_15
+#> 4 17        cluster_17
+#> 5 14        cluster_13
+#> 6 15        cluster_15
 ```
 
 Each record is assigned a `cluster_id`. Records sharing the same cluster
@@ -229,7 +229,7 @@ into a single call:
 
 ## Evaluation
 
-If you have labelled data (pairs known to be matches or non-matches),
+If you have labeled data (pairs known to be matches or non-matches),
 `irelink` provides tools to assess model quality:
 
 - [`il_accuracy()`](http://christophertkenny.com/irelink/reference/il_accuracy.md)

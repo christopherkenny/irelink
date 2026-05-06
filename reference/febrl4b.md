@@ -45,7 +45,7 @@ A tibble with 5,000 rows and 11 columns:
 
 - suburb:
 
-  Character. Suburb or neighbourhood.
+  Character. Suburb or neighborhood.
 
 - postcode:
 
@@ -67,7 +67,7 @@ A tibble with 5,000 rows and 11 columns:
 
 Distributed via the splink datasets repository
 (<https://github.com/moj-analytical-services/splink_datasets>) under the
-MIT licence. The FEBRL datasets originate from Christen and Churches
+MIT license. The FEBRL datasets originate from Christen and Churches
 (2004) and are widely used as record-linkage benchmarks.
 
 ## References

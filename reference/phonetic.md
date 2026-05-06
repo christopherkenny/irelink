@@ -31,7 +31,7 @@ When used as a `transform` argument in
 [`block_on()`](http://christophertkenny.com/irelink/reference/block_on.md),
 or
 [`il_compare()`](http://christophertkenny.com/irelink/reference/il_compare.md),
-the computation is pushed into SQL so data is never materialised into R.
+the computation is pushed into SQL so data is never materialized into R.
 
 ### SQL availability
 

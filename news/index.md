@@ -119,7 +119,7 @@ probabilistic record linkage engine into idiomatic R.
 - [`il_find_blocking_below()`](http://christophertkenny.com/irelink/reference/il_find_blocking_below.md)
   finds blocking rule combinations below a pair count ceiling.
 - [`block_from_labels()`](http://christophertkenny.com/irelink/reference/block_from_labels.md)
-  measures per-column recall from labelled pairs.
+  measures per-column recall from labeled pairs.
 
 ### Training
 
@@ -148,7 +148,7 @@ probabilistic record linkage engine into idiomatic R.
 - [`il_estimate_m_from_labels()`](http://christophertkenny.com/irelink/reference/il_estimate_m_from_labels.md)
   and
   [`il_estimate_m_from_column()`](http://christophertkenny.com/irelink/reference/il_estimate_m_from_column.md)
-  initialise parameters from ground-truth labels.
+  initialize parameters from ground-truth labels.
 
 ### Prediction
 
@@ -190,7 +190,7 @@ probabilistic record linkage engine into idiomatic R.
 - [`il_completeness()`](http://christophertkenny.com/irelink/reference/il_completeness.md)
   and
   [`il_profile()`](http://christophertkenny.com/irelink/reference/il_profile.md)
-  summarise data quality;
+  summarize data quality;
   [`il_profile()`](http://christophertkenny.com/irelink/reference/il_profile.md)
   accepts raw SQL expressions as column definitions (e.g.,
   `"city || left(first_name, 1)"`).
@@ -200,12 +200,12 @@ probabilistic record linkage engine into idiomatic R.
   [`il_precision_recall()`](http://christophertkenny.com/irelink/reference/il_precision_recall.md),
   and
   [`il_roc()`](http://christophertkenny.com/irelink/reference/il_roc.md)
-  evaluate performance against labelled data.
+  evaluate performance against labeled data.
 - [`il_errors()`](http://christophertkenny.com/irelink/reference/il_errors.md)
   surfaces false positives and false negatives.
 - [`il_graph_metrics()`](http://christophertkenny.com/irelink/reference/il_graph_metrics.md)
   computes node degree, node centrality, cluster density, cluster
-  centralisation, and bridge detection.
+  centralization, and bridge detection.
 - [`il_comparison_vectors()`](http://christophertkenny.com/irelink/reference/il_comparison_vectors.md)
   returns the gamma pattern distribution from a trained model.
 
@@ -217,17 +217,17 @@ probabilistic record linkage engine into idiomatic R.
   computes batch string similarity across a DataFrame with SQL-side
   scoring on DuckDB/PostgreSQL.
 - [`il_comparator_threshold_chart()`](http://christophertkenny.com/irelink/reference/il_comparator_threshold_chart.md)
-  visualises match rates at multiple similarity thresholds.
+  visualizes match rates at multiple similarity thresholds.
 - [`il_phonetic_chart()`](http://christophertkenny.com/irelink/reference/il_phonetic_chart.md)
   produces a Soundex agreement heatmap.
 - [`il_tf_chart()`](http://christophertkenny.com/irelink/reference/il_tf_chart.md)
-  visualises model-specific term frequency distributions with labelled
+  visualizes model-specific term frequency distributions with labeled
   most/least common values.
 - [`il_register_tf()`](http://christophertkenny.com/irelink/reference/il_register_tf.md)
   registers pre-computed term frequency tables in the database and
   returns the updated model.
 
-### Visualisation
+### Visualization
 
 - [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
   methods for `il_model`, `il_compared`, `il_training_history`,

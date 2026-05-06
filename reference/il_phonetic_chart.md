@@ -1,6 +1,6 @@
 # Phonetic Match Chart
 
-Visualises phonetic coding agreement between two columns. Shows how
+Visualizes phonetic coding agreement between two columns. Shows how
 Soundex groupings match across pairs.
 
 ## Usage

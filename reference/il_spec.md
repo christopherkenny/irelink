@@ -1,6 +1,6 @@
 # Create an Empty Linkage Specification
 
-Initialises a blank `il_spec` object onto which comparison layers and
+Initializes a blank `il_spec` object onto which comparison layers and
 blocking rules are added with
 [`il_compare()`](http://christophertkenny.com/irelink/reference/il_compare.md)
 and

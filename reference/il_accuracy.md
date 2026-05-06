@@ -1,7 +1,7 @@
 # Accuracy Metrics Across Thresholds
 
 Computes a full suite of classification metrics at a range of
-match-probability thresholds. Requires labelled pairs.
+match-probability thresholds. Requires labeled pairs.
 
 ## Usage
 
@@ -17,7 +17,7 @@ il_accuracy(model, labels = NULL, labels_col = NULL)
 
 - labels:
 
-  A data frame of labelled pairs with a logical or integer match
+  A data frame of labeled pairs with a logical or integer match
   indicator. Required unless `labels_col` is provided.
 
 - labels_col:

@@ -1,9 +1,9 @@
 # Confusion Matrix at a Threshold
 
-Computes the thresholded confusion-matrix counts for labelled pairs.
-Uses the same SQL-first scoring path as
+Computes the thresholded confusion-matrix counts for labeled pairs. Uses
+the same SQL-first scoring path as
 [`il_accuracy()`](http://christophertkenny.com/irelink/reference/il_accuracy.md)
-on supported backends, so labelled pairs do not need to be predicted and
+on supported backends, so labeled pairs do not need to be predicted and
 collected in full before evaluation.
 
 ## Usage
@@ -20,7 +20,7 @@ il_confusion_matrix(model, labels = NULL, threshold = 0.85, labels_col = NULL)
 
 - labels:
 
-  A data frame of labelled pairs with a logical or integer match
+  A data frame of labeled pairs with a logical or integer match
   indicator. Required unless `labels_col` is provided.
 
 - threshold:

@@ -109,13 +109,13 @@ than collecting them into R.
 [`il_cluster()`](http://christophertkenny.com/irelink/reference/il_cluster.md)
 detects the lazy reference and runs connected-components analysis
 entirely in SQL, avoiding a costly round-trip for datasets where
-materialising millions of rows would exhaust memory.
+materializing millions of rows would exhaust memory.
 
 ``` r
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,946 pairs in table __il_8651_1_predicted_4 (threshold = 0.5)
+#> <il_compared_lazy> 2,946 pairs in table __il_8705_1_predicted_4 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -188,16 +188,16 @@ metrics$clusters
 #> # A tibble: 116 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralisation
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_10       13      35   0.449                 0.258 
-#>  2 cluster_142      46     204   0.197                 0.236 
-#>  3 cluster_15        5      10   0.95                  0.0833
-#>  4 cluster_252       9      32   0.889                 0.143 
-#>  5 cluster_38        5      10   1                     0     
-#>  6 cluster_409       4       6   1                     0     
-#>  7 cluster_550       8      26   0.929                 0.0952
-#>  8 cluster_581      10      38   0.833                 0.208 
-#>  9 cluster_684       2       1   1                    NA     
-#> 10 cluster_738       6      15   1                     0     
+#>  1 cluster_115       8      24   0.857                  0.190
+#>  2 cluster_326       4       4   0.667                  0.667
+#>  3 cluster_792       7      15   0.714                  0.4  
+#>  4 cluster_867       3       3   1                      0    
+#>  5 cluster_924       8      28   1                      0    
+#>  6 cluster_229       8      28   1                      0    
+#>  7 cluster_237       6      15   1                      0    
+#>  8 cluster_261       4       6   1                      0    
+#>  9 cluster_603       9      29   0.806                  0.25 
+#> 10 cluster_100      19      74   0.436                  0.382
 #> # ℹ 106 more rows
 ```
 
@@ -217,12 +217,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 973       cluster_133      1          0.0233
-#> 2 918       cluster_133      2          0.0465
-#> 3 856       cluster_133      6          0.140 
-#> 4 673       cluster_133      6          0.140 
-#> 5 857       cluster_133      2          0.0465
-#> 6 853       cluster_133      2          0.0465
+#> 1 459       cluster_164     13           0.419
+#> 2 993       cluster_164      8           0.258
+#> 3 48        cluster_164      4           0.129
+#> 4 171       cluster_164      6           0.194
+#> 5 461       cluster_164     10           0.323
+#> 6 167       cluster_164      7           0.226
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -272,7 +272,7 @@ to check the volume trade-off before committing to a spec.
 
 The `transform` argument in
 [`il_compare()`](http://christophertkenny.com/irelink/reference/il_compare.md)
-applies a function to both values before scoring. Use it to normalise
+applies a function to both values before scoring. Use it to normalize
 case or strip whitespace before a similarity comparison:
 
 ``` r

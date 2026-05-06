@@ -75,8 +75,7 @@ An updated `il_spec` (a new copy; the input is not modified).
 `c(col_a, col_b)`, or helpers such as
 [`tidyselect::starts_with()`](https://tidyselect.r-lib.org/reference/starts_with.html).
 When multiple columns are targeted, each receives its own comparison
-layer with the same method, mirroring `gt::fmt_number()`'s `columns`
-argument.
+layer with the same method.
 
 ## Examples
 

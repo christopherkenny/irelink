@@ -1,8 +1,8 @@
 # Term Frequency Adjustment Chart
 
-Visualises the distribution of term frequencies for a column in the
+Visualizes the distribution of term frequencies for a column in the
 model. Shows how individual values shift the match weight via the TF
-adjustment (rare values boost the weight; common values penalise it).
+adjustment (rare values boost the weight; common values penalize it).
 
 ## Usage
 

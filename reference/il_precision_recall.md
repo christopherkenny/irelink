@@ -1,7 +1,7 @@
 # Compute Precision-Recall Curve Data
 
 Returns a tidy tibble of precision and recall values at each
-match-probability threshold. Requires labelled pairs. Designed for use
+match-probability threshold. Requires labeled pairs. Designed for use
 with
 [`ggplot2::geom_line()`](https://ggplot2.tidyverse.org/reference/geom_path.html).
 
@@ -19,7 +19,7 @@ il_precision_recall(model, labels = NULL, labels_col = NULL)
 
 - labels:
 
-  A data frame of labelled pairs with a logical or integer match
+  A data frame of labeled pairs with a logical or integer match
   indicator. Required unless `labels_col` is provided.
 
 - labels_col:

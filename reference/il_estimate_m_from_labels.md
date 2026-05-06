@@ -1,7 +1,7 @@
-# Estimate Match (m) Parameters from Labelled Data
+# Estimate Match (m) Parameters from Labeled Data
 
 Learns the m probabilities (the probability of observing each comparison
-level given that the records **do** match) from a set of pre-labelled
+level given that the records **do** match) from a set of pre-labeled
 record pairs. Use this instead of
 [`il_estimate_em()`](http://christophertkenny.com/irelink/reference/il_estimate_em.md)
 when ground-truth labels are available.
@@ -20,7 +20,7 @@ il_estimate_m_from_labels(model, labels)
 
 - labels:
 
-  A data frame of labelled pairs with columns identifying the left
+  A data frame of labeled pairs with columns identifying the left
   record, right record, and a logical or integer match indicator.
 
 ## Value

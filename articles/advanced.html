@@ -168,11 +168,11 @@ scored set:</p>
 database rather than collecting them into R. <code><a href="../reference/il_cluster.html">il_cluster()</a></code>
 detects the lazy reference and runs connected-components analysis
 entirely in SQL, avoiding a costly round-trip for datasets where
-materialising millions of rows would exhaust memory.</p>
+materializing millions of rows would exhaust memory.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pairs_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span>, collect <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">pairs_lazy</span></span>
-<span><span class="co">#&gt; &lt;il_compared_lazy&gt; 2,946 pairs in table __il_8651_1_predicted_4 (threshold = 0.5)</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;il_compared_lazy&gt; 2,946 pairs in table __il_8705_1_predicted_4 (threshold = 0.5)</span></span></code></pre></div>
 <p>Pass the lazy reference directly to <code><a href="../reference/il_cluster.html">il_cluster()</a></code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">clusters_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">pairs_lazy</span>, threshold <span class="op">=</span> <span class="fl">0.85</span><span class="op">)</span></span>
@@ -223,16 +223,16 @@ maximum possible edges for a cluster of that size):</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 116 × 5</span></span></span>
 <span><span class="co">#&gt;    cluster_id  n_nodes n_edges density cluster_centralisation</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> cluster_10       13      35   0.449                 0.258 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> cluster_142      46     204   0.197                 0.236 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> cluster_15        5      10   0.95                  0.083<span style="text-decoration: underline;">3</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> cluster_252       9      32   0.889                 0.143 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> cluster_38        5      10   1                     0     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> cluster_409       4       6   1                     0     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_550       8      26   0.929                 0.095<span style="text-decoration: underline;">2</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_581      10      38   0.833                 0.208 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_684       2       1   1                    <span style="color: #BB0000;">NA</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_738       6      15   1                     0     </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> cluster_115       8      24   0.857                  0.190</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> cluster_326       4       4   0.667                  0.667</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> cluster_792       7      15   0.714                  0.4  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> cluster_867       3       3   1                      0    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> cluster_924       8      28   1                      0    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> cluster_229       8      28   1                      0    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_237       6      15   1                      0    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_261       4       6   1                      0    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_603       9      29   0.806                  0.25 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_100      19      74   0.436                  0.382</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 106 more rows</span></span></span></code></pre></div>
 <p>A high maximum cluster size combined with low density often indicates
 that a transitive link is pulling unrelated entities together. Consider
@@ -245,12 +245,12 @@ raising the threshold in <code><a href="https://rdrr.io/r/stats/predict.html" cl
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id  degree node_centrality</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 973       cluster_133      1          0.023<span style="text-decoration: underline;">3</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 918       cluster_133      2          0.046<span style="text-decoration: underline;">5</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 856       cluster_133      6          0.140 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 673       cluster_133      6          0.140 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 857       cluster_133      2          0.046<span style="text-decoration: underline;">5</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 853       cluster_133      2          0.046<span style="text-decoration: underline;">5</span></span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 459       cluster_164     13           0.419</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 993       cluster_164      8           0.258</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 48        cluster_164      4           0.129</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 171       cluster_164      6           0.194</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 461       cluster_164     10           0.323</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 167       cluster_164      7           0.226</span></span></code></pre></div>
 <p>Records with unusually high degree relative to their cluster size may
 be acting as hubs that inflate the cluster beyond its true
 membership.</p>
@@ -289,7 +289,7 @@ before committing to a spec.</p>
 <h2 id="column-transforms">Column transforms<a class="anchor" aria-label="anchor" href="#column-transforms"></a>
 </h2>
 <p>The <code>transform</code> argument in <code><a href="../reference/il_compare.html">il_compare()</a></code>
-applies a function to both values before scoring. Use it to normalise
+applies a function to both values before scoring. Use it to normalize
 case or strip whitespace before a similarity comparison:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec_tr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>

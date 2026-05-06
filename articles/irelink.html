@@ -85,8 +85,8 @@ records are a match given how similar they are across multiple
 fields.</p>
 <p><code>irelink</code> implements the Fellegi-Sunter model of
 probabilistic record linkage. Parameters are estimated via unsupervised
-Expectation-Maximisation, so no labelled training data is required to
-get started.</p>
+Expectation-Maximization, so no labeled training data is required to get
+started.</p>
 </div>
 <div class="section level2">
 <h2 id="a-typical-workflow">A typical workflow<a class="anchor" aria-label="anchor" href="#a-typical-workflow"></a>
@@ -179,7 +179,7 @@ chance two random non-matching records agree on each comparison level)
 from a random sample of pairs:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_u.html">il_estimate_u</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></code></pre></div>
-<p>Then run Expectation-Maximisation to learn m-probabilities (the
+<p>Then run Expectation-Maximization to learn m-probabilities (the
 chance true matches agree on each level). You supply a blocking rule to
 generate the training pairs:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
@@ -212,12 +212,12 @@ above a match-probability threshold:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
 <span><span class="co">#&gt;   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob match_weight</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           2          11                2             2         1         8.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           3          14                2             2         0         3.86</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           4          14                2             2         0         3.86</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           7          17                2             2         1         8.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>          13          14                2             2         0         3.86</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>          19          20                2             2         0         3.86</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           1          11                2             2         1         8.76</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           8          17                1             2         1         7.49</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           9          20                2             2         0         3.86</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>          10          20                2             2         0         3.86</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           1           2                2             2         1         8.76</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           3          13                2             2         1         8.76</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: total_match_weight &lt;dbl&gt;, match_probability &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>Each row is a candidate pair with columns for the left and right
 record identifiers, the per-comparison gamma values, the evidence-only
@@ -236,12 +236,12 @@ clusters using connected-components analysis:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 19        cluster_10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 20        cluster_10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 4         cluster_13</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 7         cluster_17</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 13        cluster_13</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 8         cluster_17</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 3         cluster_13</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 5         cluster_15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 6         cluster_15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 17        cluster_17</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 14        cluster_13</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 15        cluster_15</span></span></code></pre></div>
 <p>Each record is assigned a <code>cluster_id</code>. Records sharing
 the same cluster are considered to be the same entity.</p>
 </div>
@@ -352,7 +352,7 @@ levels into a single call:</p>
 <div class="section level2">
 <h2 id="evaluation">Evaluation<a class="anchor" aria-label="anchor" href="#evaluation"></a>
 </h2>
-<p>If you have labelled data (pairs known to be matches or non-matches),
+<p>If you have labeled data (pairs known to be matches or non-matches),
 <code>irelink</code> provides tools to assess model quality:</p>
 <ul>
 <li>

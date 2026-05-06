@@ -2,7 +2,7 @@
 
 Returns a tidy tibble of false-positive rates and true-positive rates at
 each match-probability threshold, for plotting an ROC curve. Requires
-labelled pairs. Designed for use with
+labeled pairs. Designed for use with
 [`ggplot2::geom_line()`](https://ggplot2.tidyverse.org/reference/geom_path.html).
 
 ## Usage
@@ -19,7 +19,7 @@ il_roc(model, labels = NULL, labels_col = NULL)
 
 - labels:
 
-  A data frame of labelled pairs with a logical or integer match
+  A data frame of labeled pairs with a logical or integer match
   indicator. Required unless `labels_col` is provided.
 
 - labels_col:

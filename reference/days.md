@@ -1,7 +1,7 @@
 # Create a Duration in Days
 
 A tagged-value constructor that marks a numeric threshold as a number of
-days. Inspired by `gt::px()` and `gt::pct()`. Use inside
+days. Use inside
 [`cl_date_diff()`](http://christophertkenny.com/irelink/reference/cl_date_diff.md)
 for self-documenting, unit-safe thresholds.
 

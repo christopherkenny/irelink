@@ -1,6 +1,6 @@
 # Comparator Score Bar Chart
 
-Visualises the output of
+Visualizes the output of
 [`il_string_similarity()`](http://christophertkenny.com/irelink/reference/il_string_similarity.md)
 as a horizontal bar chart, making it easy to compare multiple
 string-distance metrics at a glance.

@@ -81,7 +81,7 @@ variation.</p>
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>When used as a <code>transform</code> argument in <code><a href="il_block_on.html">il_block_on()</a></code>, <code><a href="block_on.html">block_on()</a></code>,
 or <code><a href="il_compare.html">il_compare()</a></code>, the computation is pushed into SQL so data is
-never materialised into R.</p><div class="section">
+never materialized into R.</p><div class="section">
 <h3 id="sql-availability">SQL availability<a class="anchor" aria-label="anchor" href="#sql-availability"></a></h3>
 <table class="table table"><tr><td>Function</td><td>DuckDB</td><td>PostgreSQL</td><td>SQLite</td></tr><tr><td><code>il_soundex</code></td><td>✓ (macro)</td><td>✓ (native)</td><td>comparisons only (R-side)</td></tr><tr><td><code>il_metaphone</code></td><td>✗</td><td>✓ (native)</td><td>✗</td></tr><tr><td><code>il_dmetaphone</code></td><td>✗</td><td>✓ (native)</td><td>✗</td></tr></table><p>SQLite does not expose a way to register scalar R functions as SQL UDFs,
 so phonetic transforms cannot be used in <strong>blocking rules</strong> on SQLite.

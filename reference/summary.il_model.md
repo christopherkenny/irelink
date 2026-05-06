@@ -1,4 +1,4 @@
-# Summarise an irelink Model
+# Summarize an irelink Model
 
 Prints a detailed table of trained parameters including m and u
 probabilities, match weights, and the prior match probability for each

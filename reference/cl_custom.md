@@ -2,8 +2,8 @@
 
 Creates a comparison level from a raw SQL expression. Use this when none
 of the built-in `cl_*()` helpers fit. The SQL should reference `l.` and
-`r.` prefixed column names for the left and right records. Analogous to
-`gt::md()` — a tagged-string helper with processing semantics.
+`r.` prefixed column names for the left and right records. This is a
+tagged-string helper with processing semantics.
 
 ## Usage
 

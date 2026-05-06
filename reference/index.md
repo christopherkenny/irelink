@@ -124,7 +124,7 @@ Create and train a probabilistic linkage model.
 - [`il_estimate_u()`](http://christophertkenny.com/irelink/reference/il_estimate_u.md)
   : Estimate Non-Match (u) Parameters
 - [`il_estimate_em()`](http://christophertkenny.com/irelink/reference/il_estimate_em.md)
-  : Train Parameters via Expectation-Maximisation
+  : Train Parameters via Expectation-Maximization
 - [`il_estimate_prior()`](http://christophertkenny.com/irelink/reference/il_estimate_prior.md)
   : Estimate the Prior Match Probability
 - [`il_prior_prevalence()`](http://christophertkenny.com/irelink/reference/il_prior_prevalence.md)
@@ -136,7 +136,7 @@ Create and train a probabilistic linkage model.
 - [`il_estimate_m_from_column()`](http://christophertkenny.com/irelink/reference/il_estimate_m_from_column.md)
   : Estimate Match (m) Parameters from a Label Column
 - [`il_estimate_m_from_labels()`](http://christophertkenny.com/irelink/reference/il_estimate_m_from_labels.md)
-  : Estimate Match (m) Parameters from Labelled Data
+  : Estimate Match (m) Parameters from Labeled Data
 - [`is_il_model()`](http://christophertkenny.com/irelink/reference/is_il_model.md)
   : Test if an Object is an irelink Model
 
@@ -192,7 +192,7 @@ Examine parameters, weights, and training diagnostics.
 - [`print(`*`<il_spec>`*`)`](http://christophertkenny.com/irelink/reference/print.il_spec.md)
   : Print an irelink Specification
 - [`summary(`*`<il_model>`*`)`](http://christophertkenny.com/irelink/reference/summary.il_model.md)
-  : Summarise an irelink Model
+  : Summarize an irelink Model
 - [`autoplot(`*`<il_model>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_model.md)
   : Quick Match-Weights Plot for a Model
 - [`autoplot(`*`<il_compared>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_compared.md)
@@ -200,7 +200,7 @@ Examine parameters, weights, and training diagnostics.
 
 ## Evaluation
 
-Assess model quality against labelled data.
+Assess model quality against labeled data.
 
 - [`il_accuracy()`](http://christophertkenny.com/irelink/reference/il_accuracy.md)
   : Accuracy Metrics Across Thresholds
@@ -238,11 +238,11 @@ Suggest and evaluate blocking rules to reduce candidate pairs.
 - [`il_find_blocking_below()`](http://christophertkenny.com/irelink/reference/il_find_blocking_below.md)
   : Find Blocking Rules Below a Pair-Count Threshold
 - [`block_from_labels()`](http://christophertkenny.com/irelink/reference/block_from_labels.md)
-  : Derive Blocking Rules from Labelled Pairs
+  : Derive Blocking Rules from Labeled Pairs
 
 ## Data Profiling
 
-Explore and summarise input data before linkage.
+Explore and summarize input data before linkage.
 
 - [`il_completeness()`](http://christophertkenny.com/irelink/reference/il_completeness.md)
   : Column Completeness Across Datasets
