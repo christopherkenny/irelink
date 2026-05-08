@@ -172,6 +172,10 @@ nrow(labels)
 sum(labels$is_match)
 ```
 
+Because `labels` includes all true cross-table matches, any true match missed
+by the blocking rules is counted as a false negative in the evaluation curves
+below.
+
 ### Accuracy metrics
 
 ```{r accuracy, fig.width = 6, fig.height = 3.5}

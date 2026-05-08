@@ -97,7 +97,8 @@ autoplot(pairs, which = 1)
 ## Lazy prediction for large data
 
 `predict(collect = FALSE)` keeps scored pairs in the database rather
-than collecting them into R.
+than collecting them into R. This lazy path requires a DuckDB or
+PostgreSQL backend; the examples here use DuckDB.
 `il_cluster()` detects the lazy reference and runs connected-components
 analysis entirely in SQL, avoiding a costly round-trip for datasets
 where materializing millions of rows would exhaust memory.
@@ -116,7 +117,8 @@ nrow(clusters_lazy)
 
 `autoplot()` and `il_waterfall()` collect automatically when needed,
 so downstream analysis code is unchanged.
-Use the lazy path any time candidate-pair counts exceed available memory.
+Use the lazy path on DuckDB or PostgreSQL when candidate-pair counts
+exceed available memory.
 The lazy prediction table is model-scoped; `il_cleanup(model)` removes it
 along with the model's source and term-frequency tables.
 

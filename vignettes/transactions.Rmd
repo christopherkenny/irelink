@@ -60,6 +60,8 @@ The data is synthetic and designed to be challenging: amounts differ due to fees
 Since every origin payment has exactly one destination counterpart, the prior match probability is `1 / n_origin`.
 
 This vignette requires the [nanoparquet](https://cran.r-project.org/package=nanoparquet) package to read the remote Parquet files and will only compile when the package and data URLs are both available.
+It also assumes DuckDB specifically: the blocking rules below use raw `.where`
+SQL with DuckDB date helpers such as `strftime()` and `yearweek()`.
 
 ## Load the data
 
@@ -190,6 +192,10 @@ spec
 
 ## Train the model
 
+Because this benchmark is one-to-one, set the prevalence prior directly with
+the exported `il_prior_prevalence()` helper rather than mutating `model$params`
+internally:
+
 ```{r model}
 model <- il_model(
   df_origin,
@@ -198,7 +204,7 @@ model <- il_model(
   con = con,
   link_type = 'link'
 )
-model$params$prior <- 1 / nrow(df_origin)
+model <- il_prior_prevalence(model, 1 / nrow(df_origin))
 model <- il_estimate_u(model, max_pairs = 1e6) |>
   il_estimate_em(block_on(memo)) |>
   il_estimate_em(block_on(amount))
