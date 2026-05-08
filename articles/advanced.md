@@ -115,7 +115,7 @@ materializing millions of rows would exhaust memory.
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,783 pairs in table __il_8723_1_predicted_4 (threshold = 0.5)
+#> <il_compared_lazy> 2,783 pairs in table __il_8714_1_predicted_4 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -188,16 +188,16 @@ metrics$clusters
 #> # A tibble: 142 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralisation
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_10       13      31   0.397                 0.318 
-#>  2 cluster_142       7      38   1.81                  1.43  
-#>  3 cluster_15        5      10   0.95                  0.0833
-#>  4 cluster_252       9      32   0.889                 0.143 
-#>  5 cluster_38        5      10   1                     0     
-#>  6 cluster_409       4       6   1                     0     
-#>  7 cluster_517      10      46   1.01                  0.125 
-#>  8 cluster_550       8      26   0.929                 0.0952
-#>  9 cluster_581      10      37   0.822                 0.222 
-#> 10 cluster_684       2       1   1                    NA     
+#>  1 cluster_133       9      40   1.10                   0.196
+#>  2 cluster_243       1       2   0                     NA    
+#>  3 cluster_44       14      57   0.626                  0.167
+#>  4 cluster_476       2       1   1                     NA    
+#>  5 cluster_905       2       1   1                     NA    
+#>  6 cluster_194      10      35   0.778                  0.139
+#>  7 cluster_20        3       2   0.667                  1    
+#>  8 cluster_276       3       4   1.5                    4.5  
+#>  9 cluster_289       7      17   0.810                  0.267
+#> 10 cluster_686       7      18   0.857                  0.2  
 #> # ℹ 132 more rows
 ```
 
@@ -217,12 +217,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 140       cluster_133      9           1.12 
-#> 2 133       cluster_133     10           1.25 
-#> 3 141       cluster_133      9           1.12 
-#> 4 134       cluster_133     10           1.25 
-#> 5 135       cluster_133      3           0.375
-#> 6 136       cluster_133      9           1.12
+#> 1 134       cluster_133     10            1.25
+#> 2 139       cluster_133     10            1.25
+#> 3 140       cluster_133      9            1.12
+#> 4 138       cluster_133      9            1.12
+#> 5 137       cluster_133     10            1.25
+#> 6 133       cluster_133     10            1.25
 ```
 
 Records with unusually high degree relative to their cluster size may be

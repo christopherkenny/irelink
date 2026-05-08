@@ -44,8 +44,10 @@ il_cluster(
 
   An optional named character vector or data frame mapping `unique_id`
   values to their source dataset name. Used with `method = "best_link"`
-  to enforce at-most-one-record per source dataset per cluster. If a
-  data frame, must contain columns `unique_id` and `source_dataset`.
+  to enforce at-most-one-record per source dataset per cluster. If
+  supplied, it must cover every `unique_id` present in `pairs`. If a
+  data frame, it must contain columns `unique_id` and `source_dataset`,
+  and `unique_id` values must be unique.
 
 ## Value
 

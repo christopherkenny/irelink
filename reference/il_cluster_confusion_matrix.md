@@ -49,6 +49,8 @@ il_cluster_confusion_matrix(
 
   Optional source-dataset mapping passed to
   [`il_cluster()`](http://christophertkenny.com/irelink/reference/il_cluster.md).
+  If supplied, it must cover every `unique_id` in the predicted pairs,
+  and duplicate `unique_id` mappings are not allowed.
 
 ## Value
 

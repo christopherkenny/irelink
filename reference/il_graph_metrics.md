@@ -21,7 +21,7 @@ il_graph_metrics(pairs, clusters)
 
   A tibble from
   [`il_cluster()`](http://christophertkenny.com/irelink/reference/il_cluster.md)
-  with cluster assignments.
+  with `unique_id` and `cluster_id` columns.
 
 ## Value
 

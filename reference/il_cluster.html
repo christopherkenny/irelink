@@ -94,7 +94,9 @@ where the best-link probability is tied.</p></dd>
 mapping <code>unique_id</code> values to their source dataset name. Used with
 <code>method = "best_link"</code> to enforce at-most-one-record per source
 dataset per cluster.
-If a data frame, must contain columns <code>unique_id</code> and <code>source_dataset</code>.</p></dd>
+If supplied, it must cover every <code>unique_id</code> present in <code>pairs</code>.
+If a data frame, it must contain columns <code>unique_id</code> and
+<code>source_dataset</code>, and <code>unique_id</code> values must be unique.</p></dd>
 
 </dl></div>
     <div class="section level2">
