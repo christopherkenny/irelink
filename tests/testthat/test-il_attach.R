@@ -301,6 +301,74 @@ test_that('il_attach() works with two-table link mode', {
   expect_s3_class(pairs, 'il_compared')
 })
 
+test_that('il_attach() validates right data columns in link mode', {
+  skip_if_no_jsonlite()
+  skip_if_not_installed('RSQLite')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df_a <- data.frame(
+    unique_id = 1:3, first_name = c('A', 'B', 'C'),
+    surname = c('X', 'Y', 'Z'), stringsAsFactors = FALSE
+  )
+  df_b <- data.frame(
+    unique_id = 4:6, first_name = c('D', 'E', 'F'),
+    surname = c('X', 'Y', 'Z'), stringsAsFactors = FALSE
+  )
+
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_compare(surname, cl_exact()) |>
+    il_block_on(surname)
+
+  model <- il_model(df_a, df_b, spec = spec, con = con, link_type = 'link') |>
+    il_estimate_u(max_pairs = 1e5) |>
+    il_estimate_em(block_on(surname))
+
+  tmp <- withr::local_tempfile(fileext = '.json')
+  il_save(model, tmp)
+  loaded <- il_load(tmp)
+
+  con2 <- test_con()
+  withr::defer(test_discon(con2))
+
+  new_a <- df_a
+  new_b <- data.frame(
+    unique_id = 7:9,
+    first_name = c('G', 'H', 'I'),
+    stringsAsFactors = FALSE
+  )
+
+  expect_error(
+    il_attach(loaded, new_a, new_b, con = con2),
+    'right data'
+  )
+})
+
+test_that('il_attach() errors when more than two datasets are supplied', {
+  skip_if_not_installed('RSQLite')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+  model <- make_attach_model(con)
+
+  con2 <- test_con()
+  withr::defer(test_discon(con2))
+
+  df <- data.frame(
+    unique_id = 1:3,
+    first_name = c('A', 'B', 'C'),
+    surname = c('X', 'Y', 'Z'),
+    stringsAsFactors = FALSE
+  )
+
+  expect_error(
+    il_attach(model, df, df, df, con = con2, link_type = 'link'),
+    'at most two datasets'
+  )
+})
+
 # --- Validation errors ------------------------------------------------------
 
 test_that('il_attach() errors on zero-row data', {

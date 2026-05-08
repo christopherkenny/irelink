@@ -69,6 +69,52 @@ test_that('tidyselect: starts_with() selects matching columns', {
   expect_s3_class(spec, 'il_spec')
 })
 
+test_that('tidyselect helpers resolve when il_model() sees data columns', {
+  skip_if_not_installed('RSQLite')
+  skip_if_not_installed('tidyselect')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- data.frame(
+    unique_id = 1:4,
+    addr_1 = c('a', 'a', 'b', 'b'),
+    addr_2 = c('x', 'x', 'y', 'z'),
+    other = c('m', 'n', 'm', 'n')
+  )
+  spec <- il_spec() |>
+    il_compare(starts_with('addr_'), cl_exact()) |>
+    il_block_on(addr_1)
+
+  model <- il_model(df, spec = spec, con = con)
+  expect_equal(
+    vapply(model$spec$comparisons, function(comp) comp$columns, character(1)),
+    c('addr_1', 'addr_2')
+  )
+})
+
+test_that('tidyselect where() uses data column classes when resolving', {
+  skip_if_not_installed('RSQLite')
+  skip_if_not_installed('tidyselect')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- data.frame(
+    unique_id = 1:4,
+    name = c('a', 'a', 'b', 'b'),
+    age = c(10, 10, 20, 21),
+    stringsAsFactors = FALSE
+  )
+  spec <- il_spec() |>
+    il_compare(tidyselect::where(is.character), cl_exact()) |>
+    il_block_on(name)
+
+  model <- il_model(df, spec = spec, con = con)
+  expect_equal(length(model$spec$comparisons), 1)
+  expect_equal(model$spec$comparisons[[1]]$columns, 'name')
+})
+
 test_that('tidyselect: everything() selects all columns', {
   # From: 09-implementation-plan §6b — tidyselect edge case
   spec <- il_spec() |>

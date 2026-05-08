@@ -23,7 +23,7 @@ You should:
 - draft a description paragraph in the DESCRIPTION file which aspirationally explains the package (as if it's done) in 3-5 sentences
 - add some sentences to README.Rmd about what this package does (as if it's done) to complete the open goals section
 
-## Follow up b (Opus 4.6)
+## Follow-up b (Opus 4.6)
 
 As a reminder on form, make sure any *text* is not directly copied and that after updating the README.Rmd, that you render it with devtools::build_readme().
 
@@ -80,7 +80,7 @@ Finally, write your findings to `inst/refs/04-irelink-core-interface.md`.
 This should detail the types, the major inputs, and any other details about how this can be friendly for tidyverse users.
 Ensure that there are examples in this document.
 
-## Follow up b (Opus 4.6 high)
+## Follow-up b (Opus 4.6 high)
 
 This looks very good.
 Please also look at `gt`, which has a slightly more modern interface than `ggplot2`.
@@ -315,7 +315,7 @@ Don't rerun any of the other systems, just get use this to eyeball how we are do
 
 If we're behind, identify what we might need to fix.
 
-## follow up (Opus 4.6 high)
+## Follow-up (Opus 4.6 high)
 
 Write these updates to `inst/refs/16-performance.md`.
 
@@ -338,7 +338,7 @@ The inst/refs/07-features-for-later.md file explicitly deferred it: "Term-freque
 
 The risk: The benchmark at inst/benchmarks/rl-workshop.qmd uses cl_exact(term_frequency = TRUE) on city, which will produce the same result as cl_exact() with no flag. If someone benchmarks against splink using TF weighting enabled, the results will quietly differ.
 
-## follow up (Opus 4.6 high)
+## Follow-up (Opus 4.6 high)
 
 Things to verify before asking for feedback:
 
@@ -409,7 +409,7 @@ Then, write two vignettes which use the new data and (if possible) the new plots
 Write an update to `inst/refs/19-tutorial-lessons.md`.
 
 
-## Follow up (Opus 4.6 high)
+## Follow-up (Opus 4.6 high)
 
 So these changes look like they're in the right direction but, it doesn't seem like you listened to what I asked for.
 
@@ -424,7 +424,7 @@ Perhaps make a random vector once now  and use that to index entries or somethin
 
 Finally, update the vignettes to reflect these changes.
 
-## Follow up (Opus 4.6 high)
+## Follow-up (Opus 4.6 high)
 
 Again, moving in the right direction, but some of these things follow bad patterns.
 
@@ -1179,7 +1179,7 @@ Review the package surface.
 How does this seem to compare with the python package splink (../splink)?
 Write this to inst/refs/46-review.md.
 
-## Followup (Claude Code Sonnet 4.6 medium)
+## Follow-up (Claude Code Sonnet 4.6 medium)
 
 Review `inst/refs/46-review.md`.
 Remove any overstatements or comments which would require adding unmaintained packages like `plotly`.
@@ -1201,3 +1201,19 @@ Scan for things that should not be included in roxygen. These include, but are n
 
 There are substantial docs that help explain the design in `inst/`.
 These are not user facing and should not leak into the user-facing docs.
+
+
+## Code (Codex GPT-5.5 medium)
+
+We are starting a manual review of this package.
+Look at `inst/refs/47-review-plan.md`.
+Perform a first review of Chunk X and give me an action plan so that I can review efficiently
+
+Write notes to `inst/refs/[48-57]-review-chunk-X.md`.
+
+
+### Follow-up (Codex GPT-5.5 medium)
+
+If you're spotting errors, then this isn't ready for human review.
+Take a look at each of the risks you identified and clarify if they are an issue or not.
+If they are an issue, fix them and make a note in the doc on how you fixed it.

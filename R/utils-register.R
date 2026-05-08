@@ -132,12 +132,16 @@ register_data <- function(data, con = NULL, tbl_name = '__il_data',
       )
       DBI::dbExecute(con, view_sql)
     }
+    if ('unique_id' %in% cols) {
+      validate_registered_unique_id(con, tbl_name, cols)
+    }
 
     return(list(
       tbl_name = tbl_name,
       con = con,
       n_records = n_records,
       columns = cols,
+      column_classes = infer_registered_column_classes(con, tbl_name),
       needs_cleanup = TRUE
     ))
   }
@@ -181,12 +185,16 @@ register_data <- function(data, con = NULL, tbl_name = '__il_data',
       )
       DBI::dbExecute(con, view_sql)
     }
+    if ('unique_id' %in% cols) {
+      validate_registered_unique_id(con, tbl_name, cols)
+    }
 
     return(list(
       tbl_name = tbl_name,
       con = con,
       n_records = n_records,
       columns = cols,
+      column_classes = infer_registered_column_classes(con, tbl_name),
       needs_cleanup = TRUE
     ))
   }
@@ -207,6 +215,10 @@ register_data <- function(data, con = NULL, tbl_name = '__il_data',
     if (add_unique_id && !('unique_id' %in% names(data))) {
       data$unique_id <- seq_len(nrow(data))
     }
+    if ('unique_id' %in% names(data)) {
+      validate_data_frame_unique_id(data)
+    }
+    column_classes <- infer_column_classes(data)
     data <- as.data.frame(data)
     DBI::dbWriteTable(con, tbl_name, data, overwrite = TRUE)
 
@@ -215,6 +227,7 @@ register_data <- function(data, con = NULL, tbl_name = '__il_data',
       con = con,
       n_records = nrow(data),
       columns = names(data),
+      column_classes = column_classes,
       needs_cleanup = TRUE
     ))
   }
@@ -247,4 +260,38 @@ count_tbl_lazy <- function(tbl, con) {
 drop_registered <- function(con, tbl_name) {
   try(DBI::dbExecute(con, glue::glue('DROP VIEW IF EXISTS {tbl_name}')), silent = TRUE)
   try(DBI::dbRemoveTable(con, tbl_name, fail_if_missing = FALSE), silent = TRUE)
+}
+
+#' Validate unique_id in an in-memory data frame
+#' @param data A data frame.
+#' @noRd
+validate_data_frame_unique_id <- function(data) {
+  if (anyNA(data$unique_id)) {
+    cli::cli_abort('{.field unique_id} must not contain missing values.')
+  }
+  if (anyDuplicated(data$unique_id) > 0L) {
+    cli::cli_abort('{.field unique_id} must uniquely identify rows.')
+  }
+  invisible(NULL)
+}
+
+#' Validate unique_id in a registered database table or view
+#' @param con A DBI connection.
+#' @param tbl_name Registered table/view name.
+#' @param columns Registered column names.
+#' @noRd
+validate_registered_unique_id <- function(con, tbl_name, columns) {
+  res <- DBI::dbGetQuery(con, glue::glue(
+    'SELECT COUNT(*) AS n, ',
+    'SUM(CASE WHEN unique_id IS NULL THEN 1 ELSE 0 END) AS n_missing, ',
+    'COUNT(DISTINCT unique_id) AS n_distinct ',
+    'FROM {tbl_name}'
+  ))
+  if (as.numeric(res$n_missing[1]) > 0) {
+    cli::cli_abort('{.field unique_id} must not contain missing values.')
+  }
+  if (as.numeric(res$n_distinct[1]) != as.numeric(res$n[1])) {
+    cli::cli_abort('{.field unique_id} must uniquely identify rows.')
+  }
+  invisible(NULL)
 }

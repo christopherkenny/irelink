@@ -67,7 +67,13 @@ il_block_on <- function(spec, ..., .where = NULL, .transform = NULL,
       class = 'il_error_type'
     )
   }
-  parsed <- parse_blocking_cols(rlang::enquos(...))
+  col_exprs <- rlang::enquos(...)
+  if (length(col_exprs) == 0L && is.null(.where)) {
+    cli::cli_abort(
+      '{.fn il_block_on} requires at least one column or a {.arg .where} condition.'
+    )
+  }
+  parsed <- parse_blocking_cols(col_exprs)
   transform <- merge_blocking_transforms(parsed$per_col_tfs, .transform, parsed$columns)
   rule <- structure(
     list(

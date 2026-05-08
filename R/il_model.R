@@ -48,6 +48,11 @@ il_model <- function(
 ) {
   link_type <- match.arg(link_type)
   extra_inputs <- list(...)
+  if (length(extra_inputs) > 1L) {
+    cli::cli_abort(
+      '{.fn il_model} accepts at most two datasets: {.arg .data} and one additional dataset.'
+    )
+  }
 
   validate_il_spec(spec)
 
@@ -60,6 +65,7 @@ il_model <- function(
     tbl_name = paste0(table_prefix, '_data_l')
   )
   con <- reg_l$con
+  spec <- resolve_spec_selectors(spec, reg_l$columns, reg_l$column_classes)
 
   # Register phonetic SQL macros if any transforms require them
   register_phonetic_macros(con)
@@ -90,6 +96,12 @@ il_model <- function(
       con = con,
       tbl_name = paste0(table_prefix, '_data_r')
     )
+    missing_cols_r <- setdiff(spec_cols, reg_r$columns)
+    if (length(missing_cols_r) > 0L) {
+      cli::cli_abort(
+        'Column{?s} {.field {missing_cols_r}} referenced in the spec but not found in the right data.'
+      )
+    }
     tbl_name_r <- reg_r$tbl_name
     n_records_r <- reg_r$n_records
   }
@@ -169,6 +181,11 @@ il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
   link_type <- link_type %||% model$link_type %||% 'dedupe'
   link_type <- match.arg(link_type, c('dedupe', 'link', 'link_and_dedupe'))
   extra_inputs <- list(...)
+  if (length(extra_inputs) > 1L) {
+    cli::cli_abort(
+      '{.fn il_attach} accepts at most two datasets: {.arg .data} and one additional dataset.'
+    )
+  }
 
   table_prefix <- il_new_table_prefix()
 
@@ -179,6 +196,9 @@ il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
     tbl_name = paste0(table_prefix, '_data_l')
   )
   con <- reg_l$con
+  model$spec <- resolve_spec_selectors(
+    model$spec, reg_l$columns, reg_l$column_classes
+  )
 
   # Register phonetic SQL macros if needed
   register_phonetic_macros(con)
@@ -209,6 +229,12 @@ il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
       con = con,
       tbl_name = paste0(table_prefix, '_data_r')
     )
+    missing_cols_r <- setdiff(spec_cols, reg_r$columns)
+    if (length(missing_cols_r) > 0L) {
+      cli::cli_abort(
+        'Column{?s} {.field {missing_cols_r}} referenced in the model spec but not found in the right data.'
+      )
+    }
     tbl_name_r <- reg_r$tbl_name
     n_records_r <- reg_r$n_records
   }

@@ -161,3 +161,33 @@ test_that('register_data errors on zero-row data.frame', {
     'zero-row'
   )
 })
+
+test_that('register_data rejects duplicate unique_id values', {
+  con <- test_con()
+  on.exit(test_discon(con))
+
+  df <- data.frame(
+    unique_id = c(1L, 1L, 2L),
+    first_name = c('A', 'B', 'C')
+  )
+
+  expect_error(
+    register_data(df, con = con),
+    'uniquely identify'
+  )
+})
+
+test_that('register_data rejects missing unique_id values', {
+  con <- test_con()
+  on.exit(test_discon(con))
+
+  df <- data.frame(
+    unique_id = c(1L, NA_integer_, 2L),
+    first_name = c('A', 'B', 'C')
+  )
+
+  expect_error(
+    register_data(df, con = con),
+    'missing values'
+  )
+})

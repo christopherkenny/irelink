@@ -42,6 +42,13 @@ test_that('passing a non-spec to il_block_on() errors', {
   )
 })
 
+test_that('il_block_on() requires at least one column or where condition', {
+  expect_error(
+    il_block_on(il_spec()),
+    'requires at least one column'
+  )
+})
+
 test_that('print.il_spec() shows blocking rules', {
   spec <- il_spec() |>
     il_compare(first_name, cl_exact()) |>

@@ -62,13 +62,18 @@ il_compare <- function(spec, col, method, ...,
     )
   }
   col_expr <- rlang::enquo(col)
-  columns <- extract_col_names(col_expr)
+  selected <- extract_col_names(col_expr)
+  columns <- selected$columns
   for (column in columns) {
     entry <- list(
       columns = column, method = method, transform = transform,
       tf_adjustment_weight = tf_adjustment_weight,
       tf_minimum_u_value = tf_minimum_u_value
     )
+    if (!is.null(selected$selector)) {
+      entry$selector <- selected$selector
+      entry$deferred_select <- TRUE
+    }
     spec$comparisons <- c(spec$comparisons, list(entry))
   }
   spec
@@ -79,19 +84,110 @@ il_compare <- function(spec, col, method, ...,
 extract_col_names <- function(quo) {
   expr <- rlang::quo_get_expr(quo)
   if (rlang::is_symbol(expr)) {
-    return(as.character(expr))
+    return(list(columns = as.character(expr), selector = NULL))
   }
   if (rlang::is_call(expr, 'c')) {
     args <- as.list(expr)[-1]
-    return(vapply(args, function(a) {
-      if (rlang::is_symbol(a)) {
-        as.character(a)
-      } else {
-        deparse(a)
-      }
-    }, character(1)))
+    simple <- vapply(args, rlang::is_symbol, logical(1))
+    if (all(simple)) {
+      return(list(
+        columns = vapply(args, as.character, character(1)),
+        selector = NULL
+      ))
+    }
+    return(list(
+      columns = paste(deparse(expr), collapse = ''),
+      selector = quo
+    ))
   }
-  # Tidyselect helpers (starts_with, everything, matches, etc.) —
-  # store as deferred expression string
-  list(deparse(expr))
+  list(
+    columns = paste(deparse(expr), collapse = ''),
+    selector = quo
+  )
+}
+
+# Resolve data-dependent tidyselect comparisons once model columns are known.
+# Bare-name comparisons are already concrete and pass through unchanged.
+resolve_spec_selectors <- function(spec, columns, column_classes = NULL) {
+  if (!any(vapply(spec$comparisons, function(comp) {
+    isTRUE(comp$deferred_select) && !is.null(comp$selector)
+  }, logical(1)))) {
+    return(spec)
+  }
+
+  rlang::check_installed(
+    'tidyselect',
+    reason = 'to resolve tidyselect helpers in il_compare().'
+  )
+
+  data_proxy <- make_tidyselect_proxy(columns, column_classes)
+  resolved <- list()
+  for (comp in spec$comparisons) {
+    if (!isTRUE(comp$deferred_select) || is.null(comp$selector)) {
+      resolved <- c(resolved, list(comp))
+      next
+    }
+
+    selector <- comp$selector
+    selected <- tidyselect::eval_select(
+      rlang::quo_get_expr(selector),
+      data = data_proxy,
+      env = rlang::quo_get_env(selector)
+    )
+    if (length(selected) == 0L) {
+      cli::cli_abort(
+        'Tidyselect expression {.code {comp$columns}} did not match any columns.'
+      )
+    }
+
+    for (column in names(selected)) {
+      new_comp <- comp
+      new_comp$columns <- column
+      new_comp$selector <- NULL
+      new_comp$deferred_select <- NULL
+      resolved <- c(resolved, list(new_comp))
+    }
+  }
+  spec$comparisons <- resolved
+  spec
+}
+
+make_tidyselect_proxy <- function(columns, column_classes = NULL) {
+  if (is.null(column_classes)) {
+    column_classes <- stats::setNames(rep(NA_character_, length(columns)), columns)
+  }
+  proxy <- lapply(columns, function(col) {
+    cls <- column_classes[[col]] %||% NA_character_
+    if (is.na(cls)) {
+      return(logical())
+    }
+    switch(cls,
+      character = character(),
+      factor = factor(),
+      integer = integer(),
+      numeric = numeric(),
+      double = numeric(),
+      logical = logical(),
+      Date = as.Date(character()),
+      POSIXct = as.POSIXct(character()),
+      POSIXlt = as.POSIXlt(character()),
+      logical()
+    )
+  })
+  stats::setNames(proxy, columns)
+}
+
+infer_column_classes <- function(df) {
+  stats::setNames(vapply(df, function(x) class(x)[1], character(1)), names(df))
+}
+
+infer_registered_column_classes <- function(con, tbl_name) {
+  out <- try(
+    DBI::dbGetQuery(con, glue::glue('SELECT * FROM {tbl_name} WHERE 1 = 0')),
+    silent = TRUE
+  )
+  if (inherits(out, 'try-error')) {
+    return(NULL)
+  }
+  infer_column_classes(out)
 }

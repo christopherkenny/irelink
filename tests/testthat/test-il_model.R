@@ -99,6 +99,46 @@ test_that("il_model() with link_type='link' accepts two datasets", {
   expect_s3_class(model, 'il_model')
 })
 
+test_that("il_model() validates spec columns against right data in link mode", {
+  skip_if_not_installed('RSQLite')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df1 <- data.frame(
+    unique_id = 1:3,
+    first_name = c('John', 'Mary', 'Jane'),
+    surname = c('Smith', 'Jones', 'Taylor')
+  )
+  df2 <- data.frame(
+    unique_id = 4:6,
+    first_name = c('John', 'Mary', 'Alice')
+  )
+
+  expect_error(
+    il_model(df1, df2, spec = make_test_spec(), con = con, link_type = 'link'),
+    'right data'
+  )
+})
+
+test_that('il_model() errors when more than two datasets are supplied', {
+  skip_if_not_installed('RSQLite')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- data.frame(
+    unique_id = 1:3,
+    first_name = c('A', 'B', 'C'),
+    surname = c('X', 'Y', 'Z')
+  )
+
+  expect_error(
+    il_model(df, df, df, spec = make_test_spec(), con = con, link_type = 'link'),
+    'at most two datasets'
+  )
+})
+
 test_that('print.il_model() shows key info', {
   skip_if_not_installed('RSQLite')
 
