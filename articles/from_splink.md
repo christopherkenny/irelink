@@ -22,6 +22,10 @@ serve the same role and can be passed directly to
 
 [TABLE]
 
+`irelink` also supports `link_type = "link_and_dedupe"` for two-table
+jobs where duplicates may exist both within each input table and across
+the two tables.
+
 ## Comparison levels
 
 Comparison levels are the building blocks for scoring how similar two
@@ -141,7 +145,7 @@ linker.training.estimate_parameters_using_expectation_maximisation(
     block_on("surname")
 )
 
-pairwise = linker.inference.predict(threshold_match_weight=0.5)
+pairwise = linker.inference.predict(threshold_match_probability=0.5)
 clusters = linker.clustering.cluster_pairwise_predictions_at_threshold(
     pairwise, 0.95
 )
@@ -174,10 +178,12 @@ il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
 
-Splink’s prediction `match_weight` includes the prior odds. In
-`irelink`, `match_weight` is evidence-only and `total_match_weight` is
-the prior-inclusive log2 odds. Probability thresholds are portable;
-match-weight thresholds need that prior adjustment.
+The examples above use probability thresholds because those are portable
+between Splink and `irelink`. Splink’s prediction `match_weight`
+includes the prior odds. In `irelink`, `match_weight` is evidence-only
+and `total_match_weight` is the prior-inclusive log2 odds. Match-weight
+thresholds therefore need that prior adjustment when you translate them
+between the two packages.
 
 ## Example: finding matches against new records
 
@@ -203,3 +209,8 @@ new_df <- data.frame(
 )
 results <- il_find_matches(model, new_df, threshold = 0.5)
 ```
+
+Splink exposes a match-weight threshold for this workflow, while
+[`il_find_matches()`](http://christophertkenny.com/irelink/reference/il_find_matches.md)
+filters on posterior match probability. Translate those thresholds with
+the same caution as in the prediction example above.

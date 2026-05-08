@@ -216,12 +216,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id  
 #>   <chr>     <chr>       
-#> 1 1384      cluster_1384
-#> 2 3026      cluster_3026
-#> 3 4435      cluster_1137
-#> 4 870       cluster_3026
-#> 5 4210      cluster_3653
-#> 6 4295      cluster_1505
+#> 1 4998      cluster_4417
+#> 2 664       cluster_664 
+#> 3 1003      cluster_1003
+#> 4 4656      cluster_4656
+#> 5 2526      cluster_2526
+#> 6 2906      cluster_2330
 ```
 
 ## Evaluate against ground truth
@@ -264,6 +264,10 @@ nrow(labels)
 sum(labels$is_match)
 #> [1] 5001
 ```
+
+Because `labels` includes all true cross-table matches, any true match
+missed by the blocking rules is counted as a false negative in the
+evaluation curves below.
 
 ### Accuracy metrics
 

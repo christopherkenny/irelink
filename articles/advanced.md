@@ -105,7 +105,8 @@ autoplot(pairs, which = 1)
 ## Lazy prediction for large data
 
 `predict(collect = FALSE)` keeps scored pairs in the database rather
-than collecting them into R.
+than collecting them into R. This lazy path requires a DuckDB or
+PostgreSQL backend; the examples here use DuckDB.
 [`il_cluster()`](http://christophertkenny.com/irelink/reference/il_cluster.md)
 detects the lazy reference and runs connected-components analysis
 entirely in SQL, avoiding a costly round-trip for datasets where
@@ -115,7 +116,7 @@ materializing millions of rows would exhaust memory.
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,783 pairs in table __il_8709_1_predicted_4 (threshold = 0.5)
+#> <il_compared_lazy> 2,783 pairs in table __il_8895_1_predicted_4 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -132,10 +133,10 @@ nrow(clusters_lazy)
 and
 [`il_waterfall()`](http://christophertkenny.com/irelink/reference/il_waterfall.md)
 collect automatically when needed, so downstream analysis code is
-unchanged. Use the lazy path any time candidate-pair counts exceed
-available memory. The lazy prediction table is model-scoped;
-`il_cleanup(model)` removes it along with the model’s source and
-term-frequency tables.
+unchanged. Use the lazy path on DuckDB or PostgreSQL when candidate-pair
+counts exceed available memory. The lazy prediction table is
+model-scoped; `il_cleanup(model)` removes it along with the model’s
+source and term-frequency tables.
 
 ## Chunked u estimation and SQL profiling
 
@@ -188,11 +189,11 @@ metrics$clusters
 #> # A tibble: 142 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralisation
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_164       8      37   1.32                   3    
-#>  2 cluster_176      26     114   0.351                  0.313
-#>  3 cluster_428       3       2   0.667                  1    
-#>  4 cluster_58        5      10   1                      0    
-#>  5 cluster_960       7      17   0.810                  0.267
+#>  1 cluster_133       9      40   1.10                   0.196
+#>  2 cluster_243       1       2   0                     NA    
+#>  3 cluster_44       14      57   0.626                  0.167
+#>  4 cluster_476       2       1   1                     NA    
+#>  5 cluster_905       2       1   1                     NA    
 #>  6 cluster_149      16      61   0.508                  0.410
 #>  7 cluster_301      10      41   0.911                  0.111
 #>  8 cluster_362      19      74   0.430                  0.824
@@ -217,12 +218,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 169       cluster_164      6           0.857
-#> 2 171       cluster_164      6           0.857
-#> 3 167       cluster_164      7           1    
-#> 4 165       cluster_164      8           1.14 
-#> 5 170       cluster_164      6           0.857
-#> 6 168       cluster_164     25           3.57
+#> 1 139       cluster_133     10           1.25 
+#> 2 137       cluster_133     10           1.25 
+#> 3 141       cluster_133      9           1.12 
+#> 4 134       cluster_133     10           1.25 
+#> 5 135       cluster_133      3           0.375
+#> 6 138       cluster_133      9           1.12
 ```
 
 Records with unusually high degree relative to their cluster size may be

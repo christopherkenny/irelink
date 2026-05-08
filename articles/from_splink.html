@@ -181,6 +181,10 @@ directly to <code><a href="../reference/il_compare.html">il_compare()</a></code>
 </tr>
 </tbody>
 </table>
+<p><code>irelink</code> also supports
+<code>link_type = "link_and_dedupe"</code> for two-table jobs where
+duplicates may exist both within each input table and across the two
+tables.</p>
 </div>
 <div class="section level2">
 <h2 id="comparison-levels">Comparison levels<a class="anchor" aria-label="anchor" href="#comparison-levels"></a>
@@ -491,7 +495,7 @@ functions.</p>
 <span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>    block_on(<span class="st">"surname"</span>)</span>
 <span id="cb2-24"><a href="#cb2-24" tabindex="-1"></a>)</span>
 <span id="cb2-25"><a href="#cb2-25" tabindex="-1"></a></span>
-<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>pairwise <span class="op">=</span> linker.inference.predict(threshold_match_weight<span class="op">=</span><span class="fl">0.5</span>)</span>
+<span id="cb2-26"><a href="#cb2-26" tabindex="-1"></a>pairwise <span class="op">=</span> linker.inference.predict(threshold_match_probability<span class="op">=</span><span class="fl">0.5</span>)</span>
 <span id="cb2-27"><a href="#cb2-27" tabindex="-1"></a>clusters <span class="op">=</span> linker.clustering.cluster_pairwise_predictions_at_threshold(</span>
 <span id="cb2-28"><a href="#cb2-28" tabindex="-1"></a>    pairwise, <span class="fl">0.95</span></span>
 <span id="cb2-29"><a href="#cb2-29" tabindex="-1"></a>)</span></code></pre></div>
@@ -518,11 +522,13 @@ functions.</p>
 <span></span>
 <span><span class="fu"><a href="../reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>Splink’s prediction <code>match_weight</code> includes the prior
-odds. In <code>irelink</code>, <code>match_weight</code> is
-evidence-only and <code>total_match_weight</code> is the prior-inclusive
-log2 odds. Probability thresholds are portable; match-weight thresholds
-need that prior adjustment.</p>
+<p>The examples above use probability thresholds because those are
+portable between Splink and <code>irelink</code>. Splink’s prediction
+<code>match_weight</code> includes the prior odds. In
+<code>irelink</code>, <code>match_weight</code> is evidence-only and
+<code>total_match_weight</code> is the prior-inclusive log2 odds.
+Match-weight thresholds therefore need that prior adjustment when you
+translate them between the two packages.</p>
 </div>
 <div class="section level2">
 <h2 id="example-finding-matches-against-new-records">Example: finding matches against new records<a class="anchor" aria-label="anchor" href="#example-finding-matches-against-new-records"></a>
@@ -542,6 +548,10 @@ need that prior adjustment.</p>
 <span>  dob <span class="op">=</span> <span class="st">"1990-01-15"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_find_matches.html">il_find_matches</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">new_df</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
+<p>Splink exposes a match-weight threshold for this workflow, while
+<code><a href="../reference/il_find_matches.html">il_find_matches()</a></code> filters on posterior match probability.
+Translate those thresholds with the same caution as in the prediction
+example above.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>
