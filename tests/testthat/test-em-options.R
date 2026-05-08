@@ -66,3 +66,27 @@ test_that('il_estimate_em validates max_iterations', {
   expect_error(il_estimate_em(model, block_on(city), max_iterations = -1L))
   expect_error(il_estimate_em(model, block_on(city), max_iterations = 'ten'))
 })
+
+test_that('il_estimate_em validates blocking and convergence before training', {
+  skip_if_not_installed('duckdb')
+  con <- test_con()
+  on.exit(test_discon(con), add = TRUE)
+
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_block_on(city)
+  model <- il_model(fake_1000, spec = spec, con = con)
+
+  expect_error(
+    il_estimate_em(model, list(columns = 'city')),
+    'blocking'
+  )
+  expect_error(
+    il_estimate_em(model, block_on(city), convergence = 0),
+    'convergence'
+  )
+  expect_error(
+    il_estimate_em(model, block_on(city), convergence = Inf),
+    'convergence'
+  )
+})

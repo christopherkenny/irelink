@@ -335,3 +335,29 @@ test_that('dependency-aware SQL score lookups do not use shared table names', {
     'find sentinel'
   )
 })
+
+test_that('training history can combine independent and dependency-aware sessions', {
+  skip_if_not_installed('duckdb')
+
+  con <- DBI::dbConnect(duckdb::duckdb())
+  withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
+
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_compare(surname, cl_exact())
+
+  model <- il_model(fake_1000, spec = spec, con = con) |>
+    il_estimate_u(max_pairs = 1000) |>
+    il_estimate_em(block_on(city), max_iterations = 1L) |>
+    il_estimate_em(
+      block_on(.where = '1=1'),
+      estimator_mode = 'dependency-aware',
+      convergence = 1,
+      max_iterations = 1L
+    )
+
+  history <- il_training_history(model)
+  expect_true('comparison' %in% names(history))
+  expect_true('estimator_mode' %in% names(history))
+  expect_true(any(history$estimator_mode == 'dependency-aware', na.rm = TRUE))
+})

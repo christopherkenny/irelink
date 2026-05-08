@@ -103,6 +103,15 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
   estimate_without_tf_supplied <- !missing(estimate_without_tf)
   estimator_mode <- match.arg(estimator_mode)
   validate_il_model(model)
+  if (!inherits(blocking, 'il_blocking_rule')) {
+    cli::cli_abort(
+      '{.arg blocking} must be a blocking rule created by {.fn block_on}.'
+    )
+  }
+  if (!is.numeric(convergence) || length(convergence) != 1L ||
+    is.na(convergence) || !is.finite(convergence) || convergence <= 0) {
+    cli::cli_abort('{.arg convergence} must be a positive finite number.')
+  }
   if (!is.numeric(max_iterations) || length(max_iterations) != 1L ||
     max_iterations < 1L || max_iterations != as.integer(max_iterations)) {
     cli::cli_abort('{.arg max_iterations} must be a positive integer.')

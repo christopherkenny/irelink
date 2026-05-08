@@ -32,6 +32,9 @@ il_register_tf <- function(model, col, tf_data, overwrite = FALSE) {
   if (!is.character(col) || length(col) != 1L) {
     cli::cli_abort('{.arg col} must be a single character string.')
   }
+  if (!col %in% model$data$columns) {
+    cli::cli_abort('Column {.field {col}} not found in the model data.')
+  }
 
   tf_col_name <- paste0('tf_', col)
   expected_cols <- c(col, tf_col_name)
@@ -40,6 +43,19 @@ il_register_tf <- function(model, col, tf_data, overwrite = FALSE) {
     cli::cli_abort(
       '{.arg tf_data} must have columns {.val {expected_cols}}, \\
        got {.val {names(tf_data)}}.'
+    )
+  }
+  if (anyNA(tf_data[[col]])) {
+    cli::cli_abort('{.arg tf_data} value column {.field {col}} must not contain missing values.')
+  }
+  if (anyDuplicated(tf_data[[col]]) > 0L) {
+    cli::cli_abort('{.arg tf_data} value column {.field {col}} must contain unique values.')
+  }
+  tf_values <- tf_data[[tf_col_name]]
+  if (!is.numeric(tf_values) || anyNA(tf_values) ||
+    any(!is.finite(tf_values)) || any(tf_values <= 0 | tf_values > 1)) {
+    cli::cli_abort(
+      '{.arg tf_data} frequency column {.field {tf_col_name}} must contain finite probabilities with 0 < value <= 1.'
     )
   }
 

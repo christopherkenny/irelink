@@ -70,6 +70,30 @@
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_estimate_m_from_labels <- function(model, labels) {
   validate_il_model(model)
+  if (!is.data.frame(labels)) {
+    cli::cli_abort('{.arg labels} must be a data frame.')
+  }
+  required <- c('unique_id_l', 'unique_id_r', 'is_match')
+  missing <- setdiff(required, names(labels))
+  if (length(missing) > 0L) {
+    cli::cli_abort(
+      '{.arg labels} must contain column{?s} {.field {missing}}.'
+    )
+  }
+  if (anyNA(labels$is_match)) {
+    cli::cli_abort('{.field is_match} must not contain missing values.')
+  }
+  if (is.logical(labels$is_match)) {
+    labels$is_match <- as.logical(labels$is_match)
+  } else if (is.numeric(labels$is_match) &&
+    all(labels$is_match %in% c(0, 1))) {
+    labels$is_match <- labels$is_match == 1
+  } else {
+    cli::cli_abort('{.field is_match} must be logical or numeric 0/1.')
+  }
+  if (anyNA(labels$unique_id_l) || anyNA(labels$unique_id_r)) {
+    cli::cli_abort('Label unique ID columns must not contain missing values.')
+  }
   con <- model$con
   dialect <- detect_dialect(con)
   tbl <- model$data$tbl_l

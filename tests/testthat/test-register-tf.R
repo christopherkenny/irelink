@@ -38,6 +38,46 @@ test_that('il_register_tf rejects wrong columns', {
   expect_error(il_register_tf(model, 'first_name', bad_tf))
 })
 
+test_that('il_register_tf validates value and probability columns', {
+  skip_if_not_installed('duckdb')
+  con <- test_con()
+  on.exit(test_discon(con), add = TRUE)
+
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_block_on(city)
+  model <- il_model(fake_1000, spec = spec, con = con)
+
+  expect_error(
+    il_register_tf(model, 'missing_col', data.frame(
+      missing_col = 'John',
+      tf_missing_col = 0.1
+    )),
+    'not found'
+  )
+  expect_error(
+    il_register_tf(model, 'first_name', data.frame(
+      first_name = c('John', 'John'),
+      tf_first_name = c(0.1, 0.2)
+    )),
+    'unique'
+  )
+  expect_error(
+    il_register_tf(model, 'first_name', data.frame(
+      first_name = 'John',
+      tf_first_name = 0
+    )),
+    'probabilities'
+  )
+  expect_error(
+    il_register_tf(model, 'first_name', data.frame(
+      first_name = 'John',
+      tf_first_name = NA_real_
+    )),
+    'probabilities'
+  )
+})
+
 test_that('il_register_tf prevents overwrite by default', {
   skip_if_not_installed('duckdb')
   con <- test_con()

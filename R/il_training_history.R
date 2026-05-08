@@ -67,10 +67,22 @@ il_training_history <- function(model) {
   if (is.null(history) || length(history) == 0L) {
     cli::cli_abort('No training history available. Run {.fn il_estimate_em} first.')
   }
-  result <- do.call(rbind, history)
+  result <- bind_training_history_rows(history)
   # Normalize earlier format if needed
   if ('level' %in% names(result) && !'gamma_level' %in% names(result)) {
     result <- migrate_params_to_gamma_level(result)
   }
   add_class(result, 'il_training_history')
+}
+
+bind_training_history_rows <- function(history) {
+  all_names <- unique(unlist(lapply(history, names), use.names = FALSE))
+  rows <- lapply(history, function(row) {
+    missing <- setdiff(all_names, names(row))
+    for (col in missing) {
+      row[[col]] <- NA
+    }
+    row[, all_names, drop = FALSE]
+  })
+  tibble::as_tibble(do.call(rbind, rows))
 }

@@ -123,13 +123,18 @@ il_estimate_u <- function(model, max_pairs = 1e6,
     cn <- comp_names[j]
     gcol <- paste0('gamma_', cn)
     n_levels <- n_gamma_levels(comparisons[[j]]$method)
+    u_vals <- numeric(n_levels)
     for (k in seq(0L, n_levels - 1L)) {
       count_k <- sum(counts$n[counts[[gcol]] == k], na.rm = TRUE)
       u_k <- count_k / n_pairs
+      u_vals[k + 1L] <- max(u_k, 1e-6)
+    }
+    u_vals <- u_vals / sum(u_vals)
+    for (k in seq(0L, n_levels - 1L)) {
       rows <- c(rows, list(data.frame(
         comparison = cn,
         gamma_level = k,
-        u = max(u_k, 1e-6),
+        u = u_vals[k + 1L],
         stringsAsFactors = FALSE
       )))
     }

@@ -130,8 +130,17 @@ test_that('il_estimate_u() keeps unobserved gamma levels with a u floor', {
 
   params <- il_parameters(model)
   expect_equal(sort(params$gamma_level), 0:2)
-  expect_equal(params$u[params$gamma_level == 1], 1e-6)
-  expect_equal(params$u[params$gamma_level == 2], 1e-6)
+  expect_equal(sum(params$u), 1)
+  expect_equal(
+    params$u[params$gamma_level == 1],
+    1e-6 / (1 + 2e-6),
+    tolerance = 1e-12
+  )
+  expect_equal(
+    params$u[params$gamma_level == 2],
+    1e-6 / (1 + 2e-6),
+    tolerance = 1e-12
+  )
 })
 
 # --- il_estimate_em() -----------------------------------------------------
@@ -315,6 +324,42 @@ test_that('il_estimate_m_from_labels() computes m from pairwise labels', {
   expect_false(all(is.na(params$m)))
   # All m values should be in [0, 1]
   expect_true(all(params$m >= 0 & params$m <= 1, na.rm = TRUE))
+})
+
+test_that('il_estimate_m_from_labels() validates label table shape', {
+  skip_if_not_installed('RSQLite')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- data.frame(
+    unique_id = 1:3,
+    first_name = c('Robin', 'Robyn', 'James')
+  )
+  spec <- il_spec() |>
+    il_compare(first_name, cl_levenshtein(2))
+  model <- il_model(df, spec = spec, con = con)
+
+  expect_error(
+    il_estimate_m_from_labels(model, data.frame(unique_id_l = 1L)),
+    'unique_id_r'
+  )
+  expect_error(
+    il_estimate_m_from_labels(model, data.frame(
+      unique_id_l = 1L,
+      unique_id_r = 2L,
+      is_match = NA
+    )),
+    'is_match'
+  )
+  expect_error(
+    il_estimate_m_from_labels(model, data.frame(
+      unique_id_l = 1L,
+      unique_id_r = 2L,
+      is_match = 2
+    )),
+    '0/1'
+  )
 })
 
 # --- il_estimate_m_from_column() ------------------------------------------
