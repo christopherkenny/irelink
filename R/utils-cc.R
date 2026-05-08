@@ -345,7 +345,7 @@ sql_best_link_filter <- function(con, edges_tbl, ties_method = 'lowest_id',
 
 #' Iterative one-to-one clustering (SQL)
 #'
-#' Implements splink's iterative best-link merge with dataset constraints.
+#' Implements iterative best-link merging with dataset constraints.
 #' Each iteration: (1) identify which datasets each cluster contains,
 #' (2) rank candidate edges excluding those that would cause dataset
 #' collisions, (3) keep mutual best pairs, (4) merge. Repeat until

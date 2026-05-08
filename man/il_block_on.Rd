@@ -32,14 +32,13 @@ becomes a separate row for the blocking join. Requires a DuckDB or
 PostgreSQL backend. Defaults to \code{NULL}.}
 }
 \value{
-An updated \code{il_spec} (a new copy; the input is not modified).
+An updated copy of \code{spec}.
 }
 \description{
 Adds an equality-based blocking rule to a specification. During
 prediction, only record pairs that agree on the blocking columns are
-scored. Multiple calls are OR-ed together; within a single call,
-columns are AND-ed. This mirrors \code{\link[dplyr:join_by]{dplyr::join_by()}} where multiple
-conditions inside one call are AND-ed.
+scored. Multiple calls are OR-ed together. Within a single call,
+columns are AND-ed.
 }
 \examples{
 # Block on state OR first name (two calls = OR)

@@ -18,7 +18,8 @@ transforms in order. The individual steps are stored in the
 }
 \description{
 Creates a single transform function that applies multiple transformations
-in sequence — first function applied first, last function applied last.
+in sequence. The first function is applied first and the last function
+is applied last.
 The result is itself a function that can be passed as the \code{transform}
 argument to \code{\link[=il_compare]{il_compare()}} or \code{\link[=il_block_on]{il_block_on()}}.
 }

@@ -3,7 +3,7 @@
 \docType{data}
 \name{fake_20}
 \alias{fake_20}
-\title{Fake 20 — Minimal Deduplication Example}
+\title{Fake 20: Minimal Deduplication Example}
 \format{
 A tibble with 20 rows and 6 columns:
 \describe{

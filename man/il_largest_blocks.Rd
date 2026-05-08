@@ -32,7 +32,7 @@ descending pair count. Columns are the blocking-key values plus
 }
 \description{
 For a given blocking rule, returns the \code{n} blocking-key combinations
-that produce the most record pairs. Useful for diagnosing skew — a
+that produce the most record pairs. This helps diagnose skew, where a
 single dominant key can create a quadratic explosion of pairs.
 }
 \examples{

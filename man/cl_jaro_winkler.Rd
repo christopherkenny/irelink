@@ -19,8 +19,7 @@ A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
 \description{
 Creates comparison levels based on the Jaro-Winkler similarity score
 (0 to 1). Thresholds are passed as unnamed arguments ordered from
-strictest to most lenient — the same direction you would read them in
-a waterfall chart.
+strictest to most lenient.
 }
 \examples{
 il_spec() |>

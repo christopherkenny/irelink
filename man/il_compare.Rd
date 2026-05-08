@@ -33,21 +33,20 @@ functions work on the R-side path only.}
 
 \item{tf_adjustment_weight}{Numeric power to raise the term-frequency
 Bayes factor to. A value of \code{1.0} (the default) applies the full
-adjustment; \code{0} disables it entirely. Only relevant when the
+adjustment. Use \code{0} to disable it entirely. Only relevant when the
 comparison method has \code{term_frequency = TRUE}.}
 
 \item{tf_minimum_u_value}{Numeric floor for the term-frequency
 denominator. When both TF values are below this threshold, it is
-used instead — preventing unrealistically large match weights for
+used instead, preventing unrealistically large match weights for
 very rare terms. Defaults to \code{0.0} (no floor).}
 }
 \value{
-An updated \code{il_spec} (a new copy; the input is not modified).
+An updated copy of \code{spec}.
 }
 \description{
 Declares how one or more columns should be compared when scoring record
-pairs. Each call accumulates a new layer onto the spec, following the
-same stacking pattern as \code{\link[ggplot2:geom_point]{ggplot2::geom_point()}} layers.
+pairs. Each call adds one comparison to the specification.
 }
 \details{
 \code{col} accepts tidyselect expressions: a bare column name, \code{c(col_a, col_b)}, or helpers such as \code{\link[tidyselect:starts_with]{tidyselect::starts_with()}}. When multiple

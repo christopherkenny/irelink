@@ -2,8 +2,7 @@
 #'
 #' Calculates the proportion of records that cannot be linked at each
 #' match-probability threshold. Returns a tidy tibble for plotting the
-#' "unlinkables curve" — useful for understanding how restrictive each
-#' threshold is.
+#' "unlinkables curve". This helps show how restrictive each threshold is.
 #'
 #' @param model A trained `il_model` object.
 #'

@@ -22,10 +22,9 @@ cl_array_intersect <- function(...) {
 #'
 #' Creates comparison levels based on the best-matching pair of values
 #' across two array columns. For each record pair, every element of the
-#' left array is compared against every element of the right array; the
+#' left array is compared against every element of the right array. The
 #' best score (maximum similarity for `'jaro_winkler'`, minimum distance
-#' for `'levenshtein'`) is then tested against each threshold. Equivalent
-#' to splink's `PairwiseStringDistanceFunctionAtThresholds`.
+#' for `'levenshtein'`) is then tested against each threshold.
 #'
 #' On DuckDB the pairwise comparison runs in SQL via an UNNEST cross-join
 #' scalar subquery. On SQLite it falls back to an R-side nested apply.
@@ -75,9 +74,8 @@ cl_array_min_distance <- function(fn = c('jaro_winkler', 'levenshtein'), ...) {
 #' Array Subset Comparison
 #'
 #' Creates a comparison level that matches when the smaller of two array
-#' columns is a complete subset of the larger — i.e., every element of
-#' the smaller array appears in the larger one. Equivalent to splink's
-#' `ArraySubsetLevel`.
+#' columns is a complete subset of the larger. In other words, every
+#' element of the smaller array appears in the larger one.
 #'
 #' On DuckDB and PostgreSQL this is computed in SQL using
 #' `ARRAY_LENGTH(ARRAY_INTERSECT(...)) = LEAST(ARRAY_LENGTH(...))`.

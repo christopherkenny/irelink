@@ -1,7 +1,8 @@
 #' Compose Multiple Transforms into a Chain
 #'
 #' Creates a single transform function that applies multiple transformations
-#' in sequence — first function applied first, last function applied last.
+#' in sequence. The first function is applied first and the last function
+#' is applied last.
 #' The result is itself a function that can be passed as the `transform`
 #' argument to [il_compare()] or [il_block_on()].
 #'

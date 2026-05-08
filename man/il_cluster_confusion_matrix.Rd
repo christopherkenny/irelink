@@ -36,10 +36,9 @@ A one-row tibble with columns \code{threshold}, \code{tp}, \code{fp}, \code{fn},
 }
 \description{
 Computes a record-level confusion matrix after clustering predicted
-matches into entities. This mirrors the common \code{dedupe.ids} style of
-evaluation used in fastLink comparisons: a record is treated as
-"duplicated" if it is not the first record in its predicted cluster,
-and likewise for the ground-truth \code{labels_col}.
+matches into entities. A record is treated as "duplicated" if it is not
+the first record in its predicted cluster, and likewise for the
+ground-truth \code{labels_col}.
 }
 \details{
 For DuckDB and PostgreSQL backends, pair scoring and clustering are

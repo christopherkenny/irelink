@@ -25,7 +25,7 @@ and \code{\link[=il_block_on]{il_block_on()}}.}
 
 \item{con}{A DBI connection object (e.g., from
 \code{DBI::dbConnect(duckdb::duckdb())}). Optional when \code{.data} is a
-\code{tbl_lazy} — the connection is extracted from the table reference.}
+\code{tbl_lazy}, the connection is extracted from the table reference.}
 
 \item{link_type}{One of \code{"dedupe"} (default), \code{"link"}, or
 \code{"link_and_dedupe"}.}

@@ -19,7 +19,7 @@
 #'   and [il_block_on()].
 #' @param con A DBI connection object (e.g., from
 #'   `DBI::dbConnect(duckdb::duckdb())`). Optional when `.data` is a
-#'   `tbl_lazy` — the connection is extracted from the table reference.
+#'   `tbl_lazy`, the connection is extracted from the table reference.
 #' @param link_type One of `"dedupe"` (default), `"link"`, or
 #'   `"link_and_dedupe"`.
 #'
@@ -140,7 +140,7 @@ il_model <- function(
 #'   table name. The first (or only) input dataset.
 #' @param ... Additional datasets for multi-table linkage.
 #' @param con A DBI connection object. Optional when `.data` is a
-#'   `tbl_lazy` — the connection is extracted from the table reference.
+#'   `tbl_lazy`, the connection is extracted from the table reference.
 #' @param link_type Optionally override the model's link type. If `NULL`
 #'   (default), uses the link type stored in the model.
 #'

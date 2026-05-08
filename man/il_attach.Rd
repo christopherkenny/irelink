@@ -15,7 +15,7 @@ table name. The first (or only) input dataset.}
 \item{...}{Additional datasets for multi-table linkage.}
 
 \item{con}{A DBI connection object. Optional when \code{.data} is a
-\code{tbl_lazy} — the connection is extracted from the table reference.}
+\code{tbl_lazy}, the connection is extracted from the table reference.}
 
 \item{link_type}{Optionally override the model's link type. If \code{NULL}
 (default), uses the link type stored in the model.}

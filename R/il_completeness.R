@@ -1,8 +1,7 @@
 #' Column Completeness Across Datasets
 #'
 #' Computes the percentage of non-null values for each column across one
-#' or more datasets. Returns a tidy tibble suitable for plotting with
-#' [ggplot2::geom_col()].
+#' or more datasets.
 #'
 #' @param ... One or more data frames, dbplyr `tbl_lazy` references, or
 #'   character table names to profile.

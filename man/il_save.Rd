@@ -24,7 +24,7 @@ Serializes a trained \code{il_model} object to \code{.json} or \code{.rds}, chos
 }
 \details{
 \code{.json} writes Splink settings JSON. Other extensions write RDS. The
-database connection and any in-database tables are not stored; supply a
+database connection and any in-database tables are not stored. Supply a
 fresh connection with \code{\link[=il_attach]{il_attach()}} after loading.
 }
 \examples{

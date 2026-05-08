@@ -2,7 +2,7 @@
 #'
 #' Runs the EM algorithm under a blocking rule to learn m and u parameters
 #' from unlabeled data. Multiple calls with different blocking rules can
-#' be chained to train on complementary subsets of record pairs — each
+#' be chained to train on complementary subsets of record pairs. Each
 #' call updates the model cumulatively.
 #'
 #' @param model An `il_model` object (piped in).
@@ -11,7 +11,7 @@
 #'   when the largest change in any updated parameter is below this value.
 #'   Defaults to `1e-5`.
 #' @param fix_u Logical. If `TRUE` (the default), hold u parameters fixed
-#'   during EM — only m is updated. Set to `FALSE` to also estimate u.
+#'   during EM, so only m is updated. Set to `FALSE` to also estimate u.
 #'   Only supported with `estimator_mode = "independent"`.
 #' @param fix_m Logical. If `TRUE`, hold m parameters fixed during EM.
 #'   Defaults to `FALSE`. At least one of `fix_u` and `fix_m` must be
@@ -25,9 +25,8 @@
 #' @param estimate_without_tf Logical. If `TRUE` (the default), EM runs
 #'   on aggregated gamma-pattern counts (fast, but ignores per-pair term
 #'   frequency variation). If `FALSE`, EM runs on individual pairs and
-#'   incorporates per-pair TF adjustments in the E-step, matching
-#'   splink's default behavior. Only matters when at least one
-#'   comparison has `term_frequency = TRUE`. Only supported with
+#'   incorporates per-pair TF adjustments in the E-step. Only matters
+#'   when at least one comparison has `term_frequency = TRUE`. Only supported with
 #'   `estimator_mode = "independent"`.
 #' @param derive_prior Logical. If `TRUE`, derive the prior from the
 #'   trained parameter values after EM completes and store it in the
@@ -450,7 +449,7 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
 #' @param u_list List of u probability vectors per comparison.
 #' @param pattern_mat Integer matrix of unique gamma patterns.
 #' @param pattern_n Numeric vector of counts per pattern.
-#' @return Numeric scalar — the derived prior.
+#' @return Numeric scalar, the derived prior.
 #' @noRd
 derive_prior_from_params <- function(m_list, u_list, pattern_mat, pattern_n) {
   n_comp <- ncol(pattern_mat)

@@ -3,7 +3,7 @@
 \docType{data}
 \name{febrl4b}
 \alias{febrl4b}
-\title{FEBRL 4b — Record Linkage Duplicate Records}
+\title{FEBRL 4b: Record Linkage Duplicate Records}
 \format{
 A tibble with 5,000 rows and 11 columns:
 \describe{

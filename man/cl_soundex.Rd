@@ -12,10 +12,10 @@ A comparison-level object for use in \code{\link[=il_compare]{il_compare()}} or
 }
 \description{
 Creates a comparison level based on the Soundex phonetic algorithm.
-Two strings match if their Soundex codes are identical — useful as a
-fallback level within \code{\link[=cl_levels]{cl_levels()}} or \code{\link[=cl_name]{cl_name()}} to catch names
-that sound similar but are spelled differently (e.g., Smith/Smyth,
-Robert/Rupert).
+Two strings match if their Soundex codes are identical. This can be
+used as a fallback level within \code{\link[=cl_levels]{cl_levels()}} or \code{\link[=cl_name]{cl_name()}} to catch
+names that sound similar but are spelled differently (e.g.,
+Smith/Smyth, Robert/Rupert).
 }
 \details{
 On DuckDB, Soundex runs via a registered SQL MACRO.

@@ -2,9 +2,8 @@
 #'
 #' Adds an equality-based blocking rule to a specification. During
 #' prediction, only record pairs that agree on the blocking columns are
-#' scored. Multiple calls are OR-ed together; within a single call,
-#' columns are AND-ed. This mirrors [dplyr::join_by()] where multiple
-#' conditions inside one call are AND-ed.
+#' scored. Multiple calls are OR-ed together. Within a single call,
+#' columns are AND-ed.
 #'
 #' @param spec An `il_spec` object (piped in).
 #' @param ... Columns for equality blocking (AND-ed within one call).
@@ -25,7 +24,7 @@
 #'   becomes a separate row for the blocking join. Requires a DuckDB or
 #'   PostgreSQL backend. Defaults to `NULL`.
 #'
-#' @return An updated `il_spec` (a new copy; the input is not modified).
+#' @return An updated copy of `spec`.
 #' @export
 #'
 #' @examples
@@ -86,8 +85,7 @@ il_block_on <- function(spec, ..., .where = NULL, .transform = NULL,
 #' Creates a blocking rule for use inside training verbs such as
 #' [il_estimate_em()] and [il_estimate_prior()]. This is distinct from
 #' [il_block_on()], which adds prediction-time blocking to a specification.
-#' Analogous to [dplyr::join_by()] — a specification object that describes
-#' how to partition pairs during training.
+#' The returned object describes how to partition pairs during training.
 #'
 #' @param ... Column names (bare or `column ~ transform` formulas). See
 #'   [il_block_on()] for details on the formula syntax. Columns are AND-ed

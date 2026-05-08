@@ -28,7 +28,7 @@ when the largest change in any updated parameter is below this value.
 Defaults to \code{1e-5}.}
 
 \item{fix_u}{Logical. If \code{TRUE} (the default), hold u parameters fixed
-during EM — only m is updated. Set to \code{FALSE} to also estimate u.
+during EM, so only m is updated. Set to \code{FALSE} to also estimate u.
 Only supported with \code{estimator_mode = "independent"}.}
 
 \item{fix_m}{Logical. If \code{TRUE}, hold m parameters fixed during EM.
@@ -46,9 +46,8 @@ Defaults to \code{FALSE}.}
 \item{estimate_without_tf}{Logical. If \code{TRUE} (the default), EM runs
 on aggregated gamma-pattern counts (fast, but ignores per-pair term
 frequency variation). If \code{FALSE}, EM runs on individual pairs and
-incorporates per-pair TF adjustments in the E-step, matching
-splink's default behavior. Only matters when at least one
-comparison has \code{term_frequency = TRUE}. Only supported with
+incorporates per-pair TF adjustments in the E-step. Only matters
+when at least one comparison has \code{term_frequency = TRUE}. Only supported with
 \code{estimator_mode = "independent"}.}
 
 \item{derive_prior}{Logical. If \code{TRUE}, derive the prior from the
@@ -68,7 +67,7 @@ An updated \code{il_model} with trained m and u parameters.
 \description{
 Runs the EM algorithm under a blocking rule to learn m and u parameters
 from unlabeled data. Multiple calls with different blocking rules can
-be chained to train on complementary subsets of record pairs — each
+be chained to train on complementary subsets of record pairs. Each
 call updates the model cumulatively.
 }
 \examples{

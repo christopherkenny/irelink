@@ -2,8 +2,7 @@
 #'
 #' Creates a comparison level that fires when two column values are
 #' transposed between the left and right records (e.g., first name and
-#' surname accidentally swapped). This is a standalone equivalent of
-#' splink's `ColumnsReversedLevel`.
+#' surname accidentally swapped).
 #'
 #' Use inside [cl_levels()] to add a swap-detection level to a custom
 #' comparison. For a ready-made name comparison that already includes

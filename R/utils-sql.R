@@ -740,7 +740,7 @@ sql_explode_from <- function(tbl, explode_cols, dialect) {
 #' @param tbl_l Left table name.
 #' @param tbl_r Right table name.
 #' @param link_type One of "dedupe", "link", or "link_and_dedupe".
-#' @param has_two_tables Logical; TRUE when tbl_l and tbl_r differ.
+#' @param has_two_tables Logical. TRUE when tbl_l and tbl_r differ.
 #' @return A list of lists, each with `from_l`, `from_r`, `join_cond`.
 #' @noRd
 build_table_pairs <- function(tbl_l, tbl_r, link_type, has_two_tables) {
@@ -967,7 +967,7 @@ build_blocking_condition <- function(columns, where = NULL, transform = NULL,
 #' @param tbl_l Left table name.
 #' @param tbl_r Right table name (same as tbl_l for dedupe).
 #' @param where A SQL WHERE fragment for blocking.
-#' @param dedupe Logical; if TRUE, add `l.unique_id < r.unique_id`.
+#' @param dedupe Logical. If TRUE, add `l.unique_id < r.unique_id`.
 #' @return Integer count of pairs.
 #' @noRd
 count_blocked_pairs <- function(con, tbl_l, tbl_r, where, dedupe = TRUE) {
@@ -991,7 +991,7 @@ count_blocked_pairs <- function(con, tbl_l, tbl_r, where, dedupe = TRUE) {
 #' @param tbl_r Right table name.
 #' @param rule An il_blocking_rule object.
 #' @param link_type One of "dedupe", "link", or "link_and_dedupe".
-#' @param has_two_tables Logical; TRUE when tbl_l and tbl_r differ.
+#' @param has_two_tables Logical. TRUE when tbl_l and tbl_r differ.
 #' @param dialect SQL dialect string.
 #' @return SQL selecting source/id columns for blocked pairs.
 #' @noRd

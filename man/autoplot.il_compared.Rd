@@ -21,6 +21,7 @@ A \code{ggplot} object.
 \description{
 Produces a match-weight histogram from scored pairs, or a waterfall
 chart for a single pair when \code{which} is provided. This is a
-convenience wrapper; for full control, use \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}}
-directly on the tibble or on data from \code{\link[=il_waterfall]{il_waterfall()}}.
+convenience wrapper around \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}}. For full control,
+build a plot directly from the prediction result or from
+\code{\link[=il_waterfall]{il_waterfall()}}.
 }

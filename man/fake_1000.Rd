@@ -3,7 +3,7 @@
 \docType{data}
 \name{fake_1000}
 \alias{fake_1000}
-\title{Splink Fake 1000 — Deduplication Benchmark}
+\title{Splink Fake 1000: Deduplication Benchmark}
 \format{
 A tibble with 1,000 rows and 7 columns:
 \describe{

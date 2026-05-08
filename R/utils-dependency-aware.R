@@ -511,7 +511,7 @@ prepare_dependency_scored_query <- function(model, gamma_sql,
 #' Score Comparison Patterns
 #'
 #' Scores an aggregated or row-level comparison-pattern table using a trained
-#' model. Dependency-aware models use their fitted log-linear pattern state;
+#' model. Dependency-aware models use their fitted log-linear pattern state.
 #' independent models use the fieldwise m/u parameters.
 #'
 #' @param model A trained `il_model`.

@@ -2,8 +2,8 @@
 #'
 #' Phonetic algorithms for blocking and comparison transforms. These
 #' functions compute phonetic encodings that group similar-sounding
-#' names together — useful for blocking rules that tolerate spelling
-#' variation.
+#' names together. They are useful for blocking rules that tolerate
+#' spelling variation.
 #'
 #' When used as a `transform` argument in [il_block_on()], [block_on()],
 #' or [il_compare()], the computation is pushed into SQL so data is

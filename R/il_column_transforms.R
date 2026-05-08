@@ -45,7 +45,7 @@ il_substr <- function(start, length) {
 #'
 #' @param pattern A POSIX-style regular expression.
 #' @param group Integer capture group (0 = whole match). Currently only
-#'   group 0 is supported in the R fallback; SQL backends support
+#'   group 0 is supported in the R fallback. SQL backends support
 #'   numbered groups.
 #'
 #' @return An `il_column_transform` closure.
@@ -129,7 +129,8 @@ il_cast_to_string <- function() {
 #'
 #' Returns a transform that attempts to parse a string column as a date.
 #' Unlike `as.Date()`, failures return `NA`/`NULL` rather than raising an
-#' error — on DuckDB this uses `try_strptime()`, on PostgreSQL `TO_DATE()`.
+#' error. On DuckDB this uses `try_strptime()`, and on PostgreSQL it uses
+#' `TO_DATE()`.
 #' The result can be passed as the `transform` argument to [il_compare()]
 #' or [il_block_on()], and composed with other transforms via
 #' [il_transform()].
@@ -158,8 +159,8 @@ il_try_parse_date <- function(format = '%Y-%m-%d') {
 #'
 #' Returns a transform that attempts to parse a string column as a
 #' timestamp. Unlike `as.POSIXct()`, failures return `NA`/`NULL` rather
-#' than raising an error — on DuckDB this uses `try_strptime()`, on
-#' PostgreSQL `TO_TIMESTAMP()`. The result can be passed as the
+#' than raising an error. On DuckDB this uses `try_strptime()`, and on
+#' PostgreSQL it uses `TO_TIMESTAMP()`. The result can be passed as the
 #' `transform` argument to [il_compare()] or [il_block_on()], and
 #' composed with other transforms via [il_transform()].
 #'

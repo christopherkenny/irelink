@@ -16,8 +16,8 @@ An \code{il_column_transform} closure.
 \description{
 Returns a transform that attempts to parse a string column as a
 timestamp. Unlike \code{as.POSIXct()}, failures return \code{NA}/\code{NULL} rather
-than raising an error — on DuckDB this uses \code{try_strptime()}, on
-PostgreSQL \code{TO_TIMESTAMP()}. The result can be passed as the
+than raising an error. On DuckDB this uses \code{try_strptime()}, and on
+PostgreSQL it uses \code{TO_TIMESTAMP()}. The result can be passed as the
 \code{transform} argument to \code{\link[=il_compare]{il_compare()}} or \code{\link[=il_block_on]{il_block_on()}}, and
 composed with other transforms via \code{\link[=il_transform]{il_transform()}}.
 }

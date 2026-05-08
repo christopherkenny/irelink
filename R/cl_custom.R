@@ -24,13 +24,13 @@ cl_custom <- function(sql_expr, ...) {
 #' Literal Value Comparison
 #'
 #' Creates a comparison level that checks whether a column equals a
-#' fixed literal value on the left record, right record, or both.
-#' Equivalent to splink's `LiteralMatchLevel`. Useful as a gate inside
-#' [cl_levels()] to restrict a comparison to records with a known value
-#' (e.g., only compare names when `country = 'US'`).
+#' fixed literal value on the left record, right record, or both. This is
+#' useful as a gate inside [cl_levels()] to restrict a comparison to
+#' records with a known value (e.g., only compare names when
+#' `country = 'US'`).
 #'
 #' @param value A scalar value to compare against. Character values are
-#'   quoted in the generated SQL; numerics are not.
+#'   quoted in the generated SQL. Numerics are not.
 #' @param side Which record to check: `'both'` (default), `'left'`, or
 #'   `'right'`.
 #'

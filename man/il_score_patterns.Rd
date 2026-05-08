@@ -18,6 +18,6 @@ A tibble containing the input columns plus \code{match_weight} and
 }
 \description{
 Scores an aggregated or row-level comparison-pattern table using a trained
-model. Dependency-aware models use their fitted log-linear pattern state;
+model. Dependency-aware models use their fitted log-linear pattern state.
 independent models use the fieldwise m/u parameters.
 }

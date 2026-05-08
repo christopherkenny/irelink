@@ -11,9 +11,8 @@ A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
 }
 \description{
 Creates a comparison level that matches when the smaller of two array
-columns is a complete subset of the larger — i.e., every element of
-the smaller array appears in the larger one. Equivalent to splink's
-\code{ArraySubsetLevel}.
+columns is a complete subset of the larger. In other words, every
+element of the smaller array appears in the larger one.
 }
 \details{
 On DuckDB and PostgreSQL this is computed in SQL using

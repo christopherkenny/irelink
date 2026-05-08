@@ -19,8 +19,7 @@ A tibble with columns \code{table}, \code{column}, \code{n_total},
 }
 \description{
 Computes the percentage of non-null values for each column across one
-or more datasets. Returns a tidy tibble suitable for plotting with
-\code{\link[ggplot2:geom_bar]{ggplot2::geom_col()}}.
+or more datasets.
 }
 \examples{
 df <- data.frame(

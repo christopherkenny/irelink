@@ -1,10 +1,9 @@
 #' Cluster-Level Confusion Matrix for Deduplication
 #'
 #' Computes a record-level confusion matrix after clustering predicted
-#' matches into entities. This mirrors the common `dedupe.ids` style of
-#' evaluation used in fastLink comparisons: a record is treated as
-#' "duplicated" if it is not the first record in its predicted cluster,
-#' and likewise for the ground-truth `labels_col`.
+#' matches into entities. A record is treated as "duplicated" if it is not
+#' the first record in its predicted cluster, and likewise for the
+#' ground-truth `labels_col`.
 #'
 #' For DuckDB and PostgreSQL backends, pair scoring and clustering are
 #' pushed into SQL where possible. The final summary still returns a

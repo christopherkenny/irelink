@@ -10,7 +10,7 @@ il_regex_extract(pattern, group = 0L)
 \item{pattern}{A POSIX-style regular expression.}
 
 \item{group}{Integer capture group (0 = whole match). Currently only
-group 0 is supported in the R fallback; SQL backends support
+group 0 is supported in the R fallback. SQL backends support
 numbered groups.}
 }
 \value{

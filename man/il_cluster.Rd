@@ -23,13 +23,13 @@ clustering, or \code{"best_link"} for single-best-link clustering.}
 
 \item{ties_method}{How to handle tied best-link probabilities when
 \code{method = "best_link"}. \code{"lowest_id"} (default) keeps the edge to
-the record with the smaller \code{unique_id}; \code{"drop"} removes all edges
+the record with the smaller \code{unique_id}. \code{"drop"} removes all edges
 where the best-link probability is tied.}
 
 \item{source_dataset}{An optional named character vector or data frame
 mapping \code{unique_id} values to their source dataset name. Used with
 \code{method = "best_link"} to enforce at-most-one-record per source
-dataset per cluster (splink's \code{duplicate_free_datasets} constraint).
+dataset per cluster.
 If a data frame, must contain columns \code{unique_id} and \code{source_dataset}.}
 }
 \value{
@@ -38,9 +38,8 @@ A tibble with one row per input record, including a
 }
 \description{
 Groups scored record pairs into entity clusters using graph-based
-methods. Analogous to \code{\link[dplyr:group_by]{dplyr::group_by()}} — just as \code{group_by()}
-assigns group labels, \code{il_cluster()} assigns cluster IDs to records
-that represent the same real-world entity.
+methods. The result assigns cluster IDs to records that represent the
+same real-world entity.
 }
 \examples{
 df <- data.frame(

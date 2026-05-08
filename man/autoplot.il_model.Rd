@@ -20,7 +20,7 @@ A \code{ggplot} object.
 }
 \description{
 Produces a ready-made chart from a trained model. By default draws
-the match-weights bar chart; set \code{type = "parameters"} for an m / u
+the match-weights bar chart. Set \code{type = "parameters"} for an m / u
 probability comparison. For full control, extract data with
 \code{\link[=il_weights]{il_weights()}} or \code{\link[=il_parameters]{il_parameters()}} and build a custom
 \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}}.

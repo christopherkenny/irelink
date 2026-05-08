@@ -2,8 +2,8 @@
 #'
 #' Estimates the probability that two randomly selected records from the
 #' dataset are a match, using deterministic rules and a recall assumption.
-#' This prior anchors the Fellegi-Sunter model. Analogous to fitting a
-#' base rate before more detailed parameter estimation.
+#' This prior anchors the Fellegi-Sunter model before more detailed
+#' parameter estimation.
 #'
 #' @param model An `il_model` object (piped in).
 #' @param ... Blocking rules created by [block_on()] that define

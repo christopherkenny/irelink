@@ -29,8 +29,7 @@ A blocking-rule object for use in training verbs.
 Creates a blocking rule for use inside training verbs such as
 \code{\link[=il_estimate_em]{il_estimate_em()}} and \code{\link[=il_estimate_prior]{il_estimate_prior()}}. This is distinct from
 \code{\link[=il_block_on]{il_block_on()}}, which adds prediction-time blocking to a specification.
-Analogous to \code{\link[dplyr:join_by]{dplyr::join_by()}} — a specification object that describes
-how to partition pairs during training.
+The returned object describes how to partition pairs during training.
 }
 \examples{
 block_on(first_name, surname)

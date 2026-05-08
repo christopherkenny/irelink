@@ -1,8 +1,7 @@
 #' Add a Comparison Layer to a Specification
 #'
 #' Declares how one or more columns should be compared when scoring record
-#' pairs. Each call accumulates a new layer onto the spec, following the
-#' same stacking pattern as [ggplot2::geom_point()] layers.
+#' pairs. Each call adds one comparison to the specification.
 #'
 #' `col` accepts tidyselect expressions: a bare column name, `c(col_a,
 #' col_b)`, or helpers such as [tidyselect::starts_with()]. When multiple
@@ -21,15 +20,15 @@
 #'   functions work on the R-side path only.
 #' @param tf_adjustment_weight Numeric power to raise the term-frequency
 #'   Bayes factor to. A value of `1.0` (the default) applies the full
-#'   adjustment; `0` disables it entirely. Only relevant when the
+#'   adjustment. Use `0` to disable it entirely. Only relevant when the
 #'   comparison method has `term_frequency = TRUE`.
 #' @param tf_minimum_u_value Numeric floor for the term-frequency
 #'   denominator. When both TF values are below this threshold, it is
-#'   used instead — preventing unrealistically large match weights for
+#'   used instead, preventing unrealistically large match weights for
 #'   very rare terms. Defaults to `0.0` (no floor).
 #' @param ... Reserved for future use.
 #'
-#' @return An updated `il_spec` (a new copy; the input is not modified).
+#' @return An updated copy of `spec`.
 #' @export
 #'
 #' @examples

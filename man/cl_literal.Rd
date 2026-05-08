@@ -8,7 +8,7 @@ cl_literal(value, side = c("both", "left", "right"))
 }
 \arguments{
 \item{value}{A scalar value to compare against. Character values are
-quoted in the generated SQL; numerics are not.}
+quoted in the generated SQL. Numerics are not.}
 
 \item{side}{Which record to check: \code{'both'} (default), \code{'left'}, or
 \code{'right'}.}
@@ -19,10 +19,10 @@ A comparison-level object for use in \code{\link[=il_compare]{il_compare()}} or
 }
 \description{
 Creates a comparison level that checks whether a column equals a
-fixed literal value on the left record, right record, or both.
-Equivalent to splink's \code{LiteralMatchLevel}. Useful as a gate inside
-\code{\link[=cl_levels]{cl_levels()}} to restrict a comparison to records with a known value
-(e.g., only compare names when \code{country = 'US'}).
+fixed literal value on the left record, right record, or both. This is
+useful as a gate inside \code{\link[=cl_levels]{cl_levels()}} to restrict a comparison to
+records with a known value (e.g., only compare names when
+\code{country = 'US'}).
 }
 \examples{
 il_spec() |>

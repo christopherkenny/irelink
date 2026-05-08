@@ -1189,3 +1189,15 @@ Remove any overstatements or comments which would require adding unmaintained pa
 I need to start manually reviewing this package.
 Scan the package surface and give me some ideas on how to break this into chunks.
 Write the plan to `inst/refs/47-review-plan.md`.
+
+## Docs (Codex GPT-5.5 medium)
+
+Perform a critical docs review for this new R package.
+There is some leakage between the design docs and the actual Roxygen documentation.
+Scan for things that should not be included in roxygen. These include, but are not limited to:
+
+- inspiration for an interface. e.g., il_compare points to geom_point and links to it. This is not acceptable, as there is no formal relationship between them, even if informally, these might have similar stacking structures.
+- em dashes in roxygen: these are intended to be clear, not ugly lists. writing should be optimized for humans, which requires clear sentences, not runons that are powered by lazy punctuation (e.g., ---, —, ;)
+
+There are substantial docs that help explain the design in `inst/`.
+These are not user facing and should not leak into the user-facing docs.

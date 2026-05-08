@@ -2,7 +2,6 @@
 #'
 #' Initializes a blank `il_spec` object onto which comparison layers and
 #' blocking rules are added with [il_compare()] and [il_block_on()].
-#' Analogous to [ggplot2::ggplot()] creating an empty canvas.
 #'
 #' @return An `il_spec` object with no comparisons or blocking rules.
 #' @export

@@ -1,7 +1,7 @@
 #' Quick Match-Weights Plot for a Model
 #'
 #' Produces a ready-made chart from a trained model. By default draws
-#' the match-weights bar chart; set `type = "parameters"` for an m / u
+#' the match-weights bar chart. Set `type = "parameters"` for an m / u
 #' probability comparison. For full control, extract data with
 #' [il_weights()] or [il_parameters()] and build a custom
 #' [ggplot2::ggplot()].
@@ -81,8 +81,9 @@ autoplot.il_model <- function(object, type = c('weights', 'parameters'), ...) {
 #'
 #' Produces a match-weight histogram from scored pairs, or a waterfall
 #' chart for a single pair when `which` is provided. This is a
-#' convenience wrapper; for full control, use [ggplot2::ggplot()]
-#' directly on the tibble or on data from [il_waterfall()].
+#' convenience wrapper around [ggplot2::ggplot()]. For full control,
+#' build a plot directly from the prediction result or from
+#' [il_waterfall()].
 #'
 #' @param object An `il_compared` tibble from [predict.il_model()].
 #' @param which An optional integer index. If provided, produces a

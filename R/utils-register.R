@@ -79,7 +79,7 @@ il_track_table <- function(model, tbl_name,
 #' @param data A data.frame, `tbl_lazy`, or character table name.
 #' @param con A DBI connection (optional when `data` is `tbl_lazy`).
 #' @param tbl_name Internal table/view name to create.
-#' @param add_unique_id Logical; if TRUE, injects a `unique_id` column
+#' @param add_unique_id Logical. If TRUE, injects a `unique_id` column
 #'   when one is not already present.
 #' @return A list with `tbl_name`, `con`, `n_records`, `columns`, and
 #'   `needs_cleanup` (logical).

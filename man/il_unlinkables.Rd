@@ -15,8 +15,7 @@ A tibble with columns \code{threshold} and \code{pct_unlinkable}.
 \description{
 Calculates the proportion of records that cannot be linked at each
 match-probability threshold. Returns a tidy tibble for plotting the
-"unlinkables curve" — useful for understanding how restrictive each
-threshold is.
+"unlinkables curve". This helps show how restrictive each threshold is.
 }
 \examples{
 df <- data.frame(

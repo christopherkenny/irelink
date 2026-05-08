@@ -3,7 +3,7 @@
 \docType{data}
 \name{fake_1000_labels}
 \alias{fake_1000_labels}
-\title{Splink Fake 1000 — Clerical Pairwise Labels}
+\title{Splink Fake 1000: Clerical Pairwise Labels}
 \format{
 A tibble with 3,176 rows and 5 columns:
 \describe{
@@ -30,7 +30,7 @@ Each row records whether a pair of records from \code{fake_1000} is a true
 match (\code{clerical_match_score = 1}) or a non-match
 (\code{clerical_match_score = 0}).
 These labels enable evaluation of model accuracy, ROC curves, and
-precision–recall metrics.
+precision-recall metrics.
 }
 \seealso{
 \link{fake_1000}, \code{\link[=il_accuracy]{il_accuracy()}}, \code{\link[=il_roc]{il_roc()}},

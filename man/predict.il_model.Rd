@@ -67,8 +67,7 @@ scored pairs table in the database.
 \description{
 Generates and scores all candidate record pairs that pass the blocking
 rules, returning those above the match-probability threshold. This is
-an S3 method for \code{\link[stats:predict]{stats::predict()}} — the same generic used for \code{lm},
-\code{glm}, and tidymodels objects.
+an S3 method for \code{\link[stats:predict]{stats::predict()}}.
 }
 \examples{
 df <- data.frame(

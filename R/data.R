@@ -1,4 +1,4 @@
-#' Splink Fake 1000 — Deduplication Benchmark
+#' Splink Fake 1000: Deduplication Benchmark
 #'
 #' A dataset of 1,000 synthetic records representing 181 unique people,
 #' each with varying numbers of duplicate entries.
@@ -34,14 +34,14 @@
 'fake_1000'
 
 
-#' Splink Fake 1000 — Clerical Pairwise Labels
+#' Splink Fake 1000: Clerical Pairwise Labels
 #'
 #' Pairwise clerical labels for the [fake_1000] dataset.
 #' Each row records whether a pair of records from `fake_1000` is a true
 #' match (`clerical_match_score = 1`) or a non-match
 #' (`clerical_match_score = 0`).
 #' These labels enable evaluation of model accuracy, ROC curves, and
-#' precision–recall metrics.
+#' precision-recall metrics.
 #'
 #' @format A tibble with 3,176 rows and 5 columns:
 #' \describe{
@@ -64,7 +64,7 @@
 'fake_1000_labels'
 
 
-#' FEBRL 4a — Record Linkage Original Records
+#' FEBRL 4a: Record Linkage Original Records
 #'
 #' The FEBRL (Freely Extensible Biomedical Record Linkage) dataset 4a
 #' contains 5,000 original records.
@@ -106,7 +106,7 @@
 'febrl4a'
 
 
-#' FEBRL 4b — Record Linkage Duplicate Records
+#' FEBRL 4b: Record Linkage Duplicate Records
 #'
 #' The FEBRL (Freely Extensible Biomedical Record Linkage) dataset 4b
 #' contains 5,000 duplicate records, one for each original in [febrl4a].
@@ -152,7 +152,7 @@
 'febrl4b'
 
 
-#' Fake 20 — Minimal Deduplication Example
+#' Fake 20: Minimal Deduplication Example
 #'
 #' A small, hand-crafted dataset of 20 records representing 5 unique
 #' people.

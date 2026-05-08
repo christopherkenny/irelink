@@ -22,8 +22,8 @@ A character vector of phonetic codes (same length as \code{x}).
 \description{
 Phonetic algorithms for blocking and comparison transforms. These
 functions compute phonetic encodings that group similar-sounding
-names together — useful for blocking rules that tolerate spelling
-variation.
+names together. They are useful for blocking rules that tolerate
+spelling variation.
 }
 \details{
 When used as a \code{transform} argument in \code{\link[=il_block_on]{il_block_on()}}, \code{\link[=block_on]{block_on()}},

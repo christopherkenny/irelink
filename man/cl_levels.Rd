@@ -19,8 +19,7 @@ A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
 \description{
 Assembles an ordered list of comparison levels from individual level
 constructors. Use this when the built-in \verb{cl_*()} helpers do not fit
-and you need full control over the level hierarchy. Analogous to
-writing a custom \code{\link[ggplot2:stat_identity]{ggplot2::stat_identity()}} layer.
+and you need full control over the level hierarchy.
 }
 \examples{
 il_spec() |>

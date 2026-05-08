@@ -22,8 +22,7 @@ A comparison-level object for use in \code{\link[=il_compare]{il_compare()}} or
 \description{
 Creates a comparison level that fires when two column values are
 transposed between the left and right records (e.g., first name and
-surname accidentally swapped). This is a standalone equivalent of
-splink's \code{ColumnsReversedLevel}.
+surname accidentally swapped).
 }
 \details{
 Use inside \code{\link[=cl_levels]{cl_levels()}} to add a swap-detection level to a custom

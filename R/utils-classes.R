@@ -126,8 +126,8 @@ validate_il_compared <- function(x) {
 #'
 #' @param method Character string naming the comparison method.
 #' @param ... Additional named fields stored in the level (e.g., `thresholds`).
-#' @param is_null_level Logical; TRUE for null sentinel levels.
-#' @param is_else_level Logical; TRUE for else fallback levels.
+#' @param is_null_level Logical. TRUE for null sentinel levels.
+#' @param is_else_level Logical. TRUE for else fallback levels.
 #'
 #' @return An `il_comparison_level` S3 object.
 #' @noRd

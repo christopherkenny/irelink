@@ -33,7 +33,7 @@ A tibble of exact-match record pairs.
 \description{
 Finds exact-match record pairs using the blocking rules in the
 specification, without requiring probabilistic training. This is a
-common first step before probabilistic linkage — pairs that match on
+common first step before probabilistic linkage. Pairs that match on
 all blocking columns are returned directly.
 }
 \examples{

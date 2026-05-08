@@ -24,8 +24,8 @@ An updated \code{il_model} with the estimated prior.
 \description{
 Estimates the probability that two randomly selected records from the
 dataset are a match, using deterministic rules and a recall assumption.
-This prior anchors the Fellegi-Sunter model. Analogous to fitting a
-base rate before more detailed parameter estimation.
+This prior anchors the Fellegi-Sunter model before more detailed
+parameter estimation.
 }
 \examples{
 df <- data.frame(

@@ -2,8 +2,7 @@
 #'
 #' Generates and scores all candidate record pairs that pass the blocking
 #' rules, returning those above the match-probability threshold. This is
-#' an S3 method for [stats::predict()] — the same generic used for `lm`,
-#' `glm`, and tidymodels objects.
+#' an S3 method for [stats::predict()].
 #'
 #' @param object A trained `il_model` object.
 #' @param threshold A numeric value between 0 and 1. Only pairs with a

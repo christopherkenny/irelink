@@ -1,9 +1,8 @@
 #' Cluster Scored Pairs into Entities
 #'
 #' Groups scored record pairs into entity clusters using graph-based
-#' methods. Analogous to [dplyr::group_by()] — just as `group_by()`
-#' assigns group labels, `il_cluster()` assigns cluster IDs to records
-#' that represent the same real-world entity.
+#' methods. The result assigns cluster IDs to records that represent the
+#' same real-world entity.
 #'
 #' @param pairs An `il_compared` tibble from [predict.il_model()].
 #' @param threshold An optional secondary match-probability threshold.
@@ -12,13 +11,13 @@
 #'   clustering, or `"best_link"` for single-best-link clustering.
 #' @param ties_method How to handle tied best-link probabilities when
 #'   `method = "best_link"`. `"lowest_id"` (default) keeps the edge to
-#'   the record with the smaller `unique_id`; `"drop"` removes all edges
+#'   the record with the smaller `unique_id`. `"drop"` removes all edges
 #'   where the best-link probability is tied.
 #'
 #' @param source_dataset An optional named character vector or data frame
 #'   mapping `unique_id` values to their source dataset name. Used with
 #'   `method = "best_link"` to enforce at-most-one-record per source
-#'   dataset per cluster (splink's `duplicate_free_datasets` constraint).
+#'   dataset per cluster.
 #'   If a data frame, must contain columns `unique_id` and `source_dataset`.
 #'
 #' @return A tibble with one row per input record, including a

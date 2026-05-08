@@ -1,10 +1,10 @@
 #' Soundex Phonetic Comparison
 #'
 #' Creates a comparison level based on the Soundex phonetic algorithm.
-#' Two strings match if their Soundex codes are identical — useful as a
-#' fallback level within [cl_levels()] or [cl_name()] to catch names
-#' that sound similar but are spelled differently (e.g., Smith/Smyth,
-#' Robert/Rupert).
+#' Two strings match if their Soundex codes are identical. This can be
+#' used as a fallback level within [cl_levels()] or [cl_name()] to catch
+#' names that sound similar but are spelled differently (e.g.,
+#' Smith/Smyth, Robert/Rupert).
 #'
 #' On DuckDB, Soundex runs via a registered SQL MACRO.
 #' On PostgreSQL, it uses the native `soundex()` function.

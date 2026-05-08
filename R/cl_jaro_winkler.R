@@ -2,8 +2,7 @@
 #'
 #' Creates comparison levels based on the Jaro-Winkler similarity score
 #' (0 to 1). Thresholds are passed as unnamed arguments ordered from
-#' strictest to most lenient — the same direction you would read them in
-#' a waterfall chart.
+#' strictest to most lenient.
 #'
 #' @param ... Numeric thresholds between 0 and 1, ordered from strictest
 #'   to most lenient (e.g., `0.9, 0.7`).

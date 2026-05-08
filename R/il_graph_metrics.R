@@ -233,7 +233,7 @@ graph_metrics_r <- function(pairs, clusters) {
 
 #' Compute bridge flags for edges
 #'
-#' Uses igraph to identify bridge edges — edges whose removal would
+#' Uses igraph to identify bridge edges. Removing one of these edges would
 #' disconnect the graph.
 #'
 #' @param id_l,id_r Character vectors of edge endpoints.

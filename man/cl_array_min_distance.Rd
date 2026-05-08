@@ -21,10 +21,9 @@ A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
 \description{
 Creates comparison levels based on the best-matching pair of values
 across two array columns. For each record pair, every element of the
-left array is compared against every element of the right array; the
+left array is compared against every element of the right array. The
 best score (maximum similarity for \code{'jaro_winkler'}, minimum distance
-for \code{'levenshtein'}) is then tested against each threshold. Equivalent
-to splink's \code{PairwiseStringDistanceFunctionAtThresholds}.
+for \code{'levenshtein'}) is then tested against each threshold.
 }
 \details{
 On DuckDB the pairwise comparison runs in SQL via an UNNEST cross-join

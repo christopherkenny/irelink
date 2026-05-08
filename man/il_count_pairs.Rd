@@ -26,7 +26,7 @@ are supplied, it also includes \code{cumulative_pairs} and
 \description{
 Estimates how many record pairs each blocking rule generates without
 performing full comparisons. Useful for tuning blocking strategies
-before training — too many pairs is slow; too few misses matches.
+before training. Too many pairs is slow, while too few misses matches.
 }
 \examples{
 df <- data.frame(
