@@ -109,7 +109,7 @@ test_that('sql_tf_adj_expr() uses COALESCE for one-sided NULL handling', {
   # Should NOT require both sides non-NULL
   expect_false(grepl('tf_city_l IS NOT NULL AND tf_city_r IS NOT NULL', sql))
   # Should require at least one side non-NULL via COALESCE
-  expect_true(grepl('COALESCE\\(tf_city_l, tf_city_r\\) IS NOT NULL', sql))
+  expect_true(grepl('COALESCE\\("tf_city_l", "tf_city_r"\\) IS NOT NULL', sql))
 })
 
 # --- TF adjustment math ------------------------------------------------------

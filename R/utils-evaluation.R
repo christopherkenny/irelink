@@ -36,6 +36,9 @@ labels_from_column <- function(model, labels_col, threshold = 0) {
   dialect <- detect_dialect(con)
   tbl_l <- model$data$tbl_l
   tbl_r <- model$data$tbl_r %||% tbl_l
+  qtbl_l <- sql_quote_identifier(tbl_l)
+  qtbl_r <- sql_quote_identifier(tbl_r)
+  qlabels_col <- sql_quote_identifier(labels_col)
   link_type <- model$link_type %||% 'dedupe'
   dedup_cond <- if (link_type == 'dedupe') {
     'AND gl.unique_id < gr.unique_id '
@@ -51,13 +54,13 @@ labels_from_column <- function(model, labels_col, threshold = 0) {
     sql <- glue::glue(
       'WITH true_matches AS (',
       'SELECT gl.unique_id AS unique_id_l, gr.unique_id AS unique_id_r ',
-      'FROM {tbl_l} gl JOIN {tbl_r} gr ',
-      'ON gl.{labels_col} IS NOT NULL AND gr.{labels_col} IS NOT NULL ',
-      'AND gl.{labels_col} = gr.{labels_col} {dedup_cond}',
+      'FROM {qtbl_l} gl JOIN {qtbl_r} gr ',
+      'ON gl.{qlabels_col} IS NOT NULL AND gr.{qlabels_col} IS NOT NULL ',
+      'AND gl.{qlabels_col} = gr.{qlabels_col} {dedup_cond}',
       '), universe AS (',
       'SELECT unique_id_l, unique_id_r FROM true_matches ',
       'UNION ',
-      'SELECT unique_id_l, unique_id_r FROM {lazy$predicted_tbl}',
+      'SELECT unique_id_l, unique_id_r FROM {sql_quote_identifier(lazy$predicted_tbl)}',
       ') ',
       'SELECT u.unique_id_l, u.unique_id_r, ',
       'CASE WHEN tm.unique_id_l IS NOT NULL THEN 1 ELSE 0 END AS is_match ',
@@ -71,9 +74,9 @@ labels_from_column <- function(model, labels_col, threshold = 0) {
   # Fallback: collect all true matches from data + candidate pairs, label both
   sql_true <- glue::glue(
     'SELECT gl.unique_id AS unique_id_l, gr.unique_id AS unique_id_r ',
-    'FROM {tbl_l} gl JOIN {tbl_r} gr ',
-    'ON gl.{labels_col} IS NOT NULL AND gr.{labels_col} IS NOT NULL ',
-    'AND gl.{labels_col} = gr.{labels_col} {dedup_cond}'
+    'FROM {qtbl_l} gl JOIN {qtbl_r} gr ',
+    'ON gl.{qlabels_col} IS NOT NULL AND gr.{qlabels_col} IS NOT NULL ',
+    'AND gl.{qlabels_col} = gr.{qlabels_col} {dedup_cond}'
   )
   true_pairs <- DBI::dbGetQuery(con, sql_true)
   true_pairs$is_match <- 1L
@@ -90,6 +93,9 @@ resolve_labels_from_pairs <- function(model, pairs, labels_col) {
   con <- model$con
   tbl_l <- model$data$tbl_l
   tbl_r <- model$data$tbl_r %||% tbl_l
+  qtbl_l <- sql_quote_identifier(tbl_l)
+  qtbl_r <- sql_quote_identifier(tbl_r)
+  qlabels_col <- sql_quote_identifier(labels_col)
 
   id_l <- as.character(pairs$unique_id_l)
   id_r <- as.character(pairs$unique_id_r)
@@ -98,7 +104,7 @@ resolve_labels_from_pairs <- function(model, pairs, labels_col) {
 
   # Fetch ground-truth column for all relevant IDs
   sql_l <- glue::glue(
-    'SELECT unique_id, {labels_col} FROM {tbl_l} WHERE unique_id IN ({id_list})'
+    'SELECT unique_id, {qlabels_col} FROM {qtbl_l} WHERE unique_id IN ({id_list})'
   )
   gt_l <- DBI::dbGetQuery(con, sql_l)
   rownames(gt_l) <- as.character(gt_l$unique_id)
@@ -107,7 +113,7 @@ resolve_labels_from_pairs <- function(model, pairs, labels_col) {
     gt_r <- gt_l
   } else {
     sql_r <- glue::glue(
-      'SELECT unique_id, {labels_col} FROM {tbl_r} WHERE unique_id IN ({id_list})'
+      'SELECT unique_id, {qlabels_col} FROM {qtbl_r} WHERE unique_id IN ({id_list})'
     )
     gt_r <- DBI::dbGetQuery(con, sql_r)
     rownames(gt_r) <- as.character(gt_r$unique_id)
@@ -186,6 +192,8 @@ score_labeled_pairs <- function(model, labels) {
   dialect <- detect_dialect(con)
   tbl_l <- model$data$tbl_l
   tbl_r <- model$data$tbl_r %||% tbl_l
+  qtbl_l <- sql_quote_identifier(tbl_l)
+  qtbl_r <- sql_quote_identifier(tbl_r)
 
   id_l <- as.character(labels$unique_id_l)
   id_r <- as.character(labels$unique_id_r)
@@ -206,7 +214,9 @@ score_labeled_pairs <- function(model, labels) {
       comparisons,
       function(comp) {
         expr <- sql_gamma_case(comp, dialect)
-        glue::glue('{expr} AS gamma_{comparison_name(comp)}')
+        glue::glue(
+          '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+        )
       },
       character(1)
     )
@@ -255,9 +265,9 @@ score_labeled_pairs <- function(model, labels) {
       'FROM (',
       'SELECT lbl.pair_idx, {gamma_select}, ',
       '{br_sql} AS found_by_blocking ',
-      'FROM {lbl_tbl} lbl ',
-      'JOIN {tbl_l} l ON l.unique_id = lbl.uid_l ',
-      'JOIN {tbl_r} r ON r.unique_id = lbl.uid_r',
+      'FROM {sql_quote_identifier(lbl_tbl)} lbl ',
+      'JOIN {qtbl_l} l ON l.unique_id = lbl.uid_l ',
+      'JOIN {qtbl_r} r ON r.unique_id = lbl.uid_r',
       ') AS gamma_pairs',
       ') AS weighted_pairs ORDER BY pair_idx'
     )
@@ -276,10 +286,12 @@ score_labeled_pairs <- function(model, labels) {
   id_list <- paste(DBI::dbQuoteString(con, all_ids), collapse = ', ')
 
   cols_needed <- unique(c('unique_id', comp_names))
-  col_select <- paste(cols_needed, collapse = ', ')
+  col_select <- sql_identifier_csv(cols_needed)
+  qtbl_l <- sql_quote_identifier(tbl_l)
+  qtbl_r <- sql_quote_identifier(tbl_r)
 
   sql_l <- glue::glue(
-    'SELECT {col_select} FROM {tbl_l} WHERE unique_id IN ({id_list})'
+    'SELECT {col_select} FROM {qtbl_l} WHERE unique_id IN ({id_list})'
   )
   src_l <- DBI::dbGetQuery(con, sql_l)
   rownames(src_l) <- as.character(src_l$unique_id)
@@ -288,7 +300,7 @@ score_labeled_pairs <- function(model, labels) {
     src_r <- src_l
   } else {
     sql_r <- glue::glue(
-      'SELECT {col_select} FROM {tbl_r} WHERE unique_id IN ({id_list})'
+      'SELECT {col_select} FROM {qtbl_r} WHERE unique_id IN ({id_list})'
     )
     src_r <- DBI::dbGetQuery(con, sql_r)
     rownames(src_r) <- as.character(src_r$unique_id)

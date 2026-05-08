@@ -39,3 +39,24 @@ test_that('cl_date_diff(days(30)) generates date arithmetic SQL', {
   )
   expect_match(sql, '30', fixed = TRUE)
 })
+
+test_that('date-diff SQL uses PostgreSQL date arithmetic for postgres', {
+  sql <- sql_for_comparison_level(
+    cl_date_diff(days(30)), 'dob',
+    dialect = 'postgres'
+  )
+  expect_match(sql, 'CAST\\(l\\."dob" AS DATE\\) - CAST\\(r\\."dob" AS DATE\\)')
+  expect_no_match(sql, 'JULIANDAY', fixed = TRUE)
+})
+
+test_that('sql_gamma_case quotes non-syntactic column names', {
+  comp <- list(
+    columns = 'first name',
+    method = cl_exact(),
+    transform = NULL
+  )
+  sql <- sql_gamma_case(comp, 'duckdb')
+  expect_match(sql, 'l\\."first name" IS NOT NULL')
+  expect_match(sql, 'r\\."first name" IS NOT NULL')
+  expect_match(sql, 'l\\."first name" = r\\."first name"')
+})

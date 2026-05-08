@@ -43,6 +43,59 @@ dialect_has_fuzzy_sql <- function(dialect) {
   dialect %in% c('duckdb', 'postgres')
 }
 
+#' Quote a SQL identifier with ANSI double quotes
+#' @noRd
+sql_quote_identifier <- function(x) {
+  if (!is.character(x) || anyNA(x)) {
+    cli::cli_abort('SQL identifiers must be non-missing character strings.')
+  }
+  vapply(x, function(val) {
+    paste0('"', gsub('"', '""', val, fixed = TRUE), '"')
+  }, character(1), USE.NAMES = FALSE)
+}
+
+#' Build an aliased column reference
+#' @noRd
+sql_col_ref <- function(alias, col) {
+  paste0(alias, '.', sql_quote_identifier(col))
+}
+
+#' Join identifiers for a SELECT or GROUP BY clause
+#' @noRd
+sql_identifier_csv <- function(x) {
+  paste(sql_quote_identifier(x), collapse = ', ')
+}
+
+#' Build a dialect-specific date-difference expression in days
+#' @noRd
+sql_date_diff_expr <- function(lcol, rcol, dialect) {
+  if (identical(dialect, 'duckdb')) {
+    return(glue::glue('ABS(TRY_CAST({lcol} AS DATE) - TRY_CAST({rcol} AS DATE))'))
+  }
+  if (identical(dialect, 'postgres')) {
+    return(glue::glue('ABS(CAST({lcol} AS DATE) - CAST({rcol} AS DATE))'))
+  }
+  glue::glue('ABS(JULIANDAY({lcol}) - JULIANDAY({rcol}))')
+}
+
+#' Build a dialect-specific timestamp-difference expression in seconds
+#' @noRd
+sql_time_diff_expr <- function(lcol, rcol, dialect) {
+  if (identical(dialect, 'duckdb')) {
+    return(glue::glue(
+      'ABS(EPOCH(CAST({lcol} AS TIMESTAMP)) - EPOCH(CAST({rcol} AS TIMESTAMP)))'
+    ))
+  }
+  if (identical(dialect, 'postgres')) {
+    return(glue::glue(
+      'ABS(EXTRACT(EPOCH FROM (CAST({lcol} AS TIMESTAMP) - CAST({rcol} AS TIMESTAMP))))'
+    ))
+  }
+  glue::glue(
+    'ABS((JULIANDAY({lcol}) - JULIANDAY({rcol})) * 86400.0)'
+  )
+}
+
 #' Wrap a column reference with a SQL-translated transform
 #'
 #' Maps common R functions (tolower, toupper, trimws) and phonetic
@@ -274,12 +327,13 @@ sql_gamma_case <- function(comp, dialect) {
   }
 
   # Build column references with optional transforms
-  lcol <- sql_transform_col(glue::glue('l.{col}'), tf, dialect)
-  rcol <- sql_transform_col(glue::glue('r.{col}'), tf, dialect)
-
-  null_guard <- glue::glue(
-    'l.{col} IS NOT NULL AND r.{col} IS NOT NULL'
-  )
+  if (length(col) == 1L) {
+    lref <- sql_col_ref('l', col)
+    rref <- sql_col_ref('r', col)
+    lcol <- sql_transform_col(lref, tf, dialect)
+    rcol <- sql_transform_col(rref, tf, dialect)
+    null_guard <- glue::glue('{lref} IS NOT NULL AND {rref} IS NOT NULL')
+  }
 
   if (method == 'exact') {
     return(glue::glue(
@@ -369,11 +423,10 @@ sql_gamma_case <- function(comp, dialect) {
         1
       )
       days_val <- thresholds[i] * mult
-      if (dialect == 'duckdb') {
-        glue::glue('WHEN {null_guard} AND ABS(TRY_CAST({lcol} AS DATE) - TRY_CAST({rcol} AS DATE)) <= {days_val} THEN {n - i + 1L}')
-      } else {
-        glue::glue('WHEN {null_guard} AND ABS(JULIANDAY({lcol}) - JULIANDAY({rcol})) <= {days_val} THEN {n - i + 1L}')
-      }
+      diff_expr <- sql_date_diff_expr(lcol, rcol, dialect)
+      glue::glue(
+        'WHEN {null_guard} AND {diff_expr} <= {days_val} THEN {n - i + 1L}'
+      )
     }, character(1))
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
@@ -382,15 +435,10 @@ sql_gamma_case <- function(comp, dialect) {
     n <- length(thresholds)
     whens <- vapply(seq_along(thresholds), function(i) {
       secs_val <- time_diff_to_seconds(thresholds[i], level$units[i])
-      if (dialect == 'duckdb') {
-        glue::glue(
-          'WHEN {null_guard} AND ABS(EPOCH(CAST({lcol} AS TIMESTAMP)) - EPOCH(CAST({rcol} AS TIMESTAMP))) <= {secs_val} THEN {n - i + 1L}'
-        )
-      } else {
-        glue::glue(
-          'WHEN {null_guard} AND ABS(EXTRACT(EPOCH FROM (CAST({lcol} AS TIMESTAMP) - CAST({rcol} AS TIMESTAMP)))) <= {secs_val} THEN {n - i + 1L}'
-        )
-      }
+      diff_expr <- sql_time_diff_expr(lcol, rcol, dialect)
+      glue::glue(
+        'WHEN {null_guard} AND {diff_expr} <= {secs_val} THEN {n - i + 1L}'
+      )
     }, character(1))
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
@@ -408,12 +456,13 @@ sql_gamma_case <- function(comp, dialect) {
         '{.fn cl_distance_km} comparisons require latitude and longitude columns.'
       )
     }
-    lat_l <- sql_transform_col(glue::glue('l.{col[1]}'), tf, dialect)
-    lon_l <- sql_transform_col(glue::glue('l.{col[2]}'), tf, dialect)
-    lat_r <- sql_transform_col(glue::glue('r.{col[1]}'), tf, dialect)
-    lon_r <- sql_transform_col(glue::glue('r.{col[2]}'), tf, dialect)
+    lat_l <- sql_transform_col(sql_col_ref('l', col[1]), tf, dialect)
+    lon_l <- sql_transform_col(sql_col_ref('l', col[2]), tf, dialect)
+    lat_r <- sql_transform_col(sql_col_ref('r', col[1]), tf, dialect)
+    lon_r <- sql_transform_col(sql_col_ref('r', col[2]), tf, dialect)
     null_guard2 <- glue::glue(
-      'l.{col[1]} IS NOT NULL AND r.{col[1]} IS NOT NULL AND l.{col[2]} IS NOT NULL AND r.{col[2]} IS NOT NULL'
+      '{sql_col_ref("l", col[1])} IS NOT NULL AND {sql_col_ref("r", col[1])} IS NOT NULL ',
+      'AND {sql_col_ref("l", col[2])} IS NOT NULL AND {sql_col_ref("r", col[2])} IS NOT NULL'
     )
     dist <- glue::glue(
       '2 * 6371 * ASIN(SQRT(POWER(SIN(RADIANS(({lat_r} - {lat_l}) / 2)), 2) + ',
@@ -443,7 +492,12 @@ sql_gamma_case <- function(comp, dialect) {
   }
 
   if (method == 'custom') {
-    sql_expr <- glue::glue(level$sql_expr, col = col[[1]], .open = '{', .close = '}')
+    sql_expr <- glue::glue(
+      level$sql_expr,
+      col = sql_quote_identifier(col[[1]]),
+      .open = '{',
+      .close = '}'
+    )
     return(glue::glue('CASE WHEN {null_guard} AND ({sql_expr}) THEN 1 ELSE 0 END'))
   }
 
@@ -497,8 +551,8 @@ sql_gamma_case <- function(comp, dialect) {
 #' @return A SQL condition string.
 #' @noRd
 sql_sublevel_condition <- function(sub, col, dialect, null_guard,
-                                   lcol = paste0('l.', col),
-                                   rcol = paste0('r.', col)) {
+                                   lcol = sql_col_ref('l', col),
+                                   rcol = sql_col_ref('r', col)) {
   method <- sub$method
 
   if (method == 'exact') {
@@ -548,18 +602,14 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
       1
     )
     days_val <- t * mult
-    if (dialect == 'duckdb') {
-      return(glue::glue('{null_guard} AND ABS(TRY_CAST({lcol} AS DATE) - TRY_CAST({rcol} AS DATE)) <= {days_val}'))
-    }
-    return(glue::glue('{null_guard} AND ABS(JULIANDAY({lcol}) - JULIANDAY({rcol})) <= {days_val}'))
+    diff_expr <- sql_date_diff_expr(lcol, rcol, dialect)
+    return(glue::glue('{null_guard} AND {diff_expr} <= {days_val}'))
   }
   if (method == 'time_diff') {
     t <- sub$thresholds[1]
     secs_val <- time_diff_to_seconds(t, sub$units[1])
-    if (dialect == 'duckdb') {
-      return(glue::glue('{null_guard} AND ABS(EPOCH(CAST({lcol} AS TIMESTAMP)) - EPOCH(CAST({rcol} AS TIMESTAMP))) <= {secs_val}'))
-    }
-    return(glue::glue('{null_guard} AND ABS(EXTRACT(EPOCH FROM (CAST({lcol} AS TIMESTAMP) - CAST({rcol} AS TIMESTAMP)))) <= {secs_val}'))
+    diff_expr <- sql_time_diff_expr(lcol, rcol, dialect)
+    return(glue::glue('{null_guard} AND {diff_expr} <= {secs_val}'))
   }
   if (method == 'soundex') {
     soundex_fn <- if (identical(dialect, 'duckdb')) 'il_soundex' else 'soundex'
@@ -567,14 +617,14 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
   }
   if (method == 'array_subset') {
     return(glue::glue(
-      '{null_guard} AND ARRAY_LENGTH(ARRAY_INTERSECT(l.{col}, r.{col})) = ',
-      'LEAST(ARRAY_LENGTH(l.{col}), ARRAY_LENGTH(r.{col}))'
+      '{null_guard} AND ARRAY_LENGTH(ARRAY_INTERSECT({lcol}, {rcol})) = ',
+      'LEAST(ARRAY_LENGTH({lcol}), ARRAY_LENGTH({rcol}))'
     ))
   }
   if (method == 'array_intersect') {
     t <- sub$thresholds[1]
     return(glue::glue(
-      '{null_guard} AND ARRAY_LENGTH(ARRAY_INTERSECT(l.{col}, r.{col})) >= {t}'
+      '{null_guard} AND ARRAY_LENGTH(ARRAY_INTERSECT({lcol}, {rcol})) >= {t}'
     ))
   }
   if (method == 'array_min_distance') {
@@ -584,7 +634,12 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
     return(glue::glue('{null_guard} AND ({inner}) {op} {t}'))
   }
   if (method == 'custom') {
-    sql_expr <- glue::glue(sub$sql_expr, col = col, .open = '{', .close = '}')
+    sql_expr <- glue::glue(
+      sub$sql_expr,
+      col = sql_quote_identifier(col),
+      .open = '{',
+      .close = '}'
+    )
     return(glue::glue('{null_guard} AND ({sql_expr})'))
   }
   if (method == 'and') {
@@ -620,9 +675,10 @@ sql_array_min_distance_inner <- function(fn, col) {
   } else {
     'levenshtein(lv, rv)'
   }
+  qcol <- sql_quote_identifier(col)
   paste0(
     '(SELECT ', agg, '(', dist_fn, ') ',
-    'FROM UNNEST(l.', col, ') AS t1(lv), UNNEST(r.', col, ') AS t2(rv))'
+    'FROM UNNEST(l.', qcol, ') AS t1(lv), UNNEST(r.', qcol, ') AS t2(rv))'
   )
 }
 
@@ -644,7 +700,7 @@ sql_array_min_distance_case <- function(level, col, null_guard) {
     'SELECT CASE ', paste(when_clauses, collapse = ' '), ' ELSE 0 END ',
     'FROM (SELECT ', if (fn == 'jaro_winkler') 'MAX' else 'MIN',
     '(', if (fn == 'jaro_winkler') 'jaro_winkler_similarity(lv, rv)' else 'levenshtein(lv, rv)',
-    ') AS m FROM UNNEST(l.', col, ') AS t1(lv), UNNEST(r.', col, ') AS t2(rv)) sub_m'
+    ') AS m FROM UNNEST(l.', sql_quote_identifier(col), ') AS t1(lv), UNNEST(r.', sql_quote_identifier(col), ') AS t2(rv)) sub_m'
   )
 
   glue::glue(
@@ -676,7 +732,9 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL,
   # Gamma SELECT expressions
   gamma_exprs <- vapply(comparisons, function(comp) {
     expr <- sql_gamma_case(comp, dialect)
-    glue::glue('{expr} AS gamma_{comparison_name(comp)}')
+    glue::glue(
+      '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+    )
   }, character(1))
   gamma_select <- paste(gamma_exprs, collapse = ', ')
 
@@ -742,7 +800,7 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL,
     } else {
       all_parts <- c(all_parts, glue::glue(
         '{select_prefix}',
-        'FROM {tp$from_l} l, {tp$from_r} r ',
+        'FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
         'WHERE {tp$join_cond}'
       ))
     }
@@ -790,9 +848,9 @@ build_gamma_query_from_blocked_pairs <- function(model, blocked_pairs_tbl,
   parts <- vapply(combos, function(combo) {
     glue::glue(
       'SELECT b.l_unique_id, b.r_unique_id, {gamma_select} ',
-      'FROM {blocked_pairs_tbl} b ',
-      'INNER JOIN {combo$from_l} l ON l.unique_id = b.l_unique_id ',
-      'INNER JOIN {combo$from_r} r ON r.unique_id = b.r_unique_id ',
+      'FROM {sql_quote_identifier(blocked_pairs_tbl)} b ',
+      'INNER JOIN {sql_quote_identifier(combo$from_l)} l ON l.unique_id = b.l_unique_id ',
+      'INNER JOIN {sql_quote_identifier(combo$from_r)} r ON r.unique_id = b.r_unique_id ',
       "WHERE b.source_l = '{combo$source_l}' ",
       "AND b.source_r = '{combo$source_r}'"
     )
@@ -818,33 +876,36 @@ build_gamma_query_from_blocked_pairs <- function(model, blocked_pairs_tbl,
 #' @return A SQL FROM fragment (either a table name or a parenthesised subquery).
 #' @noRd
 sql_explode_from <- function(tbl, explode_cols, dialect) {
+  qtbl <- sql_quote_identifier(tbl)
   if (is.null(explode_cols) || length(explode_cols) == 0L) {
-    return(tbl)
+    return(qtbl)
   }
   if (dialect == 'duckdb') {
-    exclude_clause <- paste0(explode_cols, collapse = ', ')
-    unnest_exprs <- paste0('UNNEST(', explode_cols, ') AS ', explode_cols,
+    qexplode <- sql_quote_identifier(explode_cols)
+    exclude_clause <- paste(qexplode, collapse = ', ')
+    unnest_exprs <- paste0('UNNEST(', qexplode, ') AS ', qexplode,
       collapse = ', '
     )
     return(glue::glue(
-      '(SELECT * EXCLUDE ({exclude_clause}), {unnest_exprs} FROM {tbl})'
+      '(SELECT * EXCLUDE ({exclude_clause}), {unnest_exprs} FROM {qtbl})'
     ))
   }
   if (dialect == 'postgres') {
     # PostgreSQL: CROSS JOIN LATERAL UNNEST for each array column
-    laterals <- vapply(explode_cols, function(col) {
+    laterals <- vapply(seq_along(explode_cols), function(i) {
+      qcol <- sql_quote_identifier(explode_cols[[i]])
       glue::glue(
-        'CROSS JOIN LATERAL UNNEST({col}) AS _unnest_{col}({col})'
+        'CROSS JOIN LATERAL UNNEST({qcol}) AS _unnest_{i}({qcol})'
       )
     }, character(1))
     return(glue::glue(
-      '(SELECT * FROM {tbl} {paste(laterals, collapse = " ")})'
+      '(SELECT * FROM {qtbl} {paste(laterals, collapse = " ")})'
     ))
   }
   cli::cli_warn(
     '{.arg .explode} is not supported for SQLite; ignoring array explosion.'
   )
-  tbl
+  qtbl
 }
 
 #' Build the set of (left_table, right_table, join_condition) combos
@@ -894,16 +955,18 @@ build_table_pairs <- function(tbl_l, tbl_r, link_type, has_two_tables) {
 #' @noRd
 sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
   method <- level$method
+  lcol <- sql_col_ref('l', col)
+  rcol <- sql_col_ref('r', col)
 
   if (method == 'exact') {
-    return(glue::glue('l.{col} = r.{col}'))
+    return(glue::glue('{lcol} = {rcol}'))
   }
 
   if (method == 'jaro_winkler') {
     thresholds <- level$thresholds
     fn_name <- if (dialect == 'sqlite') 'jaro_winkler_similarity' else 'jaro_winkler_similarity'
     parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN {fn_name}(l.{col}, r.{col}) >= {t} THEN {t}')
+      glue::glue('WHEN {fn_name}({lcol}, {rcol}) >= {t} THEN {t}')
     }, character(1))
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
@@ -911,7 +974,7 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
   if (method == 'jaro') {
     thresholds <- level$thresholds
     parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN jaro_similarity(l.{col}, r.{col}) >= {t} THEN {t}')
+      glue::glue('WHEN jaro_similarity({lcol}, {rcol}) >= {t} THEN {t}')
     }, character(1))
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
@@ -920,7 +983,7 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
     thresholds <- level$thresholds
     fn_name <- method
     parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN {fn_name}(l.{col}, r.{col}) <= {t} THEN {t}')
+      glue::glue('WHEN {fn_name}({lcol}, {rcol}) <= {t} THEN {t}')
     }, character(1))
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
@@ -928,7 +991,7 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
   if (method == 'jaccard') {
     thresholds <- level$thresholds
     parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN jaccard(l.{col}, r.{col}) >= {t} THEN {t}')
+      glue::glue('WHEN jaccard({lcol}, {rcol}) >= {t} THEN {t}')
     }, character(1))
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
@@ -936,7 +999,7 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
   if (method == 'cosine') {
     thresholds <- level$thresholds
     parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN cosine_similarity(l.{col}, r.{col}) >= {t} THEN {t}')
+      glue::glue('WHEN cosine_similarity({lcol}, {rcol}) >= {t} THEN {t}')
     }, character(1))
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
@@ -944,7 +1007,7 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
   if (method == 'numeric_diff') {
     thresholds <- level$thresholds
     parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN ABS(l.{col} - r.{col}) <= {t} THEN {t}')
+      glue::glue('WHEN ABS({lcol} - {rcol}) <= {t} THEN {t}')
     }, character(1))
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
@@ -953,8 +1016,8 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
     thresholds <- level$thresholds
     parts <- vapply(thresholds, function(t) {
       glue::glue(
-        'WHEN ABS(l.{col} - r.{col}) / ',
-        'NULLIF(GREATEST(ABS(l.{col}), ABS(r.{col})), 0) <= {t} THEN {t}'
+        'WHEN ABS({lcol} - {rcol}) / ',
+        'NULLIF(GREATEST(ABS({lcol}), ABS({rcol})), 0) <= {t} THEN {t}'
       )
     }, character(1))
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
@@ -972,7 +1035,7 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
         thresholds[i]
       )
       parts[i] <- glue::glue(
-        'WHEN ABS(JULIANDAY(l.{col}) - JULIANDAY(r.{col})) <= {days_val} THEN {i}'
+        'WHEN {sql_date_diff_expr(lcol, rcol, dialect)} <= {days_val} THEN {i}'
       )
     }
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
@@ -985,7 +1048,7 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
     for (i in seq_along(thresholds)) {
       secs_val <- time_diff_to_seconds(thresholds[i], units[i])
       parts[i] <- glue::glue(
-        'WHEN ABS(EPOCH(CAST(l.{col} AS TIMESTAMP)) - EPOCH(CAST(r.{col} AS TIMESTAMP))) <= {secs_val} THEN {i}'
+        'WHEN {sql_time_diff_expr(lcol, rcol, dialect)} <= {secs_val} THEN {i}'
       )
     }
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
@@ -994,7 +1057,7 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
   if (method == 'distance_km') {
     thresholds <- level$thresholds
     parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN distance_km(l.{col}, r.{col}) <= {t} THEN {t}')
+      glue::glue('WHEN distance_km({lcol}, {rcol}) <= {t} THEN {t}')
     }, character(1))
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
@@ -1002,24 +1065,29 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
   if (method == 'array_intersect') {
     thresholds <- level$thresholds
     parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN array_intersect_count(l.{col}, r.{col}) >= {t} THEN {t}')
+      glue::glue('WHEN array_intersect_count({lcol}, {rcol}) >= {t} THEN {t}')
     }, character(1))
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == 'array_subset') {
     return(glue::glue(
-      'CASE WHEN ARRAY_LENGTH(ARRAY_INTERSECT(l.{col}, r.{col})) = ',
-      'LEAST(ARRAY_LENGTH(l.{col}), ARRAY_LENGTH(r.{col})) THEN 1 ELSE 0 END'
+      'CASE WHEN ARRAY_LENGTH(ARRAY_INTERSECT({lcol}, {rcol})) = ',
+      'LEAST(ARRAY_LENGTH({lcol}), ARRAY_LENGTH({rcol})) THEN 1 ELSE 0 END'
     ))
   }
 
   if (method == 'custom') {
-    return(level$sql_expr)
+    return(glue::glue(
+      level$sql_expr,
+      col = sql_quote_identifier(col),
+      .open = '{',
+      .close = '}'
+    ))
   }
 
   if (method == 'null') {
-    return(glue::glue('l.{col} IS NULL OR r.{col} IS NULL'))
+    return(glue::glue('{lcol} IS NULL OR {rcol} IS NULL'))
   }
 
   if (method == 'levels') {
@@ -1029,7 +1097,7 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
     return(paste(parts, collapse = '\n'))
   }
 
-  glue::glue('l.{col} = r.{col}')
+  glue::glue('{lcol} = {rcol}')
 }
 
 #' Build aliased SELECT clauses for left/right tables
@@ -1041,8 +1109,16 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
 #' @noRd
 build_select_aliases <- function(cols) {
   list(
-    left = paste(glue::glue('l.{cols} AS l_{cols}'), collapse = ', '),
-    right = paste(glue::glue('r.{cols} AS r_{cols}'), collapse = ', ')
+    left = paste(vapply(cols, function(col) {
+      glue::glue(
+        '{sql_col_ref("l", col)} AS {sql_quote_identifier(paste0("l_", col))}'
+      )
+    }, character(1)), collapse = ', '),
+    right = paste(vapply(cols, function(col) {
+      glue::glue(
+        '{sql_col_ref("r", col)} AS {sql_quote_identifier(paste0("r_", col))}'
+      )
+    }, character(1)), collapse = ', ')
   )
 }
 
@@ -1060,8 +1136,8 @@ build_blocking_condition <- function(columns, where = NULL, transform = NULL,
   if (length(columns) > 0L) {
     parts <- vapply(columns, function(col) {
       col_tf <- if (is.list(transform)) transform[[col]] else transform
-      lcol <- sql_transform_col(glue::glue('l.{col}'), col_tf, dialect)
-      rcol <- sql_transform_col(glue::glue('r.{col}'), col_tf, dialect)
+      lcol <- sql_transform_col(sql_col_ref('l', col), col_tf, dialect)
+      rcol <- sql_transform_col(sql_col_ref('r', col), col_tf, dialect)
       glue::glue('{lcol} = {rcol}')
     }, character(1))
   }
@@ -1083,14 +1159,16 @@ build_blocking_condition <- function(columns, where = NULL, transform = NULL,
 #' @return Integer count of pairs.
 #' @noRd
 count_blocked_pairs <- function(con, tbl_l, tbl_r, where, dedupe = TRUE) {
+  qtbl_l <- sql_quote_identifier(tbl_l)
+  qtbl_r <- sql_quote_identifier(tbl_r)
   if (dedupe) {
     sql <- glue::glue(
-      'SELECT COUNT(*) AS n FROM {tbl_l} l, {tbl_r} r ',
+      'SELECT COUNT(*) AS n FROM {qtbl_l} l, {qtbl_r} r ',
       'WHERE l.unique_id < r.unique_id AND {where}'
     )
   } else {
     sql <- glue::glue(
-      'SELECT COUNT(*) AS n FROM {tbl_l} l, {tbl_r} r WHERE {where}'
+      'SELECT COUNT(*) AS n FROM {qtbl_l} l, {qtbl_r} r WHERE {where}'
     )
   }
   res <- DBI::dbGetQuery(con, sql)
@@ -1186,8 +1264,9 @@ sql_weight_case <- function(comp_name, m_vec, u_vec) {
   whens <- vapply(seq_along(weights), function(i) {
     glue::glue('WHEN {i - 1L} THEN {weights[i]}')
   }, character(1))
+  gamma_col <- sql_quote_identifier(paste0('gamma_', comp_name))
   glue::glue(
-    'CAST(CASE gamma_{comp_name} {paste(whens, collapse = " ")} ELSE 0.0 END AS DOUBLE)'
+    'CAST(CASE {gamma_col} {paste(whens, collapse = " ")} ELSE 0.0 END AS DOUBLE)'
   )
 }
 
@@ -1213,14 +1292,17 @@ sql_tf_adj_expr <- function(col, max_level, u_exact,
   }
   log2_u <- log2(max(u_exact, 1e-10))
   ln2 <- log(2)
+  gamma_col <- sql_quote_identifier(paste0('gamma_', col))
+  tf_col_l <- sql_quote_identifier(paste0('tf_', col, '_l'))
+  tf_col_r <- sql_quote_identifier(paste0('tf_', col, '_r'))
   # Build TF divisor using COALESCE so that when only one side has a TF
   # value the available value is used (matches splink's coalesce approach
   # and the R-side pmax(na.rm=TRUE) path).
   tf_coalesce_lr <- glue::glue(
-    'COALESCE(tf_{col}_l, tf_{col}_r)'
+    'COALESCE({tf_col_l}, {tf_col_r})'
   )
   tf_coalesce_rl <- glue::glue(
-    'COALESCE(tf_{col}_r, tf_{col}_l)'
+    'COALESCE({tf_col_r}, {tf_col_l})'
   )
   tf_max_expr <- glue::glue(
     'GREATEST({tf_coalesce_lr}, {tf_coalesce_rl})'
@@ -1237,7 +1319,7 @@ sql_tf_adj_expr <- function(col, max_level, u_exact,
     adj_expr <- glue::glue('{tf_adjustment_weight} * ({adj_expr})')
   }
   glue::glue(
-    'CAST(CASE WHEN gamma_{col} = {max_level} ',
+    'CAST(CASE WHEN {gamma_col} = {max_level} ',
     'AND {tf_coalesce_lr} IS NOT NULL ',
     'AND {tf_divisor} > 0 ',
     'THEN {adj_expr} ',
@@ -1288,10 +1370,12 @@ build_scored_query <- function(model, threshold = 0.85,
       tf_min <- comp$tf_minimum_u_value %||% 0.0
       expr <- sql_tf_adj_expr(col, max_level, u_exact, tf_w, tf_min)
       tf_parts <- c(tf_parts, expr)
-      tf_adj_selects <- c(
-        tf_adj_selects,
-        glue::glue('({expr}) AS tf_adj_{col}')
-      )
+        tf_adj_selects <- c(
+          tf_adj_selects,
+          glue::glue(
+            '({expr}) AS {sql_quote_identifier(paste0("tf_adj_", col))}'
+          )
+        )
     }
   }
 
@@ -1303,7 +1387,7 @@ build_scored_query <- function(model, threshold = 0.85,
   ln2 <- log(2)
 
   gamma_cols <- paste0('gamma_', comp_names)
-  gamma_select <- paste(gamma_cols, collapse = ', ')
+  gamma_select <- sql_identifier_csv(gamma_cols)
 
   # tf_adj columns: inner SELECT computes them, outer just references by name
   inner_tf_adj <- ''
@@ -1313,7 +1397,10 @@ build_scored_query <- function(model, threshold = 0.85,
     tf_col_names <- vapply(comparisons[vapply(comparisons, function(c) {
       isTRUE(c$method$term_frequency)
     }, logical(1))], function(c) c$columns, character(1))
-    outer_tf_adj <- paste0(', ', paste0('tf_adj_', tf_col_names, collapse = ', '))
+    outer_tf_adj <- paste0(
+      ', ',
+      sql_identifier_csv(paste0('tf_adj_', tf_col_names))
+    )
   }
 
   # Choose filter: match_weight threshold or match_probability threshold

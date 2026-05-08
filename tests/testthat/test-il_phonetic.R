@@ -164,10 +164,10 @@ test_that('build_blocking_condition applies soundex transform (DuckDB)', {
     transform = il_soundex,
     dialect = 'duckdb'
   )
-  expect_true(grepl('il_soundex\\(l\\.first_name\\)', sql))
-  expect_true(grepl('il_soundex\\(r\\.first_name\\)', sql))
-  expect_true(grepl('il_soundex\\(l\\.surname\\)', sql))
-  expect_true(grepl('il_soundex\\(r\\.surname\\)', sql))
+  expect_true(grepl('il_soundex\\(l\\."first_name"\\)', sql))
+  expect_true(grepl('il_soundex\\(r\\."first_name"\\)', sql))
+  expect_true(grepl('il_soundex\\(l\\."surname"\\)', sql))
+  expect_true(grepl('il_soundex\\(r\\."surname"\\)', sql))
   expect_true(grepl('AND', sql))
 })
 
@@ -177,13 +177,13 @@ test_that('build_blocking_condition applies soundex transform (PostgreSQL)', {
     transform = il_soundex,
     dialect = 'postgres'
   )
-  expect_true(grepl('soundex\\(l\\.first_name\\)', sql))
-  expect_true(grepl('soundex\\(r\\.first_name\\)', sql))
+  expect_true(grepl('soundex\\(l\\."first_name"\\)', sql))
+  expect_true(grepl('soundex\\(r\\."first_name"\\)', sql))
 })
 
 test_that('build_blocking_condition without transform leaves columns bare', {
   sql <- build_blocking_condition(columns = 'first_name')
-  expect_equal(sql, 'l.first_name = r.first_name')
+  expect_equal(sql, 'l."first_name" = r."first_name"')
 })
 
 # --- print.il_spec shows transform label ------------------------------------

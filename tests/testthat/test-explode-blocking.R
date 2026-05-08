@@ -26,29 +26,29 @@ test_that('block_on rejects non-character .explode', {
 
 test_that('sql_explode_from returns table name when no explode cols', {
   result <- sql_explode_from('my_tbl', NULL, 'duckdb')
-  expect_equal(result, 'my_tbl')
+  expect_equal(result, '"my_tbl"')
 
   result2 <- sql_explode_from('my_tbl', character(0), 'duckdb')
-  expect_equal(result2, 'my_tbl')
+  expect_equal(result2, '"my_tbl"')
 })
 
 test_that('sql_explode_from generates DuckDB UNNEST subquery', {
   result <- sql_explode_from('my_tbl', 'emails', 'duckdb')
   expect_match(result, 'EXCLUDE')
-  expect_match(result, 'UNNEST\\(emails\\) AS emails')
-  expect_match(result, 'FROM my_tbl')
+  expect_match(result, 'UNNEST\\("emails"\\) AS "emails"')
+  expect_match(result, 'FROM "my_tbl"', fixed = TRUE)
 })
 
 test_that('sql_explode_from handles multiple explode cols in DuckDB', {
   result <- sql_explode_from('t', c('emails', 'phones'), 'duckdb')
-  expect_match(result, 'UNNEST\\(emails\\) AS emails')
-  expect_match(result, 'UNNEST\\(phones\\) AS phones')
+  expect_match(result, 'UNNEST\\("emails"\\) AS "emails"')
+  expect_match(result, 'UNNEST\\("phones"\\) AS "phones"')
 })
 
 test_that('sql_explode_from generates PostgreSQL LATERAL UNNEST', {
   result <- sql_explode_from('my_tbl', 'tags', 'postgres')
   expect_match(result, 'CROSS JOIN LATERAL UNNEST')
-  expect_match(result, 'FROM my_tbl')
+  expect_match(result, 'FROM "my_tbl"', fixed = TRUE)
 })
 
 test_that('sql_explode_from warns for SQLite and returns table unchanged', {
@@ -56,7 +56,7 @@ test_that('sql_explode_from warns for SQLite and returns table unchanged', {
     result <- sql_explode_from('my_tbl', 'arr', 'sqlite'),
     'not supported for SQLite'
   )
-  expect_equal(result, 'my_tbl')
+  expect_equal(result, '"my_tbl"')
 })
 
 test_that('explode blocking works end-to-end with DuckDB arrays', {

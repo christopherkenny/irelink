@@ -73,7 +73,9 @@ il_register_tf <- function(model, col, tf_data, overwrite = FALSE) {
     )
   }
 
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tf_tbl}'))
+  DBI::dbExecute(con, glue::glue(
+    'DROP TABLE IF EXISTS {sql_quote_identifier(tf_tbl)}'
+  ))
   DBI::dbWriteTable(con, tf_tbl, tf_data[, expected_cols])
 
   model$data$tf_tables[[col]] <- tf_tbl

@@ -146,10 +146,10 @@ test_that('formula transforms generate correct SQL', {
     transform = rule$transform,
     dialect = 'duckdb'
   )
-  expect_match(sql, 'SUBSTRING(l.first_name, 1, 3)', fixed = TRUE)
-  expect_match(sql, 'SUBSTRING(r.first_name, 1, 3)', fixed = TRUE)
-  expect_match(sql, 'SUBSTRING(l.surname, 1, 4)', fixed = TRUE)
-  expect_match(sql, 'SUBSTRING(r.surname, 1, 4)', fixed = TRUE)
+  expect_match(sql, 'SUBSTRING(l."first_name", 1, 3)', fixed = TRUE)
+  expect_match(sql, 'SUBSTRING(r."first_name", 1, 3)', fixed = TRUE)
+  expect_match(sql, 'SUBSTRING(l."surname", 1, 4)', fixed = TRUE)
+  expect_match(sql, 'SUBSTRING(r."surname", 1, 4)', fixed = TRUE)
 })
 
 test_that('mixed formula+bare generates correct SQL', {
@@ -161,8 +161,13 @@ test_that('mixed formula+bare generates correct SQL', {
     transform = rule$transform,
     dialect = 'duckdb'
   )
-  expect_match(sql, 'SUBSTRING(l.postcode_fake, 1, 3)', fixed = TRUE)
-  expect_match(sql, 'l.dob = r.dob', fixed = TRUE)
+  expect_match(sql, 'SUBSTRING(l."postcode_fake", 1, 3)', fixed = TRUE)
+  expect_match(sql, 'l."dob" = r."dob"', fixed = TRUE)
+})
+
+test_that('blocking SQL quotes non-syntactic column names', {
+  sql <- build_blocking_condition('first name', dialect = 'duckdb')
+  expect_identical(sql, 'l."first name" = r."first name"')
 })
 
 test_that('print.il_spec shows per-column formula transforms', {

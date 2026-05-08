@@ -21,7 +21,7 @@ get_pairs_with_gamma_counts <- function(model, blocking_rules, limit = NULL) {
 
   if (dialect_has_fuzzy_sql(dialect)) {
     gamma_sql <- build_gamma_query(model, blocking_rules, limit = limit)
-    group_by_clause <- paste(gamma_cols, collapse = ', ')
+    group_by_clause <- sql_identifier_csv(gamma_cols)
     sql <- glue::glue(
       'SELECT {group_by_clause}, COUNT(*) AS n FROM ({gamma_sql}) AS pairs ',
       'GROUP BY {group_by_clause}'
@@ -185,16 +185,18 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6,
 
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)
-      glue::glue('{expr} AS gamma_{comparison_name(comp)}')
+      glue::glue(
+        '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+      )
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
-    group_by_clause <- paste(gamma_cols, collapse = ', ')
+    group_by_clause <- sql_identifier_csv(gamma_cols)
 
     table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
     parts <- vapply(table_pairs, function(tp) {
       glue::glue(
         'SELECT {gamma_select} ',
-        'FROM {tp$from_l} l, {tp$from_r} r ',
+        'FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
         'WHERE {tp$join_cond}'
       )
     }, character(1))
@@ -269,16 +271,18 @@ get_random_pair_gamma_counts_chunked <- function(model, max_pairs,
 
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)
-      glue::glue('{expr} AS gamma_{comparison_name(comp)}')
+      glue::glue(
+        '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+      )
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
-    group_by_clause <- paste(gamma_cols, collapse = ', ')
+    group_by_clause <- sql_identifier_csv(gamma_cols)
 
     table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
     parts <- vapply(table_pairs, function(tp) {
       glue::glue(
         'SELECT {gamma_select} ',
-        'FROM {tp$from_l} l, {tp$from_r} r ',
+        'FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
         'WHERE {tp$join_cond}'
       )
     }, character(1))
@@ -778,7 +782,7 @@ get_blocked_pairs <- function(model, blocking) {
       tp$join_cond
     }
     glue::glue(
-      'SELECT {sel$left}, {sel$right} FROM {tp$from_l} l, {tp$from_r} r ',
+      'SELECT {sel$left}, {sel$right} FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
       'WHERE {where_clause}'
     )
   }, character(1))
@@ -803,7 +807,7 @@ get_all_pairs <- function(model, max_pairs = 1e6) {
   table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
   parts <- vapply(table_pairs, function(tp) {
     glue::glue(
-      'SELECT {sel$left}, {sel$right} FROM {tp$from_l} l, {tp$from_r} r ',
+      'SELECT {sel$left}, {sel$right} FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
       'WHERE {tp$join_cond}'
     )
   }, character(1))

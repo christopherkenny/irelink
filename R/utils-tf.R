@@ -36,37 +36,42 @@ compute_tf_tables <- function(model) {
   con <- model$con
   tbl_l <- model$data$tbl_l
   tbl_r <- model$data$tbl_r
+  qtbl_l <- sql_quote_identifier(tbl_l)
+  qtbl_r <- if (!is.null(tbl_r)) sql_quote_identifier(tbl_r) else NULL
 
   tf_tables <- list()
   for (col in tf_cols) {
     tf_tbl <- il_table_name(model, 'tf', col)
+    qcol <- sql_quote_identifier(col)
+    qtf_tbl <- sql_quote_identifier(tf_tbl)
+    qtf_col <- sql_quote_identifier(paste0('tf_', col))
 
     if (!is.null(tbl_r)) {
       # Link mode: compute from union of both tables
       union_sql <- glue::glue(
-        'SELECT {col} FROM {tbl_l} WHERE {col} IS NOT NULL ',
+        'SELECT {qcol} FROM {qtbl_l} WHERE {qcol} IS NOT NULL ',
         'UNION ALL ',
-        'SELECT {col} FROM {tbl_r} WHERE {col} IS NOT NULL'
+        'SELECT {qcol} FROM {qtbl_r} WHERE {qcol} IS NOT NULL'
       )
       select_sql <- glue::glue(
-        'SELECT {col}, CAST(COUNT(*) AS DOUBLE) / ',
-        '(SELECT COUNT(*) FROM ({union_sql}) sub) AS tf_{col} ',
+        'SELECT {qcol}, CAST(COUNT(*) AS DOUBLE) / ',
+        '(SELECT COUNT(*) FROM ({union_sql}) sub) AS {qtf_col} ',
         'FROM ({union_sql}) combined ',
-        'GROUP BY {col}'
+        'GROUP BY {qcol}'
       )
     } else {
       # Dedupe mode: single table
       select_sql <- glue::glue(
-        'SELECT {col}, CAST(COUNT(*) AS DOUBLE) / ',
-        '(SELECT COUNT({col}) FROM {tbl_l} WHERE {col} IS NOT NULL) AS tf_{col} ',
-        'FROM {tbl_l} ',
-        'WHERE {col} IS NOT NULL ',
-        'GROUP BY {col}'
+        'SELECT {qcol}, CAST(COUNT(*) AS DOUBLE) / ',
+        '(SELECT COUNT({qcol}) FROM {qtbl_l} WHERE {qcol} IS NOT NULL) AS {qtf_col} ',
+        'FROM {qtbl_l} ',
+        'WHERE {qcol} IS NOT NULL ',
+        'GROUP BY {qcol}'
       )
     }
 
-    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tf_tbl}'))
-    DBI::dbExecute(con, glue::glue('CREATE TABLE {tf_tbl} AS {select_sql}'))
+    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {qtf_tbl}'))
+    DBI::dbExecute(con, glue::glue('CREATE TABLE {qtf_tbl} AS {select_sql}'))
     tf_tables[[col]] <- tf_tbl
   }
 
@@ -99,13 +104,18 @@ sql_tf_select_exprs <- function(tf_cols, tf_tables) {
   exprs <- character(0)
   for (col in tf_cols) {
     tf_tbl <- tf_tables[[col]]
+    qtf_tbl <- sql_quote_identifier(tf_tbl)
+    qcol <- sql_quote_identifier(col)
+    qtf_col <- sql_quote_identifier(paste0('tf_', col))
+    qtf_col_l <- sql_quote_identifier(paste0('tf_', col, '_l'))
+    qtf_col_r <- sql_quote_identifier(paste0('tf_', col, '_r'))
     exprs <- c(
       exprs,
       glue::glue(
-        '(SELECT tf_{col} FROM {tf_tbl} WHERE {col} = l.{col}) AS tf_{col}_l'
+        '(SELECT {qtf_col} FROM {qtf_tbl} WHERE {qcol} = {sql_col_ref("l", col)}) AS {qtf_col_l}'
       ),
       glue::glue(
-        '(SELECT tf_{col} FROM {tf_tbl} WHERE {col} = r.{col}) AS tf_{col}_r'
+        '(SELECT {qtf_col} FROM {qtf_tbl} WHERE {qcol} = {sql_col_ref("r", col)}) AS {qtf_col_r}'
       )
     )
   }

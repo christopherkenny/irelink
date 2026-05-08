@@ -50,6 +50,42 @@ test_that('register_data handles tbl_lazy input', {
   expect_true('unique_id' %in% reg$columns)
 })
 
+test_that('register_data handles reserved-word source table names', {
+  con <- test_con()
+  on.exit(test_discon(con))
+
+  DBI::dbWriteTable(con, 'select', fake_20, overwrite = TRUE)
+  reg <- register_data('select', con = con, tbl_name = '__test_reserved')
+  on.exit(drop_registered(con, '__test_reserved'), add = TRUE, after = FALSE)
+
+  expect_equal(reg$n_records, 20L)
+  expect_equal(
+    DBI::dbGetQuery(con, 'SELECT COUNT(*) AS n FROM "__test_reserved"')$n,
+    20L
+  )
+})
+
+test_that('register_data handles tbl_lazy input on SQLite', {
+  skip_if_not_installed('RSQLite')
+  skip_if_not_installed('dbplyr')
+  skip_if_not_installed('dplyr')
+
+  con <- DBI::dbConnect(RSQLite::SQLite(), ':memory:')
+  on.exit(DBI::dbDisconnect(con), add = TRUE)
+
+  DBI::dbWriteTable(con, 'lazy_src_sqlite', fake_20, overwrite = TRUE)
+  tbl_ref <- dplyr::tbl(con, 'lazy_src_sqlite')
+
+  reg <- register_data(tbl_ref, tbl_name = '__test_lazy_sqlite')
+  on.exit(drop_registered(con, '__test_lazy_sqlite'), add = TRUE, after = FALSE)
+
+  expect_equal(reg$n_records, 20L)
+  expect_equal(
+    DBI::dbGetQuery(con, 'SELECT COUNT(*) AS n FROM "__test_lazy_sqlite"')$n,
+    20L
+  )
+})
+
 test_that('register_data materializes stable synthetic unique_id values', {
   skip_if_not_installed('dbplyr')
   skip_if_not_installed('dplyr')

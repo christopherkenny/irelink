@@ -32,6 +32,8 @@ il_estimate_m_from_column <- function(model, label_col) {
   con <- model$con
   dialect <- detect_dialect(con)
   tbl <- model$data$tbl_l
+  qtbl <- sql_quote_identifier(tbl)
+  qlabel_col <- sql_quote_identifier(col_name)
   comparisons <- model$spec$comparisons
   comp_names <- comparison_names(comparisons)
 
@@ -45,17 +47,19 @@ il_estimate_m_from_column <- function(model, label_col) {
     # SQL-first: within-cluster self-join + gamma computation + aggregation
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)
-      glue::glue('{expr} AS gamma_{comparison_name(comp)}')
+      glue::glue(
+        '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+      )
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
     gamma_cols <- paste0('gamma_', comp_names)
-    group_by_clause <- paste(gamma_cols, collapse = ', ')
+    group_by_clause <- sql_identifier_csv(gamma_cols)
 
     sql <- glue::glue(
       'SELECT {group_by_clause}, COUNT(*) AS n FROM (',
       'SELECT {gamma_select} ',
-      'FROM {tbl} l, {tbl} r ',
-      'WHERE l.{col_name} IS NOT NULL AND l.{col_name} = r.{col_name} ',
+      'FROM {qtbl} l, {qtbl} r ',
+      'WHERE l.{qlabel_col} IS NOT NULL AND l.{qlabel_col} = r.{qlabel_col} ',
       'AND l.unique_id < r.unique_id',
       ') AS match_pairs GROUP BY {group_by_clause}'
     )
@@ -76,8 +80,8 @@ il_estimate_m_from_column <- function(model, label_col) {
 
     sql <- glue::glue(
       'SELECT {sel$left}, {sel$right} ',
-      'FROM {tbl} l, {tbl} r ',
-      'WHERE l.{col_name} IS NOT NULL AND l.{col_name} = r.{col_name} ',
+      'FROM {qtbl} l, {qtbl} r ',
+      'WHERE l.{qlabel_col} IS NOT NULL AND l.{qlabel_col} = r.{qlabel_col} ',
       'AND l.unique_id < r.unique_id'
     )
     pairs <- DBI::dbGetQuery(con, sql)

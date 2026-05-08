@@ -46,8 +46,8 @@ test_that('transform = tolower produces LOWER() in SQL gamma', {
   )
   sql <- sql_gamma_case(comp, 'duckdb')
   expect_true(grepl('LOWER', sql))
-  expect_true(grepl('LOWER\\(l\\.name\\)', sql))
-  expect_true(grepl('LOWER\\(r\\.name\\)', sql))
+  expect_true(grepl('LOWER\\(l\\."name"\\)', sql))
+  expect_true(grepl('LOWER\\(r\\."name"\\)', sql))
 })
 
 test_that('transform = toupper produces UPPER() in SQL gamma', {
@@ -70,7 +70,7 @@ test_that('NULL transform leaves SQL unchanged', {
   )
   sql <- sql_gamma_case(comp, 'duckdb')
   expect_false(grepl('LOWER|UPPER|TRIM', sql))
-  expect_true(grepl('l\\.name', sql))
+  expect_true(grepl('l\\."name"', sql))
 })
 
 test_that('custom transforms error on SQL gamma paths', {

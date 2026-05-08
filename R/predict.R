@@ -505,19 +505,30 @@ join_original_fields <- function(result, model) {
       return(result)
     }
 
-    l_select <- paste0('sl.', field_cols, ' AS ', field_cols, '_l', collapse = ', ')
+    l_select <- paste(vapply(field_cols, function(col) {
+      glue::glue(
+        'sl.{sql_quote_identifier(col)} AS {sql_quote_identifier(paste0(col, "_l"))}'
+      )
+    }, character(1)), collapse = ', ')
     if (tbl_r == tbl_l) {
       r_field_cols <- field_cols
     } else {
       r_field_cols <- setdiff(DBI::dbListFields(con, tbl_r), 'unique_id')
     }
-    r_select <- paste0('sr.', r_field_cols, ' AS ', r_field_cols, '_r', collapse = ', ')
+    r_select <- paste(vapply(r_field_cols, function(col) {
+      glue::glue(
+        'sr.{sql_quote_identifier(col)} AS {sql_quote_identifier(paste0(col, "_r"))}'
+      )
+    }, character(1)), collapse = ', ')
+    qtmp_tbl <- sql_quote_identifier(tmp_tbl)
+    qtbl_l <- sql_quote_identifier(tbl_l)
+    qtbl_r <- sql_quote_identifier(tbl_r)
 
     sql <- glue::glue(
       'SELECT t.row_idx, {l_select}, {r_select} ',
-      'FROM {tmp_tbl} t ',
-      'JOIN {tbl_l} sl ON sl.unique_id = t.uid_l ',
-      'JOIN {tbl_r} sr ON sr.unique_id = t.uid_r ',
+      'FROM {qtmp_tbl} t ',
+      'JOIN {qtbl_l} sl ON sl.unique_id = t.uid_l ',
+      'JOIN {qtbl_r} sr ON sr.unique_id = t.uid_r ',
       'ORDER BY t.row_idx'
     )
     fields <- DBI::dbGetQuery(con, sql)
@@ -539,8 +550,9 @@ join_original_fields <- function(result, model) {
     return(result)
   }
 
-  col_select <- paste(c('unique_id', field_cols), collapse = ', ')
-  sql_l <- glue::glue('SELECT {col_select} FROM {tbl_l} WHERE unique_id IN ({id_list})')
+  col_select <- sql_identifier_csv(c('unique_id', field_cols))
+  qtbl_l <- sql_quote_identifier(tbl_l)
+  sql_l <- glue::glue('SELECT {col_select} FROM {qtbl_l} WHERE unique_id IN ({id_list})')
   src_l <- DBI::dbGetQuery(con, sql_l)
   rownames(src_l) <- as.character(src_l$unique_id)
 
@@ -549,8 +561,9 @@ join_original_fields <- function(result, model) {
   } else {
     all_cols_r <- DBI::dbListFields(con, tbl_r)
     field_cols_r <- setdiff(all_cols_r, 'unique_id')
-    col_select_r <- paste(c('unique_id', field_cols_r), collapse = ', ')
-    sql_r <- glue::glue('SELECT {col_select_r} FROM {tbl_r} WHERE unique_id IN ({id_list})')
+    col_select_r <- sql_identifier_csv(c('unique_id', field_cols_r))
+    qtbl_r <- sql_quote_identifier(tbl_r)
+    sql_r <- glue::glue('SELECT {col_select_r} FROM {qtbl_r} WHERE unique_id IN ({id_list})')
     src_r <- DBI::dbGetQuery(con, sql_r)
     rownames(src_r) <- as.character(src_r$unique_id)
   }

@@ -97,6 +97,7 @@ il_estimate_m_from_labels <- function(model, labels) {
   con <- model$con
   dialect <- detect_dialect(con)
   tbl <- model$data$tbl_l
+  qtbl <- sql_quote_identifier(tbl)
   comparisons <- model$spec$comparisons
   comp_names <- comparison_names(comparisons)
 
@@ -118,18 +119,20 @@ il_estimate_m_from_labels <- function(model, labels) {
 
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)
-      glue::glue('{expr} AS gamma_{comparison_name(comp)}')
+      glue::glue(
+        '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+      )
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
     gamma_cols <- paste0('gamma_', comp_names)
-    group_by_clause <- paste(gamma_cols, collapse = ', ')
+    group_by_clause <- sql_identifier_csv(gamma_cols)
 
     sql <- glue::glue(
       'SELECT {group_by_clause}, COUNT(*) AS n FROM (',
       'SELECT {gamma_select} ',
-      'FROM {lbl_tbl} lbl ',
-      'JOIN {tbl} l ON l.unique_id = lbl.uid_l ',
-      'JOIN {tbl} r ON r.unique_id = lbl.uid_r',
+      'FROM {sql_quote_identifier(lbl_tbl)} lbl ',
+      'JOIN {qtbl} l ON l.unique_id = lbl.uid_l ',
+      'JOIN {qtbl} r ON r.unique_id = lbl.uid_r',
       ') AS match_pairs GROUP BY {group_by_clause}'
     )
     counts <- DBI::dbGetQuery(con, sql)
@@ -147,7 +150,7 @@ il_estimate_m_from_labels <- function(model, labels) {
     ))
     id_list <- paste(DBI::dbQuoteString(con, all_ids), collapse = ', ')
     sql <- glue::glue(
-      'SELECT * FROM {tbl} WHERE unique_id IN ({id_list})'
+      'SELECT * FROM {qtbl} WHERE unique_id IN ({id_list})'
     )
     data <- DBI::dbGetQuery(con, sql)
     id_col <- 'unique_id'

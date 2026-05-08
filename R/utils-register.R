@@ -103,7 +103,7 @@ register_data <- function(data, con = NULL, tbl_name = '__il_data',
     # Determine the source SQL
     remote_nm <- dbplyr::remote_name(data)
     source_sql <- if (!is.null(remote_nm)) {
-      glue::glue('SELECT * FROM {remote_nm}')
+      glue::glue('SELECT * FROM {sql_quote_identifier(remote_nm)}')
     } else {
       dbplyr::remote_query(data)
     }
@@ -113,22 +113,23 @@ register_data <- function(data, con = NULL, tbl_name = '__il_data',
     # they stay stable across later queries to the model.
     # Drop any existing table/view first to avoid type conflicts.
     drop_registered(con, tbl_name)
+    qtbl_name <- sql_quote_identifier(tbl_name)
     has_uid <- 'unique_id' %in% cols
     if (has_uid) {
       view_sql <- glue::glue(
-        'CREATE OR REPLACE VIEW {tbl_name} AS {source_sql}'
+        'CREATE VIEW {qtbl_name} AS {source_sql}'
       )
       DBI::dbExecute(con, view_sql)
     } else if (add_unique_id) {
       table_sql <- glue::glue(
-        'CREATE TABLE {tbl_name} AS ',
+        'CREATE TABLE {qtbl_name} AS ',
         'SELECT *, ROW_NUMBER() OVER () AS unique_id FROM ({source_sql}) AS __src'
       )
       cols <- c(cols, 'unique_id')
       DBI::dbExecute(con, table_sql)
     } else {
       view_sql <- glue::glue(
-        'CREATE OR REPLACE VIEW {tbl_name} AS {source_sql}'
+        'CREATE VIEW {qtbl_name} AS {source_sql}'
       )
       DBI::dbExecute(con, view_sql)
     }
@@ -155,8 +156,9 @@ register_data <- function(data, con = NULL, tbl_name = '__il_data',
     }
 
     cols <- DBI::dbListFields(con, data)
+    qdata <- sql_quote_identifier(data)
     n_records <- as.integer(
-      DBI::dbGetQuery(con, glue::glue('SELECT COUNT(*) AS n FROM {data}'))$n[1]
+      DBI::dbGetQuery(con, glue::glue('SELECT COUNT(*) AS n FROM {qdata}'))$n[1]
     )
 
     if (n_records == 0L) {
@@ -167,21 +169,22 @@ register_data <- function(data, con = NULL, tbl_name = '__il_data',
     # Drop any existing table/view first to avoid type conflicts.
     # As above, materialize synthesized row IDs once so they stay stable.
     drop_registered(con, tbl_name)
+    qtbl_name <- sql_quote_identifier(tbl_name)
     if (has_uid) {
       view_sql <- glue::glue(
-        'CREATE OR REPLACE VIEW {tbl_name} AS SELECT * FROM {data}'
+        'CREATE VIEW {qtbl_name} AS SELECT * FROM {qdata}'
       )
       DBI::dbExecute(con, view_sql)
     } else if (add_unique_id) {
       table_sql <- glue::glue(
-        'CREATE TABLE {tbl_name} AS ',
-        'SELECT *, ROW_NUMBER() OVER () AS unique_id FROM {data}'
+        'CREATE TABLE {qtbl_name} AS ',
+        'SELECT *, ROW_NUMBER() OVER () AS unique_id FROM {qdata}'
       )
       cols <- c(cols, 'unique_id')
       DBI::dbExecute(con, table_sql)
     } else {
       view_sql <- glue::glue(
-        'CREATE OR REPLACE VIEW {tbl_name} AS SELECT * FROM {data}'
+        'CREATE VIEW {qtbl_name} AS SELECT * FROM {qdata}'
       )
       DBI::dbExecute(con, view_sql)
     }
@@ -245,7 +248,9 @@ register_data <- function(data, con = NULL, tbl_name = '__il_data',
 count_tbl_lazy <- function(tbl, con) {
   remote_nm <- dbplyr::remote_name(tbl)
   if (!is.null(remote_nm)) {
-    sql <- glue::glue('SELECT COUNT(*) AS n FROM {remote_nm}')
+    sql <- glue::glue(
+      'SELECT COUNT(*) AS n FROM {sql_quote_identifier(remote_nm)}'
+    )
   } else {
     inner <- dbplyr::remote_query(tbl)
     sql <- glue::glue('SELECT COUNT(*) AS n FROM ({inner}) AS __cnt')
@@ -258,7 +263,8 @@ count_tbl_lazy <- function(tbl, con) {
 #' @param tbl_name The name of the view/table to drop.
 #' @noRd
 drop_registered <- function(con, tbl_name) {
-  try(DBI::dbExecute(con, glue::glue('DROP VIEW IF EXISTS {tbl_name}')), silent = TRUE)
+  qtbl_name <- sql_quote_identifier(tbl_name)
+  try(DBI::dbExecute(con, glue::glue('DROP VIEW IF EXISTS {qtbl_name}')), silent = TRUE)
   try(DBI::dbRemoveTable(con, tbl_name, fail_if_missing = FALSE), silent = TRUE)
 }
 
@@ -281,11 +287,12 @@ validate_data_frame_unique_id <- function(data) {
 #' @param columns Registered column names.
 #' @noRd
 validate_registered_unique_id <- function(con, tbl_name, columns) {
+  qtbl_name <- sql_quote_identifier(tbl_name)
   res <- DBI::dbGetQuery(con, glue::glue(
     'SELECT COUNT(*) AS n, ',
     'SUM(CASE WHEN unique_id IS NULL THEN 1 ELSE 0 END) AS n_missing, ',
     'COUNT(DISTINCT unique_id) AS n_distinct ',
-    'FROM {tbl_name}'
+    'FROM {qtbl_name}'
   ))
   if (as.numeric(res$n_missing[1]) > 0) {
     cli::cli_abort('{.field unique_id} must not contain missing values.')

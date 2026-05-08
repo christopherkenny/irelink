@@ -43,7 +43,7 @@ il_comparison_vectors <- function(model, blocking = NULL, limit = NULL) {
   if (dialect_has_fuzzy_sql(dialect)) {
     # SQL path: GROUP BY + COUNT entirely in-database
     gamma_sql <- build_gamma_query(model, blocking_rules, limit = limit)
-    group_cols <- paste(gamma_cols, collapse = ', ')
+    group_cols <- sql_identifier_csv(gamma_cols)
     sql <- glue::glue(
       'SELECT {group_cols}, COUNT(*) AS count ',
       'FROM ({gamma_sql}) __cv ',

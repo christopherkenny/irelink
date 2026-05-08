@@ -111,12 +111,16 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
   }
 
   tbl_existing <- model$data$tbl_l
+  qtbl_new <- sql_quote_identifier(tbl_new)
+  qtbl_existing <- sql_quote_identifier(tbl_existing)
 
   if (dialect_has_fuzzy_sql(dialect)) {
     # SQL-first: compute gammas in database
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)
-      glue::glue('{expr} AS gamma_{comparison_name(comp)}')
+      glue::glue(
+        '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+      )
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
 
@@ -136,7 +140,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
         glue::glue(
           'SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ',
           '{gamma_select} ',
-          'FROM {tbl_new} l, {tbl_existing} r ',
+          'FROM {qtbl_new} l, {qtbl_existing} r ',
           'WHERE {cond}'
         )
       }, character(1))
@@ -145,7 +149,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
       inner <- glue::glue(
         'SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ',
         '{gamma_select} ',
-        'FROM {tbl_new} l, {tbl_existing} r'
+        'FROM {qtbl_new} l, {qtbl_existing} r'
       )
     }
     sql <- glue::glue('SELECT DISTINCT * FROM ({inner}) AS pairs')
@@ -212,8 +216,16 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     # Select only columns that exist in both new_records (l) and existing (r)
     existing_cols <- model$data$columns
     r_cols <- intersect(needed_cols, existing_cols)
-    sel_l <- paste(glue::glue('l.{new_cols} AS l_{new_cols}'), collapse = ', ')
-    sel_r <- paste(glue::glue('r.{r_cols} AS r_{r_cols}'), collapse = ', ')
+    sel_l <- paste(vapply(new_cols, function(col) {
+      glue::glue(
+        '{sql_col_ref("l", col)} AS {sql_quote_identifier(paste0("l_", col))}'
+      )
+    }, character(1)), collapse = ', ')
+    sel_r <- paste(vapply(r_cols, function(col) {
+      glue::glue(
+        '{sql_col_ref("r", col)} AS {sql_quote_identifier(paste0("r_", col))}'
+      )
+    }, character(1)), collapse = ', ')
 
     all_pair_frames <- list()
     if (length(blocking_rules) > 0L) {
@@ -223,7 +235,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
           dialect = dialect
         )
         sql <- glue::glue(
-          'SELECT {sel_l}, {sel_r} FROM {tbl_new} l, {tbl_existing} r ',
+          'SELECT {sel_l}, {sel_r} FROM {qtbl_new} l, {qtbl_existing} r ',
           'WHERE {block_where}'
         )
         bp <- DBI::dbGetQuery(con, sql)
@@ -231,7 +243,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
       }
     } else {
       sql <- glue::glue(
-        'SELECT {sel_l}, {sel_r} FROM {tbl_new} l, {tbl_existing} r'
+        'SELECT {sel_l}, {sel_r} FROM {qtbl_new} l, {qtbl_existing} r'
       )
       bp <- DBI::dbGetQuery(con, sql)
       if (nrow(bp) > 0L) all_pair_frames <- list(bp)

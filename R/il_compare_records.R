@@ -109,13 +109,16 @@ il_compare_records <- function(record_a, record_b, spec, con = NULL) {
 
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)
-      glue::glue('{expr} AS gamma_{comparison_name(comp)}')
+      glue::glue(
+        '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+      )
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
+    qtbl_tmp <- sql_quote_identifier(tbl_tmp)
 
     sql <- glue::glue(
       'SELECT {gamma_select} ',
-      'FROM {tbl_tmp} l, {tbl_tmp} r ',
+      'FROM {qtbl_tmp} l, {qtbl_tmp} r ',
       'WHERE l.unique_id = 1 AND r.unique_id = 2'
     )
     row <- DBI::dbGetQuery(con, sql)
