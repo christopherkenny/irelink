@@ -25,6 +25,21 @@ test_that('il_tf_chart returns a ggplot', {
   expect_s3_class(p, 'ggplot')
 })
 
+test_that('il_tf_chart quotes non-syntactic TF column names', {
+  con <- test_con()
+  on.exit(test_discon(con), add = TRUE)
+
+  df <- data.frame(unique_id = 1:4, check.names = FALSE)
+  df[['first name']] <- c('A', 'A', 'B', 'B')
+
+  spec <- il_spec() |>
+    il_compare(all_of('first name'), cl_exact(term_frequency = TRUE))
+  model <- il_model(df, spec = spec, con = con)
+
+  p <- il_tf_chart(model, 'first name')
+  expect_s3_class(p, 'ggplot')
+})
+
 test_that('il_tf_chart errors for col without TF table', {
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)

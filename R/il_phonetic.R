@@ -58,7 +58,8 @@ il_dmetaphone <- function(x) {
 
 # R-side Soundex implementation
 # Follows the standard algorithm: retain first letter, map consonants to
-# digits, collapse adjacent duplicates, pad/truncate to 4 characters.
+# digits, collapse adjacent duplicates while treating H/W as transparent
+# separators, and pad/truncate to 4 characters.
 soundex_one <- function(s) {
   if (is.na(s) || nchar(s) == 0L) {
     return(NA_character_)
@@ -74,19 +75,29 @@ soundex_one <- function(s) {
     O = '0', P = '1', Q = '2', R = '6', S = '2', T = '3', U = '0',
     V = '1', W = '0', X = '2', Y = '0', Z = '2'
   )
+  vowels <- c('A', 'E', 'I', 'O', 'U', 'Y')
+  separators <- c('H', 'W')
 
-  mapped <- codes[chars]
-  mapped[is.na(mapped)] <- ''
+  last_code <- unname(codes[first])
+  out <- character(0)
+  if (length(chars) > 1L) {
+    for (ch in chars[-1L]) {
+      if (ch %in% separators) {
+        next
+      }
+      code <- unname(codes[ch])
+      if (is.na(code) || ch %in% vowels) {
+        last_code <- NULL
+        next
+      }
+      if (!identical(code, last_code)) {
+        out <- c(out, code)
+      }
+      last_code <- code
+    }
+  }
 
-  # Remove adjacent duplicates
-  keep <- c(TRUE, mapped[-1L] != mapped[-length(mapped)])
-  deduped <- mapped[keep]
-
-  # Drop the first character's code (we use the letter), then remove zeros
-  rest <- deduped[-1L]
-  rest <- rest[rest != '0' & rest != '']
-
-  code <- paste0(first, paste0(rest, collapse = ''))
+  code <- paste0(first, paste0(out, collapse = ''))
   # Pad to 4 characters
   code <- paste0(code, '000')
   substr(code, 1L, 4L)
@@ -108,17 +119,27 @@ register_phonetic_macros <- function(con) {
     return(invisible(NULL))
   }
 
-  # Build the nested dedup expression once in R
-  coded <- paste0(
-    'translate(upper(CAST(s AS VARCHAR)[2:]), ',
+  letters_only <- "regexp_replace(upper(CAST(s AS VARCHAR)), '[^A-Z]', '', 'g')"
+  first_letter <- paste0('substr(', letters_only, ', 1, 1)')
+  first_code <- paste0(
+    'translate(', first_letter, ', ',
     "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '01230120022455012623010202')"
   )
-  dedup <- dedup_adjacent(dedup_adjacent(coded))
+  coded_tail <- paste0(
+    'translate(',
+    "replace(replace(substr(", letters_only, ", 2), 'H', ''), 'W', '')",
+    ", 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '01230120022455012623010202')"
+  )
+  dedup <- dedup_adjacent(coded_tail)
+  trimmed <- paste0(
+    'CASE WHEN left(', dedup, ', 1) = ', first_code,
+    ' THEN substr(', dedup, ', 2) ELSE ', dedup, ' END'
+  )
 
   macro_sql <- paste0(
     'CREATE OR REPLACE MACRO il_soundex(s) AS (',
-    'CASE WHEN s IS NULL OR length(CAST(s AS VARCHAR)) = 0 THEN NULL ELSE ',
-    'left(upper(CAST(s AS VARCHAR)[1]) || replace((', dedup, "), '0', '') || '000', 4) ",
+    'CASE WHEN s IS NULL OR length(', letters_only, ') = 0 THEN NULL ELSE ',
+    'left(', first_letter, " || replace((", trimmed, "), '0', '') || '000', 4) ",
     'END)'
   )
   DBI::dbExecute(con, macro_sql)
@@ -126,11 +147,13 @@ register_phonetic_macros <- function(con) {
 }
 
 # Helper: wrap an expression in nested replace() calls that collapse
-# adjacent duplicate digits (0–6). Two passes handle runs up to length 4.
-dedup_adjacent <- function(expr) {
-  for (d in as.character(0:6)) {
-    dd <- paste0(d, d)
-    expr <- paste0('replace(', expr, ", '", dd, "', '", d, "')")
+# adjacent duplicate digits (0–6). Repeated passes handle longer runs.
+dedup_adjacent <- function(expr, passes = 4L) {
+  for (i in seq_len(passes)) {
+    for (d in as.character(0:6)) {
+      dd <- paste0(d, d)
+      expr <- paste0('replace(', expr, ", '", dd, "', '", d, "')")
+    }
   }
   expr
 }

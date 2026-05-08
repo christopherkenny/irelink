@@ -217,7 +217,7 @@ il_comparator_threshold_chart <- function(.data, col_1, col_2,
 #'
 #' @param .data A data frame or character table name.
 #' @param col_1,col_2 Column names (unquoted or character).
-#' @param con A DBI connection. If provided and DuckDB, computes
+#' @param con A DBI connection. If provided and DuckDB or PostgreSQL, computes
 #'   Soundex in SQL.
 #'
 #' @return A `ggplot2` object.
@@ -232,9 +232,10 @@ il_phonetic_chart <- function(.data, col_1, col_2, con = NULL) {
   if (use_sql) {
     tbl_name <- il_scratch_table_name('phonetic')
     if (is.data.frame(.data)) {
-      DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl_name}'))
+      qtbl <- sql_quote_identifier(tbl_name)
+      DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {qtbl}'))
       DBI::dbWriteTable(con, tbl_name, .data)
-      on.exit(DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl_name}')),
+      on.exit(DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {qtbl}')),
         add = TRUE
       )
     } else {
@@ -244,14 +245,17 @@ il_phonetic_chart <- function(.data, col_1, col_2, con = NULL) {
     dialect <- detect_dialect(con)
     if (dialect == 'duckdb') register_phonetic_macros(con)
     sx_fn <- if (dialect == 'duckdb') 'il_soundex' else 'soundex'
+    qtbl <- sql_quote_identifier(tbl_name)
+    qcol_1 <- sql_quote_identifier(col_1)
+    qcol_2 <- sql_quote_identifier(col_2)
 
     sql <- glue::glue(
-      'SELECT {col_1}, {col_2}, ',
-      '  {sx_fn}({col_1}) AS soundex_1, ',
-      '  {sx_fn}({col_2}) AS soundex_2, ',
-      '  {sx_fn}({col_1}) = {sx_fn}({col_2}) AS soundex_match ',
-      'FROM {tbl_name} ',
-      'WHERE {col_1} IS NOT NULL AND {col_2} IS NOT NULL'
+      'SELECT {qcol_1} AS {qcol_1}, {qcol_2} AS {qcol_2}, ',
+      '  {sx_fn}({qcol_1}) AS soundex_1, ',
+      '  {sx_fn}({qcol_2}) AS soundex_2, ',
+      '  {sx_fn}({qcol_1}) = {sx_fn}({qcol_2}) AS soundex_match ',
+      'FROM {qtbl} ',
+      'WHERE {qcol_1} IS NOT NULL AND {qcol_2} IS NOT NULL'
     )
     df <- tibble::as_tibble(DBI::dbGetQuery(con, sql))
   } else {

@@ -9,6 +9,10 @@ test_that('il_soundex produces correct codes for known inputs', {
   expect_equal(il_soundex('Smyth'), 'S530')
   expect_equal(il_soundex('Johnson'), 'J525')
   expect_equal(il_soundex('Jonson'), 'J525')
+  expect_equal(il_soundex('Ashcraft'), 'A261')
+  expect_equal(il_soundex('Ashcroft'), 'A261')
+  expect_equal(il_soundex('Tymczak'), 'T522')
+  expect_equal(il_soundex('Pfister'), 'P236')
 })
 
 test_that('il_soundex is case-insensitive', {
@@ -219,7 +223,8 @@ test_that('DuckDB il_soundex macro matches R-side for known pairs', {
 
   pairs <- data.frame(name = c(
     'Smith', 'Smyth', 'Robert', 'Rupert',
-    'Johnson', 'Jonson', 'Lee', 'Stephen', 'Steven'
+    'Johnson', 'Jonson', 'Lee', 'Stephen', 'Steven',
+    'Ashcraft', 'Ashcroft', 'Tymczak', 'Pfister'
   ))
   DBI::dbWriteTable(con, '__test_names', pairs, overwrite = TRUE)
 
@@ -227,6 +232,28 @@ test_that('DuckDB il_soundex macro matches R-side for known pairs', {
 
   r_codes <- il_soundex(pairs$name)
   expect_equal(result$code, r_codes)
+})
+
+test_that('DuckDB il_soundex macro matches standard edge cases', {
+  con <- test_con()
+  on.exit(test_discon(con), add = TRUE)
+
+  register_phonetic_macros(con)
+
+  result <- DBI::dbGetQuery(
+    con,
+    paste(
+      "SELECT il_soundex('Ashcraft') AS ashcraft,",
+      "il_soundex('Ashcroft') AS ashcroft,",
+      "il_soundex('Tymczak') AS tymczak,",
+      "il_soundex('Pfister') AS pfister"
+    )
+  )
+
+  expect_equal(result$ashcraft, 'A261')
+  expect_equal(result$ashcroft, 'A261')
+  expect_equal(result$tymczak, 'T522')
+  expect_equal(result$pfister, 'P236')
 })
 
 test_that('DuckDB il_soundex macro handles NULL', {

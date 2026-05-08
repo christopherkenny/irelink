@@ -26,6 +26,11 @@ Serializes a trained \code{il_model} object to \code{.json} or \code{.rds}, chos
 \code{.json} writes Splink settings JSON. Other extensions write RDS. The
 database connection and any in-database tables are not stored. Supply a
 fresh connection with \code{\link[=il_attach]{il_attach()}} after loading.
+
+JSON export preserves scoring and prediction behavior by lowering
+comparisons and blocking rules to SQL. It does not guarantee exact
+round-tripping of irelink helper structure such as transform functions or
+structured blocking-rule fields.
 }
 \examples{
 df <- data.frame(

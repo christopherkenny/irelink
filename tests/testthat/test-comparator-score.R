@@ -84,3 +84,17 @@ test_that('il_phonetic_chart returns ggplot', {
   p <- il_phonetic_chart(df, name_l, name_r)
   expect_s3_class(p, 'ggplot')
 })
+
+test_that('il_phonetic_chart SQL path quotes non-syntactic column names', {
+  con <- test_con()
+  on.exit(test_discon(con), add = TRUE)
+
+  df <- data.frame(
+    check.names = FALSE,
+    'first name' = c('Smith', 'Jones'),
+    'other name' = c('Smyth', 'Jonez')
+  )
+  p <- il_phonetic_chart(df, `first name`, `other name`, con = con)
+
+  expect_s3_class(p, 'ggplot')
+})

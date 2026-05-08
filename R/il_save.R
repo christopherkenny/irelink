@@ -7,6 +7,11 @@
 #' database connection and any in-database tables are not stored. Supply a
 #' fresh connection with [il_attach()] after loading.
 #'
+#' JSON export preserves scoring and prediction behavior by lowering
+#' comparisons and blocking rules to SQL. It does not guarantee exact
+#' round-tripping of irelink helper structure such as transform functions or
+#' structured blocking-rule fields.
+#'
 #' @param model A trained `il_model` object.
 #' @param path A file path (character string) where the model will be
 #'   saved.
@@ -83,6 +88,11 @@ il_save <- function(model, path, overwrite = FALSE) {
 #' Settings JSON is loaded into an `il_model` that can be used with
 #' [il_attach()] and [predict()]. The database connection and any in-database
 #' tables are not loaded.
+#'
+#' JSON imports reconstruct equivalent SQL-backed comparison and blocking
+#' behavior for use after [il_attach()]. They do not necessarily recreate the
+#' original irelink helper objects or transform functions stored in the
+#' original spec.
 #'
 #' @param path A file path (character string) to a saved model.
 #'

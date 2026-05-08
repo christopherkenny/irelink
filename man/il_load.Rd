@@ -19,6 +19,11 @@ Reads a saved \code{il_model} object from \code{.json} or \code{.rds}.
 Settings JSON is loaded into an \code{il_model} that can be used with
 \code{\link[=il_attach]{il_attach()}} and \code{\link[=predict]{predict()}}. The database connection and any in-database
 tables are not loaded.
+
+JSON imports reconstruct equivalent SQL-backed comparison and blocking
+behavior for use after \code{\link[=il_attach]{il_attach()}}. They do not necessarily recreate the
+original irelink helper objects or transform functions stored in the
+original spec.
 }
 \examples{
 df <- data.frame(

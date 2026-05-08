@@ -4,7 +4,7 @@
 #' model. Shows how individual values shift the match weight via the TF
 #' adjustment. Rare values boost the weight, while common values penalize it.
 #'
-#' @param model A trained `il_model` object with `term_frequency = TRUE`
+#' @param model An `il_model` object with `term_frequency = TRUE`
 #'   enabled for at least one comparison column.
 #' @param col A character string naming the column to plot.
 #' @param n_most_freq Number of most-frequent values to label. Default 10.
@@ -39,15 +39,21 @@ il_tf_chart <- function(model, col, n_most_freq = 10L, n_least_freq = 5L) {
     cli::cli_abort(
       'No term frequency table found for column {.field {col}}. \\
        Ensure {.code term_frequency = TRUE} is set in the comparison \\
-       and the model has been trained.',
+       and the model has been initialized with data.',
       class = 'il_error_type'
     )
   }
 
   tf_col <- paste0('tf_', col)
+  qcol <- sql_quote_identifier(col)
+  qtf_col <- sql_quote_identifier(tf_col)
+  qtf_tbl <- sql_quote_identifier(tf_tbl)
   tf_data <- DBI::dbGetQuery(
     con,
-    glue::glue('SELECT {col} AS value, {tf_col} AS tf FROM {tf_tbl} ORDER BY {tf_col} DESC')
+    glue::glue(
+      'SELECT {qcol} AS "value", {qtf_col} AS "tf" ',
+      'FROM {qtf_tbl} ORDER BY {qtf_col} DESC'
+    )
   )
 
   if (nrow(tf_data) == 0L) {
