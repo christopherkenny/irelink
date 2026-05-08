@@ -218,20 +218,20 @@ summary(model)
 #>   Blocking rules: 3
 #> 
 #>   Parameters:
-#>     prior: 0.6821835
+#>     prior: 0.5161334
 #>     comparisons: # A tibble: 23 × 4
 #>      comparisons:    comparison gamma_level      m       u
 #>      comparisons:    <chr>            <int>  <dbl>   <dbl>
-#>      comparisons:  1 first_name           0 0.360  0.763  
-#>      comparisons:  2 first_name           1 0.109  0.0147 
-#>      comparisons:  3 first_name           2 0.0276 0.00168
-#>      comparisons:  4 first_name           3 0.0887 0.00292
-#>      comparisons:  5 first_name           4 0.414  0.00672
-#>      comparisons:  6 surname              0 0.349  0.809  
-#>      comparisons:  7 surname              1 0.0945 0.0145 
-#>      comparisons:  8 surname              2 0.0272 0.00158
-#>      comparisons:  9 surname              3 0.0692 0.00247
-#>      comparisons: 10 surname              4 0.460  0.00951
+#>      comparisons:  1 first_name           0 0.355  0.967  
+#>      comparisons:  2 first_name           1 0.110  0.0187 
+#>      comparisons:  3 first_name           2 0.0278 0.00213
+#>      comparisons:  4 first_name           3 0.0894 0.00370
+#>      comparisons:  5 first_name           4 0.417  0.00852
+#>      comparisons:  6 surname              0 0.346  0.966  
+#>      comparisons:  7 surname              1 0.0941 0.0173 
+#>      comparisons:  8 surname              2 0.0274 0.00189
+#>      comparisons:  9 surname              3 0.0696 0.00295
+#>      comparisons: 10 surname              4 0.463  0.0114 
 #>      comparisons: # ℹ 13 more rows
 #>     u_estimation: 1e+05
 #>      u_estimation: FALSE
@@ -287,11 +287,11 @@ head(predict(model2, threshold = 0.85))
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob gamma_city
 #>         <int>       <int>            <int>         <int>     <int>      <int>
 #> 1         479         481                4             4         5          0
-#> 2         508         512                4            -1         3          1
-#> 3         509         512                4             2         3          1
-#> 4         535         536                4            -1         2          1
-#> 5         664         667                4             4         5          0
-#> 6          69          71                4             2         5          0
+#> 2         509         512                4             2         3          1
+#> 3         535         536                4            -1         2          1
+#> 4         100         104                4            -1         5          0
+#> 5         150         152                4             4         2          1
+#> 6         252         254                4             4         5          0
 #> # ℹ 5 more variables: gamma_email <int>, match_weight <dbl>, tf_adj_city <dbl>,
 #> #   total_match_weight <dbl>, match_probability <dbl>
 DBI::dbDisconnect(con2, shutdown = TRUE)
@@ -308,7 +308,7 @@ Score all candidate pairs and apply a probability threshold:
 
 predictions <- predict(model, threshold = 0.5)
 nrow(predictions)
-#> [1] 2946
+#> [1] 2783
 ```
 
 View the match-weight distribution:
@@ -338,12 +338,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 68        cluster_63 
-#> 2 663       cluster_654
-#> 3 699       cluster_694
-#> 4 870       cluster_867
-#> 5 795       cluster_792
-#> 6 232       cluster_229
+#> 1 29        cluster_27 
+#> 2 35        cluster_32 
+#> 3 520       cluster_517
+#> 4 552       cluster_550
+#> 5 627       cluster_626
+#> 6 700       cluster_694
 ```
 
 ## Evaluate against ground truth
@@ -379,15 +379,15 @@ acc
 #>     threshold    tp    fp    fn    tn fn_blocking_miss precision recall    f1
 #>         <dbl> <int> <int> <int> <int>            <int>     <dbl>  <dbl> <dbl>
 #>  1 0           1135   229   896   916              896     0.832  0.559 0.669
-#>  2 0.00000887  1135   229   896   916              896     0.832  0.559 0.669
-#>  3 0.0000171   1135   229   896   916              896     0.832  0.559 0.669
-#>  4 0.0000188   1135   229   896   916              896     0.832  0.559 0.669
-#>  5 0.0000205   1135   229   896   916              896     0.832  0.559 0.669
-#>  6 0.0000362   1135   229   896   916              896     0.832  0.559 0.669
-#>  7 0.0000396   1135   229   896   916              896     0.832  0.559 0.669
-#>  8 0.0000436   1135   229   896   916              896     0.832  0.559 0.669
-#>  9 0.0000839   1135   229   896   916              896     0.832  0.559 0.669
-#> 10 0.000123    1135   229   896   916              896     0.832  0.559 0.669
+#>  2 0.00000183  1135   229   896   916              896     0.832  0.559 0.669
+#>  3 0.00000353  1135   229   896   916              896     0.832  0.559 0.669
+#>  4 0.00000498  1135   229   896   916              896     0.832  0.559 0.669
+#>  5 0.00000512  1135   229   896   916              896     0.832  0.559 0.669
+#>  6 0.00000960  1135   229   896   916              896     0.832  0.559 0.669
+#>  7 0.00000986  1135   229   896   916              896     0.832  0.559 0.669
+#>  8 0.0000139   1135   229   896   916              896     0.832  0.559 0.669
+#>  9 0.0000255   1135   229   896   916              896     0.832  0.559 0.669
+#> 10 0.0000268   1115   152   916   993              896     0.880  0.549 0.676
 #> # ℹ 409 more rows
 #> # ℹ 7 more variables: f2 <dbl>, f0_5 <dbl>, specificity <dbl>, npv <dbl>,
 #> #   accuracy <dbl>, p4 <dbl>, phi <dbl>
@@ -431,12 +431,12 @@ head(errors)
 #> # A tibble: 6 × 6
 #>   unique_id_l unique_id_r match_weight match_probability true_label error_type  
 #>         <int>       <int>        <dbl>             <dbl> <lgl>      <chr>       
-#> 1           4           6         9.28             0.999 FALSE      false_posit…
-#> 2           4           7        18.0              1.000 FALSE      false_posit…
-#> 3           4           8         9.83             0.999 FALSE      false_posit…
-#> 4           4           9        15.3              1.000 FALSE      false_posit…
-#> 5           4          10        13.2              1.000 FALSE      false_posit…
-#> 6           4          11         6.15             0.994 FALSE      false_posit…
+#> 1           4           6         8.33             0.997 FALSE      false_posit…
+#> 2           4           7        17.1              1.000 FALSE      false_posit…
+#> 3           4           8         8.89             0.998 FALSE      false_posit…
+#> 4           4           9        14.7              1.000 FALSE      false_posit…
+#> 5           4          10        12.2              1.000 FALSE      false_posit…
+#> 6           4          11         5.20             0.975 FALSE      false_posit…
 ```
 
 ### Unlinkables

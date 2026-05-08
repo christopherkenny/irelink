@@ -255,20 +255,20 @@ EM:</p>
 <span><span class="co">#&gt;   Blocking rules: 3</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt;   Parameters:</span></span>
-<span><span class="co">#&gt;     prior: 0.6821835</span></span>
+<span><span class="co">#&gt;     prior: 0.5161334</span></span>
 <span><span class="co">#&gt;     comparisons: <span style="color: #949494;"># A tibble: 23 × 4</span></span></span>
 <span><span class="co">#&gt;      comparisons:    comparison gamma_level      m       u</span></span>
 <span><span class="co">#&gt;      comparisons:    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 1</span> first_name           0 0.360  0.763  </span></span>
-<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 2</span> first_name           1 0.109  0.014<span style="text-decoration: underline;">7</span> </span></span>
-<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 3</span> first_name           2 0.027<span style="text-decoration: underline;">6</span> 0.001<span style="text-decoration: underline;">68</span></span></span>
-<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 4</span> first_name           3 0.088<span style="text-decoration: underline;">7</span> 0.002<span style="text-decoration: underline;">92</span></span></span>
-<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 5</span> first_name           4 0.414  0.006<span style="text-decoration: underline;">72</span></span></span>
-<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 6</span> surname              0 0.349  0.809  </span></span>
-<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 7</span> surname              1 0.094<span style="text-decoration: underline;">5</span> 0.014<span style="text-decoration: underline;">5</span> </span></span>
-<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 8</span> surname              2 0.027<span style="text-decoration: underline;">2</span> 0.001<span style="text-decoration: underline;">58</span></span></span>
-<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 9</span> surname              3 0.069<span style="text-decoration: underline;">2</span> 0.002<span style="text-decoration: underline;">47</span></span></span>
-<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;">10</span> surname              4 0.460  0.009<span style="text-decoration: underline;">51</span></span></span>
+<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 1</span> first_name           0 0.355  0.967  </span></span>
+<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 2</span> first_name           1 0.110  0.018<span style="text-decoration: underline;">7</span> </span></span>
+<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 3</span> first_name           2 0.027<span style="text-decoration: underline;">8</span> 0.002<span style="text-decoration: underline;">13</span></span></span>
+<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 4</span> first_name           3 0.089<span style="text-decoration: underline;">4</span> 0.003<span style="text-decoration: underline;">70</span></span></span>
+<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 5</span> first_name           4 0.417  0.008<span style="text-decoration: underline;">52</span></span></span>
+<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 6</span> surname              0 0.346  0.966  </span></span>
+<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 7</span> surname              1 0.094<span style="text-decoration: underline;">1</span> 0.017<span style="text-decoration: underline;">3</span> </span></span>
+<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 8</span> surname              2 0.027<span style="text-decoration: underline;">4</span> 0.001<span style="text-decoration: underline;">89</span></span></span>
+<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;"> 9</span> surname              3 0.069<span style="text-decoration: underline;">6</span> 0.002<span style="text-decoration: underline;">95</span></span></span>
+<span><span class="co">#&gt;      comparisons: <span style="color: #BCBCBC;">10</span> surname              4 0.463  0.011<span style="text-decoration: underline;">4</span> </span></span>
 <span><span class="co">#&gt;      comparisons: <span style="color: #949494;"># ℹ 13 more rows</span></span></span>
 <span><span class="co">#&gt;     u_estimation: 1e+05</span></span>
 <span><span class="co">#&gt;      u_estimation: FALSE</span></span>
@@ -306,11 +306,11 @@ re-apply the model without retraining:</p>
 <span><span class="co">#&gt;   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob gamma_city</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         479         481                4             4         5          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         508         512                4            -<span style="color: #BB0000;">1</span>         3          1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         509         512                4             2         3          1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>         535         536                4            -<span style="color: #BB0000;">1</span>         2          1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>         664         667                4             4         5          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>          69          71                4             2         5          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         509         512                4             2         3          1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         535         536                4            -<span style="color: #BB0000;">1</span>         2          1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>         100         104                4            -<span style="color: #BB0000;">1</span>         5          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>         150         152                4             4         2          1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>         252         254                4             4         5          0</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: gamma_email &lt;int&gt;, match_weight &lt;dbl&gt;, tf_adj_city &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   total_match_weight &lt;dbl&gt;, match_probability &lt;dbl&gt;</span></span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con2</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -325,7 +325,7 @@ arrives.</p>
 <div class="sourceCode" id="cb17"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">predictions</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/nrow.html" class="external-link">nrow</a></span><span class="op">(</span><span class="va">predictions</span><span class="op">)</span></span>
-<span><span class="co">#&gt; [1] 2946</span></span></code></pre></div>
+<span><span class="co">#&gt; [1] 2783</span></span></code></pre></div>
 <p>View the match-weight distribution:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">predictions</span><span class="op">)</span></span></code></pre></div>
@@ -341,12 +341,12 @@ arrives.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 68        cluster_63 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 663       cluster_654</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 699       cluster_694</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 870       cluster_867</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 795       cluster_792</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 232       cluster_229</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 29        cluster_27 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 35        cluster_32 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 520       cluster_517</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 552       cluster_550</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 627       cluster_626</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 700       cluster_694</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>
@@ -379,15 +379,15 @@ evaluation:</p>
 <span><span class="co">#&gt;     threshold    tp    fp    fn    tn fn_blocking_miss precision recall    f1</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span> <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> 0           <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 0.000<span style="text-decoration: underline;">008</span>87  <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 0.000<span style="text-decoration: underline;">017</span>1   <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 0.000<span style="text-decoration: underline;">018</span>8   <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 0.000<span style="text-decoration: underline;">020</span>5   <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 0.000<span style="text-decoration: underline;">036</span>2   <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 0.000<span style="text-decoration: underline;">039</span>6   <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 0.000<span style="text-decoration: underline;">043</span>6   <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 0.000<span style="text-decoration: underline;">083</span>9   <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 0.000<span style="text-decoration: underline;">123</span>    <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> 0.000<span style="text-decoration: underline;">001</span>83  <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> 0.000<span style="text-decoration: underline;">003</span>53  <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> 0.000<span style="text-decoration: underline;">004</span>98  <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> 0.000<span style="text-decoration: underline;">005</span>12  <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> 0.000<span style="text-decoration: underline;">009</span>60  <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> 0.000<span style="text-decoration: underline;">009</span>86  <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> 0.000<span style="text-decoration: underline;">013</span>9   <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> 0.000<span style="text-decoration: underline;">025</span>5   <span style="text-decoration: underline;">1</span>135   229   896   916              896     0.832  0.559 0.669</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> 0.000<span style="text-decoration: underline;">026</span>8   <span style="text-decoration: underline;">1</span>115   152   916   993              896     0.880  0.549 0.676</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 409 more rows</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 7 more variables: f2 &lt;dbl&gt;, f0_5 &lt;dbl&gt;, specificity &lt;dbl&gt;, npv &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   accuracy &lt;dbl&gt;, p4 &lt;dbl&gt;, phi &lt;dbl&gt;</span></span></span></code></pre></div>
@@ -422,12 +422,12 @@ threshold:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
 <span><span class="co">#&gt;   unique_id_l unique_id_r match_weight match_probability true_label error_type  </span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;lgl&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           4           6         9.28             0.999 FALSE      false_posit…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           4           7        18.0              1.000 FALSE      false_posit…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           4           8         9.83             0.999 FALSE      false_posit…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           4           9        15.3              1.000 FALSE      false_posit…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           4          10        13.2              1.000 FALSE      false_posit…</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           4          11         6.15             0.994 FALSE      false_posit…</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           4           6         8.33             0.997 FALSE      false_posit…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           4           7        17.1              1.000 FALSE      false_posit…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           4           8         8.89             0.998 FALSE      false_posit…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           4           9        14.7              1.000 FALSE      false_posit…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           4          10        12.2              1.000 FALSE      false_posit…</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           4          11         5.20             0.975 FALSE      false_posit…</span></span></code></pre></div>
 </div>
 <div class="section level3">
 <h3 id="unlinkables">Unlinkables<a class="anchor" aria-label="anchor" href="#unlinkables"></a>

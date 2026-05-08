@@ -115,7 +115,7 @@ materializing millions of rows would exhaust memory.
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,946 pairs in table __il_8762_1_predicted_4 (threshold = 0.5)
+#> <il_compared_lazy> 2,783 pairs in table __il_8740_1_predicted_4 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -125,7 +125,7 @@ Pass the lazy reference directly to
 
 clusters_lazy <- il_cluster(pairs_lazy, threshold = 0.85)
 nrow(clusters_lazy)
-#> [1] 956
+#> [1] 952
 ```
 
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
@@ -185,20 +185,20 @@ maximum possible edges for a cluster of that size):
 ``` r
 
 metrics$clusters
-#> # A tibble: 116 × 5
+#> # A tibble: 142 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralisation
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_10       13      35   0.449                 0.258 
-#>  2 cluster_142      46     204   0.197                 0.236 
-#>  3 cluster_15        5      10   0.95                  0.0833
-#>  4 cluster_252       9      32   0.889                 0.143 
-#>  5 cluster_38        5      10   1                     0     
-#>  6 cluster_409       4       6   1                     0     
-#>  7 cluster_550       8      26   0.929                 0.0952
-#>  8 cluster_581      10      38   0.833                 0.208 
-#>  9 cluster_684       2       1   1                    NA     
-#> 10 cluster_738       6      15   1                     0     
-#> # ℹ 106 more rows
+#>  1 cluster_115       8      24   0.857                  0.190
+#>  2 cluster_311       3       5   1.67                   2.5  
+#>  3 cluster_326       4       4   0.667                  0.667
+#>  4 cluster_731       4      16   2.75                   6.5  
+#>  5 cluster_792       7      15   0.714                  0.4  
+#>  6 cluster_867       3       3   1                      0    
+#>  7 cluster_900       4       9   1.5                    1    
+#>  8 cluster_924       8      28   1                      0    
+#>  9 cluster_13       14      37   0.407                  0.154
+#> 10 cluster_479      14      39   0.429                  0.397
+#> # ℹ 132 more rows
 ```
 
 A high maximum cluster size combined with low density often indicates
@@ -217,12 +217,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 171       cluster_164      6          0.194 
-#> 2 995       cluster_164      8          0.258 
-#> 3 167       cluster_164      7          0.226 
-#> 4 48        cluster_164      4          0.129 
-#> 5 169       cluster_164      6          0.194 
-#> 6 462       cluster_164      2          0.0645
+#> 1 165       cluster_164      8           1.14 
+#> 2 171       cluster_164      6           0.857
+#> 3 167       cluster_164      7           1    
+#> 4 170       cluster_164      6           0.857
+#> 5 168       cluster_164     25           3.57 
+#> 6 164       cluster_164      8           1.14
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -321,23 +321,23 @@ matches
 #> # A tibble: 17 × 5
 #>    unique_id_l unique_id_r match_weight total_match_weight match_probability
 #>          <int>       <int>        <dbl>              <dbl>             <dbl>
-#>  1           1         237         2.54               3.64             0.926
-#>  2           1         239         1.46               2.56             0.855
-#>  3           1         364         1.46               2.56             0.855
-#>  4           1         365         1.46               2.56             0.855
-#>  5           1         241         1.46               2.56             0.855
-#>  6           1         242         1.46               2.56             0.855
-#>  7           1         362         2.54               3.64             0.926
-#>  8           1         366         1.46               2.56             0.855
-#>  9           1         367         1.46               2.56             0.855
-#> 10           1         789         2.67               3.77             0.932
-#> 11           2         858         1.47               2.57             0.856
-#> 12           1         240         1.46               2.56             0.855
-#> 13           1         363         1.46               2.56             0.855
-#> 14           2         859         2.55               3.66             0.927
-#> 15           2         864         1.47               2.57             0.856
-#> 16           1         238         2.67               3.77             0.932
-#> 17           1         791         1.46               2.56             0.855
+#>  1           1         237        2.28               2.37              0.838
+#>  2           1         239        0.832              0.925             0.655
+#>  3           1         364        0.832              0.925             0.655
+#>  4           1         365        0.832              0.925             0.655
+#>  5           1         241        0.832              0.925             0.655
+#>  6           1         242        0.832              0.925             0.655
+#>  7           1         362        2.28               2.37              0.838
+#>  8           1         366        0.832              0.925             0.655
+#>  9           1         367        0.832              0.925             0.655
+#> 10           1         789        2.31               2.41              0.841
+#> 11           2         858        0.871              0.964             0.661
+#> 12           1         240        0.832              0.925             0.655
+#> 13           1         363        0.832              0.925             0.655
+#> 14           2         859        2.31               2.41              0.841
+#> 15           2         864        0.871              0.964             0.661
+#> 16           1         238        2.31               2.41              0.841
+#> 17           1         791        0.832              0.925             0.655
 ```
 
 Each row is a (new record, existing record) pair. `unique_id_l`
