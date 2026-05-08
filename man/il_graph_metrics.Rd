@@ -9,7 +9,8 @@ il_graph_metrics(pairs, clusters)
 \arguments{
 \item{pairs}{An \code{il_compared} tibble from \code{\link[=predict.il_model]{predict.il_model()}}.}
 
-\item{clusters}{A tibble from \code{\link[=il_cluster]{il_cluster()}} with cluster assignments.}
+\item{clusters}{A tibble from \code{\link[=il_cluster]{il_cluster()}} with \code{unique_id} and
+\code{cluster_id} columns.}
 }
 \value{
 A named list of three tibbles:

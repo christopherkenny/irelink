@@ -220,3 +220,54 @@ test_that('source_dataset warns when used with connected method', {
     'source_dataset'
   )
 })
+
+test_that('il_cluster() validates threshold and required pair columns', {
+  pairs <- tibble::tibble(
+    unique_id_l = c('A'),
+    unique_id_r = c('B'),
+    match_probability = 0.9
+  )
+  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+
+  expect_error(
+    il_cluster(pairs, threshold = 'x'),
+    'threshold'
+  )
+  expect_error(
+    il_cluster(pairs[, 'unique_id_l', drop = FALSE]),
+    'unique_id_r'
+  )
+  expect_error(
+    il_cluster(
+      pairs[, c('unique_id_l', 'unique_id_r'), drop = FALSE],
+      method = 'best_link'
+    ),
+    'match_probability'
+  )
+})
+
+test_that('il_cluster() requires complete and unique source_dataset mappings', {
+  pairs <- tibble::tibble(
+    unique_id_l = c('A'),
+    unique_id_r = c('B'),
+    match_probability = 0.9
+  )
+  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+
+  expect_error(
+    il_cluster(pairs, method = 'best_link', source_dataset = c(A = 'ds1')),
+    'must provide a source dataset for every'
+  )
+  expect_error(
+    il_cluster(
+      pairs,
+      method = 'best_link',
+      source_dataset = data.frame(
+        unique_id = c('A', 'A', 'B'),
+        source_dataset = c('ds1', 'ds2', 'ds3'),
+        stringsAsFactors = FALSE
+      )
+    ),
+    'at most once'
+  )
+})

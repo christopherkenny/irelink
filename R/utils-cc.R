@@ -195,18 +195,18 @@ solve_cc_sql <- function(con, edges_tbl, max_iterations = 100L,
     con, glue::glue('SELECT COUNT(*) AS n FROM {edges_tbl}')
   )$n
   if (n_edges == 0L) {
+    if (collect) {
+      return(tibble::tibble(
+        node_id = character(0), cluster_id = character(0)
+      ))
+    }
     output_tbl <- cc_tbl('output', prefix)
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
     DBI::dbExecute(con, glue::glue(
       'CREATE TABLE {output_tbl} AS ',
       'SELECT CAST(NULL AS VARCHAR) AS node_id, CAST(NULL AS VARCHAR) AS cluster_id WHERE 1 = 0'
     ))
-    if (!collect) {
-      return(output_tbl)
-    }
-    return(tibble::tibble(
-      node_id = character(0), cluster_id = character(0)
-    ))
+    return(output_tbl)
   }
 
   cc_initialise(con, edges_tbl, prefix = prefix)
@@ -249,6 +249,7 @@ solve_cc_sql <- function(con, edges_tbl, max_iterations = 100L,
   }
 
   result <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {output_tbl}'))
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
   tibble::as_tibble(result)
 }
 
@@ -498,8 +499,17 @@ solve_one_to_one_sql <- function(con, edges_tbl, source_dataset,
     'SELECT node_id, representative AS cluster_id FROM {oto_repr}'
   ))
 
+  result <- NULL
+  if (collect) {
+    result <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {output_tbl}'))
+  }
+
   # Clean up
-  for (tbl in c(oto_repr, oto_src, oto_cluster_ds, oto_ranked, oto_merged)) {
+  tables_to_drop <- c(oto_repr, oto_src, oto_cluster_ds, oto_ranked, oto_merged)
+  if (collect) {
+    tables_to_drop <- c(tables_to_drop, output_tbl)
+  }
+  for (tbl in tables_to_drop) {
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
   }
 
@@ -507,7 +517,6 @@ solve_one_to_one_sql <- function(con, edges_tbl, source_dataset,
     return(output_tbl)
   }
 
-  result <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {output_tbl}'))
   tibble::as_tibble(result)
 }
 

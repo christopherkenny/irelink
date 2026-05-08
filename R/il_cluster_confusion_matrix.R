@@ -18,7 +18,8 @@
 #' @param ties_method Tie handling for `method = "best_link"`, passed to
 #'   [il_cluster()].
 #' @param source_dataset Optional source-dataset mapping passed to
-#'   [il_cluster()].
+#'   [il_cluster()]. If supplied, it must cover every `unique_id` in the
+#'   predicted pairs, and duplicate `unique_id` mappings are not allowed.
 #'
 #' @return A one-row tibble with columns `threshold`, `tp`, `fp`, `fn`,
 #'   `tn`, `precision`, `recall`, and `f1`.
@@ -139,7 +140,15 @@ cluster_assignments_lazy_sql <- function(pairs, threshold = NULL,
                                          source_dataset = NULL) {
   method <- match.arg(method)
   ties_method <- match.arg(ties_method)
-  source_dataset <- normalise_source_dataset(source_dataset)
+  if (!is.null(threshold)) {
+    threshold <- validate_probability_threshold(threshold, 'threshold')
+  }
+  validate_cluster_pairs(pairs, threshold = threshold, method = method)
+  source_dataset <- prepare_cluster_source_dataset(
+    source_dataset,
+    pairs,
+    method = method
+  )
 
   con <- pairs$con
   predicted_tbl <- pairs$predicted_tbl

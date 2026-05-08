@@ -18,7 +18,9 @@
 #'   mapping `unique_id` values to their source dataset name. Used with
 #'   `method = "best_link"` to enforce at-most-one-record per source
 #'   dataset per cluster.
-#'   If a data frame, must contain columns `unique_id` and `source_dataset`.
+#'   If supplied, it must cover every `unique_id` present in `pairs`.
+#'   If a data frame, it must contain columns `unique_id` and
+#'   `source_dataset`, and `unique_id` values must be unique.
 #'
 #' @return A tibble with one row per input record, including a
 #'   `cluster_id` column.
@@ -82,16 +84,16 @@ il_cluster <- function(pairs, threshold = NULL,
                        source_dataset = NULL) {
   method <- match.arg(method)
   ties_method <- match.arg(ties_method)
-
-  # Normalise source_dataset to a named character vector
-  source_dataset <- normalise_source_dataset(source_dataset)
-
-  if (!is.null(source_dataset) && method != 'best_link') {
-    cli::cli_warn(
-      '{.arg source_dataset} is only used with {.code method = "best_link"}. Ignoring.'
-    )
-    source_dataset <- NULL
+  if (!is.null(threshold)) {
+    threshold <- validate_probability_threshold(threshold, 'threshold')
   }
+  validate_cluster_pairs(pairs, threshold = threshold, method = method)
+
+  source_dataset <- prepare_cluster_source_dataset(
+    source_dataset,
+    pairs,
+    method = method
+  )
 
   # Lazy path: pairs are still in the database
   if (inherits(pairs, 'il_compared_lazy')) {
@@ -125,6 +127,7 @@ cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id'
     threshold = threshold,
     prefix = cc_prefix
   )
+  on.exit(drop_registered(con, edges_tbl), add = TRUE)
 
   if (method == 'best_link') {
     if (!is.null(source_dataset)) {
@@ -134,8 +137,6 @@ cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id'
         con, edges_tbl, source_dataset, ties_method,
         prefix = cc_prefix
       )
-      DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
-
       # Add isolated nodes
       all_ids <- unique(c(
         as.character(pairs$unique_id_l),
@@ -145,7 +146,7 @@ cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id'
       if (length(isolated) > 0L) {
         iso_df <- tibble::tibble(
           node_id = isolated,
-          cluster_id = paste0('cluster_', isolated)
+          cluster_id = isolated
         )
         result <- rbind(result, iso_df)
       }
@@ -177,7 +178,7 @@ cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id'
   if (length(isolated) > 0L) {
     iso_df <- tibble::tibble(
       node_id = isolated,
-      cluster_id = paste0('cluster_', isolated)
+      cluster_id = isolated
     )
     result <- rbind(result, iso_df)
   }
@@ -332,6 +333,7 @@ cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
     'SELECT unique_id_l, unique_id_r, match_probability ',
     'FROM {predicted_tbl}{threshold_where}'
   ))
+  on.exit(drop_registered(con, edges_tbl), add = TRUE)
 
   if (method == 'best_link') {
     if (!is.null(source_dataset)) {
@@ -340,8 +342,6 @@ cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
         con, edges_tbl, source_dataset, ties_method,
         prefix = cc_prefix
       )
-      DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
-
       all_ids <- DBI::dbGetQuery(con, glue::glue(
         'SELECT DISTINCT id FROM (',
         'SELECT unique_id_l AS id FROM {predicted_tbl} ',
@@ -354,7 +354,7 @@ cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
       if (length(isolated) > 0L) {
         iso_df <- tibble::tibble(
           node_id = isolated,
-          cluster_id = paste0('cluster_', isolated)
+          cluster_id = isolated
         )
         result <- rbind(result, iso_df)
       }
@@ -390,7 +390,7 @@ cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
   if (length(isolated) > 0L) {
     iso_df <- tibble::tibble(
       node_id = isolated,
-      cluster_id = paste0('cluster_', isolated)
+      cluster_id = isolated
     )
     result <- rbind(result, iso_df)
   }
@@ -415,14 +415,155 @@ normalise_source_dataset <- function(sd) {
         '{.arg source_dataset} data frame must contain columns {.val unique_id} and {.val source_dataset}.'
       )
     }
+    if (anyNA(sd$unique_id) || any(sd$unique_id == '')) {
+      cli::cli_abort('{.field unique_id} in {.arg source_dataset} must not contain missing values.')
+    }
+    if (anyNA(sd$source_dataset)) {
+      cli::cli_abort('{.field source_dataset} in {.arg source_dataset} must not contain missing values.')
+    }
+    if (anyDuplicated(sd$unique_id) > 0L) {
+      cli::cli_abort('{.arg source_dataset} must map each {.field unique_id} at most once.')
+    }
     out <- as.character(sd$source_dataset)
     names(out) <- as.character(sd$unique_id)
     return(out)
   }
   if (is.character(sd) && !is.null(names(sd))) {
+    if (anyNA(names(sd)) || any(names(sd) == '')) {
+      cli::cli_abort('{.arg source_dataset} must have a non-missing name for every mapping.')
+    }
+    if (anyNA(sd)) {
+      cli::cli_abort('{.arg source_dataset} must not contain missing source-dataset values.')
+    }
+    if (anyDuplicated(names(sd)) > 0L) {
+      cli::cli_abort('{.arg source_dataset} must map each {.field unique_id} at most once.')
+    }
     return(sd)
   }
   cli::cli_abort(
     '{.arg source_dataset} must be a named character vector or a data frame with columns {.val unique_id} and {.val source_dataset}.'
   )
+}
+
+#' Validate public clustering input columns
+#' @noRd
+validate_cluster_pairs <- function(pairs, threshold = NULL,
+                                   method = c('connected', 'best_link')) {
+  method <- match.arg(method)
+
+  if (!inherits(pairs, 'il_compared_lazy') && !is.data.frame(pairs)) {
+    cli::cli_abort(
+      '{.arg pairs} must be a data frame, tibble, or {.cls il_compared_lazy} object.'
+    )
+  }
+
+  required_cols <- c('unique_id_l', 'unique_id_r')
+  if (!is.null(threshold) || identical(method, 'best_link')) {
+    required_cols <- c(required_cols, 'match_probability')
+  }
+  validate_pair_input_columns(pairs, required_cols)
+  invisible(pairs)
+}
+
+#' Validate required columns on collected or lazy pair inputs
+#' @noRd
+validate_pair_input_columns <- function(pairs, required_cols, arg = 'pairs') {
+  cols <- pair_input_columns(pairs)
+  missing_cols <- setdiff(required_cols, cols)
+  if (length(missing_cols) > 0L) {
+    cli::cli_abort(
+      '{.arg {arg}} must contain column{?s} {.field {missing_cols}}.'
+    )
+  }
+  invisible(pairs)
+}
+
+#' Return available columns for collected or lazy pair inputs
+#' @noRd
+pair_input_columns <- function(pairs) {
+  if (inherits(pairs, 'il_compared_lazy')) {
+    return(DBI::dbListFields(pairs$con, pairs$predicted_tbl))
+  }
+  if (!is.data.frame(pairs)) {
+    cli::cli_abort('{.arg pairs} must be a data frame, tibble, or {.cls il_compared_lazy} object.')
+  }
+  names(pairs)
+}
+
+#' Validate and normalise source-dataset mappings
+#' @noRd
+prepare_cluster_source_dataset <- function(source_dataset, pairs, method) {
+  source_dataset <- normalise_source_dataset(source_dataset)
+
+  if (!is.null(source_dataset) && method != 'best_link') {
+    cli::cli_warn(
+      '{.arg source_dataset} is only used with {.code method = "best_link"}. Ignoring.'
+    )
+    return(NULL)
+  }
+
+  if (is.null(source_dataset)) {
+    return(NULL)
+  }
+
+  all_ids <- cluster_input_ids(pairs)
+  missing_ids <- setdiff(all_ids, names(source_dataset))
+  if (length(missing_ids) > 0L) {
+    preview <- missing_ids[seq_len(min(5L, length(missing_ids)))]
+    extra <- length(missing_ids) - length(preview)
+    extra_text <- if (extra > 0L) paste0(' and ', extra, ' more') else ''
+    cli::cli_abort(
+      '{.arg source_dataset} must provide a source dataset for every {.field unique_id} in {.arg pairs}. Missing source-dataset entries for {.val {preview}}{extra_text}.'
+    )
+  }
+
+  source_dataset
+}
+
+#' Return all unique IDs present in collected or lazy pair inputs
+#' @noRd
+cluster_input_ids <- function(pairs) {
+  if (inherits(pairs, 'il_compared_lazy')) {
+    return(DBI::dbGetQuery(
+      pairs$con,
+      glue::glue(
+        'SELECT DISTINCT id FROM (',
+        'SELECT unique_id_l AS id FROM {pairs$predicted_tbl} ',
+        'UNION ',
+        'SELECT unique_id_r AS id FROM {pairs$predicted_tbl}',
+        ') sub'
+      )
+    )$id)
+  }
+
+  unique(c(
+    as.character(pairs$unique_id_l),
+    as.character(pairs$unique_id_r)
+  ))
+}
+
+#' Validate cluster-assignment inputs
+#' @noRd
+validate_cluster_assignments <- function(clusters, arg = 'clusters') {
+  if (!is.data.frame(clusters)) {
+    cli::cli_abort('{.arg {arg}} must be a data frame or tibble.')
+  }
+
+  required_cols <- c('unique_id', 'cluster_id')
+  missing_cols <- setdiff(required_cols, names(clusters))
+  if (length(missing_cols) > 0L) {
+    cli::cli_abort(
+      '{.arg {arg}} must contain column{?s} {.field {missing_cols}}.'
+    )
+  }
+  if (anyNA(clusters$unique_id) || anyNA(clusters$cluster_id)) {
+    cli::cli_abort(
+      '{.arg {arg}} must not contain missing {.field unique_id} or {.field cluster_id} values.'
+    )
+  }
+  if (anyDuplicated(clusters$unique_id) > 0L) {
+    cli::cli_abort('{.arg {arg}} must contain one row per {.field unique_id}.')
+  }
+
+  invisible(clusters)
 }

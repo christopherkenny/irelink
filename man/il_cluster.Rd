@@ -30,7 +30,9 @@ where the best-link probability is tied.}
 mapping \code{unique_id} values to their source dataset name. Used with
 \code{method = "best_link"} to enforce at-most-one-record per source
 dataset per cluster.
-If a data frame, must contain columns \code{unique_id} and \code{source_dataset}.}
+If supplied, it must cover every \code{unique_id} present in \code{pairs}.
+If a data frame, it must contain columns \code{unique_id} and
+\code{source_dataset}, and \code{unique_id} values must be unique.}
 }
 \value{
 A tibble with one row per input record, including a

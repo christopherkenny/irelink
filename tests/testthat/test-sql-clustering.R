@@ -208,10 +208,99 @@ test_that('SQL CC: cleanup removes temp tables', {
 
   clusters <- il_cluster(pairs)
 
-  # After clustering, intermediate tables should not linger.
   cc_tables <- grep('^__il_cc', DBI::dbListTables(con), value = TRUE)
-  for (tbl in cc_tables) DBI::dbExecute(con, paste('DROP TABLE IF EXISTS', tbl))
-  tables <- DBI::dbListTables(con)
-  cc_tables <- tables[grepl('^__il_cc', tables)]
   expect_equal(length(cc_tables), 0)
+
+  best_link <- make_sql_pairs(
+    con,
+    id_l = c('A', 'B'),
+    id_r = c('B', 'C'),
+    prob = c(0.9, 0.85)
+  )
+  il_cluster(
+    best_link,
+    method = 'best_link',
+    source_dataset = c(A = 'x', B = 'y', C = 'z')
+  )
+
+  cc_tables <- grep('^__il_cc', DBI::dbListTables(con), value = TRUE)
+  expect_equal(length(cc_tables), 0)
+})
+
+test_that('SQL CC: isolated nodes receive a single cluster_ prefix', {
+  con <- test_con()
+  on.exit(test_discon(con))
+
+  pairs <- make_sql_pairs(con,
+    id_l = c('A', 'B'),
+    id_r = c('B', 'C'),
+    prob = c(0.95, 0.40)
+  )
+
+  clusters <- il_cluster(pairs, threshold = 0.80)
+  expect_false(any(grepl('^cluster_cluster_', clusters$cluster_id)))
+  expect_equal(
+    clusters$cluster_id[clusters$unique_id == 'C'],
+    'cluster_C'
+  )
+})
+
+test_that('SQL best_link: isolated nodes receive a single cluster_ prefix', {
+  con <- test_con()
+  on.exit(test_discon(con))
+
+  pairs <- make_sql_pairs(con,
+    id_l = c('A'),
+    id_r = c('B'),
+    prob = 0.40
+  )
+
+  clusters <- il_cluster(
+    pairs,
+    threshold = 0.80,
+    method = 'best_link',
+    source_dataset = c(A = 'x', B = 'y')
+  )
+  expect_false(any(grepl('^cluster_cluster_', clusters$cluster_id)))
+  expect_equal(sort(clusters$cluster_id), c('cluster_A', 'cluster_B'))
+})
+
+test_that('SQL best_link with source_dataset matches R tie handling', {
+  con <- test_con()
+  on.exit(test_discon(con))
+
+  pairs_data <- tibble::tibble(
+    unique_id_l = c('B', 'A'),
+    unique_id_r = c('C', 'C'),
+    match_weight = c(4, 4),
+    match_probability = c(0.9, 0.9)
+  )
+  sql_pairs <- structure(pairs_data, class = c('il_compared', class(pairs_data)))
+  attr(sql_pairs, 'model') <- list(con = con)
+
+  r_pairs <- structure(pairs_data, class = c('il_compared', class(pairs_data)))
+  source_dataset <- c(A = 'left', B = 'left', C = 'right')
+
+  sql_clusters <- il_cluster(
+    sql_pairs,
+    method = 'best_link',
+    ties_method = 'lowest_id',
+    source_dataset = source_dataset
+  )
+  r_clusters <- il_cluster(
+    r_pairs,
+    method = 'best_link',
+    ties_method = 'lowest_id',
+    source_dataset = source_dataset
+  )
+
+  sql_map <- stats::setNames(sql_clusters$cluster_id, sql_clusters$unique_id)
+  r_map <- stats::setNames(r_clusters$cluster_id, r_clusters$unique_id)
+
+  expect_equal(unname(sql_map['A']), unname(sql_map['C']))
+  expect_false(unname(sql_map['A']) == unname(sql_map['B']))
+  expect_equal(
+    sql_map[c('A', 'B', 'C')] == sql_map['A'],
+    r_map[c('A', 'B', 'C')] == r_map['A']
+  )
 })

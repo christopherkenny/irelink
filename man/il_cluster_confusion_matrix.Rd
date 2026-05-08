@@ -28,7 +28,8 @@ Defaults to \code{0.85}.}
 \code{\link[=il_cluster]{il_cluster()}}.}
 
 \item{source_dataset}{Optional source-dataset mapping passed to
-\code{\link[=il_cluster]{il_cluster()}}.}
+\code{\link[=il_cluster]{il_cluster()}}. If supplied, it must cover every \code{unique_id} in the
+predicted pairs, and duplicate \code{unique_id} mappings are not allowed.}
 }
 \value{
 A one-row tibble with columns \code{threshold}, \code{tp}, \code{fp}, \code{fn},

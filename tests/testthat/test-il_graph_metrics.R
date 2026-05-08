@@ -217,3 +217,33 @@ test_that('il_graph_metrics() includes cluster_centralisation', {
   # 3 nodes, all degree 2 → (3*2 - 6) / (2*1) = 0
   expect_equal(metrics$clusters$cluster_centralisation, 0, tolerance = 0.01)
 })
+
+test_that('il_graph_metrics() validates pair and cluster columns', {
+  pairs <- tibble::tibble(
+    unique_id_l = c('1'),
+    unique_id_r = c('2'),
+    match_probability = 0.95,
+    match_weight = 4.25
+  )
+  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+  clusters <- tibble::tibble(
+    unique_id = c('1', '2'),
+    cluster_id = c('A', 'A')
+  )
+
+  expect_error(
+    il_graph_metrics(pairs[, c('unique_id_l', 'unique_id_r', 'match_probability')], clusters),
+    'match_weight'
+  )
+  expect_error(
+    il_graph_metrics(pairs, clusters[, 'unique_id', drop = FALSE]),
+    'cluster_id'
+  )
+  expect_error(
+    il_graph_metrics(
+      pairs,
+      tibble::tibble(unique_id = c('1', '1'), cluster_id = c('A', 'A'))
+    ),
+    'one row per'
+  )
+})

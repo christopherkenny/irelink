@@ -5,7 +5,8 @@
 #' edges or weakly connected components.
 #'
 #' @param pairs An `il_compared` tibble from [predict.il_model()].
-#' @param clusters A tibble from [il_cluster()] with cluster assignments.
+#' @param clusters A tibble from [il_cluster()] with `unique_id` and
+#'   `cluster_id` columns.
 #'
 #' @return A named list of three tibbles:
 #'   \describe{
@@ -71,6 +72,11 @@
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_graph_metrics <- function(pairs, clusters) {
   pairs <- ensure_collected(pairs)
+  validate_pair_input_columns(
+    pairs,
+    c('unique_id_l', 'unique_id_r', 'match_probability', 'match_weight')
+  )
+  validate_cluster_assignments(clusters)
   # Try SQL path first
   model <- attr(pairs, 'model')
   con <- if (!is.null(model)) model$con else NULL
