@@ -73,6 +73,15 @@ test_that('NULL transform leaves SQL unchanged', {
   expect_true(grepl('l\\.name', sql))
 })
 
+test_that('custom transforms error on SQL gamma paths', {
+  comp <- list(
+    columns = 'name',
+    method = structure(list(method = 'exact'), class = 'il_comparison_level'),
+    transform = function(x) trimws(tolower(x))
+  )
+  expect_error(sql_gamma_case(comp, 'duckdb'), class = 'il_error_type')
+})
+
 test_that('transform applied R-side in compute_gamma_matrix', {
   comparisons <- list(
     list(

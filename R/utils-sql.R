@@ -80,7 +80,13 @@ sql_transform_col <- function(col_ref, transform, dialect = NULL) {
   }
   fn_name <- transform_to_sql_fn(transform)
   if (is.null(fn_name)) {
-    return(col_ref)
+    cli::cli_abort(
+      c(
+        'Transform function cannot be translated to SQL.',
+        'i' = 'Use a built-in SQL-capable transform or run through an R fallback path.'
+      ),
+      class = 'il_error_type'
+    )
   }
   paste0(fn_name, '(', col_ref, ')')
 }

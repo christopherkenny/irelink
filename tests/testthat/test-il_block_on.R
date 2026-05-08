@@ -185,6 +185,37 @@ test_that('il_block_on() accepts a named list .transform', {
   expect_true(is.list(spec$blocking_rules[[1]]$transform))
 })
 
+test_that('named list .transform must match blocking columns', {
+  expect_error(
+    il_block_on(
+      il_spec(),
+      first_name,
+      .transform = list(first_name = tolower, surname = toupper)
+    ),
+    class = 'il_error_type'
+  )
+  expect_error(
+    il_block_on(
+      il_spec(),
+      first_name, surname,
+      .transform = list(first_name = tolower)
+    ),
+    class = 'il_error_type'
+  )
+})
+
+test_that('formula transforms can fill named list .transform entries', {
+  spec <- il_spec() |>
+    il_block_on(
+      first_name ~ il_substr(1, 3),
+      surname,
+      .transform = list(surname = tolower)
+    )
+  rule <- spec$blocking_rules[[1]]
+  expect_s3_class(rule$transform$first_name, 'il_column_transform')
+  expect_identical(rule$transform$surname, tolower)
+})
+
 test_that('il_block_on() errors on unnamed list .transform', {
   expect_snapshot(
     error = TRUE,

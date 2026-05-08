@@ -188,6 +188,7 @@ parse_blocking_cols <- function(col_exprs) {
 # named list depending on what was provided.
 merge_blocking_transforms <- function(per_col_tfs, dot_transform, columns) {
   if (length(per_col_tfs) == 0L) {
+    validate_blocking_transform_names(dot_transform, columns)
     return(dot_transform)
   }
   if (is.null(dot_transform)) {
@@ -205,5 +206,27 @@ merge_blocking_transforms <- function(per_col_tfs, dot_transform, columns) {
   for (nm in names(per_col_tfs)) {
     combined[[nm]] <- per_col_tfs[[nm]]
   }
+  validate_blocking_transform_names(combined, columns)
   combined
+}
+
+validate_blocking_transform_names <- function(transform, columns) {
+  if (!is.list(transform)) {
+    return(invisible(NULL))
+  }
+  extra <- setdiff(names(transform), columns)
+  missing <- setdiff(columns, names(transform))
+  if (length(extra) > 0L || length(missing) > 0L) {
+    bullets <- c(
+      '{.arg .transform} names must match the blocking columns.'
+    )
+    if (length(extra) > 0L) {
+      bullets <- c(bullets, 'x' = 'Unknown transform name{?s}: {.val {extra}}.')
+    }
+    if (length(missing) > 0L) {
+      bullets <- c(bullets, 'x' = 'Missing transform name{?s}: {.val {missing}}.')
+    }
+    cli::cli_abort(bullets, class = 'il_error_type')
+  }
+  invisible(NULL)
 }

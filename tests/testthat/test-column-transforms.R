@@ -16,11 +16,27 @@ test_that('il_regex_extract returns match or NA', {
   expect_true(is.na(tf('abcdef')))
 })
 
+test_that('il_regex_extract supports capture groups in R', {
+  tf <- il_regex_extract('([A-Z]+)([0-9]+)', group = 2L)
+  expect_equal(tf(c('ABC123', 'XYZ', NA)), c('123', NA, NA))
+})
+
 test_that('il_regex_extract SQL wraps in NULLIF', {
   tf <- il_regex_extract('[0-9]+', 1L)
   sql <- sql_transform_col('l.phone', tf, 'duckdb')
   expect_match(sql, 'regexp_extract')
   expect_match(sql, 'NULLIF')
+})
+
+test_that('column transform SQL escapes string literals', {
+  expect_equal(
+    sql_transform_col('l.name', il_nullif("O'Reilly"), 'duckdb'),
+    "NULLIF(l.name, 'O''Reilly')"
+  )
+  expect_match(
+    sql_transform_col('l.txt', il_regex_extract("([A-Z]')"), 'duckdb'),
+    "'\\(\\[A-Z\\]''\\)'"
+  )
 })
 
 test_that('il_nullif replaces value with NA', {
@@ -62,6 +78,14 @@ test_that('il_try_parse_date PostgreSQL SQL uses TO_DATE', {
   tf <- il_try_parse_date('%Y-%m-%d')
   sql <- sql_transform_col('l.dob', tf, 'postgres')
   expect_match(sql, 'TO_DATE')
+  expect_match(sql, 'YYYY-MM-DD')
+})
+
+test_that('il_try_parse_timestamp PostgreSQL SQL translates strptime tokens', {
+  tf <- il_try_parse_timestamp('%Y-%m-%d %H:%M:%S')
+  sql <- sql_transform_col('l.ts', tf, 'postgres')
+  expect_match(sql, 'TO_TIMESTAMP')
+  expect_match(sql, 'YYYY-MM-DD HH24:MI:SS')
 })
 
 test_that('il_array_element extracts first/last', {
@@ -74,8 +98,17 @@ test_that('il_array_element extracts first/last', {
 test_that('il_array_element SQL generation', {
   tf_first <- il_array_element('first')
   tf_last <- il_array_element('last')
-  expect_equal(sql_transform_col('l.arr', tf_first), 'l.arr[1]')
-  expect_equal(sql_transform_col('l.arr', tf_last), 'l.arr[-1]')
+  expect_equal(sql_transform_col('l.arr', tf_first, 'duckdb'), 'l.arr[1]')
+  expect_equal(sql_transform_col('l.arr', tf_last, 'duckdb'), 'l.arr[-1]')
+  expect_equal(
+    sql_transform_col('l.arr', tf_last, 'postgres'),
+    'l.arr[array_length(l.arr, 1)]'
+  )
+})
+
+test_that('backend-specific transforms reject unsupported SQL dialects', {
+  expect_error(sql_transform_col('l.dob', il_try_parse_date(), 'sqlite'))
+  expect_error(sql_transform_col('l.arr', il_array_element('first'), 'sqlite'))
 })
 
 test_that('column transforms serialize to name', {
