@@ -15,8 +15,8 @@ il_tf_chart(model, col, n_most_freq = 10L, n_least_freq = 5L)
 
 - model:
 
-  A trained `il_model` object with `term_frequency = TRUE` enabled for
-  at least one comparison column.
+  An `il_model` object with `term_frequency = TRUE` enabled for at least
+  one comparison column.
 
 - col:
 

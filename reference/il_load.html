@@ -69,6 +69,10 @@
     <p>Settings JSON is loaded into an <code>il_model</code> that can be used with
 <code><a href="il_attach.html">il_attach()</a></code> and <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>. The database connection and any in-database
 tables are not loaded.</p>
+<p>JSON imports reconstruct equivalent SQL-backed comparison and blocking
+behavior for use after <code><a href="il_attach.html">il_attach()</a></code>. They do not necessarily recreate the
+original irelink helper objects or transform functions stored in the
+original spec.</p>
     </div>
 
     <div class="section level2">

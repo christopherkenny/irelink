@@ -25,6 +25,12 @@ Settings JSON is loaded into an `il_model` that can be used with
 and [`predict()`](https://rdrr.io/r/stats/predict.html). The database
 connection and any in-database tables are not loaded.
 
+JSON imports reconstruct equivalent SQL-backed comparison and blocking
+behavior for use after
+[`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md).
+They do not necessarily recreate the original irelink helper objects or
+transform functions stored in the original spec.
+
 ## Examples
 
 ``` r

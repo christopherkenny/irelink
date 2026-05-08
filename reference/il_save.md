@@ -35,6 +35,11 @@ fresh connection with
 [`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md)
 after loading.
 
+JSON export preserves scoring and prediction behavior by lowering
+comparisons and blocking rules to SQL. It does not guarantee exact
+round-tripping of irelink helper structure such as transform functions
+or structured blocking-rule fields.
+
 ## Examples
 
 ``` r
