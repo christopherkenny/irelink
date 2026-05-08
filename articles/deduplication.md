@@ -286,12 +286,12 @@ head(predict(model2, threshold = 0.85))
 #> # A tibble: 6 × 11
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob gamma_city
 #>         <int>       <int>            <int>         <int>     <int>      <int>
-#> 1           0           3                4            -1         5          0
-#> 2           1           3                4             4         2          0
-#> 3           6          11                4             4         2          0
-#> 4          10          11                4             4         2          0
-#> 5          52          57                4             4         5          0
-#> 6          54          57                4            -1         5          0
+#> 1         479         481                4             4         5          0
+#> 2         509         512                4             2         3          1
+#> 3         535         536                4            -1         2          1
+#> 4         100         104                4            -1         5          0
+#> 5         150         152                4             4         2          1
+#> 6         252         254                4             4         5          0
 #> # ℹ 5 more variables: gamma_email <int>, match_weight <dbl>, tf_adj_city <dbl>,
 #> #   total_match_weight <dbl>, match_probability <dbl>
 DBI::dbDisconnect(con2, shutdown = TRUE)
@@ -338,12 +338,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 411       cluster_409
-#> 2 526       cluster_517
-#> 3 685       cluster_684
-#> 4 520       cluster_517
-#> 5 882       cluster_879
-#> 6 931       cluster_924
+#> 1 899       cluster_898
+#> 2 820       cluster_814
+#> 3 816       cluster_814
+#> 4 770       cluster_767
+#> 5 299       cluster_296
+#> 6 525       cluster_517
 ```
 
 ## Evaluate against ground truth
