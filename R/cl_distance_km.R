@@ -25,6 +25,7 @@ cl_distance_km <- function(...) {
   mi_to_km <- 1.609344
   thresholds <- vapply(args, function(a) {
     if (is.numeric(a) && length(a) == 1L) {
+      check_unit_input(a, 'cl_distance_km')
       return(a)
     }
     if (is.list(a) && !is.null(a$unit)) {
@@ -40,5 +41,11 @@ cl_distance_km <- function(...) {
     }
     cli::cli_abort('Invalid threshold for {.fn cl_distance_km}.')
   }, numeric(1))
+  if (length(thresholds) > 1L && is.unsorted(thresholds)) {
+    cli::cli_warn(
+      'Thresholds for {.fn cl_distance_km} should be in ascending order; re-ordering.'
+    )
+    thresholds <- sort(thresholds)
+  }
   new_comparison_level('distance_km', thresholds = thresholds)
 }

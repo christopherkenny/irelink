@@ -64,6 +64,20 @@ il_compare <- function(spec, col, method, ...,
   col_expr <- rlang::enquo(col)
   selected <- extract_col_names(col_expr)
   columns <- selected$columns
+  if (identical(method$method, 'distance_km')) {
+    if (!is.null(selected$selector) || length(columns) != 2L) {
+      cli::cli_abort(
+        '{.fn cl_distance_km} comparisons must select exactly two concrete columns: latitude and longitude.'
+      )
+    }
+    entry <- list(
+      columns = columns, method = method, transform = transform,
+      tf_adjustment_weight = tf_adjustment_weight,
+      tf_minimum_u_value = tf_minimum_u_value
+    )
+    spec$comparisons <- c(spec$comparisons, list(entry))
+    return(spec)
+  }
   for (column in columns) {
     entry <- list(
       columns = column, method = method, transform = transform,

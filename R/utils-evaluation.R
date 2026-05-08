@@ -179,7 +179,7 @@ score_labeled_pairs <- function(model, labels) {
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
   prior <- safe_prior(model)
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
   mu <- extract_mu_vectors(params, comp_names)
 
   con <- model$con
@@ -206,7 +206,7 @@ score_labeled_pairs <- function(model, labels) {
       comparisons,
       function(comp) {
         expr <- sql_gamma_case(comp, dialect)
-        glue::glue('{expr} AS gamma_{comp$columns}')
+        glue::glue('{expr} AS gamma_{comparison_name(comp)}')
       },
       character(1)
     )

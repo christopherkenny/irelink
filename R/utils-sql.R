@@ -261,6 +261,12 @@ sql_gamma_case <- function(comp, dialect) {
   thresholds <- level$thresholds
   tf <- comp$transform
 
+  if (length(col) == 2L && method != 'distance_km') {
+    cli::cli_abort(
+      'Only {.fn cl_distance_km} comparisons can use two columns.'
+    )
+  }
+
   # Build column references with optional transforms
   lcol <- sql_transform_col(glue::glue('l.{col}'), tf, dialect)
   rcol <- sql_transform_col(glue::glue('r.{col}'), tf, dialect)
@@ -292,6 +298,22 @@ sql_gamma_case <- function(comp, dialect) {
     n <- length(thresholds)
     whens <- vapply(seq_along(thresholds), function(i) {
       glue::glue('WHEN {null_guard} AND jaro_similarity({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}')
+    }, character(1))
+    return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
+  }
+
+  if (method == 'jaccard') {
+    n <- length(thresholds)
+    whens <- vapply(seq_along(thresholds), function(i) {
+      glue::glue('WHEN {null_guard} AND jaccard({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}')
+    }, character(1))
+    return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
+  }
+
+  if (method == 'cosine') {
+    n <- length(thresholds)
+    whens <- vapply(seq_along(thresholds), function(i) {
+      glue::glue('WHEN {null_guard} AND cosine_similarity({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}')
     }, character(1))
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
@@ -374,6 +396,51 @@ sql_gamma_case <- function(comp, dialect) {
     ))
   }
 
+  if (method == 'distance_km') {
+    if (length(col) != 2L) {
+      cli::cli_abort(
+        '{.fn cl_distance_km} comparisons require latitude and longitude columns.'
+      )
+    }
+    lat_l <- sql_transform_col(glue::glue('l.{col[1]}'), tf, dialect)
+    lon_l <- sql_transform_col(glue::glue('l.{col[2]}'), tf, dialect)
+    lat_r <- sql_transform_col(glue::glue('r.{col[1]}'), tf, dialect)
+    lon_r <- sql_transform_col(glue::glue('r.{col[2]}'), tf, dialect)
+    null_guard2 <- glue::glue(
+      'l.{col[1]} IS NOT NULL AND r.{col[1]} IS NOT NULL AND l.{col[2]} IS NOT NULL AND r.{col[2]} IS NOT NULL'
+    )
+    dist <- glue::glue(
+      '2 * 6371 * ASIN(SQRT(POWER(SIN(RADIANS(({lat_r} - {lat_l}) / 2)), 2) + ',
+      'COS(RADIANS({lat_l})) * COS(RADIANS({lat_r})) * ',
+      'POWER(SIN(RADIANS(({lon_r} - {lon_l}) / 2)), 2)))'
+    )
+    n <- length(thresholds)
+    whens <- vapply(seq_along(thresholds), function(i) {
+      glue::glue('WHEN {null_guard2} AND {dist} <= {thresholds[i]} THEN {n - i + 1L}')
+    }, character(1))
+    return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
+  }
+
+  if (method == 'array_intersect') {
+    n <- length(thresholds)
+    whens <- vapply(seq_along(thresholds), function(i) {
+      glue::glue('WHEN {null_guard} AND ARRAY_LENGTH(ARRAY_INTERSECT({lcol}, {rcol})) >= {thresholds[i]} THEN {n - i + 1L}')
+    }, character(1))
+    return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
+  }
+
+  if (method == 'array_subset') {
+    return(glue::glue(
+      'CASE WHEN {null_guard} AND ARRAY_LENGTH(ARRAY_INTERSECT({lcol}, {rcol})) = ',
+      'LEAST(ARRAY_LENGTH({lcol}), ARRAY_LENGTH({rcol})) THEN 1 ELSE 0 END'
+    ))
+  }
+
+  if (method == 'custom') {
+    sql_expr <- glue::glue(level$sql_expr, col = col[[1]], .open = '{', .close = '}')
+    return(glue::glue('CASE WHEN {null_guard} AND ({sql_expr}) THEN 1 ELSE 0 END'))
+  }
+
   if (method == 'array_min_distance') {
     return(sql_array_min_distance_case(level, col, null_guard))
   }
@@ -439,6 +506,14 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
     t <- sub$thresholds[1]
     return(glue::glue('{null_guard} AND jaro_similarity({lcol}, {rcol}) >= {t}'))
   }
+  if (method == 'jaccard') {
+    t <- sub$thresholds[1]
+    return(glue::glue('{null_guard} AND jaccard({lcol}, {rcol}) >= {t}'))
+  }
+  if (method == 'cosine') {
+    t <- sub$thresholds[1]
+    return(glue::glue('{null_guard} AND cosine_similarity({lcol}, {rcol}) >= {t}'))
+  }
   if (method == 'levenshtein') {
     t <- sub$thresholds[1]
     return(glue::glue('{null_guard} AND levenshtein({lcol}, {rcol}) <= {t}'))
@@ -450,6 +525,13 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
   if (method == 'numeric_diff') {
     t <- sub$thresholds[1]
     return(glue::glue('{null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) <= {t}'))
+  }
+  if (method == 'pct_diff') {
+    t <- sub$thresholds[1]
+    return(glue::glue(
+      '{null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) / ',
+      'NULLIF(GREATEST(ABS(CAST({lcol} AS DOUBLE)), ABS(CAST({rcol} AS DOUBLE))), 0) < {t}'
+    ))
   }
   if (method == 'date_diff') {
     t <- sub$thresholds[1]
@@ -483,6 +565,12 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
       'LEAST(ARRAY_LENGTH(l.{col}), ARRAY_LENGTH(r.{col}))'
     ))
   }
+  if (method == 'array_intersect') {
+    t <- sub$thresholds[1]
+    return(glue::glue(
+      '{null_guard} AND ARRAY_LENGTH(ARRAY_INTERSECT(l.{col}, r.{col})) >= {t}'
+    ))
+  }
   if (method == 'array_min_distance') {
     t <- sub$thresholds[1]
     inner <- sql_array_min_distance_inner(sub$fn, col)
@@ -492,6 +580,24 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
   if (method == 'custom') {
     sql_expr <- glue::glue(sub$sql_expr, col = col, .open = '{', .close = '}')
     return(glue::glue('{null_guard} AND ({sql_expr})'))
+  }
+  if (method == 'and') {
+    parts <- vapply(sub$children, sql_sublevel_condition, character(1),
+      col = col, dialect = dialect, null_guard = null_guard,
+      lcol = lcol, rcol = rcol
+    )
+    return(glue::glue('({paste(parts, collapse = ") AND (")})'))
+  }
+  if (method == 'or') {
+    parts <- vapply(sub$children, sql_sublevel_condition, character(1),
+      col = col, dialect = dialect, null_guard = null_guard,
+      lcol = lcol, rcol = rcol
+    )
+    return(glue::glue('({paste(parts, collapse = ") OR (")})'))
+  }
+  if (method == 'not') {
+    part <- sql_sublevel_condition(sub$child, col, dialect, null_guard, lcol, rcol)
+    return(glue::glue('{null_guard} AND NOT ({part})'))
   }
   # Default: exact match
   glue::glue('{null_guard} AND {lcol} = {rcol}')
@@ -564,7 +670,7 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL,
   # Gamma SELECT expressions
   gamma_exprs <- vapply(comparisons, function(comp) {
     expr <- sql_gamma_case(comp, dialect)
-    glue::glue('{expr} AS gamma_{comp$columns}')
+    glue::glue('{expr} AS gamma_{comparison_name(comp)}')
   }, character(1))
   gamma_select <- paste(gamma_exprs, collapse = ', ')
 
@@ -1149,7 +1255,7 @@ build_scored_query <- function(model, threshold = 0.85,
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
   prior <- safe_prior(model)
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
   blocking_rules <- model$spec$blocking_rules
 
   mu <- extract_mu_vectors(params, comp_names)
@@ -1323,7 +1429,7 @@ build_greedy_query <- function(model, inner_sql) {
 #' @return Character vector of output column names.
 #' @noRd
 greedy_result_columns <- function(model) {
-  comp_names <- vapply(model$spec$comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(model$spec$comparisons)
   tf_cols <- vapply(model$spec$comparisons, function(c) {
     if (isTRUE(c$method$term_frequency)) c$columns else NA_character_
   }, character(1))

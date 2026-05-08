@@ -34,7 +34,7 @@ il_comparison_vectors <- function(model, blocking = NULL, limit = NULL) {
   }
 
   comparisons <- model$spec$comparisons
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
   gamma_cols <- paste0('gamma_', comp_names)
 
   con <- model$con

@@ -14,7 +14,22 @@
 #' il_spec() |>
 #'   il_compare(tags, cl_array_intersect(2, 1))
 cl_array_intersect <- function(...) {
-  thresholds <- check_distance_thresholds(c(...), 'cl_array_intersect')
+  thresholds <- c(...)
+  if (length(thresholds) == 0L) {
+    cli::cli_abort('{.fn cl_array_intersect} requires at least one threshold.')
+  }
+  if (!is.numeric(thresholds) || anyNA(thresholds)) {
+    cli::cli_abort('Thresholds for {.fn cl_array_intersect} must be numeric.')
+  }
+  if (any(thresholds < 0)) {
+    cli::cli_abort('Thresholds for {.fn cl_array_intersect} must be non-negative.')
+  }
+  if (length(thresholds) > 1L && is.unsorted(rev(thresholds))) {
+    cli::cli_warn(
+      'Thresholds for {.fn cl_array_intersect} should be in descending order; re-ordering.'
+    )
+    thresholds <- sort(thresholds, decreasing = TRUE)
+  }
   new_comparison_level('array_intersect', thresholds = thresholds)
 }
 

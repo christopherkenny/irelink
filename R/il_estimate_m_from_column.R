@@ -33,7 +33,7 @@ il_estimate_m_from_column <- function(model, label_col) {
   dialect <- detect_dialect(con)
   tbl <- model$data$tbl_l
   comparisons <- model$spec$comparisons
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
 
   # Verify label column exists using DBI-portable approach
   tbl_cols <- DBI::dbListFields(con, tbl)
@@ -45,7 +45,7 @@ il_estimate_m_from_column <- function(model, label_col) {
     # SQL-first: within-cluster self-join + gamma computation + aggregation
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)
-      glue::glue('{expr} AS gamma_{comp$columns}')
+      glue::glue('{expr} AS gamma_{comparison_name(comp)}')
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
     gamma_cols <- paste0('gamma_', comp_names)

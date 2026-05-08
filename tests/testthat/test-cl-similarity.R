@@ -74,6 +74,21 @@ test_that('cl_jaccard() creates a jaccard similarity level', {
   expect_equal(lev$thresholds, c(0.8, 0.5))
 })
 
+test_that('cl_jaccard() and cl_cosine() have active SQL gamma support', {
+  jaccard_sql <- sql_gamma_case(
+    list(columns = 'name', method = cl_jaccard(0.8), transform = NULL),
+    dialect = 'duckdb'
+  )
+  cosine_sql <- sql_gamma_case(
+    list(columns = 'name', method = cl_cosine(0.8), transform = NULL),
+    dialect = 'duckdb'
+  )
+  expect_match(jaccard_sql, 'jaccard', fixed = TRUE)
+  expect_match(cosine_sql, 'cosine_similarity', fixed = TRUE)
+  expect_false(grepl('l.name = r.name', jaccard_sql, fixed = TRUE))
+  expect_false(grepl('l.name = r.name', cosine_sql, fixed = TRUE))
+})
+
 test_that('cl_cosine() creates a cosine similarity level', {
   lev <- cl_cosine(0.9, 0.7, 0.5)
   expect_s3_class(lev, 'il_comparison_level')
@@ -129,6 +144,7 @@ test_that('cl_date_diff() accepts mixed metric thresholds', {
 
 test_that('cl_date_diff() rejects negative thresholds', {
   expect_error(cl_date_diff(days(-1)))
+  expect_error(cl_date_diff(-1))
 })
 
 test_that('cl_date_diff() rejects invalid metrics', {
@@ -155,6 +171,37 @@ test_that('cl_distance_km() accepts miles', {
   expect_s3_class(lev, 'il_comparison_level')
 })
 
+test_that('cl_distance_km() rejects negative bare numerics', {
+  expect_error(cl_distance_km(-1))
+})
+
+test_that('cl_distance_km() uses a two-column comparison and computes R gamma', {
+  spec <- il_spec() |>
+    il_compare(c(lat, lon), cl_distance_km(km(1), km(500)))
+
+  expect_equal(spec$comparisons[[1]]$columns, c('lat', 'lon'))
+  expect_equal(comparison_name(spec$comparisons[[1]]), 'lat_lon')
+
+  pairs <- data.frame(
+    l_lat = c(0, 0),
+    l_lon = c(0, 0),
+    r_lat = c(0, 10),
+    r_lon = c(0, 10)
+  )
+  gamma <- compute_gamma_matrix(pairs, spec$comparisons)
+  expect_equal(colnames(gamma), 'lat_lon')
+  expect_equal(gamma[, 1], c(2L, 0L))
+})
+
+test_that('cl_distance_km() has active SQL gamma support', {
+  sql <- sql_gamma_case(
+    list(columns = c('lat', 'lon'), method = cl_distance_km(km(1)), transform = NULL),
+    dialect = 'duckdb'
+  )
+  expect_match(sql, '6371', fixed = TRUE)
+  expect_match(sql, 'RADIANS', fixed = TRUE)
+})
+
 # --- cl_array_intersect() -------------------------------------------------
 # From: test_array_columns.py::test_array_comparison_1
 
@@ -166,6 +213,24 @@ test_that('cl_array_intersect() creates an array intersection level', {
 
 test_that('cl_array_intersect() rejects negative thresholds', {
   expect_error(cl_array_intersect(-1, 2))
+})
+
+test_that('cl_array_intersect() computes shared-element R gamma', {
+  gamma <- compute_gamma(
+    c('a,b,c', 'a,b', 'x'),
+    c('b,c,d', 'c,d', 'y'),
+    cl_array_intersect(2, 1)
+  )
+  expect_equal(gamma, c(2L, 0L, 0L))
+})
+
+test_that('cl_array_intersect() has active SQL gamma support', {
+  sql <- sql_gamma_case(
+    list(columns = 'tags', method = cl_array_intersect(2, 1), transform = NULL),
+    dialect = 'duckdb'
+  )
+  expect_match(sql, 'ARRAY_INTERSECT', fixed = TRUE)
+  expect_match(sql, 'ARRAY_LENGTH', fixed = TRUE)
 })
 
 # --- cl_array_min_distance() ----------------------------------------------
@@ -219,6 +284,15 @@ test_that('cl_custom() stores a raw SQL expression', {
   lev <- cl_custom('SUBSTR(l.postcode, 1, 3) = SUBSTR(r.postcode, 1, 3)')
   expect_s3_class(lev, 'il_comparison_level')
   expect_equal(lev$method, 'custom')
+})
+
+test_that('cl_custom() has active SQL gamma support and no silent R fallback', {
+  sql <- sql_gamma_case(
+    list(columns = 'score', method = cl_custom('l.score + r.score > 10'), transform = NULL),
+    dialect = 'duckdb'
+  )
+  expect_match(sql, 'l.score + r.score > 10', fixed = TRUE)
+  expect_error(compute_gamma(6, 6, cl_custom('l.score + r.score > 10')))
 })
 
 # --- Threshold validation (cross-cutting) ---------------------------------

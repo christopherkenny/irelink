@@ -198,3 +198,11 @@ test_that('cl_literal() numeric values are not quoted', {
   lev <- cl_literal(1L)
   expect_false(grepl("'", lev$sql_expr))
 })
+
+test_that('cl_literal() escapes quotes and uses IS NULL for missing values', {
+  quoted <- cl_literal("O'Reilly")
+  missing <- cl_literal(NA_character_)
+  expect_match(quoted$sql_expr, "O''Reilly", fixed = TRUE)
+  expect_match(missing$sql_expr, 'IS NULL', fixed = TRUE)
+  expect_false(grepl('= NULL', missing$sql_expr, fixed = TRUE))
+})

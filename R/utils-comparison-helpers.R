@@ -39,5 +39,11 @@ check_distance_thresholds <- function(thresholds, fn_name) {
   if (any(thresholds < 0)) {
     cli::cli_abort('Thresholds for {.fn {fn_name}} must be non-negative.')
   }
+  if (length(thresholds) > 1L && is.unsorted(thresholds)) {
+    cli::cli_warn(
+      'Thresholds for {.fn {fn_name}} should be in ascending order; re-ordering.'
+    )
+    thresholds <- sort(thresholds)
+  }
   thresholds
 }

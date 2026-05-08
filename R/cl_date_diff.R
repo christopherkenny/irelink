@@ -26,6 +26,7 @@ cl_date_diff <- function(...) {
   valid_units <- c('days', 'months', 'years')
   thresholds <- vapply(args, function(a) {
     if (is.numeric(a) && length(a) == 1L) {
+      check_unit_input(a, 'cl_date_diff')
       return(a)
     }
     if (is.list(a) && !is.null(a$unit)) {
@@ -44,5 +45,16 @@ cl_date_diff <- function(...) {
     }
     a$unit
   }, character(1))
+  days_values <- thresholds * vapply(units, function(unit) {
+    switch(unit, days = 1, months = 30, years = 365)
+  }, numeric(1))
+  if (length(days_values) > 1L && is.unsorted(days_values)) {
+    cli::cli_warn(
+      'Thresholds for {.fn cl_date_diff} should be in ascending order; re-ordering.'
+    )
+    ord <- order(days_values)
+    thresholds <- thresholds[ord]
+    units <- units[ord]
+  }
   new_comparison_level('date_diff', thresholds = thresholds, units = units)
 }

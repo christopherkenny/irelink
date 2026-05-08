@@ -109,7 +109,7 @@ il_estimate_em <- function(model, blocking, convergence = 1e-5,
   }
   max_iterations <- as.integer(max_iterations)
   comparisons <- model$spec$comparisons
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
   n_comp <- length(comp_names)
 
   # Decide whether to use per-pair TF-inclusive EM

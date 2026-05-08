@@ -81,7 +81,7 @@ il_waterfall <- function(pairs, which = 1L) {
   }
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
 
   mu <- extract_mu_vectors(params, comp_names)
   gamma <- vapply(comp_names, function(cn) {

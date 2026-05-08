@@ -74,7 +74,7 @@ il_estimate_m_from_labels <- function(model, labels) {
   dialect <- detect_dialect(con)
   tbl <- model$data$tbl_l
   comparisons <- model$spec$comparisons
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
 
   match_pairs <- labels[labels$is_match, ]
   if (nrow(match_pairs) == 0L) {
@@ -94,7 +94,7 @@ il_estimate_m_from_labels <- function(model, labels) {
 
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)
-      glue::glue('{expr} AS gamma_{comp$columns}')
+      glue::glue('{expr} AS gamma_{comparison_name(comp)}')
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
     gamma_cols <- paste0('gamma_', comp_names)

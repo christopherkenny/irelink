@@ -7,7 +7,7 @@ il_estimate_em_dependency_aware <- function(model, blocking, convergence,
                                             derive_prior,
                                             has_tf) {
   comparisons <- model$spec$comparisons
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
   deactivated <- vapply(comparisons, function(c) {
     any(c$columns %in% blocking$columns)
   }, logical(1))
@@ -531,7 +531,7 @@ il_score_patterns <- function(model, patterns) {
   }
 
   comparisons <- model$spec$comparisons
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
   gamma_cols <- paste0('gamma_', comp_names)
   if (all(gamma_cols %in% names(patterns))) {
     gamma_mat <- as.matrix(patterns[, gamma_cols, drop = FALSE])

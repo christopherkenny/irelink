@@ -47,6 +47,10 @@ test_that('cl_time_diff() errors with no arguments', {
   expect_error(cl_time_diff(), 'requires at least one threshold')
 })
 
+test_that('cl_time_diff() rejects negative bare numerics', {
+  expect_error(cl_time_diff(-1))
+})
+
 # --- time_diff_to_seconds() internal helper -----------------------------
 
 test_that('time_diff_to_seconds converts units correctly', {

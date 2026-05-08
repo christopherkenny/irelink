@@ -16,7 +16,7 @@ get_pairs_with_gamma_counts <- function(model, blocking_rules, limit = NULL) {
   con <- model$con
   dialect <- detect_dialect(con)
   comparisons <- model$spec$comparisons
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
   gamma_cols <- paste0('gamma_', comp_names)
 
   if (dialect_has_fuzzy_sql(dialect)) {
@@ -76,7 +76,7 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
   con <- model$con
   dialect <- detect_dialect(con)
   comparisons <- model$spec$comparisons
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
   tf_cols <- tf_columns(comparisons)
 
   if (dialect_has_fuzzy_sql(dialect)) {
@@ -173,7 +173,7 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6,
   con <- model$con
   dialect <- detect_dialect(con)
   comparisons <- model$spec$comparisons
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
   gamma_cols <- paste0('gamma_', comp_names)
 
   if (dialect_has_fuzzy_sql(dialect)) {
@@ -185,7 +185,7 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6,
 
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)
-      glue::glue('{expr} AS gamma_{comp$columns}')
+      glue::glue('{expr} AS gamma_{comparison_name(comp)}')
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
     group_by_clause <- paste(gamma_cols, collapse = ', ')
@@ -253,7 +253,7 @@ get_random_pair_gamma_counts_chunked <- function(model, max_pairs,
   con <- model$con
   dialect <- detect_dialect(con)
   comparisons <- model$spec$comparisons
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
   gamma_cols <- paste0('gamma_', comp_names)
 
   counts <- empty_gamma_counts(gamma_cols)
@@ -269,7 +269,7 @@ get_random_pair_gamma_counts_chunked <- function(model, max_pairs,
 
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)
-      glue::glue('{expr} AS gamma_{comp$columns}')
+      glue::glue('{expr} AS gamma_{comparison_name(comp)}')
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
     group_by_clause <- paste(gamma_cols, collapse = ', ')
@@ -561,6 +561,30 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     return(gamma)
   }
 
+  if (method == 'distance_km') {
+    lat_l <- val_l[[1]]
+    lon_l <- val_l[[2]]
+    lat_r <- val_r[[1]]
+    lon_r <- val_r[[2]]
+    lat_l <- suppressWarnings(as.numeric(lat_l))
+    lon_l <- suppressWarnings(as.numeric(lon_l))
+    lat_r <- suppressWarnings(as.numeric(lat_r))
+    lon_r <- suppressWarnings(as.numeric(lon_r))
+    bp <- !is.na(lat_l) & !is.na(lon_l) & !is.na(lat_r) & !is.na(lon_r)
+    rad <- pi / 180
+    dlat <- (lat_r - lat_l) * rad
+    dlon <- (lon_r - lon_l) * rad
+    a <- sin(dlat / 2)^2 + cos(lat_l * rad) * cos(lat_r * rad) * sin(dlon / 2)^2
+    dist <- 2 * 6371 * asin(sqrt(a))
+    gamma <- rep(0L, length(lat_l))
+    nt <- length(thresholds)
+    for (i in rev(seq_along(thresholds))) {
+      level_code <- nt - i + 1L
+      gamma[bp & !is.na(dist) & dist <= thresholds[i]] <- level_code
+    }
+    return(gamma)
+  }
+
   if (method == 'date_diff') {
     date_l <- suppressWarnings(as.Date(val_l))
     date_r <- suppressWarnings(as.Date(val_r))
@@ -650,6 +674,26 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     return(as.integer(result))
   }
 
+  if (method == 'array_intersect') {
+    result <- mapply(function(a, b) {
+      if (is.na(a) || is.na(b)) {
+        return(0L)
+      }
+      a_set <- unique(unlist(strsplit(as.character(a), ',\\s*')))
+      b_set <- unique(unlist(strsplit(as.character(b), ',\\s*')))
+      shared <- length(intersect(a_set, b_set))
+      gamma <- 0L
+      nt <- length(thresholds)
+      for (i in rev(seq_along(thresholds))) {
+        if (shared >= thresholds[i]) {
+          gamma <- nt - i + 1L
+        }
+      }
+      gamma
+    }, val_l, val_r)
+    return(as.integer(result))
+  }
+
   if (method == 'levels') {
     has_null_level <- any(vapply(comp_level$levels, function(l) {
       isTRUE(l$is_null_level)
@@ -677,6 +721,30 @@ compute_gamma <- function(val_l, val_r, comp_level) {
       gamma[sub_gamma > 0L] <- level_code
     }
     return(gamma)
+  }
+
+  if (method == 'and') {
+    child_mat <- vapply(comp_level$children, function(child) {
+      compute_gamma(val_l, val_r, child) > 0L
+    }, logical(n))
+    return(as.integer(rowSums(child_mat) == length(comp_level$children)))
+  }
+
+  if (method == 'or') {
+    child_mat <- vapply(comp_level$children, function(child) {
+      compute_gamma(val_l, val_r, child) > 0L
+    }, logical(n))
+    return(as.integer(rowSums(child_mat) > 0L))
+  }
+
+  if (method == 'not') {
+    return(as.integer(compute_gamma(val_l, val_r, comp_level$child) <= 0L & both_present))
+  }
+
+  if (method == 'custom') {
+    cli::cli_abort(
+      '{.fn cl_custom} requires SQL gamma computation and is not supported by the R fallback path.'
+    )
   }
 
   # Fallback: exact match
@@ -759,8 +827,13 @@ compute_gamma_matrix <- function(pairs, comparisons) {
   for (j in seq_len(n_comp)) {
     comp <- comparisons[[j]]
     col <- comp$columns
-    val_l <- pairs[[paste0('l_', col)]]
-    val_r <- pairs[[paste0('r_', col)]]
+    if (length(col) == 2L && identical(comp$method$method, 'distance_km')) {
+      val_l <- pairs[paste0('l_', col)]
+      val_r <- pairs[paste0('r_', col)]
+    } else {
+      val_l <- pairs[[paste0('l_', col)]]
+      val_r <- pairs[[paste0('r_', col)]]
+    }
     # Apply transform if specified
     if (!is.null(comp$transform)) {
       val_l <- comp$transform(val_l)
@@ -769,6 +842,6 @@ compute_gamma_matrix <- function(pairs, comparisons) {
     gamma_mat[, j] <- compute_gamma(val_l, val_r, comp$method)
   }
 
-  colnames(gamma_mat) <- vapply(comparisons, function(c) c$columns, character(1))
+  colnames(gamma_mat) <- comparison_names(comparisons)
   gamma_mat
 }

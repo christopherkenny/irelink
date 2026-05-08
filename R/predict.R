@@ -204,7 +204,7 @@ predict.il_model <- function(object, threshold = 0.85,
   comparisons <- object$spec$comparisons
   params <- object$params$comparisons
   prior <- safe_prior(object)
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
 
   result_data <- get_pairs_with_gammas(object, blocking_rules)
   gamma_mat <- result_data$gamma_mat

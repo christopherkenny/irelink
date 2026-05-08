@@ -68,7 +68,7 @@
 il_compare_records <- function(record_a, record_b, spec, con = NULL) {
   validate_il_spec(spec)
   comparisons <- spec$comparisons
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
 
   a <- as.data.frame(record_a, stringsAsFactors = FALSE)
   b <- as.data.frame(record_b, stringsAsFactors = FALSE)
@@ -95,7 +95,7 @@ il_compare_records <- function(record_a, record_b, spec, con = NULL) {
 
     gamma_exprs <- vapply(comparisons, function(comp) {
       expr <- sql_gamma_case(comp, dialect)
-      glue::glue('{expr} AS gamma_{comp$columns}')
+      glue::glue('{expr} AS gamma_{comparison_name(comp)}')
     }, character(1))
     gamma_select <- paste(gamma_exprs, collapse = ', ')
 

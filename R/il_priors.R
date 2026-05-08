@@ -159,7 +159,7 @@ prior_distribution <- function(model, col, exact = NULL, levels = NULL,
     cli::cli_abort('Supply exactly one of {.arg exact} or {.arg levels}.')
   }
   comparisons <- model$spec$comparisons
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
   idx <- match(col, comp_names)
   if (is.na(idx)) {
     cli::cli_abort(

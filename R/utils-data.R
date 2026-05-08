@@ -21,3 +21,15 @@ get_spec_columns <- function(spec) {
   block_cols <- unlist(lapply(spec$blocking_rules, function(rule) rule$columns))
   unique(c(comp_cols, block_cols))
 }
+
+#' Stable display/storage name for a comparison entry
+#' @noRd
+comparison_name <- function(comp) {
+  paste(comp$columns, collapse = '_')
+}
+
+#' Stable names for a list of comparison entries
+#' @noRd
+comparison_names <- function(comparisons) {
+  vapply(comparisons, comparison_name, character(1))
+}

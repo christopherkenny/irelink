@@ -51,11 +51,24 @@ cl_custom <- function(sql_expr, ...) {
 #'   )
 cl_literal <- function(value, side = c('both', 'left', 'right')) {
   side <- match.arg(side)
-  val_sql <- if (is.character(value)) paste0("'", value, "'") else as.character(value)
+  if (length(value) != 1L) {
+    cli::cli_abort('{.arg value} must be a scalar value.')
+  }
+  if (is.na(value)) {
+    val_sql <- 'NULL'
+    op <- 'IS'
+  } else {
+    val_sql <- if (is.character(value)) {
+      paste0("'", gsub("'", "''", value, fixed = TRUE), "'")
+    } else {
+      as.character(value)
+    }
+    op <- '='
+  }
   sql_expr <- switch(side,
-    'both'  = paste0('l.{col} = ', val_sql, ' AND r.{col} = ', val_sql),
-    'left'  = paste0('l.{col} = ', val_sql),
-    'right' = paste0('r.{col} = ', val_sql)
+    'both'  = paste0('l.{col} ', op, ' ', val_sql, ' AND r.{col} ', op, ' ', val_sql),
+    'left'  = paste0('l.{col} ', op, ' ', val_sql),
+    'right' = paste0('r.{col} ', op, ' ', val_sql)
   )
   cl_custom(sql_expr)
 }

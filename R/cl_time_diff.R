@@ -31,6 +31,7 @@ cl_time_diff <- function(...) {
   valid_units <- c('seconds', 'minutes', 'hours', 'days', 'months', 'years')
   thresholds <- vapply(args, function(a) {
     if (is.numeric(a) && length(a) == 1L) {
+      check_unit_input(a, 'cl_time_diff')
       return(a)
     }
     if (is.list(a) && !is.null(a$unit)) {
@@ -49,5 +50,14 @@ cl_time_diff <- function(...) {
     }
     a$unit
   }, character(1))
+  seconds_values <- mapply(time_diff_to_seconds, thresholds, units)
+  if (length(seconds_values) > 1L && is.unsorted(seconds_values)) {
+    cli::cli_warn(
+      'Thresholds for {.fn cl_time_diff} should be in ascending order; re-ordering.'
+    )
+    ord <- order(seconds_values)
+    thresholds <- thresholds[ord]
+    units <- units[ord]
+  }
   new_comparison_level('time_diff', thresholds = thresholds, units = units)
 }

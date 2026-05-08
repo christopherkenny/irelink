@@ -105,3 +105,26 @@ test_that('nested composition: cl_not(cl_or(cl_exact(), cl_exact()))', {
   expect_s3_class(node, 'il_comparison_level')
   expect_equal(node$method, 'not')
 })
+
+test_that('boolean composition computes R-side gamma inside cl_levels()', {
+  and_level <- cl_levels(cl_and(cl_exact(), cl_jaro_winkler(0.9)), cl_else())
+  or_level <- cl_levels(cl_or(cl_exact(), cl_jaro_winkler(0.9)), cl_else())
+  not_level <- cl_levels(cl_not(cl_exact()), cl_else())
+
+  expect_equal(compute_gamma(c('john', 'john'), c('john', 'jon'), and_level), c(1L, 0L))
+  expect_equal(compute_gamma(c('john', 'john'), c('john', 'jon'), or_level), c(1L, 1L))
+  expect_equal(compute_gamma(c('john', 'john'), c('john', 'jon'), not_level), c(0L, 1L))
+})
+
+test_that('boolean composition generates SQL conditions inside cl_levels()', {
+  sql <- sql_gamma_case(
+    list(
+      columns = 'name',
+      method = cl_levels(cl_and(cl_exact(), cl_jaro_winkler(0.9)), cl_else()),
+      transform = NULL
+    ),
+    dialect = 'duckdb'
+  )
+  expect_match(sql, 'jaro_winkler_similarity', fixed = TRUE)
+  expect_match(sql, ') AND (', fixed = TRUE)
+})

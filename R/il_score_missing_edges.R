@@ -67,7 +67,7 @@ score_specific_pairs <- function(model, id_l, id_r, threshold = 0) {
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
   prior <- safe_prior(model)
-  comp_names <- vapply(comparisons, function(c) c$columns, character(1))
+  comp_names <- comparison_names(comparisons)
   dependency_aware <- identical(model$params$estimator_mode, 'dependency-aware')
   if (!dependency_aware) {
     mu <- extract_mu_vectors(params, comp_names)
@@ -98,9 +98,14 @@ score_specific_pairs <- function(model, id_l, id_r, threshold = 0) {
   colnames(gamma_mat) <- comp_names
 
   for (j in seq_len(n_comp)) {
-    col <- comp_names[j]
-    val_l <- src[id_l, col]
-    val_r <- src[id_r, col]
+    col <- comparisons[[j]]$columns
+    if (length(col) == 2L && identical(comparisons[[j]]$method$method, 'distance_km')) {
+      val_l <- src[id_l, col, drop = FALSE]
+      val_r <- src[id_r, col, drop = FALSE]
+    } else {
+      val_l <- src[id_l, col]
+      val_r <- src[id_r, col]
+    }
     gamma_mat[, j] <- compute_gamma(val_l, val_r, comparisons[[j]]$method)
   }
 
