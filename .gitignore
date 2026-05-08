@@ -12,4 +12,4 @@ inst/doc
 vignettes/.tmp/
 vignettes/articles/.tmp/
 inst/benchmarks/fastlink
-inst/*.pdf
+inst/benchmarks/*.pdf
