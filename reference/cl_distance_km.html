@@ -77,18 +77,16 @@ from strictest to most lenient.</p></dd>
     <div class="sourceCode"><pre class="sourceCode r"><code><span class="r-in"><span><span class="fu"><a href="il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="il_compare.html">il_compare</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">lat</span>, <span class="va">lon</span><span class="op">)</span>, <span class="fu">cl_distance_km</span><span class="op">(</span><span class="fu"><a href="km.html">km</a></span><span class="op">(</span><span class="fl">5</span><span class="op">)</span>, <span class="fu"><a href="km.html">km</a></span><span class="op">(</span><span class="fl">50</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Linkage Specification</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Comparisons (2):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     lat : distance_km</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     lon : distance_km</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Comparisons (1):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     lat, lon : distance_km</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Blocking rules: (none)</span>
 <span class="r-in"><span></span></span>
 <span class="r-in"><span><span class="co"># Use miles instead</span></span></span>
 <span class="r-in"><span><span class="fu"><a href="il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span></span>
 <span class="r-in"><span>  <span class="fu"><a href="il_compare.html">il_compare</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="va">lat</span>, <span class="va">lon</span><span class="op">)</span>, <span class="fu">cl_distance_km</span><span class="op">(</span><span class="fu"><a href="mi.html">mi</a></span><span class="op">(</span><span class="fl">3</span><span class="op">)</span>, <span class="fu"><a href="mi.html">mi</a></span><span class="op">(</span><span class="fl">30</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> Linkage Specification</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>   Comparisons (2):</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     lat : distance_km</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span>     lon : distance_km</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>   Comparisons (1):</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span>     lat, lon : distance_km</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   Blocking rules: (none)</span>
 </code></pre></div>
     </div>

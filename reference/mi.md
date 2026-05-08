@@ -26,8 +26,7 @@ A tagged numeric with class `il_mi`.
 il_spec() |>
   il_compare(c(lat, lon), cl_distance_km(mi(3), mi(30)))
 #> Linkage Specification
-#>   Comparisons (2):
-#>     lat : distance_km
-#>     lon : distance_km
+#>   Comparisons (1):
+#>     lat, lon : distance_km
 #>   Blocking rules: (none)
 ```

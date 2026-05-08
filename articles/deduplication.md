@@ -286,12 +286,12 @@ head(predict(model2, threshold = 0.85))
 #> # A tibble: 6 × 11
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob gamma_city
 #>         <int>       <int>            <int>         <int>     <int>      <int>
-#> 1         479         481                4             4         5          0
-#> 2         508         512                4            -1         3          1
-#> 3         509         512                4             2         3          1
-#> 4         535         536                4            -1         2          1
-#> 5         664         667                4             4         5          0
-#> 6          69          71                4             2         5          0
+#> 1           0           3                4            -1         5          0
+#> 2           2           3                4             4         2          0
+#> 3          10          11                4             4         2          0
+#> 4          33          36                4             4         5          1
+#> 5          38          42                4             4         5          0
+#> 6          40          42                4             4         2          1
 #> # ℹ 5 more variables: gamma_email <int>, match_weight <dbl>, tf_adj_city <dbl>,
 #> #   total_match_weight <dbl>, match_probability <dbl>
 DBI::dbDisconnect(con2, shutdown = TRUE)

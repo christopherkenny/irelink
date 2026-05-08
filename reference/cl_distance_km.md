@@ -32,17 +32,15 @@ A comparison-level object for use in
 il_spec() |>
   il_compare(c(lat, lon), cl_distance_km(km(5), km(50)))
 #> Linkage Specification
-#>   Comparisons (2):
-#>     lat : distance_km
-#>     lon : distance_km
+#>   Comparisons (1):
+#>     lat, lon : distance_km
 #>   Blocking rules: (none)
 
 # Use miles instead
 il_spec() |>
   il_compare(c(lat, lon), cl_distance_km(mi(3), mi(30)))
 #> Linkage Specification
-#>   Comparisons (2):
-#>     lat : distance_km
-#>     lon : distance_km
+#>   Comparisons (1):
+#>     lat, lon : distance_km
 #>   Blocking rules: (none)
 ```
