@@ -114,3 +114,27 @@ test_that('il_unlinkables() returns monotonically increasing proportions', {
     expect_true(all(diffs >= -0.001)) # monotonically non-decreasing (with tolerance)
   }
 })
+
+test_that('il_unlinkables() handles link models without negative proportions', {
+  skip_if_not_installed('RSQLite')
+
+  con <- DBI::dbConnect(RSQLite::SQLite(), ':memory:')
+  withr::defer(DBI::dbDisconnect(con))
+
+  df_a <- data.frame(unique_id = 1L, name = 'John')
+  df_b <- data.frame(unique_id = 1L, name = 'John')
+
+  spec <- il_spec() |>
+    il_compare(name, cl_exact()) |>
+    il_block_on(name)
+
+  model <- il_model(df_a, df_b, spec = spec, con = con, link_type = 'link') |>
+    il_estimate_u(max_pairs = 10) |>
+    il_estimate_em(block_on(name), max_iterations = 1L)
+
+  unl <- il_unlinkables(model)
+  row0 <- unl[unl$threshold == 0, , drop = FALSE]
+
+  expect_true(all(unl$pct_unlinkable >= 0 & unl$pct_unlinkable <= 1))
+  expect_equal(row0$pct_unlinkable, 0)
+})

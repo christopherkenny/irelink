@@ -26,8 +26,6 @@ test_that('include_fields = TRUE adds original columns to predicted pairs', {
 })
 
 test_that('include_fields = TRUE works on lazy path (collect = FALSE)', {
-  skip_if_not_installed('duckdb')
-
   con <- DBI::dbConnect(duckdb::duckdb())
   on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
 

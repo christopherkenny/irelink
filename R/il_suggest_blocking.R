@@ -89,6 +89,8 @@ il_suggest_blocking <- function(.data, columns = NULL, con = NULL,
 #' @noRd
 evaluate_column_combos <- function(con, tbl_name, columns, n, cartesian,
                                    link_type, depth = 1L) {
+  dialect <- detect_dialect(con)
+  qtbl <- sql_quote_identifier(tbl_name)
   if (depth == 1L) {
     col_sets <- as.list(columns)
   } else {
@@ -96,28 +98,30 @@ evaluate_column_combos <- function(con, tbl_name, columns, n, cartesian,
   }
 
   results <- lapply(col_sets, function(cols) {
+    qcols <- sql_quote_identifier(cols)
     null_filters <- paste(
-      vapply(cols, function(c) glue::glue('{c} IS NOT NULL'), character(1)),
+      vapply(qcols, function(qcol) glue::glue('{qcol} IS NOT NULL'), character(1)),
       collapse = ' AND '
     )
+    select_cols <- paste(qcols, collapse = ', ')
 
     # n_distinct
     sql_distinct <- glue::glue(
       'SELECT COUNT(*) AS n FROM (',
-      'SELECT DISTINCT {paste(cols, collapse = ", ")} FROM {tbl_name} WHERE {null_filters}',
+      'SELECT DISTINCT {select_cols} FROM {qtbl} WHERE {null_filters}',
       ') AS __d'
     )
     n_distinct <- as.integer(DBI::dbGetQuery(con, sql_distinct)$n[1])
 
     # coverage: % of rows with non-NULL values in all columns
     sql_coverage <- glue::glue(
-      'SELECT COUNT(*) AS n FROM {tbl_name} WHERE {null_filters}'
+      'SELECT COUNT(*) AS n FROM {qtbl} WHERE {null_filters}'
     )
     n_covered <- as.integer(DBI::dbGetQuery(con, sql_coverage)$n[1])
     coverage <- n_covered / n
 
     # pair count
-    where <- build_blocking_condition(cols, where = NULL)
+    where <- build_blocking_condition(cols, where = NULL, dialect = dialect)
     n_pairs <- count_blocked_pairs(con, tbl_name, tbl_name, where,
       dedupe = (link_type == 'dedupe')
     )
@@ -224,9 +228,10 @@ block_from_labels <- function(.data, labels, columns = NULL, con = NULL) {
   all_ids <- unique(c(id_l, id_r))
   id_list <- paste(DBI::dbQuoteString(con, all_ids), collapse = ', ')
 
-  col_select <- paste(c('unique_id', columns), collapse = ', ')
+  qtbl <- sql_quote_identifier(tbl_name)
+  col_select <- sql_identifier_csv(c('unique_id', columns))
   sql_fetch <- glue::glue(
-    'SELECT {col_select} FROM {tbl_name} WHERE unique_id IN ({id_list})'
+    'SELECT {col_select} FROM {qtbl} WHERE unique_id IN ({id_list})'
   )
   src <- DBI::dbGetQuery(con, sql_fetch)
   rownames(src) <- as.character(src$unique_id)

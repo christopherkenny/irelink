@@ -63,7 +63,6 @@ test_that('SQLite backend supports cl_exact comparisons end-to-end', {
 })
 
 test_that('DuckDB backend works end-to-end', {
-  skip_if_not_installed('duckdb')
   df <- fake_20
   con <- DBI::dbConnect(duckdb::duckdb())
   on.exit(DBI::dbDisconnect(con, shutdown = TRUE))

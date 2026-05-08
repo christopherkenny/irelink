@@ -284,7 +284,7 @@ column_transform_sql <- function(transform, col_ref, dialect = NULL) {
         'regexp_extract(', col_ref, ', ', sql_quote_literal(p$pattern),
         ', ', p$group, ')'
       )
-      paste0('NULLIF(', inner, ", ", sql_quote_literal(''), ")")
+      paste0('NULLIF(', inner, ', ', sql_quote_literal(''), ')')
     },
     'il_nullif' = paste0(
       'NULLIF(', col_ref, ', ', sql_quote_literal(p$value), ')'

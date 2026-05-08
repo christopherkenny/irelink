@@ -3,7 +3,6 @@
 
 test_that('autoplot(model) returns a ggplot object', {
   skip_if_not_installed('RSQLite')
-  skip_if_not_installed('ggplot2')
 
   con <- test_con()
   withr::defer(test_discon(con))
@@ -24,7 +23,6 @@ test_that('autoplot(model) returns a ggplot object', {
 
 test_that('autoplot(pairs) returns a ggplot object', {
   skip_if_not_installed('RSQLite')
-  skip_if_not_installed('ggplot2')
 
   con <- test_con()
   withr::defer(test_discon(con))
@@ -47,7 +45,6 @@ test_that('autoplot(pairs) returns a ggplot object', {
 
 test_that('autoplot(pairs, which = 1) includes prior and final waterfall steps', {
   skip_if_not_installed('RSQLite')
-  skip_if_not_installed('ggplot2')
 
   con <- test_con()
   withr::defer(test_discon(con))
@@ -76,8 +73,6 @@ test_that('autoplot(pairs, which = 1) includes prior and final waterfall steps',
 })
 
 test_that('autoplot(il_profile) orders values within each facet', {
-  skip_if_not_installed('ggplot2')
-
   prof <- structure(
     tibble::tibble(
       column = c('first_name', 'surname', 'surname'),

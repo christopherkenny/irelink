@@ -64,13 +64,31 @@ il_largest_blocks <- function(.data, rule, n = 5L, con = NULL,
   con <- reg$con
   on.exit(drop_registered(con, tbl_name), add = TRUE)
 
+  dialect <- detect_dialect(con)
   cols <- rule$columns
-  group_cols <- paste(cols, collapse = ', ')
+  group_cols <- sql_identifier_csv(cols)
+  qtbl <- sql_quote_identifier(tbl_name)
+  transformed_cols <- lapply(cols, function(col) {
+    col_tf <- if (is.list(rule$transform)) rule$transform[[col]] else rule$transform
+    sql_transform_col(sql_quote_identifier(col), col_tf, dialect)
+  })
+  select_cols <- paste(
+    vapply(seq_along(cols), function(i) {
+      glue::glue('{transformed_cols[[i]]} AS {sql_quote_identifier(cols[[i]])}')
+    }, character(1)),
+    collapse = ', '
+  )
+  null_filters <- paste(
+    vapply(transformed_cols, function(expr) {
+      glue::glue('{expr} IS NOT NULL')
+    }, character(1)),
+    collapse = ' AND '
+  )
 
   sql <- glue::glue(
     'SELECT {group_cols}, COUNT(*) AS n_records ',
-    'FROM {tbl_name} ',
-    'WHERE {paste(glue::glue("{cols} IS NOT NULL"), collapse = " AND ")} ',
+    'FROM (SELECT {select_cols} FROM {qtbl}) __il_largest ',
+    'WHERE {null_filters} ',
     'GROUP BY {group_cols} ',
     'ORDER BY n_records DESC ',
     'LIMIT {n}'

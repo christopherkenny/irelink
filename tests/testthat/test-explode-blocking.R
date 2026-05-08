@@ -60,7 +60,6 @@ test_that('sql_explode_from warns for SQLite and returns table unchanged', {
 })
 
 test_that('explode blocking works end-to-end with DuckDB arrays', {
-  skip_if_not_installed('duckdb')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 

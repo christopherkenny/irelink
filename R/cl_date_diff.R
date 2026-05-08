@@ -46,7 +46,11 @@ cl_date_diff <- function(...) {
     a$unit
   }, character(1))
   days_values <- thresholds * vapply(units, function(unit) {
-    switch(unit, days = 1, months = 30, years = 365)
+    switch(unit,
+      days = 1,
+      months = 30,
+      years = 365
+    )
   }, numeric(1))
   if (length(days_values) > 1L && is.unsorted(days_values)) {
     cli::cli_warn(

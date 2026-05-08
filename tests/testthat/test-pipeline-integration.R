@@ -57,7 +57,6 @@ test_that('full pipe chain through clustering assigns cluster IDs', {
 
 test_that('il_weights() data can be used directly with ggplot2', {
   skip_if_not_installed('RSQLite')
-  skip_if_not_installed('ggplot2')
 
   con <- test_con()
   withr::defer(test_discon(con))

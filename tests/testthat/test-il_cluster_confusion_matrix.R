@@ -56,3 +56,30 @@ test_that('il_cluster_confusion_matrix() errors for non-dedupe models', {
     'deduplication models only'
   )
 })
+
+test_that('il_cluster_confusion_matrix() quotes non-syntactic labels columns on SQL path', {
+  con <- DBI::dbConnect(duckdb::duckdb())
+  on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
+
+  df <- data.frame(
+    check.names = FALSE,
+    unique_id = 1:5,
+    first_name = c('John', 'John', 'Mary', 'Bob', 'Bob'),
+    surname = c('Smith', 'Smith', 'Jones', 'Brown', 'Brown'),
+    'true cluster' = c(1, 1, 2, 3, 4)
+  )
+
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_compare(surname, cl_exact()) |>
+    il_block_on(surname)
+
+  model <- il_model(df, spec = spec, con = con) |>
+    il_estimate_u(max_pairs = 1e6) |>
+    il_estimate_em(block_on(surname))
+
+  cm <- il_cluster_confusion_matrix(model, labels_col = 'true cluster', threshold = 0.85)
+
+  expect_s3_class(cm, 'il_cluster_confusion_matrix')
+  expect_equal(nrow(cm), 1L)
+})

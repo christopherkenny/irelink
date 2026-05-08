@@ -50,28 +50,34 @@ comparator_score_sql <- function(.data, col_1, col_2, con) {
   }
 
   dialect <- detect_dialect(con)
+  qtbl <- sql_quote_identifier(tbl_name)
+  qcol_1 <- sql_quote_identifier(col_1)
+  qcol_2 <- sql_quote_identifier(col_2)
   if (dialect == 'duckdb') {
     sql <- glue::glue(
-      'SELECT {col_1}, {col_2}, ',
-      '  jaro_winkler_similarity({col_1}, {col_2}) / 100.0 AS jaro_winkler, ',
-      '  jaro_similarity({col_1}, {col_2}) / 100.0 AS jaro, ',
-      '  levenshtein({col_1}, {col_2}) AS levenshtein, ',
-      '  jaccard({col_1}, {col_2}) AS jaccard ',
-      'FROM {tbl_name} ',
-      'WHERE {col_1} IS NOT NULL AND {col_2} IS NOT NULL'
+      'SELECT {qcol_1}, {qcol_2}, ',
+      '  jaro_winkler_similarity({qcol_1}, {qcol_2}) AS jaro_winkler, ',
+      '  jaro_similarity({qcol_1}, {qcol_2}) AS jaro, ',
+      '  levenshtein({qcol_1}, {qcol_2}) AS levenshtein, ',
+      '  jaccard({qcol_1}, {qcol_2}) AS jaccard ',
+      'FROM {qtbl} ',
+      'WHERE {qcol_1} IS NOT NULL AND {qcol_2} IS NOT NULL'
     )
   } else {
     # PostgreSQL: pg_trgm provides similarity(); levenshtein from fuzzystrmatch
     sql <- glue::glue(
-      'SELECT {col_1}, {col_2}, ',
-      '  similarity({col_1}, {col_2}) AS jaro_winkler, ',
-      '  levenshtein({col_1}, {col_2}) AS levenshtein ',
-      'FROM {tbl_name} ',
-      'WHERE {col_1} IS NOT NULL AND {col_2} IS NOT NULL'
+      'SELECT {qcol_1}, {qcol_2}, ',
+      '  similarity({qcol_1}, {qcol_2}) AS jaro_winkler, ',
+      '  levenshtein({qcol_1}, {qcol_2}) AS levenshtein ',
+      'FROM {qtbl} ',
+      'WHERE {qcol_1} IS NOT NULL AND {qcol_2} IS NOT NULL'
     )
     cli::cli_warn(c(
       'PostgreSQL provides limited similarity functions.',
-      'i' = 'Only {.val jaro_winkler} (via pg_trgm) and {.val levenshtein} are computed in SQL.',
+      'i' = paste(
+        'Only {.val jaro_winkler} (compatibility alias for PostgreSQL trigram',
+        'similarity) and {.val levenshtein} are computed in SQL.'
+      ),
       'i' = 'Use {.code con = NULL} for all 5 metrics via R-side {.pkg stringdist}.'
     ))
   }

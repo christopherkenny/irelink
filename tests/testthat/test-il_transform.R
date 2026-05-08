@@ -60,7 +60,6 @@ test_that('transform chain works in R-side gamma computation', {
 })
 
 test_that('transform chain works end-to-end with DuckDB', {
-  skip_if_not_installed('duckdb')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 

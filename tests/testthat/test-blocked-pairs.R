@@ -80,8 +80,6 @@ test_that('register_blocked_pairs() preserves character ids and raw where rules'
 })
 
 test_that('register_blocked_pairs() and prior counting respect exploded blocking', {
-  skip_if_not_installed('duckdb')
-
   con <- DBI::dbConnect(duckdb::duckdb())
   withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
 
@@ -122,8 +120,6 @@ test_that('register_blocked_pairs() and prior counting respect exploded blocking
 })
 
 test_that('predict() agrees with and without registered blocked pairs', {
-  skip_if_not_installed('duckdb')
-
   con <- DBI::dbConnect(duckdb::duckdb())
   withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
 

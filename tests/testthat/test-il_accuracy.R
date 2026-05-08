@@ -109,7 +109,6 @@ test_that('il_confusion_matrix() matches il_accuracy() at the same threshold', {
 })
 
 test_that('il_accuracy() and il_confusion_matrix() agree for lazy inputs without unique_id', {
-  skip_if_not_installed('duckdb')
   skip_if_not_installed('dbplyr')
   skip_if_not_installed('dplyr')
 
@@ -179,4 +178,43 @@ test_that('il_errors() returns false positive and false negative pairs', {
 
   errors <- il_errors(model, labels, threshold = 0.85)
   expect_s3_class(errors, 'tbl_df')
+})
+
+test_that('labels_col evaluation counts blocking misses on SQLite fallback', {
+  skip_if_not_installed('RSQLite')
+
+  con <- DBI::dbConnect(RSQLite::SQLite(), ':memory:')
+  withr::defer(DBI::dbDisconnect(con))
+
+  df <- data.frame(
+    unique_id = 1:4,
+    first_name = c('A', 'A', 'B', 'C'),
+    surname = c('X', 'X', 'X', 'Y'),
+    cluster = c(1, 1, 1, 2)
+  )
+
+  spec <- il_spec() |>
+    il_compare(surname, cl_exact()) |>
+    il_block_on(first_name)
+
+  model <- il_model(df, spec = spec, con = con) |>
+    il_estimate_u(max_pairs = 100) |>
+    il_estimate_em(block_on(first_name), max_iterations = 2L)
+
+  acc <- il_accuracy(model, labels_col = 'cluster')
+  row0 <- acc[acc$threshold == 0, , drop = FALSE]
+
+  expect_equal(row0$tp, 1L)
+  expect_equal(row0$fp, 0L)
+  expect_equal(row0$fn, 2L)
+  expect_equal(row0$tn, 0L)
+  expect_equal(row0$fn_blocking_miss, 2L)
+
+  errors <- il_errors(model, labels_col = 'cluster', threshold = 0)
+  expect_equal(nrow(errors), 2L)
+  expect_true(all(errors$error_type == 'false_negative'))
+  expect_equal(
+    sort(paste(errors$unique_id_l, errors$unique_id_r, sep = '-')),
+    c('1-3', '2-3')
+  )
 })

@@ -288,7 +288,6 @@ test_that('block_on with il_soundex works in il_estimate_em', {
 
 test_that('JSON save writes plain phonetic blocking SQL and loaded model predicts', {
   skip_if_no_jsonlite()
-  skip_if_not_installed('duckdb')
 
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)

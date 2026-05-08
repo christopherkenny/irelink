@@ -276,8 +276,6 @@ test_that('predict(greedy = TRUE) keeps a deterministic one-to-one matching', {
 })
 
 test_that('predict(greedy = TRUE, collect = FALSE) returns a lazy one-to-one result', {
-  skip_if_not_installed('duckdb')
-
   con <- DBI::dbConnect(duckdb::duckdb())
   withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
 

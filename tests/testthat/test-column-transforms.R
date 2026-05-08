@@ -135,7 +135,6 @@ test_that('il_nullif validates inputs', {
 })
 
 test_that('column transforms work in DuckDB blocking', {
-  skip_if_not_installed('duckdb')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 

@@ -1,5 +1,4 @@
 test_that('il_register_tf writes TF table to database', {
-  skip_if_not_installed('duckdb')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 
@@ -25,7 +24,6 @@ test_that('il_register_tf writes TF table to database', {
 })
 
 test_that('il_register_tf rejects wrong columns', {
-  skip_if_not_installed('duckdb')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 
@@ -39,7 +37,6 @@ test_that('il_register_tf rejects wrong columns', {
 })
 
 test_that('il_register_tf validates value and probability columns', {
-  skip_if_not_installed('duckdb')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 
@@ -79,7 +76,6 @@ test_that('il_register_tf validates value and probability columns', {
 })
 
 test_that('il_register_tf prevents overwrite by default', {
-  skip_if_not_installed('duckdb')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 

@@ -1370,12 +1370,12 @@ build_scored_query <- function(model, threshold = 0.85,
       tf_min <- comp$tf_minimum_u_value %||% 0.0
       expr <- sql_tf_adj_expr(col, max_level, u_exact, tf_w, tf_min)
       tf_parts <- c(tf_parts, expr)
-        tf_adj_selects <- c(
-          tf_adj_selects,
-          glue::glue(
-            '({expr}) AS {sql_quote_identifier(paste0("tf_adj_", col))}'
-          )
+      tf_adj_selects <- c(
+        tf_adj_selects,
+        glue::glue(
+          '({expr}) AS {sql_quote_identifier(paste0("tf_adj_", col))}'
         )
+      )
     }
   }
 

@@ -1,5 +1,4 @@
 test_that('il_estimate_em respects max_iterations', {
-  skip_if_not_installed('duckdb')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 
@@ -18,7 +17,6 @@ test_that('il_estimate_em respects max_iterations', {
 })
 
 test_that('il_estimate_em fix_prior=FALSE updates prior', {
-  skip_if_not_installed('duckdb')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 
@@ -36,7 +34,6 @@ test_that('il_estimate_em fix_prior=FALSE updates prior', {
 })
 
 test_that('il_estimate_em derive_prior=TRUE stores derived prior', {
-  skip_if_not_installed('duckdb')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 
@@ -53,7 +50,6 @@ test_that('il_estimate_em derive_prior=TRUE stores derived prior', {
 })
 
 test_that('il_estimate_em validates max_iterations', {
-  skip_if_not_installed('duckdb')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 
@@ -68,7 +64,6 @@ test_that('il_estimate_em validates max_iterations', {
 })
 
 test_that('il_estimate_em validates blocking and convergence before training', {
-  skip_if_not_installed('duckdb')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 

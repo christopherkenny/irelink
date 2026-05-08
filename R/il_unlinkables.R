@@ -62,7 +62,13 @@
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_unlinkables <- function(model) {
   validate_il_model(model)
-  n_records <- model$data$n_records_l
+  link_type <- model$link_type %||% 'dedupe'
+  has_right_table <- !is.null(model$data$n_records_r) && !identical(link_type, 'dedupe')
+  n_records <- if (has_right_table) {
+    as.numeric(model$data$n_records_l) + as.numeric(model$data$n_records_r)
+  } else {
+    as.numeric(model$data$n_records_l)
+  }
   thresholds <- seq(0, 1, by = 0.05)
   con <- model$con
   dialect <- detect_dialect(con)
@@ -71,14 +77,25 @@ il_unlinkables <- function(model) {
     # SQL path: score in-database, collect only max_prob per record
     lazy <- predict_lazy(model, threshold = 0)
     on.exit(drop_registered(con, lazy$predicted_tbl), add = TRUE)
+    qpred <- sql_quote_identifier(lazy$predicted_tbl)
 
-    max_prob_sql <- glue::glue(
-      'SELECT MAX(match_probability) AS max_prob FROM (',
-      'SELECT unique_id_l AS id, match_probability FROM {lazy$predicted_tbl} ',
-      'UNION ALL ',
-      'SELECT unique_id_r AS id, match_probability FROM {lazy$predicted_tbl}',
-      ') sub GROUP BY id'
-    )
+    max_prob_sql <- if (has_right_table) {
+      glue::glue(
+        'SELECT MAX(match_probability) AS max_prob FROM (',
+        "SELECT 'l:' || CAST(unique_id_l AS VARCHAR) AS id, match_probability FROM {qpred} ",
+        'UNION ALL ',
+        "SELECT 'r:' || CAST(unique_id_r AS VARCHAR) AS id, match_probability FROM {qpred}",
+        ') sub GROUP BY id'
+      )
+    } else {
+      glue::glue(
+        'SELECT MAX(match_probability) AS max_prob FROM (',
+        'SELECT CAST(unique_id_l AS VARCHAR) AS id, match_probability FROM {qpred} ',
+        'UNION ALL ',
+        'SELECT CAST(unique_id_r AS VARCHAR) AS id, match_probability FROM {qpred}',
+        ') sub GROUP BY id'
+      )
+    }
     max_probs <- DBI::dbGetQuery(con, max_prob_sql)$max_prob
 
     pcts <- vapply(thresholds, function(t) {
@@ -96,10 +113,17 @@ il_unlinkables <- function(model) {
 
   results <- lapply(thresholds, function(t) {
     linked <- all_pairs[all_pairs$match_probability >= t, ]
-    linked_ids <- unique(c(
-      as.character(linked$unique_id_l),
-      as.character(linked$unique_id_r)
-    ))
+    linked_ids <- if (has_right_table) {
+      unique(c(
+        paste0('l:', as.character(linked$unique_id_l)),
+        paste0('r:', as.character(linked$unique_id_r))
+      ))
+    } else {
+      unique(c(
+        as.character(linked$unique_id_l),
+        as.character(linked$unique_id_r)
+      ))
+    }
     pct <- 1 - length(linked_ids) / n_records
     tibble::tibble(threshold = t, pct_unlinkable = pct)
   })

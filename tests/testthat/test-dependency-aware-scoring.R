@@ -230,8 +230,6 @@ test_that('dependency-aware estimator survives save, load, and attach', {
 })
 
 test_that('dependency-aware predict supports DuckDB lazy scoring via pattern lookup', {
-  skip_if_not_installed('duckdb')
-
   con <- DBI::dbConnect(duckdb::duckdb())
   withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
 
@@ -262,8 +260,6 @@ test_that('dependency-aware predict supports DuckDB lazy scoring via pattern loo
 })
 
 test_that('dependency-aware il_find_matches scores through the SQL pattern lookup path', {
-  skip_if_not_installed('duckdb')
-
   con <- DBI::dbConnect(duckdb::duckdb())
   withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
 
@@ -291,8 +287,6 @@ test_that('dependency-aware il_find_matches scores through the SQL pattern looku
 })
 
 test_that('dependency-aware SQL score lookups do not use shared table names', {
-  skip_if_not_installed('duckdb')
-
   con <- DBI::dbConnect(duckdb::duckdb())
   withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
 
@@ -337,8 +331,6 @@ test_that('dependency-aware SQL score lookups do not use shared table names', {
 })
 
 test_that('training history can combine independent and dependency-aware sessions', {
-  skip_if_not_installed('duckdb')
-
   con <- DBI::dbConnect(duckdb::duckdb())
   withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
 

@@ -5,8 +5,6 @@ test_that('JSON save writes Splink SQL for transformed comparisons and loaded mo
 
   expect_identical(spec$comparisons[[1]]$transform, tolower)
 
-  skip_if_not_installed('duckdb')
-
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 

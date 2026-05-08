@@ -79,8 +79,13 @@ il_errors <- function(model, labels = NULL, threshold = 0.85, labels_col = NULL)
   label_probs <- scored$label_probs
   label_weights <- scored$label_weights
   actual_positive <- scored$actual_positive
+  found_by_blocking <- scored$found_by_blocking
 
   predicted_positive <- label_probs >= threshold
+  if (!is.null(found_by_blocking)) {
+    found_by_blocking <- !is.na(found_by_blocking) & found_by_blocking
+    predicted_positive <- predicted_positive & found_by_blocking
+  }
 
   is_fp <- predicted_positive & !actual_positive
   is_fn <- !predicted_positive & actual_positive

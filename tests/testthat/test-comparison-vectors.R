@@ -1,5 +1,4 @@
 test_that('il_comparison_vectors returns distribution', {
-  skip_if_not_installed('duckdb')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 
@@ -21,8 +20,6 @@ test_that('il_comparison_vectors returns distribution', {
 })
 
 test_that('il_comparison_vectors autoplot returns ggplot', {
-  skip_if_not_installed('duckdb')
-  skip_if_not_installed('ggplot2')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 

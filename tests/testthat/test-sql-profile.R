@@ -1,6 +1,4 @@
 test_that('training functions can record SQL profile entries', {
-  skip_if_not_installed('duckdb')
-
   con <- DBI::dbConnect(duckdb::duckdb())
   withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
 
@@ -30,8 +28,6 @@ test_that('training functions can record SQL profile entries', {
 })
 
 test_that('prediction can record SQL profile entries', {
-  skip_if_not_installed('duckdb')
-
   con <- DBI::dbConnect(duckdb::duckdb())
   withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
 

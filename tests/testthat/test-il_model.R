@@ -99,7 +99,7 @@ test_that("il_model() with link_type='link' accepts two datasets", {
   expect_s3_class(model, 'il_model')
 })
 
-test_that("il_model() validates spec columns against right data in link mode", {
+test_that('il_model() validates spec columns against right data in link mode', {
   skip_if_not_installed('RSQLite')
 
   con <- test_con()

@@ -23,7 +23,6 @@ test_that('il_comparator_score handles NA values', {
 })
 
 test_that('il_comparator_score SQL path works on DuckDB', {
-  skip_if_not_installed('duckdb')
   con <- test_con()
   on.exit(test_discon(con), add = TRUE)
 
@@ -37,8 +36,34 @@ test_that('il_comparator_score SQL path works on DuckDB', {
   expect_equal(nrow(result), 3)
 })
 
+test_that('il_comparator_score DuckDB metrics stay on the 0-1 scale', {
+  con <- test_con()
+  on.exit(test_discon(con), add = TRUE)
+
+  df <- data.frame(name_l = 'John', name_r = 'Jon', stringsAsFactors = FALSE)
+  result <- il_comparator_score(df, name_l, name_r, con = con)
+
+  expect_gt(result$jaro_winkler[[1]], 0.9)
+  expect_gt(result$jaro[[1]], 0.9)
+})
+
+test_that('il_comparator_score SQL path quotes non-syntactic column names', {
+  con <- test_con()
+  on.exit(test_discon(con), add = TRUE)
+
+  df <- data.frame(
+    check.names = FALSE,
+    'first name' = 'John',
+    'other name' = 'Jon'
+  )
+  result <- il_comparator_score(df, `first name`, `other name`, con = con)
+
+  expect_equal(nrow(result), 1L)
+  expect_true(all(c('first name', 'other name') %in% names(result)))
+  expect_gt(result$jaro_winkler[[1]], 0.9)
+})
+
 test_that('il_comparator_threshold_chart returns ggplot', {
-  skip_if_not_installed('ggplot2')
   df <- data.frame(
     name_l = c('John', 'Jane', 'Bob', 'Alice'),
     name_r = c('Jon', 'Janet', 'Bobby', 'Alison'),
@@ -51,7 +76,6 @@ test_that('il_comparator_threshold_chart returns ggplot', {
 })
 
 test_that('il_phonetic_chart returns ggplot', {
-  skip_if_not_installed('ggplot2')
   df <- data.frame(
     name_l = c('Smith', 'Jones', 'Brown'),
     name_r = c('Smyth', 'Jonez', 'Browne'),

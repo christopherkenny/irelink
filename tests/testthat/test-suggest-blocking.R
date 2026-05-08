@@ -68,3 +68,54 @@ test_that('block_from_labels computes recall per column', {
   # Should be sorted by recall descending
   expect_true(all(diff(result$recall) <= 0))
 })
+
+test_that('il_largest_blocks applies blocking transforms before grouping', {
+  skip_if_not_installed('RSQLite')
+
+  con <- DBI::dbConnect(RSQLite::SQLite(), ':memory:')
+  withr::defer(DBI::dbDisconnect(con))
+
+  df <- data.frame(
+    unique_id = 1:4,
+    name = c('Anna', 'Anne', 'Bob', 'Bill')
+  )
+
+  result <- il_largest_blocks(
+    df,
+    block_on(name, .transform = il_substr(1, 1)),
+    n = 2,
+    con = con
+  )
+
+  expect_equal(sort(result$name), c('A', 'B'))
+  expect_true(all(result$n_records == 2L))
+  expect_true(all(result$n_pairs == 1))
+})
+
+test_that('blocking diagnostics quote non-syntactic column names', {
+  skip_if_not_installed('RSQLite')
+
+  con <- DBI::dbConnect(RSQLite::SQLite(), ':memory:')
+  withr::defer(DBI::dbDisconnect(con))
+
+  df <- data.frame(
+    check.names = FALSE,
+    unique_id = 1:4,
+    'first name' = c('Alice', 'Alice', 'Bob', 'Bob'),
+    surname = c('Smith', 'Smith', 'Jones', 'Jones')
+  )
+
+  suggested <- il_suggest_blocking(df, columns = 'first name', con = con)
+  expect_equal(suggested$rule, 'first name')
+
+  labels <- data.frame(
+    unique_id_l = c(1L, 3L),
+    unique_id_r = c(2L, 4L),
+    is_match = c(1L, 1L)
+  )
+  recalled <- block_from_labels(df, labels, columns = 'first name', con = con)
+  expect_equal(recalled$column, 'first name')
+
+  largest <- il_largest_blocks(df, block_on(`first name`), n = 2, con = con)
+  expect_true('first name' %in% names(largest))
+})

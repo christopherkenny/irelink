@@ -100,14 +100,17 @@ il_cluster_confusion_matrix <- function(model, labels_col, threshold = 0.85,
 cluster_confusion_counts_sql <- function(model, clusters_tbl, labels_col) {
   con <- model$con
   tbl <- model$data$tbl_l
+  qtbl <- sql_quote_identifier(tbl)
+  qclusters_tbl <- sql_quote_identifier(clusters_tbl)
+  qlabels_col <- sql_quote_identifier(labels_col)
 
   sql <- glue::glue(
     'WITH base AS (',
     '  SELECT CAST(d.unique_id AS VARCHAR) AS unique_id, ',
-    '         d.{labels_col} AS true_group, ',
+    '         d.{qlabels_col} AS true_group, ',
     "         COALESCE(c.cluster_id, 'singleton_' || CAST(d.unique_id AS VARCHAR)) AS pred_group ",
-    '  FROM {tbl} d ',
-    '  LEFT JOIN {clusters_tbl} c ',
+    '  FROM {qtbl} d ',
+    '  LEFT JOIN {qclusters_tbl} c ',
     '    ON CAST(d.unique_id AS VARCHAR) = c.unique_id',
     '), flags AS (',
     '  SELECT unique_id, ',
@@ -218,8 +221,10 @@ cluster_assignments_lazy_sql <- function(pairs, threshold = NULL,
 cluster_confusion_counts_r <- function(model, clusters, labels_col) {
   con <- model$con
   tbl <- model$data$tbl_l
+  qtbl <- sql_quote_identifier(tbl)
+  qlabels_col <- sql_quote_identifier(labels_col)
   sql <- glue::glue(
-    'SELECT unique_id, {labels_col} FROM {tbl} ORDER BY unique_id'
+    'SELECT unique_id, {qlabels_col} FROM {qtbl} ORDER BY unique_id'
   )
   base <- DBI::dbGetQuery(con, sql)
   base$unique_id <- as.character(base$unique_id)

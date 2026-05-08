@@ -139,7 +139,6 @@ test_that('il_save() with untrained model still works', {
 
 test_that('il_load() accepts a valid Splink JSON model and predict() works after attach', {
   skip_if_no_jsonlite()
-  skip_if_not_installed('duckdb')
 
   model_json <- list(
     link_type = 'dedupe_only',

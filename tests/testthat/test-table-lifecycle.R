@@ -43,8 +43,6 @@ test_that('il_cleanup_all() removes all irelink tables on a connection', {
 })
 
 test_that('lazy prediction tables are model-prefixed and cleaned by il_cleanup()', {
-  skip_if_not_installed('duckdb')
-
   con <- DBI::dbConnect(duckdb::duckdb())
   withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
 
@@ -73,8 +71,6 @@ test_that('lazy prediction tables are model-prefixed and cleaned by il_cleanup()
 })
 
 test_that('include_fields uses a model-scoped temporary join table', {
-  skip_if_not_installed('duckdb')
-
   con <- DBI::dbConnect(duckdb::duckdb())
   withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
 

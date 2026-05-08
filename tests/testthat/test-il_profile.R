@@ -35,8 +35,6 @@ test_that('il_profile() handles all-null columns gracefully', {
 })
 
 test_that('il_profile() accepts raw SQL expressions as character strings', {
-  skip_if_not_installed('duckdb')
-
   con <- DBI::dbConnect(duckdb::duckdb())
   on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
 
@@ -53,8 +51,6 @@ test_that('il_profile() accepts raw SQL expressions as character strings', {
 })
 
 test_that('il_profile() mixes bare column names and SQL expressions', {
-  skip_if_not_installed('duckdb')
-
   con <- DBI::dbConnect(duckdb::duckdb())
   on.exit(DBI::dbDisconnect(con, shutdown = TRUE))
 
