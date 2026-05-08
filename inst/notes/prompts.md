@@ -1217,3 +1217,8 @@ Write notes to `inst/refs/[48-57]-review-chunk-X.md`.
 If you're spotting errors, then this isn't ready for human review.
 Take a look at each of the risks you identified and clarify if they are an issue or not.
 If they are an issue, fix them and make a note in the doc on how you fixed it.
+
+## Summary (GPT-5.4 high)
+
+Based on what you've done in `inst/refs/47--57`, write a stage summary, `inst/refs/stage-13-notes.md`.
+This should be an executive summary with key references back to the other files.
