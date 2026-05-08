@@ -1,11 +1,11 @@
-# Splink Fake 1000 — Clerical Pairwise Labels
+# Splink Fake 1000: Clerical Pairwise Labels
 
 Pairwise clerical labels for the
 [fake_1000](http://christophertkenny.com/irelink/reference/fake_1000.md)
 dataset. Each row records whether a pair of records from `fake_1000` is
 a true match (`clerical_match_score = 1`) or a non-match
 (`clerical_match_score = 0`). These labels enable evaluation of model
-accuracy, ROC curves, and precision–recall metrics.
+accuracy, ROC curves, and precision-recall metrics.
 
 ## Usage
 

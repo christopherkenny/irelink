@@ -2,7 +2,7 @@
 
 Runs the EM algorithm under a blocking rule to learn m and u parameters
 from unlabeled data. Multiple calls with different blocking rules can be
-chained to train on complementary subsets of record pairs — each call
+chained to train on complementary subsets of record pairs. Each call
 updates the model cumulatively.
 
 ## Usage
@@ -42,9 +42,9 @@ il_estimate_em(
 
 - fix_u:
 
-  Logical. If `TRUE` (the default), hold u parameters fixed during EM —
-  only m is updated. Set to `FALSE` to also estimate u. Only supported
-  with `estimator_mode = "independent"`.
+  Logical. If `TRUE` (the default), hold u parameters fixed during EM,
+  so only m is updated. Set to `FALSE` to also estimate u. Only
+  supported with `estimator_mode = "independent"`.
 
 - fix_m:
 
@@ -68,9 +68,9 @@ il_estimate_em(
   Logical. If `TRUE` (the default), EM runs on aggregated gamma-pattern
   counts (fast, but ignores per-pair term frequency variation). If
   `FALSE`, EM runs on individual pairs and incorporates per-pair TF
-  adjustments in the E-step, matching splink's default behavior. Only
-  matters when at least one comparison has `term_frequency = TRUE`. Only
-  supported with `estimator_mode = "independent"`.
+  adjustments in the E-step. Only matters when at least one comparison
+  has `term_frequency = TRUE`. Only supported with
+  `estimator_mode = "independent"`.
 
 - derive_prior:
 

@@ -1,10 +1,8 @@
 # Cluster Scored Pairs into Entities
 
 Groups scored record pairs into entity clusters using graph-based
-methods. Analogous to
-[`dplyr::group_by()`](https://dplyr.tidyverse.org/reference/group_by.html)
-— just as `group_by()` assigns group labels, `il_cluster()` assigns
-cluster IDs to records that represent the same real-world entity.
+methods. The result assigns cluster IDs to records that represent the
+same real-world entity.
 
 ## Usage
 
@@ -39,16 +37,15 @@ il_cluster(
 
   How to handle tied best-link probabilities when
   `method = "best_link"`. `"lowest_id"` (default) keeps the edge to the
-  record with the smaller `unique_id`; `"drop"` removes all edges where
+  record with the smaller `unique_id`. `"drop"` removes all edges where
   the best-link probability is tied.
 
 - source_dataset:
 
   An optional named character vector or data frame mapping `unique_id`
   values to their source dataset name. Used with `method = "best_link"`
-  to enforce at-most-one-record per source dataset per cluster (splink's
-  `duplicate_free_datasets` constraint). If a data frame, must contain
-  columns `unique_id` and `source_dataset`.
+  to enforce at-most-one-record per source dataset per cluster. If a
+  data frame, must contain columns `unique_id` and `source_dataset`.
 
 ## Value
 

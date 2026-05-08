@@ -1,4 +1,4 @@
-# FEBRL 4b — Record Linkage Duplicate Records
+# FEBRL 4b: Record Linkage Duplicate Records
 
 The FEBRL (Freely Extensible Biomedical Record Linkage) dataset 4b
 contains 5,000 duplicate records, one for each original in

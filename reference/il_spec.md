@@ -5,9 +5,6 @@ blocking rules are added with
 [`il_compare()`](http://christophertkenny.com/irelink/reference/il_compare.md)
 and
 [`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md).
-Analogous to
-[`ggplot2::ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html)
-creating an empty canvas.
 
 ## Usage
 

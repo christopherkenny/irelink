@@ -1,10 +1,7 @@
 # Add a Comparison Layer to a Specification
 
 Declares how one or more columns should be compared when scoring record
-pairs. Each call accumulates a new layer onto the spec, following the
-same stacking pattern as
-[`ggplot2::geom_point()`](https://ggplot2.tidyverse.org/reference/geom_point.html)
-layers.
+pairs. Each call adds one comparison to the specification.
 
 ## Usage
 
@@ -54,20 +51,20 @@ il_compare(
 - tf_adjustment_weight:
 
   Numeric power to raise the term-frequency Bayes factor to. A value of
-  `1.0` (the default) applies the full adjustment; `0` disables it
+  `1.0` (the default) applies the full adjustment. Use `0` to disable it
   entirely. Only relevant when the comparison method has
   `term_frequency = TRUE`.
 
 - tf_minimum_u_value:
 
   Numeric floor for the term-frequency denominator. When both TF values
-  are below this threshold, it is used instead — preventing
+  are below this threshold, it is used instead, preventing
   unrealistically large match weights for very rare terms. Defaults to
   `0.0` (no floor).
 
 ## Value
 
-An updated `il_spec` (a new copy; the input is not modified).
+An updated copy of `spec`.
 
 ## Details
 

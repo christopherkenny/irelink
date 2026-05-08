@@ -30,7 +30,7 @@ il_save(model, path, overwrite = FALSE)
 ## Details
 
 `.json` writes Splink settings JSON. Other extensions write RDS. The
-database connection and any in-database tables are not stored; supply a
+database connection and any in-database tables are not stored. Supply a
 fresh connection with
 [`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md)
 after loading.

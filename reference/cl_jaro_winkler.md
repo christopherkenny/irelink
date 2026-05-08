@@ -2,8 +2,7 @@
 
 Creates comparison levels based on the Jaro-Winkler similarity score (0
 to 1). Thresholds are passed as unnamed arguments ordered from strictest
-to most lenient — the same direction you would read them in a waterfall
-chart.
+to most lenient.
 
 ## Usage
 

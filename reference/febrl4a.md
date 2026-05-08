@@ -1,4 +1,4 @@
-# FEBRL 4a — Record Linkage Original Records
+# FEBRL 4a: Record Linkage Original Records
 
 The FEBRL (Freely Extensible Biomedical Record Linkage) dataset 4a
 contains 5,000 original records. It is designed to be linked against

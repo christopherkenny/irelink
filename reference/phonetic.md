@@ -2,7 +2,8 @@
 
 Phonetic algorithms for blocking and comparison transforms. These
 functions compute phonetic encodings that group similar-sounding names
-together — useful for blocking rules that tolerate spelling variation.
+together. They are useful for blocking rules that tolerate spelling
+variation.
 
 ## Usage
 

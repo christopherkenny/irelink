@@ -1,8 +1,8 @@
 # Literal Value Comparison
 
 Creates a comparison level that checks whether a column equals a fixed
-literal value on the left record, right record, or both. Equivalent to
-splink's `LiteralMatchLevel`. Useful as a gate inside
+literal value on the left record, right record, or both. This is useful
+as a gate inside
 [`cl_levels()`](http://christophertkenny.com/irelink/reference/cl_levels.md)
 to restrict a comparison to records with a known value (e.g., only
 compare names when `country = 'US'`).
@@ -18,7 +18,7 @@ cl_literal(value, side = c("both", "left", "right"))
 - value:
 
   A scalar value to compare against. Character values are quoted in the
-  generated SQL; numerics are not.
+  generated SQL. Numerics are not.
 
 - side:
 

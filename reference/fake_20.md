@@ -1,4 +1,4 @@
-# Fake 20 — Minimal Deduplication Example
+# Fake 20: Minimal Deduplication Example
 
 A small, hand-crafted dataset of 20 records representing 5 unique
 people. Each person has four records with varying levels of corruption:

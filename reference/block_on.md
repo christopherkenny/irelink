@@ -6,10 +6,8 @@ and
 [`il_estimate_prior()`](http://christophertkenny.com/irelink/reference/il_estimate_prior.md).
 This is distinct from
 [`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md),
-which adds prediction-time blocking to a specification. Analogous to
-[`dplyr::join_by()`](https://dplyr.tidyverse.org/reference/join_by.html)
-— a specification object that describes how to partition pairs during
-training.
+which adds prediction-time blocking to a specification. The returned
+object describes how to partition pairs during training.
 
 ## Usage
 
@@ -100,7 +98,7 @@ block_on(first_name, .transform = il_soundex)
 #> {
 #>     vapply(x, soundex_one, character(1), USE.NAMES = FALSE)
 #> }
-#> <bytecode: 0x55ecc058ae30>
+#> <bytecode: 0x55dccc449b38>
 #> <environment: namespace:irelink>
 #> 
 #> $explode
@@ -121,8 +119,8 @@ block_on(first_name ~ il_substr(1, 3), surname ~ il_substr(1, 4))
 #> $transform$first_name
 #> function (x) 
 #> substr(x, start, start + length - 1L)
-#> <bytecode: 0x55ecc05e9ba8>
-#> <environment: 0x55ecc05ed348>
+#> <bytecode: 0x55dccc4a2788>
+#> <environment: 0x55dccc4a20c0>
 #> attr(,"transform_type")
 #> [1] "il_substr"
 #> attr(,"params")
@@ -138,8 +136,8 @@ block_on(first_name ~ il_substr(1, 3), surname ~ il_substr(1, 4))
 #> $transform$surname
 #> function (x) 
 #> substr(x, start, start + length - 1L)
-#> <bytecode: 0x55ecc05e9ba8>
-#> <environment: 0x55ecc05f1230>
+#> <bytecode: 0x55dccc4a2788>
+#> <environment: 0x55dccc4a8a60>
 #> attr(,"transform_type")
 #> [1] "il_substr"
 #> attr(,"params")

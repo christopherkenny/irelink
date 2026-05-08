@@ -2,8 +2,8 @@
 
 Generates and scores all candidate record pairs that pass the blocking
 rules, returning those above the match-probability threshold. This is an
-S3 method for [`stats::predict()`](https://rdrr.io/r/stats/predict.html)
-— the same generic used for `lm`, `glm`, and tidymodels objects.
+S3 method for
+[`stats::predict()`](https://rdrr.io/r/stats/predict.html).
 
 ## Usage
 

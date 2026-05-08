@@ -2,7 +2,7 @@
 
 Computes the distribution of gamma patterns (agreement vectors) across
 record pairs. Each unique combination of gamma values across comparisons
-is a "comparison vector"; this function counts how often each pattern
+is a "comparison vector". This function counts how often each pattern
 occurs.
 
 ## Usage

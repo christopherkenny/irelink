@@ -2,7 +2,8 @@
 
 Visualizes the distribution of term frequencies for a column in the
 model. Shows how individual values shift the match weight via the TF
-adjustment (rare values boost the weight; common values penalize it).
+adjustment. Rare values boost the weight, while common values penalize
+it.
 
 ## Usage
 

@@ -2,10 +2,8 @@
 
 Adds an equality-based blocking rule to a specification. During
 prediction, only record pairs that agree on the blocking columns are
-scored. Multiple calls are OR-ed together; within a single call, columns
-are AND-ed. This mirrors
-[`dplyr::join_by()`](https://dplyr.tidyverse.org/reference/join_by.html)
-where multiple conditions inside one call are AND-ed.
+scored. Multiple calls are OR-ed together. Within a single call, columns
+are AND-ed.
 
 ## Usage
 
@@ -52,7 +50,7 @@ il_block_on(spec, ..., .where = NULL, .transform = NULL, .explode = NULL)
 
 ## Value
 
-An updated `il_spec` (a new copy; the input is not modified).
+An updated copy of `spec`.
 
 ## Examples
 

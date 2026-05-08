@@ -2,7 +2,7 @@
 
 Scores an aggregated or row-level comparison-pattern table using a
 trained model. Dependency-aware models use their fitted log-linear
-pattern state; independent models use the fieldwise m/u parameters.
+pattern state. independent models use the fieldwise m/u parameters.
 
 ## Usage
 

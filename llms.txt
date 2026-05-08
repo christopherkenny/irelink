@@ -473,15 +473,15 @@ Save, load, and manage linkage models and resources.
 Bundled benchmark datasets from the splink ecosystem.
 
 - [`fake_20`](http://christophertkenny.com/irelink/reference/fake_20.md)
-  : Fake 20 — Minimal Deduplication Example
+  : Fake 20: Minimal Deduplication Example
 - [`fake_1000`](http://christophertkenny.com/irelink/reference/fake_1000.md)
-  : Splink Fake 1000 — Deduplication Benchmark
+  : Splink Fake 1000: Deduplication Benchmark
 - [`fake_1000_labels`](http://christophertkenny.com/irelink/reference/fake_1000_labels.md)
-  : Splink Fake 1000 — Clerical Pairwise Labels
+  : Splink Fake 1000: Clerical Pairwise Labels
 - [`febrl4a`](http://christophertkenny.com/irelink/reference/febrl4a.md)
-  : FEBRL 4a — Record Linkage Original Records
+  : FEBRL 4a: Record Linkage Original Records
 - [`febrl4b`](http://christophertkenny.com/irelink/reference/febrl4b.md)
-  : FEBRL 4b — Record Linkage Duplicate Records
+  : FEBRL 4b: Record Linkage Duplicate Records
 
 ## Unit Helpers
 

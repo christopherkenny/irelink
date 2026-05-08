@@ -1,8 +1,8 @@
 # Soundex Phonetic Comparison
 
 Creates a comparison level based on the Soundex phonetic algorithm. Two
-strings match if their Soundex codes are identical — useful as a
-fallback level within
+strings match if their Soundex codes are identical. This can be used as
+a fallback level within
 [`cl_levels()`](http://christophertkenny.com/irelink/reference/cl_levels.md)
 or
 [`cl_name()`](http://christophertkenny.com/irelink/reference/cl_name.md)

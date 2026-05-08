@@ -2,10 +2,9 @@
 
 Creates comparison levels based on the best-matching pair of values
 across two array columns. For each record pair, every element of the
-left array is compared against every element of the right array; the
+left array is compared against every element of the right array. The
 best score (maximum similarity for `'jaro_winkler'`, minimum distance
-for `'levenshtein'`) is then tested against each threshold. Equivalent
-to splink's `PairwiseStringDistanceFunctionAtThresholds`.
+for `'levenshtein'`) is then tested against each threshold.
 
 ## Usage
 

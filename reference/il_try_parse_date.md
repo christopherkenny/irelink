@@ -2,9 +2,9 @@
 
 Returns a transform that attempts to parse a string column as a date.
 Unlike [`as.Date()`](https://rdrr.io/r/base/as.Date.html), failures
-return `NA`/`NULL` rather than raising an error — on DuckDB this uses
-`try_strptime()`, on PostgreSQL `TO_DATE()`. The result can be passed as
-the `transform` argument to
+return `NA`/`NULL` rather than raising an error. On DuckDB this uses
+`try_strptime()`, and on PostgreSQL it uses `TO_DATE()`. The result can
+be passed as the `transform` argument to
 [`il_compare()`](http://christophertkenny.com/irelink/reference/il_compare.md)
 or
 [`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md),

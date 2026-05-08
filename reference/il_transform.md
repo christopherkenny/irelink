@@ -1,9 +1,9 @@
 # Compose Multiple Transforms into a Chain
 
 Creates a single transform function that applies multiple
-transformations in sequence — first function applied first, last
-function applied last. The result is itself a function that can be
-passed as the `transform` argument to
+transformations in sequence. The first function is applied first and the
+last function is applied last. The result is itself a function that can
+be passed as the `transform` argument to
 [`il_compare()`](http://christophertkenny.com/irelink/reference/il_compare.md)
 or
 [`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md).

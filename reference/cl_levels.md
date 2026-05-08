@@ -2,10 +2,7 @@
 
 Assembles an ordered list of comparison levels from individual level
 constructors. Use this when the built-in `cl_*()` helpers do not fit and
-you need full control over the level hierarchy. Analogous to writing a
-custom
-[`ggplot2::stat_identity()`](https://ggplot2.tidyverse.org/reference/stat_identity.html)
-layer.
+you need full control over the level hierarchy.
 
 ## Usage
 

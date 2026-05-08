@@ -2,9 +2,10 @@
 
 Produces a match-weight histogram from scored pairs, or a waterfall
 chart for a single pair when `which` is provided. This is a convenience
-wrapper; for full control, use
-[`ggplot2::ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html)
-directly on the tibble or on data from
+wrapper around
+[`ggplot2::ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html).
+For full control, build a plot directly from the prediction result or
+from
 [`il_waterfall()`](http://christophertkenny.com/irelink/reference/il_waterfall.md).
 
 ## Usage

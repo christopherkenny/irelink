@@ -1,9 +1,8 @@
 # Array Subset Comparison
 
 Creates a comparison level that matches when the smaller of two array
-columns is a complete subset of the larger — i.e., every element of the
-smaller array appears in the larger one. Equivalent to splink's
-`ArraySubsetLevel`.
+columns is a complete subset of the larger. In other words, every
+element of the smaller array appears in the larger one.
 
 ## Usage
 

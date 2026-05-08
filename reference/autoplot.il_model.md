@@ -1,7 +1,7 @@
 # Quick Match-Weights Plot for a Model
 
 Produces a ready-made chart from a trained model. By default draws the
-match-weights bar chart; set `type = "parameters"` for an m / u
+match-weights bar chart. Set `type = "parameters"` for an m / u
 probability comparison. For full control, extract data with
 [`il_weights()`](http://christophertkenny.com/irelink/reference/il_weights.md)
 or

@@ -30,7 +30,7 @@ il_attach(model, .data, ..., con = NULL, link_type = NULL)
 
 - con:
 
-  A DBI connection object. Optional when `.data` is a `tbl_lazy` — the
+  A DBI connection object. Optional when `.data` is a `tbl_lazy`, the
   connection is extracted from the table reference.
 
 - link_type:

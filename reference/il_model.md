@@ -41,7 +41,7 @@ il_model(
 
   A DBI connection object (e.g., from
   `DBI::dbConnect(duckdb::duckdb())`). Optional when `.data` is a
-  `tbl_lazy` — the connection is extracted from the table reference.
+  `tbl_lazy`, the connection is extracted from the table reference.
 
 - link_type:
 

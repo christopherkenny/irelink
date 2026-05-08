@@ -1,8 +1,7 @@
 # Column Completeness Across Datasets
 
 Computes the percentage of non-null values for each column across one or
-more datasets. Returns a tidy tibble suitable for plotting with
-[`ggplot2::geom_col()`](https://ggplot2.tidyverse.org/reference/geom_bar.html).
+more datasets.
 
 ## Usage
 
