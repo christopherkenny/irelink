@@ -72,6 +72,20 @@ il_compare_records <- function(record_a, record_b, spec, con = NULL) {
 
   a <- as.data.frame(record_a, stringsAsFactors = FALSE)
   b <- as.data.frame(record_b, stringsAsFactors = FALSE)
+  if (nrow(a) != 1L || nrow(b) != 1L) {
+    cli::cli_abort(
+      '{.fn il_compare_records} requires each record input to contain exactly one row.'
+    )
+  }
+  needed_cols <- unique(unlist(lapply(comparisons, function(comp) comp$columns)))
+  missing_a <- setdiff(needed_cols, names(a))
+  missing_b <- setdiff(needed_cols, names(b))
+  if (length(missing_a) > 0L || length(missing_b) > 0L) {
+    missing <- unique(c(missing_a, missing_b))
+    cli::cli_abort(
+      'Column{?s} {.field {missing}} required by the spec {?is/are} missing from the record inputs.'
+    )
+  }
 
   own_con <- is.null(con)
   if (own_con) {

@@ -1,8 +1,9 @@
 ---
 title: "Accuracy benchmark: FEBRL 4 record linkage"
 format:
-  html:
-    embed-resources: true
+  typst:
+    syntax-highlighting: idiomatic
+    keep-typ: false
 ---
 
 This document reproduces the [splink FEBRL 4 demo](https://moj-analytical-services.github.io/splink/demos/examples/duckdb/febrl4.html) using irelink and evaluates accuracy against the ground truth encoded in the data.
@@ -198,7 +199,13 @@ inspect_idx <- predictions |>
 
 predictions |>
   slice(inspect_idx) |>
-  select(unique_id_l, unique_id_r, match_weight, total_match_weight, match_probability)
+  select(
+    unique_id_l,
+    unique_id_r,
+    match_weight,
+    total_match_weight,
+    match_probability
+  )
 ```
 
 ```{r waterfall-plot}

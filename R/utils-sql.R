@@ -1260,7 +1260,7 @@ build_scored_query <- function(model, threshold = 0.85,
                                blocked_pairs_tbl = NULL) {
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
-  prior <- safe_prior(model)
+  prior <- clamp_probability(safe_prior(model))
   comp_names <- comparison_names(comparisons)
   blocking_rules <- model$spec$blocking_rules
 

@@ -52,3 +52,25 @@ test_that('il_deterministic_link() does not require trained parameters', {
   result <- il_deterministic_link(df, spec = spec, con = con)
   expect_s3_class(result, 'tbl_df')
 })
+
+test_that('il_deterministic_link() rejects unsupported multi-table modes', {
+  skip_if_not_installed('RSQLite')
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- data.frame(
+    unique_id = 1:2,
+    first_name = c('Alice', 'Alice'),
+    surname = c('Smith', 'Smith')
+  )
+
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_block_on(first_name)
+
+  expect_error(
+    il_deterministic_link(df, df, spec = spec, con = con, link_type = 'link'),
+    'single-table'
+  )
+})

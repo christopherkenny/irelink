@@ -72,6 +72,37 @@ test_that('predict() output has required columns', {
   expect_true(all(required_cols %in% names(pairs)))
 })
 
+test_that('predict() validates public scoring controls', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  model <- make_trained_model(con)
+
+  expect_error(predict(model, threshold = NA_real_), 'threshold')
+  expect_error(predict(model, threshold = 1.5), 'threshold')
+  expect_error(predict(model, threshold_match_weight = Inf), 'threshold_match_weight')
+  expect_error(predict(model, collect = NA), 'collect')
+  expect_error(predict(model, include_fields = NA), 'include_fields')
+  expect_error(predict(model, profile_sql = NA), 'profile_sql')
+})
+
+test_that('predict(type = "weights") returns model weight summaries', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  model <- make_trained_model(con)
+  weights <- predict(model, type = 'weights')
+
+  expect_s3_class(weights, 'tbl_df')
+  expect_true(all(c('comparison', 'gamma_level', 'm_prob', 'u_prob', 'weight') %in% names(weights)))
+  expect_equal(weights, il_weights(model))
+})
+
+test_that('weight_to_probability handles boundary priors by clamping', {
+  expect_equal(weight_to_probability(0, 1), 1 - 1e-6)
+  expect_equal(weight_to_probability(0, 0), 1e-6)
+})
+
 test_that('predict() keeps evidence and prior match weights explicit', {
   skip_if_not_installed('RSQLite')
 

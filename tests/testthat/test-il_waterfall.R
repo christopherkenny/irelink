@@ -43,6 +43,35 @@ test_that('il_compare_records() shows exact match on identical records', {
   expect_true(all(result[, gamma_cols] > 0))
 })
 
+test_that('il_compare_records() validates row count and required columns', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_compare(surname, cl_exact())
+
+  expect_error(
+    il_compare_records(
+      data.frame(first_name = c('A', 'B'), surname = c('C', 'D')),
+      list(first_name = 'A', surname = 'C'),
+      spec = spec,
+      con = con
+    ),
+    'exactly one row'
+  )
+
+  expect_error(
+    il_compare_records(
+      list(first_name = 'A'),
+      list(first_name = 'A', surname = 'C'),
+      spec = spec,
+      con = con
+    ),
+    'missing'
+  )
+})
+
 # --- il_find_matches() ----------------------------------------------------
 # From: test_find_new_matches.py::test_matches_work
 
@@ -73,6 +102,37 @@ test_that('il_find_matches() returns matches for a new record', {
   matches <- il_find_matches(model, new_record, threshold = 0.01)
   expect_s3_class(matches, 'tbl_df')
   expect_true(nrow(matches) > 0)
+})
+
+test_that('il_find_matches() validates trained model, threshold, and required columns', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- fake_1000[1:20, ]
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_compare(surname, cl_exact()) |>
+    il_block_on(surname)
+
+  model <- il_model(df, spec = spec, con = con)
+  expect_error(
+    il_find_matches(model, data.frame(first_name = 'A', surname = 'B')),
+    'trained'
+  )
+
+  trained <- model |>
+    il_estimate_u(max_pairs = 100) |>
+    il_estimate_em(block_on(surname))
+  expect_error(
+    il_find_matches(trained, data.frame(first_name = 'A', surname = 'B'), threshold = NA_real_),
+    'threshold'
+  )
+
+  DBI::dbWriteTable(con, 'new_missing_surname', data.frame(first_name = 'A'), overwrite = TRUE)
+  expect_error(
+    il_find_matches(trained, 'new_missing_surname'),
+    'missing'
+  )
 })
 
 # --- il_waterfall() -------------------------------------------------------
@@ -115,4 +175,23 @@ test_that('il_waterfall() returns per-comparison weight contributions', {
       tolerance = 0.01
     )
   }
+})
+
+test_that('il_waterfall() validates which', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- fake_1000
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_compare(surname, cl_exact()) |>
+    il_block_on(first_name)
+
+  model <- il_model(df, spec = spec, con = con) |>
+    il_estimate_u(max_pairs = 1e6) |>
+    il_estimate_em(block_on(first_name))
+
+  pairs <- predict(model, threshold = 0)
+  expect_error(il_waterfall(pairs, which = 0), 'which')
+  expect_error(il_waterfall(pairs, which = nrow(pairs) + 1L), 'which')
 })

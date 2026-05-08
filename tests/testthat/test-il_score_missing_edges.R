@@ -97,3 +97,62 @@ test_that('il_score_missing_edges() returns il_compared class', {
   missing <- il_score_missing_edges(model, pairs, clusters)
   expect_s3_class(missing, 'il_compared')
 })
+
+test_that('il_score_missing_edges() validates inputs', {
+  con <- test_con()
+  on.exit(test_discon(con))
+
+  df <- data.frame(
+    unique_id = c(1, 2),
+    name = c('John', 'John'),
+    stringsAsFactors = FALSE
+  )
+
+  spec <- il_spec() |>
+    il_compare(name, cl_exact()) |>
+    il_block_on(name)
+  model <- il_model(df, spec = spec, con = con) |>
+    il_estimate_u() |>
+    il_estimate_em(block_on(name))
+  pairs <- predict(model, threshold = 0)
+
+  expect_error(
+    il_score_missing_edges(model, pairs, tibble::tibble(unique_id = '1')),
+    'cluster_id'
+  )
+  expect_error(
+    il_score_missing_edges(model, pairs, tibble::tibble(unique_id = '1', cluster_id = 'a'), threshold = NA_real_),
+    'threshold'
+  )
+})
+
+test_that('il_score_missing_edges() includes gamma and TF adjustment columns', {
+  con <- test_con()
+  on.exit(test_discon(con))
+
+  df <- data.frame(
+    unique_id = c(1, 2, 3),
+    first_name = c('John', 'John', 'Jon'),
+    city = c('A', 'A', 'A'),
+    stringsAsFactors = FALSE
+  )
+
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_compare(city, cl_exact(term_frequency = TRUE)) |>
+    il_block_on(first_name)
+
+  model <- il_model(df, spec = spec, con = con) |>
+    il_estimate_u() |>
+    il_estimate_em(block_on(first_name))
+
+  pairs <- predict(model, threshold = 0)
+  clusters <- tibble::tibble(
+    unique_id = c('1', '2', '3'),
+    cluster_id = rep('cluster_1', 3)
+  )
+
+  missing <- il_score_missing_edges(model, pairs, clusters, threshold = 0)
+
+  expect_true(all(c('gamma_first_name', 'gamma_city', 'tf_adj_city') %in% names(missing)))
+})

@@ -68,6 +68,14 @@
 il_waterfall <- function(pairs, which = 1L) {
   pairs <- ensure_collected(pairs)
   validate_il_compared(pairs)
+  if (!is.numeric(which) || length(which) != 1L || is.na(which) ||
+    !is.finite(which) || which < 1 || which != as.integer(which)) {
+    cli::cli_abort('{.arg which} must be a positive row index.')
+  }
+  which <- as.integer(which)
+  if (which > nrow(pairs)) {
+    cli::cli_abort('{.arg which} must identify a row present in {.arg pairs}.')
+  }
   model <- attr(pairs, 'model')
   if (is.null(model)) {
     cli::cli_abort('No model attached to the {.cls il_compared} object.')

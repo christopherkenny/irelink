@@ -71,6 +71,12 @@ il_deterministic_link <- function(.data, ..., spec, con = NULL,
                                   )) {
   link_type <- match.arg(link_type)
   validate_il_spec(spec)
+  extra_inputs <- list(...)
+  if (length(extra_inputs) > 0L || !identical(link_type, 'dedupe')) {
+    cli::cli_abort(
+      '{.fn il_deterministic_link} currently supports single-table {.val dedupe} only.'
+    )
+  }
 
   comparisons <- spec$comparisons
   blocking_rules <- spec$blocking_rules

@@ -103,15 +103,24 @@ predict.il_model <- function(object, threshold = 0.85,
                              profile_sql = FALSE,
                              ...) {
   type <- match.arg(type)
-  validate_il_model(object)
+  validate_trained_model(object)
 
-  if (!object$trained) {
-    cli::cli_abort('Model must be trained before prediction. Use {.fn il_estimate_em} first.')
+  if (identical(type, 'weights')) {
+    return(il_weights(object))
   }
 
-  if (!is.logical(greedy) || length(greedy) != 1L || is.na(greedy)) {
-    cli::cli_abort('{.arg greedy} must be `TRUE` or `FALSE`.')
+  threshold <- validate_probability_threshold(threshold, 'threshold')
+  threshold_match_weight <- if (is.null(threshold_match_weight)) {
+    NULL
+  } else {
+    validate_finite_numeric_scalar(
+      threshold_match_weight, 'threshold_match_weight'
+    )
   }
+  collect <- validate_logical_scalar(collect, 'collect')
+  include_fields <- validate_logical_scalar(include_fields, 'include_fields')
+  greedy <- validate_logical_scalar(greedy, 'greedy')
+  profile_sql <- validate_logical_scalar(profile_sql, 'profile_sql')
 
   if (greedy && !identical(object$link_type, 'link')) {
     cli::cli_abort(
@@ -161,11 +170,7 @@ predict.il_model <- function(object, threshold = 0.85,
       )
       on.exit(drop_registered(object$con, prepared$score_tbl), add = TRUE)
       if (is.null(prepared$scored_sql)) {
-        empty <- tibble::tibble(
-          unique_id_l = integer(0), unique_id_r = integer(0),
-          match_weight = numeric(0), total_match_weight = numeric(0),
-          match_probability = numeric(0)
-        )
+        empty <- empty_scored_pairs(object)
         return(new_il_compared(empty, model = object))
       }
       scored_sql <- prepared$scored_sql
@@ -186,12 +191,7 @@ predict.il_model <- function(object, threshold = 0.85,
       profile = profile
     ))
     if (nrow(result) == 0L) {
-      empty <- tibble::tibble(
-        unique_id_l = integer(0), unique_id_r = integer(0),
-        match_weight = numeric(0), total_match_weight = numeric(0),
-        match_probability = numeric(0)
-      )
-      compared <- new_il_compared(empty, model = object)
+      compared <- new_il_compared(result, model = object)
       attr(compared, 'sql_profile') <- il_sql_profile_entries(profile)
       return(compared)
     }
@@ -211,11 +211,7 @@ predict.il_model <- function(object, threshold = 0.85,
   ids <- result_data$ids
 
   if (nrow(gamma_mat) == 0L) {
-    empty <- tibble::tibble(
-      unique_id_l = integer(0), unique_id_r = integer(0),
-      match_weight = numeric(0), total_match_weight = numeric(0),
-      match_probability = numeric(0)
-    )
+    empty <- empty_scored_pairs(object)
     return(new_il_compared(empty, model = object))
   }
 
@@ -322,14 +318,14 @@ predict_lazy <- function(model, threshold, threshold_match_weight = NULL,
       il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {predicted_tbl}'),
         step = 'predict_lazy.drop_empty', profile = profile
       )
+      empty <- empty_scored_pairs(model)
+      empty_select <- paste(vapply(names(empty), function(nm) {
+        type <- if (is.integer(empty[[nm]])) 'INTEGER' else 'DOUBLE'
+        glue::glue('CAST(NULL AS {type}) AS {nm}')
+      }, character(1)), collapse = ', ')
       il_db_execute(con, glue::glue(
         'CREATE TABLE {predicted_tbl} AS ',
-        'SELECT CAST(NULL AS INTEGER) AS unique_id_l, ',
-        'CAST(NULL AS INTEGER) AS unique_id_r, ',
-        'CAST(NULL AS DOUBLE) AS match_weight, ',
-        'CAST(NULL AS DOUBLE) AS total_match_weight, ',
-        'CAST(NULL AS DOUBLE) AS match_probability ',
-        'WHERE FALSE'
+        'SELECT {empty_select} WHERE FALSE'
       ), step = 'predict_lazy.create_empty', profile = profile)
       return(new_il_compared_lazy(
         con = con,

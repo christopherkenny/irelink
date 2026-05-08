@@ -70,7 +70,8 @@
 #' il_find_matches(model, new_df, threshold = 0.5)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_find_matches <- function(model, new_records, threshold = 0.85) {
-  validate_il_model(model)
+  validate_trained_model(model)
+  threshold <- validate_probability_threshold(threshold, 'threshold')
 
   con <- model$con
   dialect <- detect_dialect(con)
@@ -79,7 +80,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
   prior <- safe_prior(model)
   comp_names <- comparison_names(comparisons)
   blocking_rules <- model$spec$blocking_rules
-  comp_cols <- unique(comp_names)
+  comp_cols <- unique(unlist(lapply(comparisons, function(comp) comp$columns)))
   dependency_aware <- identical(model$params$estimator_mode, 'dependency-aware')
   if (!dependency_aware) {
     mu <- extract_mu_vectors(params, comp_names)
@@ -102,6 +103,12 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     add_unique_id = TRUE
   )
   on.exit(drop_registered(con, tbl_new), add = TRUE)
+  missing_new_cols <- setdiff(all_needed, reg$columns)
+  if (length(missing_new_cols) > 0L) {
+    cli::cli_abort(
+      'Column{?s} {.field {missing_new_cols}} required by the model spec {?is/are} missing from {.arg new_records}.'
+    )
+  }
 
   tbl_existing <- model$data$tbl_l
 
@@ -152,11 +159,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
       )
       on.exit(drop_registered(con, prepared$score_tbl), add = TRUE)
       if (is.null(prepared$scored_sql)) {
-        return(tibble::tibble(
-          unique_id_l = character(0), unique_id_r = character(0),
-          match_weight = numeric(0), total_match_weight = numeric(0),
-          match_probability = numeric(0)
-        ))
+        return(empty_scored_pairs(model, id_ptype = character()))
       }
       scored_sql <- glue::glue(
         'SELECT unique_id_l, unique_id_r, match_weight, total_match_weight, ',
@@ -168,11 +171,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
       result_raw <- DBI::dbGetQuery(con, sql)
 
       if (nrow(result_raw) == 0L) {
-        return(tibble::tibble(
-          unique_id_l = character(0), unique_id_r = character(0),
-          match_weight = numeric(0), total_match_weight = numeric(0),
-          match_probability = numeric(0)
-        ))
+        return(empty_scored_pairs(model, id_ptype = character()))
       }
 
       gamma_cols <- paste0('gamma_', comp_names)
@@ -239,11 +238,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     }
 
     if (length(all_pair_frames) == 0L) {
-      return(tibble::tibble(
-        unique_id_l = character(0), unique_id_r = character(0),
-        match_weight = numeric(0), total_match_weight = numeric(0),
-        match_probability = numeric(0)
-      ))
+      return(empty_scored_pairs(model, id_ptype = character()))
     }
 
     pairs <- do.call(rbind, all_pair_frames)
@@ -285,11 +280,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
   result <- result[result$match_probability >= threshold, , drop = FALSE]
 
   if (nrow(result) == 0L) {
-    return(tibble::tibble(
-      unique_id_l = character(0), unique_id_r = character(0),
-      match_weight = numeric(0), total_match_weight = numeric(0),
-      match_probability = numeric(0)
-    ))
+    return(empty_scored_pairs(model, id_ptype = character()))
   }
 
   tibble::as_tibble(result)

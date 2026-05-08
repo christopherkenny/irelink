@@ -148,8 +148,8 @@ score_gamma_matrix <- function(gamma_mat, mu) {
 #' @return Numeric vector of match probabilities in \[0, 1\].
 #' @noRd
 weight_to_probability <- function(match_weight, prior) {
-  log_odds <- log(prior / (1 - prior)) + match_weight * log(2)
-  1 / (1 + exp(-log_odds))
+  total_weight <- match_weight + prior_match_weight(prior)
+  1 / (1 + 2^(-total_weight))
 }
 
 #' Convert a prior match probability to a log2 prior-odds weight
@@ -173,6 +173,74 @@ prior_match_weight <- function(prior) {
 #' @noRd
 total_match_weight <- function(match_weight, prior) {
   match_weight + prior_match_weight(prior)
+}
+
+#' Validate a scalar probability threshold
+#' @noRd
+validate_probability_threshold <- function(x, arg = 'threshold') {
+  validate_probability_scalar(x, arg = arg, allow_boundary = TRUE)
+}
+
+#' Validate a scalar finite numeric control
+#' @noRd
+validate_finite_numeric_scalar <- function(x, arg) {
+  if (!is.numeric(x) || length(x) != 1L || is.na(x) || !is.finite(x)) {
+    cli::cli_abort('{.arg {arg}} must be a finite numeric scalar.')
+  }
+  as.numeric(x)
+}
+
+#' Validate a scalar logical control
+#' @noRd
+validate_logical_scalar <- function(x, arg) {
+  if (!is.logical(x) || length(x) != 1L || is.na(x)) {
+    cli::cli_abort('{.arg {arg}} must be `TRUE` or `FALSE`.')
+  }
+  x
+}
+
+#' Validate that a model has trained scoring parameters
+#' @noRd
+validate_trained_model <- function(model) {
+  validate_il_model(model)
+  has_independent_params <- !is.null(model$params$comparisons)
+  has_dependency_state <- identical(model$params$estimator_mode, 'dependency-aware') &&
+    !is.null(model$params$dependency_aware)
+  if (!isTRUE(model$trained) || (!has_independent_params && !has_dependency_state)) {
+    cli::cli_abort(
+      'Model must be trained before scoring. Use {.fn il_estimate_em} first.'
+    )
+  }
+  invisible(model)
+}
+
+#' Empty scored-pair tibble with the usual prediction columns
+#' @noRd
+empty_scored_pairs <- function(model = NULL, id_ptype = integer(),
+                               include_gamma = TRUE, include_tf = TRUE) {
+  out <- tibble::tibble(
+    unique_id_l = id_ptype[0],
+    unique_id_r = id_ptype[0],
+    match_weight = numeric(0),
+    total_match_weight = numeric(0),
+    match_probability = numeric(0)
+  )
+
+  if (!is.null(model) && include_gamma) {
+    comp_names <- comparison_names(model$spec$comparisons)
+    for (cn in comp_names) {
+      out[[paste0('gamma_', cn)]] <- integer(0)
+    }
+  }
+
+  if (!is.null(model) && include_tf) {
+    tf_cols <- tf_columns(model$spec$comparisons)
+    for (col in tf_cols) {
+      out[[paste0('tf_adj_', col)]] <- numeric(0)
+    }
+  }
+
+  out
 }
 
 #' Compute per-comparison contribution for a single gamma vector

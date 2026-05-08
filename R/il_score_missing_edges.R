@@ -24,8 +24,24 @@
 #' }
 il_score_missing_edges <- function(model, pairs, clusters,
                                    threshold = 0) {
-  validate_il_model(model)
+  validate_trained_model(model)
+  threshold <- validate_probability_threshold(threshold, 'threshold')
   pairs <- ensure_collected(pairs)
+  validate_il_compared(pairs)
+  required_cluster_cols <- c('unique_id', 'cluster_id')
+  missing_cluster_cols <- setdiff(required_cluster_cols, names(clusters))
+  if (length(missing_cluster_cols) > 0L) {
+    cli::cli_abort(
+      '{.arg clusters} must contain column{?s} {.field {missing_cluster_cols}}.'
+    )
+  }
+  required_pair_cols <- c('unique_id_l', 'unique_id_r')
+  missing_pair_cols <- setdiff(required_pair_cols, names(pairs))
+  if (length(missing_pair_cols) > 0L) {
+    cli::cli_abort(
+      '{.arg pairs} must contain column{?s} {.field {missing_pair_cols}}.'
+    )
+  }
   con <- model$con
 
   # Build set of existing scored pairs (normalised: smaller id first)
@@ -75,38 +91,43 @@ score_specific_pairs <- function(model, id_l, id_r, threshold = 0) {
   tbl_l <- model$data$tbl_l
   tbl_r <- model$data$tbl_r %||% tbl_l
 
-  # Fetch source data for needed ids
-  all_ids <- unique(c(id_l, id_r))
-  id_list <- paste(DBI::dbQuoteString(con, all_ids), collapse = ', ')
-
-  src_l <- DBI::dbGetQuery(con, glue::glue(
-    'SELECT * FROM {tbl_l} WHERE unique_id IN ({id_list})'
-  ))
-  if (tbl_r != tbl_l) {
-    src_r <- DBI::dbGetQuery(con, glue::glue(
-      'SELECT * FROM {tbl_r} WHERE unique_id IN ({id_list})'
-    ))
-    src <- rbind(src_l, src_r)
+  id_l <- as.character(id_l)
+  id_r <- as.character(id_r)
+  src_l <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {tbl_l}'))
+  src_r <- if (tbl_r != tbl_l) {
+    DBI::dbGetQuery(con, glue::glue('SELECT * FROM {tbl_r}'))
   } else {
-    src <- src_l
+    src_l
   }
-  rownames(src) <- as.character(src$unique_id)
+  rownames(src_l) <- as.character(src_l$unique_id)
+  rownames(src_r) <- as.character(src_r$unique_id)
+
+  if (any(!(id_l %in% rownames(src_l))) || any(!(id_r %in% rownames(src_r)))) {
+    cli::cli_abort(
+      'Could not find every requested pair ID in the model source tables.'
+    )
+  }
 
   n_pairs <- length(id_l)
-  n_comp <- length(comparisons)
-  gamma_mat <- matrix(0L, nrow = n_pairs, ncol = n_comp)
-  colnames(gamma_mat) <- comp_names
+  pair_data <- data.frame(row_idx = seq_len(n_pairs))
+  needed_cols <- unique(unlist(lapply(comparisons, function(comp) comp$columns)))
+  for (col in needed_cols) {
+    pair_data[[paste0('l_', col)]] <- src_l[id_l, col]
+    pair_data[[paste0('r_', col)]] <- src_r[id_r, col]
+  }
+  gamma_mat <- compute_gamma_matrix(pair_data, comparisons)
 
-  for (j in seq_len(n_comp)) {
-    col <- comparisons[[j]]$columns
-    if (length(col) == 2L && identical(comparisons[[j]]$method$method, 'distance_km')) {
-      val_l <- src[id_l, col, drop = FALSE]
-      val_r <- src[id_r, col, drop = FALSE]
-    } else {
-      val_l <- src[id_l, col]
-      val_r <- src[id_r, col]
+  tf_adj_list <- NULL
+  tf_adj <- numeric(n_pairs)
+  if (!dependency_aware) {
+    tf_cols <- tf_columns(comparisons)
+    if (length(tf_cols) > 0L) {
+      tf_data <- lookup_tf_r(model, pair_data, tf_cols)
+      tf_adj <- compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
+      tf_adj_list <- compute_tf_adjustment_matrix(
+        gamma_mat, tf_data, comparisons, mu
+      )
     }
-    gamma_mat[, j] <- compute_gamma(val_l, val_r, comparisons[[j]]$method)
   }
 
   if (dependency_aware) {
@@ -118,6 +139,7 @@ score_specific_pairs <- function(model, id_l, id_r, threshold = 0) {
     match_probability <- scored_patterns$match_probability
   } else {
     match_weight <- score_gamma_matrix(gamma_mat, mu)
+    match_weight <- match_weight + tf_adj
     total_mw <- total_match_weight(match_weight, prior)
     match_probability <- weight_to_probability(match_weight, prior)
   }
@@ -129,6 +151,14 @@ score_specific_pairs <- function(model, id_l, id_r, threshold = 0) {
     total_match_weight = total_mw,
     match_probability = match_probability
   )
+  for (j in seq_along(comp_names)) {
+    result[[paste0('gamma_', comp_names[j])]] <- gamma_mat[, j]
+  }
+  if (!is.null(tf_adj_list)) {
+    for (col in names(tf_adj_list)) {
+      result[[paste0('tf_adj_', col)]] <- tf_adj_list[[col]]
+    }
+  }
 
   result <- result[result$match_probability >= threshold, , drop = FALSE]
   new_il_compared(result, model = model)

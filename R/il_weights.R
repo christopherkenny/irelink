@@ -63,6 +63,11 @@
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 il_weights <- function(model) {
   validate_il_model(model)
+  if (identical(model$params$estimator_mode, 'dependency-aware')) {
+    cli::cli_abort(
+      '{.fn il_weights} reports fieldwise independent weights and is not supported for dependency-aware scores.'
+    )
+  }
   params <- model$params$comparisons
   if (is.null(params)) {
     cli::cli_abort('Model has no parameters yet. Run training verbs first.')

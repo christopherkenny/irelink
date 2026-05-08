@@ -3,7 +3,7 @@ title: "Scaling and Accuracy with `pseudopeople`"
 format:
   typst:
     syntax-highlighting: idiomatic
-    keep-typ: true
+    keep-typ: false
 ---
 
 This document benchmarks `irelink` on five `pseudopeople` scenarios using the parquet files in the sibling `pseudopeople-ri` repository.
