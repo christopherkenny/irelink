@@ -172,7 +172,7 @@ materializing millions of rows would exhaust memory.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pairs_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span>, collect <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">pairs_lazy</span></span>
-<span><span class="co">#&gt; &lt;il_compared_lazy&gt; 2,946 pairs in table __il_8843_1_predicted_4 (threshold = 0.5)</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;il_compared_lazy&gt; 2,946 pairs in table __il_8765_1_predicted_4 (threshold = 0.5)</span></span></code></pre></div>
 <p>Pass the lazy reference directly to <code><a href="../reference/il_cluster.html">il_cluster()</a></code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">clusters_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">pairs_lazy</span>, threshold <span class="op">=</span> <span class="fl">0.85</span><span class="op">)</span></span>
@@ -245,12 +245,12 @@ raising the threshold in <code><a href="https://rdrr.io/r/stats/predict.html" cl
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id  degree node_centrality</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 459       cluster_164     13           0.419</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 457       cluster_164     10           0.323</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 48        cluster_164      4           0.129</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 171       cluster_164      6           0.194</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 169       cluster_164      6           0.194</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 167       cluster_164      7           0.226</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 718       cluster_164     22          0.710 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 171       cluster_164      6          0.194 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 48        cluster_164      4          0.129 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 169       cluster_164      6          0.194 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 459       cluster_164     13          0.419 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 462       cluster_164      2          0.064<span style="text-decoration: underline;">5</span></span></span></code></pre></div>
 <p>Records with unusually high degree relative to their cluster size may
 be acting as hubs that inflate the cluster beyond its true
 membership.</p>

@@ -91,8 +91,8 @@ il_find_matches(model, new_df, threshold = 0.5)
 #> # A tibble: 3 × 5
 #>   unique_id_l unique_id_r match_weight total_match_weight match_probability
 #>         <int>       <int>        <dbl>              <dbl>             <dbl>
-#> 1           1           1         3.86               3.81             0.933
-#> 2           1           2         3.86               3.81             0.933
-#> 3           1          11         3.86               3.81             0.933
+#> 1           1          11         3.86               3.81             0.933
+#> 2           1           1         3.86               3.81             0.933
+#> 3           1           2         3.86               3.81             0.933
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

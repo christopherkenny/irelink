@@ -182,12 +182,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 8         cluster_17
-#> 2 9         cluster_10
-#> 3 7         cluster_17
-#> 4 13        cluster_13
-#> 5 10        cluster_10
-#> 6 19        cluster_10
+#> 1 19        cluster_10
+#> 2 20        cluster_10
+#> 3 4         cluster_13
+#> 4 8         cluster_17
+#> 5 9         cluster_10
+#> 6 7         cluster_17
 ```
 
 Each record is assigned a `cluster_id`. Records sharing the same cluster

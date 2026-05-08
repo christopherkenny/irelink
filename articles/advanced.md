@@ -115,7 +115,7 @@ materializing millions of rows would exhaust memory.
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,946 pairs in table __il_8843_1_predicted_4 (threshold = 0.5)
+#> <il_compared_lazy> 2,946 pairs in table __il_8765_1_predicted_4 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -217,12 +217,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 459       cluster_164     13           0.419
-#> 2 457       cluster_164     10           0.323
-#> 3 48        cluster_164      4           0.129
-#> 4 171       cluster_164      6           0.194
-#> 5 169       cluster_164      6           0.194
-#> 6 167       cluster_164      7           0.226
+#> 1 718       cluster_164     22          0.710 
+#> 2 171       cluster_164      6          0.194 
+#> 3 48        cluster_164      4          0.129 
+#> 4 169       cluster_164      6          0.194 
+#> 5 459       cluster_164     13          0.419 
+#> 6 462       cluster_164      2          0.0645
 ```
 
 Records with unusually high degree relative to their cluster size may be
