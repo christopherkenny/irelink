@@ -2,7 +2,7 @@
 
 ## Authors
 
-- **Christopher T. Kenny**. Author, maintainer.
+- **Christopher T. Kenny**. Author, maintainer, copyright holder.
   [](https://orcid.org/0000-0002-9386-6860)
 
 - **Robin Linacre**. Copyright holder.  
