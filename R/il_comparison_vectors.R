@@ -82,34 +82,3 @@ il_comparison_vectors <- function(model, blocking = NULL, limit = NULL) {
   add_class(tibble::as_tibble(agg), 'il_comparison_vectors')
 }
 
-#' Plot comparison vector distribution
-#'
-#' @param object An `il_comparison_vectors` tibble.
-#' @param ... Ignored.
-#' @return A `ggplot2` object showing the top comparison patterns by
-#'   frequency.
-#' @exportS3Method ggplot2::autoplot
-autoplot.il_comparison_vectors <- function(object, ...) {
-  gamma_cols <- grep('^gamma_', names(object), value = TRUE)
-
-  # Create a label column by pasting gamma values
-  object$pattern <- apply(object[, gamma_cols], 1, function(row) {
-    paste(row, collapse = '-')
-  })
-
-  top <- utils::head(object[order(-object$count), ], 20)
-  top$pattern <- factor(top$pattern, levels = rev(top$pattern))
-
-  top |>
-    ggplot2::ggplot() +
-    ggplot2::geom_col(
-      ggplot2::aes(x = .data$count, y = .data$pattern),
-      fill = '#2171b5'
-    ) +
-    ggplot2::labs(
-      x = 'Count',
-      y = 'Comparison Vector (gamma pattern)',
-      title = 'Comparison Vector Distribution (Top 20)'
-    ) +
-    ggplot2::theme_minimal()
-}

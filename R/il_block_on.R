@@ -113,7 +113,6 @@ il_block_on <- function(
 #'   condition are AND-ed together.
 #' @param .transform An optional transform applied to every column that does
 #'   not already have a formula transform. See [il_block_on()] for details.
-#'
 #' @param .explode An optional character vector of array column names to
 #'   unnest before blocking. See [il_block_on()] for details.
 #'

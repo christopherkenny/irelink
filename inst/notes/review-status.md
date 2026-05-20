@@ -14,13 +14,13 @@
 - [x] R/cl_numeric_diff.R
 - [x] R/cl_time_diff.R
 - [x] R/data.R
-- [ ] R/il_accuracy.R
-- [ ] R/il_block_on.R
-- [ ] R/il_cleanup.R
-- [ ] R/il_cluster.R
-- [ ] R/il_cluster_confusion_matrix.R
-- [ ] R/il_column_transforms.R
-- [ ] R/il_comparator_score.R
+- [x] R/il_accuracy.R
+- [x] R/il_block_on.R
+- [x] R/il_cleanup.R
+- [x] R/il_cluster.R
+- [x] R/il_cluster_confusion_matrix.R
+- [x] R/il_column_transforms.R
+- [x] R/il_comparator_score.R
 - [ ] R/il_compare.R
 - [ ] R/il_compare_records.R
 - [ ] R/il_comparison_vectors.R

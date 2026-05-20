@@ -456,3 +456,132 @@ autoplot.il_completeness <- function(object, ...) {
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
 }
+
+#' Plot Batch Comparator Scores
+#'
+#' @param object An `il_comparator_score` tibble.
+#' @param ... Additional arguments (currently unused).
+#'
+#' @return A `ggplot2` object.
+#' @exportS3Method ggplot2::autoplot
+autoplot.il_comparator_score <- function(object, ...) {
+  metric_cols <- intersect(
+    c('jaro_winkler', 'jaro', 'jaccard', 'cosine'),
+    names(object)
+  )
+  if (length(metric_cols) == 0L) {
+    cli::cli_abort('No similarity metric columns found.')
+  }
+
+  long <- reshape_long(object, metric_cols, 'metric', 'score')
+
+  long |>
+    ggplot2::ggplot() +
+    ggplot2::geom_histogram(
+      ggplot2::aes(x = .data$score),
+      bins = 30,
+      fill = '#2171b5',
+      colour = 'white'
+    ) +
+    ggplot2::facet_wrap(~metric, scales = 'free_y') +
+    ggplot2::labs(
+      x = 'Similarity Score',
+      y = 'Count',
+      title = 'Comparator Score Distribution'
+    ) +
+    ggplot2::theme_minimal()
+}
+
+#' Plot Comparison Vector Distribution
+#'
+#' @param object An `il_comparison_vectors` tibble.
+#' @param ... Additional arguments (currently unused).
+#'
+#' @return A `ggplot2` object showing the top comparison patterns by
+#'   frequency.
+#' @exportS3Method ggplot2::autoplot
+autoplot.il_comparison_vectors <- function(object, ...) {
+  gamma_cols <- grep('^gamma_', names(object), value = TRUE)
+
+  object$pattern <- apply(object[, gamma_cols], 1, function(row) {
+    paste(row, collapse = '-')
+  })
+
+  top <- utils::head(object[order(-object$count), ], 20)
+  top$pattern <- factor(top$pattern, levels = rev(top$pattern))
+
+  top |>
+    ggplot2::ggplot() +
+    ggplot2::geom_col(
+      ggplot2::aes(x = .data$count, y = .data$pattern),
+      fill = '#2171b5'
+    ) +
+    ggplot2::labs(
+      x = 'Count',
+      y = 'Comparison Vector (gamma pattern)',
+      title = 'Comparison Vector Distribution (Top 20)'
+    ) +
+    ggplot2::theme_minimal()
+}
+
+#' Comparator Score Bar Chart
+#'
+#' Visualizes the output of [il_string_similarity()] as a horizontal bar
+#' chart, making it easy to compare multiple string-distance metrics at a
+#' glance.
+#'
+#' @param object An `il_string_similarity` tibble (the return value of
+#'   [il_string_similarity()]).
+#' @param ... Additional arguments (currently unused).
+#'
+#' @return A `ggplot` object.
+#' @exportS3Method ggplot2::autoplot
+#'
+#' @examples
+#' \dontrun{
+#' library(ggplot2)
+#' autoplot(il_string_similarity('John', 'Jon'))
+#' }
+autoplot.il_string_similarity <- function(object, ...) {
+  long <- tibble::tibble(
+    metric = names(object),
+    score = as.numeric(object[1, ])
+  )
+
+  lv_idx <- which(long$metric == 'levenshtein')
+  if (length(lv_idx) == 1L && !is.na(long$score[lv_idx])) {
+    max_lv <- max(long$score[lv_idx], 1)
+    long$score[lv_idx] <- 1 - long$score[lv_idx] / (max_lv + 1)
+    long$metric[lv_idx] <- 'levenshtein\n(normalised)'
+  }
+
+  long$metric <- factor(long$metric, levels = rev(long$metric))
+
+  long |>
+    ggplot2::ggplot() +
+    ggplot2::geom_col(
+      ggplot2::aes(
+        x = .data[['score']],
+        y = .data[['metric']],
+        fill = .data[['score']]
+      ),
+      show.legend = FALSE
+    ) +
+    ggplot2::geom_text(
+      ggplot2::aes(
+        x = .data[['score']],
+        y = .data[['metric']],
+        label = round(.data[['score']], 3)
+      ),
+      hjust = -0.1,
+      size = 3.5
+    ) +
+    ggplot2::scale_fill_gradient(low = '#B22222', high = '#228B22') +
+    ggplot2::scale_x_continuous(limits = c(0, 1.15)) +
+    ggplot2::labs(
+      title = 'String Similarity Scores',
+      x = 'Score (higher = more similar)',
+      y = NULL
+    ) +
+    ggplot2::theme_minimal()
+}

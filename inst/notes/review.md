@@ -2,3 +2,7 @@
 - [x] Rename the geographic distance constructor to cl_geo_distance().
 - [x] data.R: Clean up the old style latex to use modern roxygen2 markdown.
 - [x] bad `if else` patterns. There should never be assignment EVER of the form `x <- if ()`, nor `x <- if () ... else ...`. Clean up every case of that to use a proper approach.
+- [x] `il_cleanup_all()` doesn't contain an actual example. It requires one, even if minor.
+- [x] `il_regex_extract()` docs are out of date.
+- [x] `il_comparator_score` docs are out of date too.
+- [x] All autoplot.* functions should be defined in `autoplot.R`.

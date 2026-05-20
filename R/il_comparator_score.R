@@ -1,16 +1,26 @@
 #' Batch String Similarity Scores
 #'
-#' Computes multiple string-similarity metrics between two columns of a
-#' data frame. Useful for profiling data quality and choosing comparison
-#' thresholds. On DuckDB, computation is pushed to SQL.
+#' Computes string-similarity metrics between two columns of a data frame
+#' or database table. Useful for profiling data quality and choosing
+#' comparison thresholds. Rows where either column is missing are omitted.
 #'
-#' @param .data A data frame or character table name.
+#' With `con = NULL`, all metrics are computed in R with
+#' [stringdist::stringdist()]. With a DuckDB or PostgreSQL connection,
+#' computation is pushed to SQL. SQL backends return the same column schema
+#' but may leave unsupported metrics as `NA`: DuckDB currently computes
+#' `jaro_winkler`, `jaro`, `levenshtein`, and `jaccard`; PostgreSQL computes
+#' `levenshtein` and a `jaro_winkler` compatibility column backed by trigram
+#' `similarity()`.
+#'
+#' @param .data A data frame or character table name. Table names require
+#'   `con`.
 #' @param col_1,col_2 Column names (unquoted or character).
 #' @param con A DBI connection. If `NULL`, uses R-side computation.
 #'
-#' @return A tibble with `col_1`, `col_2`, and similarity columns:
+#' @return A tibble with the two input columns and metric columns
 #'   `jaro_winkler`, `jaro`, `levenshtein`, `jaccard`, and `cosine`.
-#'   S3 class `il_comparator_score`.
+#'   Unsupported SQL-backend metrics are present as `NA`. The result has S3
+#'   class `il_comparator_score`.
 #' @export
 #'
 #' @examples
@@ -116,40 +126,6 @@ comparator_score_r <- function(.data, col_1, col_2) {
   )
   names(result)[1:2] <- c(col_1, col_2)
   result
-}
-
-#' Plot batch comparator scores
-#'
-#' @param object An `il_comparator_score` tibble.
-#' @param ... Ignored.
-#' @return A `ggplot2` object.
-#' @exportS3Method ggplot2::autoplot
-autoplot.il_comparator_score <- function(object, ...) {
-  metric_cols <- intersect(
-    c('jaro_winkler', 'jaro', 'jaccard', 'cosine'),
-    names(object)
-  )
-  if (length(metric_cols) == 0L) {
-    cli::cli_abort('No similarity metric columns found.')
-  }
-
-  long <- reshape_long(object, metric_cols, 'metric', 'score')
-
-  long |>
-    ggplot2::ggplot() +
-    ggplot2::geom_histogram(
-      ggplot2::aes(x = .data$score),
-      bins = 30,
-      fill = '#2171b5',
-      colour = 'white'
-    ) +
-    ggplot2::facet_wrap(~metric, scales = 'free_y') +
-    ggplot2::labs(
-      x = 'Similarity Score',
-      y = 'Count',
-      title = 'Comparator Score Distribution'
-    ) +
-    ggplot2::theme_minimal()
 }
 
 #' Comparator Score Threshold Chart

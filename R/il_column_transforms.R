@@ -54,10 +54,9 @@ il_substr <- function(start, length) {
 #' composed with other transforms via [il_transform()]. On DuckDB and
 #' PostgreSQL, the computation is pushed into SQL.
 #'
-#' @param pattern A POSIX-style regular expression.
-#' @param group Integer capture group (0 = whole match). Currently only
-#'   group 0 is supported in the R fallback. SQL backends support
-#'   numbered groups.
+#' @param pattern A regular expression.
+#' @param group Integer capture group to extract. Use `0` for the whole
+#'   match, or a positive integer for a numbered capture group.
 #'
 #' @return An `il_column_transform` closure.
 #' @export

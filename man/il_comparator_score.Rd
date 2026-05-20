@@ -7,21 +7,32 @@
 il_comparator_score(.data, col_1, col_2, con = NULL)
 }
 \arguments{
-\item{.data}{A data frame or character table name.}
+\item{.data}{A data frame or character table name. Table names require
+\code{con}.}
 
 \item{col_1, col_2}{Column names (unquoted or character).}
 
 \item{con}{A DBI connection. If \code{NULL}, uses R-side computation.}
 }
 \value{
-A tibble with \code{col_1}, \code{col_2}, and similarity columns:
+A tibble with the two input columns and metric columns
 \code{jaro_winkler}, \code{jaro}, \code{levenshtein}, \code{jaccard}, and \code{cosine}.
-S3 class \code{il_comparator_score}.
+Unsupported SQL-backend metrics are present as \code{NA}. The result has S3
+class \code{il_comparator_score}.
 }
 \description{
-Computes multiple string-similarity metrics between two columns of a
-data frame. Useful for profiling data quality and choosing comparison
-thresholds. On DuckDB, computation is pushed to SQL.
+Computes string-similarity metrics between two columns of a data frame
+or database table. Useful for profiling data quality and choosing
+comparison thresholds. Rows where either column is missing are omitted.
+}
+\details{
+With \code{con = NULL}, all metrics are computed in R with
+\code{\link[stringdist:stringdist]{stringdist::stringdist()}}. With a DuckDB or PostgreSQL connection,
+computation is pushed to SQL. SQL backends return the same column schema
+but may leave unsupported metrics as \code{NA}: DuckDB currently computes
+\code{jaro_winkler}, \code{jaro}, \code{levenshtein}, and \code{jaccard}; PostgreSQL computes
+\code{levenshtein} and a \code{jaro_winkler} compatibility column backed by trigram
+\code{similarity()}.
 }
 \examples{
 df <- data.frame(
