@@ -79,22 +79,20 @@
     
     
 <p><code>irelink</code> implements the same Fellegi-Sunter probabilistic
-record linkage framework as <a href="https://github.com/kosukeimai/fastLink" class="external-link">fastLink</a>, but with a
-different API design and a SQL backend. This vignette maps fastLink’s
-API to <code>irelink</code> so that users familiar with fastLink can get
-started quickly.</p>
+record linkage framework as <a href="https://github.com/kosukeimai/fastLink" class="external-link">fastLink</a>, but it uses
+a different API and a SQL backend. This vignette maps common fastLink
+patterns to <code>irelink</code> so you can get started quickly.</p>
 <div class="section level2">
 <h2 id="design-differences">Design differences<a class="anchor" aria-label="anchor" href="#design-differences"></a>
 </h2>
 <p>fastLink bundles data preparation, EM estimation, and matching into a
-single <code>fastLink()</code> call. <code>irelink</code> separates
-these into a pipeline of composable functions: define a spec, build a
-model, estimate parameters, then predict.</p>
-<p>fastLink’s Jaro-Winkler comparisons produce three agreement levels
-(agree / partially agree / disagree) controlled by <code>cut.a</code>
-and <code>cut.p</code> thresholds. <code>irelink</code> uses
-<code>cl_jaro_winkler(high, low)</code> to express the same two
-thresholds, giving the same three-level structure.</p>
+single <code>fastLink()</code> call. <code>irelink</code> breaks that
+work into a pipeline of composable functions where you define a spec,
+build a model, estimate parameters, and then predict.</p>
+<p>fastLink’s Jaro-Winkler comparisons produce three agreement levels,
+and <code>cut.a</code> and <code>cut.p</code> control the thresholds.
+<code>irelink</code> uses <code>cl_jaro_winkler(high, low)</code> to
+express the same thresholds.</p>
 <p>fastLink’s <code>getMatches()</code> assigns a
 <code>dedupe.ids</code> column to flag duplicates. <code>irelink</code>
 uses <code><a href="../reference/il_cluster.html">il_cluster()</a></code> instead, which assigns a
@@ -172,12 +170,12 @@ uses <code><a href="../reference/il_cluster.html">il_cluster()</a></code> instea
 </tr>
 <tr class="odd">
 <td>Set prevalence prior</td>
-<td>—</td>
+<td>Not built in</td>
 <td><code>il_prior_prevalence(model, probability)</code></td>
 </tr>
 <tr class="even">
 <td>Save / load model</td>
-<td>—</td>
+<td>Not built in</td>
 <td>
 <code>il_save(model, path)</code> / <code>il_load(path)</code>
 </td>
@@ -188,9 +186,9 @@ uses <code><a href="../reference/il_cluster.html">il_cluster()</a></code> instea
 <div class="section level2">
 <h2 id="comparison-functions">Comparison functions<a class="anchor" aria-label="anchor" href="#comparison-functions"></a>
 </h2>
-<p>fastLink compares string fields using Jaro-Winkler (default),
-Levenshtein, or Jaro, producing up to three agreement levels. Each maps
-to a <code>cl_*()</code> function in <code>irelink</code>.</p>
+<p>fastLink compares string fields with Jaro-Winkler by default, or with
+Levenshtein or Jaro. These produce up to three agreement levels. Each
+one maps to a <code>cl_*()</code> function in <code>irelink</code>.</p>
 <table class="table">
 <colgroup>
 <col width="52%">
@@ -232,10 +230,10 @@ to a <code>cl_*()</code> function in <code>irelink</code>.</p>
 </tr>
 </tbody>
 </table>
-<p>Note that Levenshtein thresholds in <code>irelink</code> are raw edit
-distances, not renormalized similarity scores as in fastLink.
-<code>cl_levenshtein(1, 2)</code> means “distance ≤ 1 is full agreement,
-distance ≤ 2 is partial agreement.”</p>
+<p>Levenshtein thresholds in <code>irelink</code> are raw edit
+distances. They are not renormalized similarity scores as in fastLink.
+<code>cl_levenshtein(1, 2)</code> means “distance &lt;= 1 is full
+agreement, and distance &lt;= 2 is partial agreement.”</p>
 </div>
 <div class="section level2">
 <h2 id="key-parameters">Key parameters<a class="anchor" aria-label="anchor" href="#key-parameters"></a>
@@ -269,7 +267,7 @@ distance ≤ 2 is partial agreement.”</p>
 </tr>
 <tr class="odd">
 <td><code>dedupe = FALSE</code></td>
-<td>default; <code>irelink</code> never enforces 1-to-1 matching</td>
+<td>default, <code>irelink</code> never enforces 1-to-1 matching</td>
 </tr>
 <tr class="even">
 <td><code>n.cores</code></td>
@@ -324,20 +322,20 @@ distance ≤ 2 is partial agreement.”</p>
 <span></span>
 <span><span class="fu"><a href="../reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>The <code><a href="../reference/il_prior_prevalence.html">il_prior_prevalence()</a></code> call replaces the
-training-driven prior with a population-level baseline, in the same way
-as resetting the prior after EM in fastLink workflows that use a heavily
-blocked training sample. If your training data is large and
-representative, this step is unnecessary.</p>
+<p><code><a href="../reference/il_prior_prevalence.html">il_prior_prevalence()</a></code> replaces the training-driven prior
+with a population-level baseline. This is similar to resetting the prior
+after EM in fastLink workflows that use a heavily blocked training
+sample, and you can skip it if your training data is large and
+representative.</p>
 </div>
 <div class="section level2">
 <h2 id="blocking">Blocking<a class="anchor" aria-label="anchor" href="#blocking"></a>
 </h2>
 <p>fastLink’s <code>blockData()</code> partitions records into groups
 and requires running <code>fastLink()</code> separately within each
-block, then reassembling the results. In <code>irelink</code>, blocking
-is declared in the spec with <code><a href="../reference/il_block_on.html">il_block_on()</a></code> and applied
-automatically — no manual loop is needed.</p>
+block before combining the results. In <code>irelink</code>, you declare
+blocking in the spec with <code><a href="../reference/il_block_on.html">il_block_on()</a></code>, and the package
+applies those rules automatically so you do not need a manual loop.</p>
 <p><strong>fastLink:</strong></p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">blocks</span> <span class="op">&lt;-</span> <span class="fu">blockData</span><span class="op">(</span><span class="va">records</span>, <span class="va">records</span>, varnames <span class="op">=</span> <span class="st">'surname'</span><span class="op">)</span></span>
@@ -358,18 +356,17 @@ automatically — no manual loop is needed.</p>
 <span>  <span class="fu"><a href="../reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">surname</span>, <span class="fu"><a href="../reference/cl_jaro_winkler.html">cl_jaro_winkler</a></span><span class="op">(</span><span class="fl">0.94</span>, <span class="fl">0.84</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">dob</span>, <span class="fu"><a href="../reference/cl_exact.html">cl_exact</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/il_block_on.html">il_block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span></span></code></pre></div>
-<p>fastLink also offers k-means blocking via
+<p>fastLink also offers k-means blocking through
 <code>blockData(..., kmeans.block = ..., nclusters = ...)</code>.
-<code>irelink</code> does not have a built-in k-means blocking step
-because data lives in a SQL backend. For numeric fields,
-<code><a href="../reference/il_block_on.html">il_block_on()</a></code> with pre-bucketed values is the nearest
-equivalent.</p>
+<code>irelink</code> does not include a built-in k-means blocking step
+because the data lives in a SQL backend. For numeric fields, the closest
+equivalent is <code><a href="../reference/il_block_on.html">il_block_on()</a></code> with pre-bucketed values.</p>
 </div>
 <div class="section level2">
 <h2 id="model-inspection">Model inspection<a class="anchor" aria-label="anchor" href="#model-inspection"></a>
 </h2>
 <p>fastLink exposes learned parameters through
-<code>out$EM$patterns.w</code> — a table of agreement patterns and
+<code>out$EM$patterns.w</code>, a table of agreement patterns and
 Fellegi-Sunter weights. <code>irelink</code> provides the same
 information visually.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
@@ -379,9 +376,9 @@ information visually.</p>
 <div class="section level2">
 <h2 id="evaluation">Evaluation<a class="anchor" aria-label="anchor" href="#evaluation"></a>
 </h2>
-<p>fastLink requires constructing a confusion table by hand from
+<p>fastLink requires you to build a confusion table by hand from
 <code>dedupe.ids</code> and a ground-truth column. <code>irelink</code>
-provides <code><a href="../reference/il_cluster_confusion_matrix.html">il_cluster_confusion_matrix()</a></code> which does this
+provides <code><a href="../reference/il_cluster_confusion_matrix.html">il_cluster_confusion_matrix()</a></code>, which does this
 directly from the model.</p>
 <p><strong>fastLink:</strong></p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">

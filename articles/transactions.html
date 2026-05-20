@@ -78,22 +78,21 @@
 
     
     
-<p>This vignette replicates the <a href="https://moj-analytical-services.github.io/splink/demos/examples/duckdb/transactions.html" class="external-link">Splink
-“Linking banking transactions” demo</a> using <code>irelink</code>. It
-demonstrates two-table linking (<code>link_type = "link"</code>),
-matching each outgoing payment in the origin table to its corresponding
+<p>This vignette reproduces the <a href="https://moj-analytical-services.github.io/splink/demos/examples/duckdb/transactions.html" class="external-link">Splink
+“Linking banking transactions” demo</a> in <code>irelink</code>. It
+demonstrates two-table linkage with <code>link_type = "link"</code> by
+matching each outgoing payment in the origin table to the corresponding
 incoming payment in the destination table.</p>
-<p>The data is synthetic and designed to be challenging: amounts differ
-due to fees and exchange-rate effects, dates shift by a few days, and
-memos are sometimes truncated. Since every origin payment has exactly
-one destination counterpart, the prior match probability is
+<p>The data is synthetic and intentionally challenging. Amounts differ
+because of fees and exchange-rate effects, dates can shift by a few
+days, and memos are sometimes truncated. Because each origin payment has
+exactly one destination counterpart, the prior match probability is
 <code>1 / n_origin</code>.</p>
-<p>This vignette requires the <a href="https://cran.r-project.org/package=nanoparquet" class="external-link">nanoparquet</a>
-package to read the remote Parquet files and will only compile when the
-package and data URLs are both available. It also assumes DuckDB
-specifically: the blocking rules below use raw <code>.where</code> SQL
-with DuckDB date helpers such as <code><a href="https://rdrr.io/r/base/strptime.html" class="external-link">strftime()</a></code> and
-<code>yearweek()</code>.</p>
+<p>This vignette requires <a href="https://cran.r-project.org/package=nanoparquet" class="external-link">nanoparquet</a> to
+read the remote Parquet files, and it only compiles when the package and
+both data URLs are available. It also assumes DuckDB because the
+blocking rules below use raw <code>.where</code> SQL with DuckDB date
+helpers such as <code><a href="https://rdrr.io/r/base/strptime.html" class="external-link">strftime()</a></code> and <code>yearweek()</code>.</p>
 <div class="section level2">
 <h2 id="load-the-data">Load the data<a class="anchor" aria-label="anchor" href="#load-the-data"></a>
 </h2>
@@ -115,11 +114,11 @@ with DuckDB date helpers such as <code><a href="https://rdrr.io/r/base/strptime.
 <div class="section level2">
 <h2 id="choose-blocking-rules">Choose blocking rules<a class="anchor" aria-label="anchor" href="#choose-blocking-rules"></a>
 </h2>
-<p>Because corresponding records differ systematically — amounts change
-due to fees, dates shift, memos are truncated — blocking rules must be
-generous enough to capture true matches while still reducing the pair
-space dramatically. The rules below use SQL expressions via
-<code>.where</code>:</p>
+<p>Because corresponding records differ in predictable ways, the
+blocking rules need to be broad enough to retain true matches while
+still shrinking the search space. Fees change amounts, dates shift, and
+memos are truncated, so the rules below use SQL expressions in
+<code>.where</code> rather than relying on exact agreement alone:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">counts</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_count_pairs.html">il_count_pairs</a></span><span class="op">(</span></span>
 <span>  <span class="va">df_origin</span>,</span>
@@ -168,10 +167,10 @@ space dramatically. The rules below use SQL expressions via
 <div class="section level2">
 <h2 id="define-the-specification">Define the specification<a class="anchor" aria-label="anchor" href="#define-the-specification"></a>
 </h2>
-<p>The <code>transaction_date</code> comparison is one-sided: payments
-can only <em>arrive</em> after they are <em>sent</em>, so the comparison
-checks <code>destination_date - origin_date</code> is between 0 and
-<em>N</em> days:</p>
+<p>The <code>transaction_date</code> comparison is one-sided because a
+payment can only arrive after it is sent. The comparison therefore
+checks whether <code>destination_date - origin_date</code> is between 0
+and <code>N</code> days:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">amount</span>, <span class="fu"><a href="../reference/cl_pct_diff.html">cl_pct_diff</a></span><span class="op">(</span><span class="fl">0.01</span>, <span class="fl">0.03</span>, <span class="fl">0.10</span>, <span class="fl">0.30</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -222,8 +221,8 @@ checks <code>destination_date - origin_date</code> is between 0 and
 <h2 id="train-the-model">Train the model<a class="anchor" aria-label="anchor" href="#train-the-model"></a>
 </h2>
 <p>Because this benchmark is one-to-one, set the prevalence prior
-directly with the exported <code><a href="../reference/il_prior_prevalence.html">il_prior_prevalence()</a></code> helper
-rather than mutating <code>model$params</code> internally:</p>
+directly with <code><a href="../reference/il_prior_prevalence.html">il_prior_prevalence()</a></code> instead of changing
+<code>model$params</code> by hand:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_model.html">il_model</a></span><span class="op">(</span></span>
 <span>  <span class="va">df_origin</span>,</span>
@@ -282,9 +281,9 @@ rather than mutating <code>model$params</code> internally:</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><code>il_cleanup(model)</code> is model-scoped. If an interactive run
-failed before you kept the model object, call
-<code>il_cleanup_all(con)</code> to remove all <code>irelink</code>
+<p><code>il_cleanup(model)</code> only removes tables owned by that
+model. If an interactive run fails before you keep the model object,
+call <code>il_cleanup_all(con)</code> to remove all <code>irelink</code>
 tables from the connection before disconnecting.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

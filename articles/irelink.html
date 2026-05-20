@@ -81,18 +81,17 @@
 <div class="section level2">
 <h2 id="what-is-record-linkage">What is record linkage?<a class="anchor" aria-label="anchor" href="#what-is-record-linkage"></a>
 </h2>
-<p>Record linkage (also called entity resolution or deduplication) is
-the task of identifying records in one or more datasets that refer to
-the same real-world entity. When datasets lack a shared unique
-identifier, you must rely on imperfect fields like names, dates of
-birth, and addresses to decide which rows belong together. Probabilistic
-record linkage formalises this by estimating the likelihood that two
-records are a match given how similar they are across multiple
+<p>Record linkage, also called entity resolution or deduplication,
+identifies records in one or more datasets that refer to the same
+real-world entity. When datasets do not share a unique identifier, you
+must rely on imperfect fields such as names, dates of birth, and
+addresses. Probabilistic record linkage estimates the chance that two
+records are a match based on how similar they are across several
 fields.</p>
 <p><code>irelink</code> implements the Fellegi-Sunter model of
-probabilistic record linkage. Parameters are estimated via unsupervised
-Expectation-Maximization, so no labeled training data is required to get
-started.</p>
+probabilistic record linkage. It estimates parameters with unsupervised
+expectation maximization, so you can get started without labeled
+training data.</p>
 </div>
 <div class="section level2">
 <h2 id="a-typical-workflow">A typical workflow<a class="anchor" aria-label="anchor" href="#a-typical-workflow"></a>
@@ -100,20 +99,20 @@ started.</p>
 <p>Every linkage task follows the same general pattern:</p>
 <ol style="list-style-type: decimal">
 <li>
-<strong>Define a specification</strong> — choose which columns to
+<strong>Define a specification.</strong> Choose which columns to
 compare and how.</li>
 <li>
-<strong>Build a model</strong> — load data into a SQL backend and
+<strong>Build a model.</strong> Load data into a SQL backend and
 attach the specification.</li>
 <li>
-<strong>Train parameters</strong> — estimate u-probabilities, then
+<strong>Train parameters.</strong> Estimate u-probabilities, then
 run EM to learn m-probabilities.</li>
 <li>
-<strong>Predict</strong> — score every candidate pair and threshold
-to get likely matches.</li>
+<strong>Predict.</strong> Score candidate pairs and keep the likely
+matches.</li>
 <li>
-<strong>Cluster</strong> — resolve pairwise links into groups of
-records that represent the same entity.</li>
+<strong>Cluster.</strong> Resolve pairwise links into groups that
+represent the same entity.</li>
 </ol>
 <p>The example below walks through each step using a small built-in
 dataset.</p>
@@ -121,10 +120,10 @@ dataset.</p>
 <div class="section level2">
 <h2 id="step-1-define-a-specification">Step 1: Define a specification<a class="anchor" aria-label="anchor" href="#step-1-define-a-specification"></a>
 </h2>
-<p>A specification describes the comparisons and blocking rules that
-drive the model. Comparisons tell <code>irelink</code> how to score
-similarity on each field. Blocking rules limit which record pairs are
-compared, making linkage tractable on large data.</p>
+<p>A specification defines the comparisons and blocking rules that drive
+the model. Comparisons tell <code>irelink</code> how to score similarity
+on each field, and blocking rules limit which record pairs are compared
+so linkage stays tractable on large datasets.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://christophertkenny.com/irelink/">irelink</a></span><span class="op">)</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -149,14 +148,15 @@ compared, making linkage tractable on large data.</p>
 <span><span class="co">#&gt;   Blocking rules (2, OR-ed):</span></span>
 <span><span class="co">#&gt;     1. surname</span></span>
 <span><span class="co">#&gt;     2. first_name</span></span></code></pre></div>
-<p>Each call to <code><a href="../reference/il_compare.html">il_compare()</a></code> adds a comparison dimension.
-<code>cl_jaro_winkler(0.9, 0.7)</code> means: score a pair as level 2 if
-Jaro-Winkler similarity is at least 0.9, level 1 if at least 0.7, and
-level 0 otherwise. <code><a href="../reference/cl_exact.html">cl_exact()</a></code> is a simple binary match.</p>
+<p>Each call to <code><a href="../reference/il_compare.html">il_compare()</a></code> adds one comparison dimension.
+Here, <code>cl_jaro_winkler(0.9, 0.7)</code> creates three levels:
+similarity of at least 0.9 is level 2, similarity of at least 0.7 is
+level 1, and anything lower is level 0. <code><a href="../reference/cl_exact.html">cl_exact()</a></code> is a
+simple binary match.</p>
 <p>Blocking rules defined with <code><a href="../reference/il_block_on.html">il_block_on()</a></code> restrict
 candidate pairs to records that share the same value in the blocking
-column. Multiple blocking rules are combined with OR logic, so a pair is
-compared if it satisfies any rule.</p>
+column. Multiple blocking rules use OR logic, so a pair is compared if
+it satisfies any one of them.</p>
 </div>
 <div class="section level2">
 <h2 id="step-2-build-a-model">Step 2: Build a model<a class="anchor" aria-label="anchor" href="#step-2-build-a-model"></a>
@@ -180,14 +180,14 @@ use an in-memory DuckDB database:</p>
 <div class="section level2">
 <h2 id="step-3-train-parameters">Step 3: Train parameters<a class="anchor" aria-label="anchor" href="#step-3-train-parameters"></a>
 </h2>
-<p>Training is a two-step process. First, estimate u-probabilities (the
-chance two random non-matching records agree on each comparison level)
-from a random sample of pairs:</p>
+<p>Training has two main steps. First, estimate u-probabilities, which
+are the chances that two random non-matching records agree at each
+comparison level:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_u.html">il_estimate_u</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></code></pre></div>
-<p>Then run Expectation-Maximization to learn m-probabilities (the
-chance true matches agree on each level). You supply a blocking rule to
-generate the training pairs:</p>
+<p>Next, run expectation maximization to learn m-probabilities, which
+are the chances that true matches agree at each level. You provide a
+blocking rule to generate the training pairs:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; EM trained: <span style="color: #00BB00;">first_name</span> and <span style="color: #00BB00;">dob</span> | skipped (blocked on):</span></span>
@@ -210,22 +210,22 @@ generate the training pairs:</p>
 <div class="section level2">
 <h2 id="step-4-predict">Step 4: Predict<a class="anchor" aria-label="anchor" href="#step-4-predict"></a>
 </h2>
-<p><code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> scores every candidate pair and returns those
-above a match-probability threshold:</p>
+<p><code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> scores candidate pairs and returns those above
+a match-probability threshold:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pairs</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">pairs</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
 <span><span class="co">#&gt;   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob match_weight</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           1          11                2             2         1         8.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           8          17                1             2         1         7.49</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           9          20                2             2         0         3.86</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>          10          20                2             2         0         3.86</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           1           2                2             2         1         8.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           3          13                2             2         1         8.76</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           2          12                2             1         0         1.64</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           2          11                2             2         1         8.76</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           3          14                2             2         0         3.86</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           4          14                2             2         0         3.86</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           7          17                2             2         1         8.76</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>          13          14                2             2         0         3.86</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: total_match_weight &lt;dbl&gt;, match_probability &lt;dbl&gt;</span></span></span></code></pre></div>
-<p>Each row is a candidate pair with columns for the left and right
+<p>Each row is a candidate pair. The output includes the left and right
 record identifiers, the per-comparison gamma values, the evidence-only
 <code>match_weight</code>, the prior-inclusive
 <code>total_match_weight</code>, and the posterior
@@ -235,27 +235,27 @@ record identifiers, the per-comparison gamma values, the evidence-only
 <h2 id="step-5-cluster">Step 5: Cluster<a class="anchor" aria-label="anchor" href="#step-5-cluster"></a>
 </h2>
 <p><code><a href="../reference/il_cluster.html">il_cluster()</a></code> resolves pairwise predictions into entity
-clusters using connected-components analysis:</p>
+clusters with connected-components analysis:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">clusters</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">pairs</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/utils/head.html" class="external-link">head</a></span><span class="op">(</span><span class="va">clusters</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 5         cluster_15</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 6         cluster_15</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 17        cluster_17</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 15        cluster_15</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 14        cluster_13</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 3         cluster_13</span></span></code></pre></div>
-<p>Each record is assigned a <code>cluster_id</code>. Records sharing
-the same cluster are considered to be the same entity.</p>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 3         cluster_13</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 5         cluster_15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 6         cluster_15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 14        cluster_13</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 17        cluster_17</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 15        cluster_15</span></span></code></pre></div>
+<p>Each record is assigned a <code>cluster_id</code>. Records in the
+same cluster are treated as the same entity.</p>
 </div>
 <div class="section level2">
 <h2 id="comparison-levels">Comparison levels<a class="anchor" aria-label="anchor" href="#comparison-levels"></a>
 </h2>
-<p><code>irelink</code> ships with a rich library of comparison levels
-for common field types:</p>
+<p><code>irelink</code> includes a large set of comparison levels for
+common field types:</p>
 <table class="table">
 <thead><tr class="header">
 <th>Level</th>
@@ -316,7 +316,7 @@ for common field types:</p>
 </tr>
 </tbody>
 </table>
-<p>For common field types, domain-specific helpers compose multiple
+<p>For common field types, domain-specific helpers combine multiple
 levels into a single call:</p>
 <table class="table">
 <thead><tr class="header">
@@ -358,26 +358,27 @@ levels into a single call:</p>
 <div class="section level2">
 <h2 id="evaluation">Evaluation<a class="anchor" aria-label="anchor" href="#evaluation"></a>
 </h2>
-<p>If you have labeled data (pairs known to be matches or non-matches),
-<code>irelink</code> provides tools to assess model quality:</p>
+<p>If you have labeled data, meaning pairs that are known matches or
+non-matches, <code>irelink</code> provides tools to assess model
+quality:</p>
 <ul>
 <li>
-<code><a href="../reference/il_accuracy.html">il_accuracy()</a></code> — overall accuracy at a threshold</li>
+<code><a href="../reference/il_accuracy.html">il_accuracy()</a></code>: overall accuracy at a threshold</li>
 <li>
-<code><a href="../reference/il_precision_recall.html">il_precision_recall()</a></code> — precision and recall across
+<code><a href="../reference/il_precision_recall.html">il_precision_recall()</a></code>: precision and recall across
 thresholds</li>
 <li>
-<code><a href="../reference/il_roc.html">il_roc()</a></code> — ROC curve data</li>
+<code><a href="../reference/il_roc.html">il_roc()</a></code>: ROC curve data</li>
 <li>
-<code><a href="../reference/il_errors.html">il_errors()</a></code> — inspect false positives and false
+<code><a href="../reference/il_errors.html">il_errors()</a></code>: inspect false positives and false
 negatives</li>
 </ul>
 </div>
 <div class="section level2">
 <h2 id="cleaning-up">Cleaning up<a class="anchor" aria-label="anchor" href="#cleaning-up"></a>
 </h2>
-<p>When you are done, release the model-owned database resources. In an
-interactive session with abandoned models, use
+<p>When you are done, release the database resources owned by the model.
+In an interactive session with abandoned models, use
 <code>il_cleanup_all(con)</code> before disconnecting to drop every
 <code>irelink</code> table on the connection.</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">

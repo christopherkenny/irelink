@@ -78,22 +78,21 @@
 
     
     
-<p><code>irelink</code> is a translation of the Python <a href="https://github.com/moj-analytical-services/splink" class="external-link">splink</a>
-library into idiomatic R. This vignette maps splink’s API to
-<code>irelink</code> so that users familiar with splink can get started
-quickly.</p>
+<p><code>irelink</code> translates the Python <a href="https://github.com/moj-analytical-services/splink" class="external-link">splink</a>
+library into idiomatic R. This vignette maps common Splink patterns to
+<code>irelink</code> so you can get started quickly.</p>
 <div class="section level2">
 <h2 id="design-differences">Design differences<a class="anchor" aria-label="anchor" href="#design-differences"></a>
 </h2>
-<p>Splink uses an object-oriented design centred on a
-<code>Linker</code> class. <code>irelink</code> instead uses a
-functional pipeline style that is natural in R. The <code>Linker</code>
-object’s namespaced methods (<code>linker.training.*</code>,
-<code>linker.inference.*</code>, etc.) become standalone functions that
-accept and return an <code>il_model</code> object.</p>
-<p>Splink bundles comparison levels into high-level “Comparison” classes
-(e.g., <code>JaroWinklerAtThresholds</code>). In <code>irelink</code>,
-the <code>cl_*()</code> functions serve the same role and can be passed
+<p>Splink uses an object-oriented design centered on a
+<code>Linker</code> class. <code>irelink</code> uses a functional
+pipeline that fits naturally in R. The <code>Linker</code> object’s
+namespaced methods such as <code>linker.training.*</code> and
+<code>linker.inference.*</code> become standalone functions that accept
+and return an <code>il_model</code> object.</p>
+<p>Splink bundles comparison levels into high-level comparison classes
+such as <code>JaroWinklerAtThresholds</code>. In <code>irelink</code>,
+the <code>cl_*()</code> functions fill the same role and can be passed
 directly to <code><a href="../reference/il_compare.html">il_compare()</a></code>.</p>
 </div>
 <div class="section level2">
@@ -189,15 +188,15 @@ directly to <code><a href="../reference/il_compare.html">il_compare()</a></code>
 </table>
 <p><code>irelink</code> also supports
 <code>link_type = "link_and_dedupe"</code> for two-table jobs where
-duplicates may exist both within each input table and across the two
+duplicates may exist within each input table and across the two
 tables.</p>
 </div>
 <div class="section level2">
 <h2 id="comparison-levels">Comparison levels<a class="anchor" aria-label="anchor" href="#comparison-levels"></a>
 </h2>
-<p>Comparison levels are the building blocks for scoring how similar two
-records are on a given field. Each <code>cl_*()</code> function
-corresponds to a splink comparison level class.</p>
+<p>Comparison levels are the building blocks used to score how similar
+two records are on a field. Each <code>cl_*()</code> function
+corresponds to a Splink comparison level class.</p>
 <table class="table">
 <thead><tr class="header">
 <th>splink (Python)</th>
@@ -282,9 +281,9 @@ corresponds to a splink comparison level class.</p>
 <div class="section level2">
 <h2 id="domain-specific-comparisons">Domain-specific comparisons<a class="anchor" aria-label="anchor" href="#domain-specific-comparisons"></a>
 </h2>
-<p>Splink provides high-level comparison classes that compose multiple
-levels for common field types. In <code>irelink</code>, these are helper
-functions that return a pre-configured set of levels.</p>
+<p>Splink provides high-level comparison classes for common field types.
+In <code>irelink</code>, these are helper functions that return
+preconfigured sets of levels.</p>
 <table class="table">
 <thead><tr class="header">
 <th>splink (Python)</th>
@@ -455,25 +454,25 @@ functions that return a pre-configured set of levels.</p>
 <div class="section level2">
 <h2 id="blocking-rules">Blocking rules<a class="anchor" aria-label="anchor" href="#blocking-rules"></a>
 </h2>
-<p>In splink, blocking rules are created with <code><a href="../reference/block_on.html">block_on()</a></code>.
-<code>irelink</code> uses the same function name. The difference is
-where they appear: splink passes them into <code>SettingsCreator</code>,
-while <code>irelink</code> adds them to a spec with
-<code><a href="../reference/il_block_on.html">il_block_on()</a></code> or passes them directly to training
+<p>In Splink, you create blocking rules with <code><a href="../reference/block_on.html">block_on()</a></code>,
+and <code>irelink</code> uses the same function name. The main
+difference is where the rules are used: Splink passes them into
+<code>SettingsCreator</code>, while <code>irelink</code> adds them to a
+spec with <code><a href="../reference/il_block_on.html">il_block_on()</a></code> or passes them directly to training
 functions.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="co"># irelink — blocking in the spec</span></span>
+<code class="sourceCode R"><span><span class="co"># blocking in the spec</span></span>
 <span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">first_name</span>, <span class="fu"><a href="../reference/cl_jaro_winkler.html">cl_jaro_winkler</a></span><span class="op">(</span><span class="fl">0.9</span>, <span class="fl">0.7</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/il_block_on.html">il_block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span></span>
 <span></span>
-<span><span class="co"># irelink — blocking in EM training</span></span>
+<span><span class="co"># blocking in EM training</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">surname</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="example-side-by-side-deduplication">Example: side-by-side deduplication<a class="anchor" aria-label="anchor" href="#example-side-by-side-deduplication"></a>
 </h2>
-<p>Below is a minimal deduplication in both splink and
+<p>Below is a minimal deduplication example in both Splink and
 <code>irelink</code>.</p>
 <p><strong>splink (Python):</strong></p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="im">from</span> splink <span class="im">import</span> Linker, SettingsCreator, DuckDBAPI, block_on, splink_datasets</span>
@@ -528,13 +527,13 @@ functions.</p>
 <span></span>
 <span><span class="fu"><a href="../reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>The examples above use probability thresholds because those are
-portable between Splink and <code>irelink</code>. Splink’s prediction
+<p>The examples above use probability thresholds because those transfer
+cleanly between Splink and <code>irelink</code>. In Splink, prediction
 <code>match_weight</code> includes the prior odds. In
-<code>irelink</code>, <code>match_weight</code> is evidence-only and
-<code>total_match_weight</code> is the prior-inclusive log2 odds.
-Match-weight thresholds therefore need that prior adjustment when you
-translate them between the two packages.</p>
+<code>irelink</code>, <code>match_weight</code> is evidence only, and
+<code>total_match_weight</code> is the prior-inclusive log2 odds. Keep
+that difference in mind if you translate match-weight thresholds between
+the two packages.</p>
 </div>
 <div class="section level2">
 <h2 id="example-finding-matches-against-new-records">Example: finding matches against new records<a class="anchor" aria-label="anchor" href="#example-finding-matches-against-new-records"></a>
@@ -554,7 +553,7 @@ translate them between the two packages.</p>
 <span>  dob <span class="op">=</span> <span class="st">"1990-01-15"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_find_matches.html">il_find_matches</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">new_df</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
-<p>Splink exposes a match-weight threshold for this workflow, while
+<p>Splink uses a match-weight threshold for this workflow.
 <code><a href="../reference/il_find_matches.html">il_find_matches()</a></code> filters on posterior match probability.
 Translate those thresholds with the same caution as in the prediction
 example above.</p>

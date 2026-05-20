@@ -78,13 +78,13 @@
 
     
     
-<p>This vignette walks through a complete deduplication workflow on the
-<code>fake_1000</code> dataset, including model training, prediction,
-clustering, and evaluation against ground-truth labels. The dataset is
-the primary demo data from the Python <a href="https://github.com/moj-analytical-services/splink" class="external-link">splink</a>
-library. It contains 1,000 records representing 181 unique people, each
-with varying numbers of duplicate entries corrupted with typos, missing
-values, and other realistic data-quality issues.</p>
+<p>This vignette walks through a full deduplication workflow on
+<code>fake_1000</code>, covering model training, prediction, clustering,
+and evaluation against ground-truth labels. The dataset comes from the
+Python <a href="https://github.com/moj-analytical-services/splink" class="external-link">splink</a>
+library and contains 1,000 records for 181 unique people. Many records
+include typos, missing values, and other realistic data-quality
+issues.</p>
 <div class="section level2">
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h2>
@@ -112,10 +112,10 @@ values, and other realistic data-quality issues.</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>         3 Julia      Taylor  2015-10-29 <span style="color: #BB0000;">NA</span>     hannah88opowersc@m            0</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>         4 oNah       Watson  2008-03-23 Bolton matthew78@ballard-mcdo…       1</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>         5 Noah       Watson  2008-03-23 Bolton matthew78@ballard-mcdo…       1</span></span></code></pre></div>
-<p>The <code>cluster</code> column is the ground truth: records sharing
-the same cluster value refer to the same person. There are 181 unique
-entities across 1000 records. Note that missing values appear as
-<code>NA</code>, reflecting real-world data-quality challenges.</p>
+<p>The <code>cluster</code> column is the ground truth, so records that
+share the same cluster value refer to the same person. There are 181
+unique entities across 1000 records. Missing values appear as
+<code>NA</code>, which reflects a common real-world problem.</p>
 <p>Before building a model, profile the data to understand its
 completeness and value distributions:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
@@ -135,8 +135,8 @@ completeness and value distributions:</p>
 <div class="sourceCode" id="cb4"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">comp</span><span class="op">)</span></span></code></pre></div>
 <p><img src="deduplication_files/figure-html/completeness-plot-1.png" class="r-plt" alt="" width="576"></p>
-<p>Check column value distributions to inform blocking and comparison
-choices:</p>
+<p>Check column value distributions to help choose blocking rules and
+comparisons:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_profile.html">il_profile</a></span><span class="op">(</span><span class="va">df</span><span class="op">[</span>, <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">'first_name'</span>, <span class="st">'surname'</span>, <span class="st">'city'</span><span class="op">)</span><span class="op">]</span>, con <span class="op">=</span> <span class="va">con</span>, top_n <span class="op">=</span> <span class="fl">5</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 15 × 3</span></span></span>
@@ -161,10 +161,10 @@ choices:</p>
 <div class="section level2">
 <h2 id="choose-blocking-rules">Choose blocking rules<a class="anchor" aria-label="anchor" href="#choose-blocking-rules"></a>
 </h2>
-<p><code><a href="../reference/il_suggest_blocking.html">il_suggest_blocking()</a></code> enumerates columns and ranks them
-as blocking keys. A good blocking key has high <code>n_distinct</code>
-(narrow blocks, fewer pairs) and high <code>coverage</code> (few missing
-values):</p>
+<p><code><a href="../reference/il_suggest_blocking.html">il_suggest_blocking()</a></code> lists candidate blocking columns
+and ranks them. A good blocking key has high <code>n_distinct</code>,
+which creates narrow blocks and fewer pairs, and high
+<code>coverage</code>, which means fewer missing values:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_suggest_blocking.html">il_suggest_blocking</a></span><span class="op">(</span><span class="va">df</span>, con <span class="op">=</span> <span class="va">con</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 6</span></span></span>
@@ -182,9 +182,9 @@ and <code>city</code>, which rank among the top columns here.</p>
 <div class="section level2">
 <h2 id="define-the-specification">Define the specification<a class="anchor" aria-label="anchor" href="#define-the-specification"></a>
 </h2>
-<p>Choose comparisons and blocking rules. Names use Jaro-Winkler
+<p>Choose the comparisons and blocking rules. Names use Jaro-Winkler
 similarity, dates of birth use the <code><a href="../reference/cl_dob.html">cl_dob()</a></code> helper, and
-city uses exact matching with term-frequency adjustments:</p>
+city uses exact matching with term-frequency adjustment:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">first_name</span>, <span class="fu"><a href="../reference/cl_name.html">cl_name</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -208,7 +208,7 @@ city uses exact matching with term-frequency adjustments:</p>
 <span><span class="co">#&gt;     1. first_name</span></span>
 <span><span class="co">#&gt;     2. surname</span></span>
 <span><span class="co">#&gt;     3. city</span></span></code></pre></div>
-<p>Estimate how many pairs each blocking rule generates:</p>
+<p>Estimate the number of pairs produced by each blocking rule:</p>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_count_pairs.html">il_count_pairs</a></span><span class="op">(</span></span>
 <span>  <span class="va">df</span>,</span>
@@ -229,7 +229,7 @@ city uses exact matching with term-frequency adjustments:</p>
 </h2>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_model.html">il_model</a></span><span class="op">(</span><span class="va">df</span>, spec <span class="op">=</span> <span class="va">spec</span>, con <span class="op">=</span> <span class="va">con</span><span class="op">)</span></span></code></pre></div>
-<p>Estimate the prior match probability using deterministic rules:</p>
+<p>Estimate the prior match probability with deterministic rules:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_prior.html">il_estimate_prior</a></span><span class="op">(</span></span>
 <span>  <span class="va">model</span>,</span>
@@ -237,8 +237,8 @@ city uses exact matching with term-frequency adjustments:</p>
 <span>  <span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">email</span><span class="op">)</span>,</span>
 <span>  recall <span class="op">=</span> <span class="fl">0.6</span></span>
 <span><span class="op">)</span></span></code></pre></div>
-<p>Estimate u-probabilities from random pairs and m-probabilities via
-EM:</p>
+<p>Estimate u-probabilities from random pairs and then estimate
+m-probabilities with EM:</p>
 <div class="sourceCode" id="cb11"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_u.html">il_estimate_u</a></span><span class="op">(</span><span class="va">model</span>, max_pairs <span class="op">=</span> <span class="fl">1e5</span><span class="op">)</span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_em.html">il_estimate_em</a></span><span class="op">(</span><span class="va">model</span>, <span class="fu"><a href="../reference/block_on.html">block_on</a></span><span class="op">(</span><span class="va">first_name</span><span class="op">)</span><span class="op">)</span></span>
@@ -282,8 +282,8 @@ EM:</p>
 <span><span class="co">#&gt;      u_estimation: NULL</span></span>
 <span><span class="co">#&gt;      u_estimation: 100000</span></span>
 <span><span class="co">#&gt;      u_estimation: 1</span></span></code></pre></div>
-<p>The match weights chart shows the discriminative power of each
-comparison:</p>
+<p>The match weights chart shows how much each comparison separates
+matches from non-matches:</p>
 <div class="sourceCode" id="cb13"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span></code></pre></div>
 <p><img src="deduplication_files/figure-html/weights-plot-1.png" class="r-plt" alt="" width="576"></p>
@@ -296,13 +296,13 @@ comparison:</p>
 <h2 id="save-and-reuse-the-model">Save and reuse the model<a class="anchor" aria-label="anchor" href="#save-and-reuse-the-model"></a>
 </h2>
 <p>Once you are satisfied with the parameters, save the model to disk.
-The saved file stores the spec and trained parameters so you can
-re-apply the model without retraining:</p>
+The saved file stores the spec and trained parameters so you can reuse
+the model without retraining:</p>
 <div class="sourceCode" id="cb15"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">path</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/tempfile.html" class="external-link">tempfile</a></span><span class="op">(</span>fileext <span class="op">=</span> <span class="st">'.rds'</span><span class="op">)</span></span>
 <span><span class="fu"><a href="../reference/il_save.html">il_save</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">path</span><span class="op">)</span></span></code></pre></div>
-<p>Load and attach the saved model to the same or different data with
-<code><a href="../reference/il_load.html">il_load()</a></code> and <code><a href="../reference/il_attach.html">il_attach()</a></code>:</p>
+<p>Load the saved model with <code><a href="../reference/il_load.html">il_load()</a></code> and attach it to the
+same data or to new data with <code><a href="../reference/il_attach.html">il_attach()</a></code>:</p>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">con2</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">loaded</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_load.html">il_load</a></span><span class="op">(</span><span class="va">path</span><span class="op">)</span></span>
@@ -320,8 +320,8 @@ re-apply the model without retraining:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: gamma_email &lt;int&gt;, match_weight &lt;dbl&gt;, tf_adj_city &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   total_match_weight &lt;dbl&gt;, match_probability &lt;dbl&gt;</span></span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con2</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p>This pattern supports the common production workflow: train once on a
-representative sample, save the model, and re-apply as new data
+<p>This pattern is common in production workflows. Train once on a
+representative sample, save the model, and reuse it as new data
 arrives.</p>
 </div>
 <div class="section level2">
@@ -336,7 +336,8 @@ arrives.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">predictions</span><span class="op">)</span></span></code></pre></div>
 <p><img src="deduplication_files/figure-html/histogram-1.png" class="r-plt" alt="" width="576"></p>
-<p>Inspect how individual pairs are scored with a waterfall chart:</p>
+<p>Use a waterfall chart to inspect how an individual pair is
+scored:</p>
 <div class="sourceCode" id="cb19"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">predictions</span>, which <span class="op">=</span> <span class="fl">1</span><span class="op">)</span></span></code></pre></div>
 <p><img src="deduplication_files/figure-html/waterfall-1.png" class="r-plt" alt="" width="576"></p>
@@ -347,18 +348,18 @@ arrives.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 127       cluster_122</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 169       cluster_164</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 300       cluster_296</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 564       cluster_558</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 809       cluster_804</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 883       cluster_879</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 254       cluster_252</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 3         cluster_0  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 141       cluster_133</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 262       cluster_261</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 782       cluster_777</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 925       cluster_924</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>
 </h2>
-<p>The <code>cluster</code> column in the original data provides
-ground-truth entity labels. Convert these to pairwise labels for
+<p>The <code>cluster</code> column in the original data provides the
+ground-truth entity labels. Convert them to pairwise labels for
 evaluation:</p>
 <div class="sourceCode" id="cb21"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Use the bundled clerical labels from splink</span></span>
@@ -410,7 +411,7 @@ evaluation:</p>
 <p><img src="deduplication_files/figure-html/roc-1.png" class="r-plt" alt="" width="480"></p>
 </div>
 <div class="section level3">
-<h3 id="precisionrecall-curve">Precision–recall curve<a class="anchor" aria-label="anchor" href="#precisionrecall-curve"></a>
+<h3 id="precision-recall-curve">Precision-recall curve<a class="anchor" aria-label="anchor" href="#precision-recall-curve"></a>
 </h3>
 <div class="sourceCode" id="cb25"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pr</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_precision_recall.html">il_precision_recall</a></span><span class="op">(</span><span class="va">model</span>, labels <span class="op">=</span> <span class="va">labels</span><span class="op">)</span></span>
@@ -438,7 +439,7 @@ threshold:</p>
 <div class="section level3">
 <h3 id="unlinkables">Unlinkables<a class="anchor" aria-label="anchor" href="#unlinkables"></a>
 </h3>
-<p>How many records cannot be linked at each threshold?</p>
+<p>How many records remain unlinkable at each threshold?</p>
 <div class="sourceCode" id="cb27"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">unlink</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_unlinkables.html">il_unlinkables</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot</a></span><span class="op">(</span><span class="va">unlink</span><span class="op">)</span></span></code></pre></div>
@@ -451,9 +452,9 @@ threshold:</p>
 <div class="sourceCode" id="cb28"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><code>il_cleanup(model)</code> is model-scoped. If an interactive run
-failed before you kept the model object, call
-<code>il_cleanup_all(con)</code> to remove all <code>irelink</code>
+<p><code>il_cleanup(model)</code> only removes tables owned by that
+model. If an interactive run fails before you keep the model object,
+call <code>il_cleanup_all(con)</code> to remove all <code>irelink</code>
 tables from the connection before disconnecting.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

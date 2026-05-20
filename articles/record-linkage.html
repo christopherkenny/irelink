@@ -78,14 +78,14 @@
 
     
     
-<p>This vignette demonstrates linking records across two separate
-datasets using the FEBRL (Freely Extensible Biomedical Record Linkage)
-benchmark data. Dataset 4a contains 5,000 original records and dataset
-4b contains 5,000 duplicates — one for each original — corrupted with
+<p>This vignette shows how to link records across two datasets using the
+FEBRL (Freely Extensible Biomedical Record Linkage) benchmark data.
+Dataset 4a contains 5,000 original records, and dataset 4b contains
+5,000 duplicates, one for each original. The duplicate records include
 typographical errors, missing values, and transpositions. Ground truth
-is encoded in the <code>rec_id</code> column: records sharing the same
-base number (e.g., <code>rec-1070-org</code> and
-<code>rec-1070-dup-0</code>) refer to the same entity.</p>
+is stored in the <code>rec_id</code> column, so records that share the
+same base number, such as <code>rec-1070-org</code> and
+<code>rec-1070-dup-0</code>, refer to the same entity.</p>
 <div class="section level2">
 <h2 id="setup">Setup<a class="anchor" aria-label="anchor" href="#setup"></a>
 </h2>
@@ -129,7 +129,7 @@ base number (e.g., <code>rec-1070-org</code> and
 <h2 id="explore-data-quality">Explore data quality<a class="anchor" aria-label="anchor" href="#explore-data-quality"></a>
 </h2>
 <p>Check completeness across both tables. Table B has more missing
-values due to the corruption process:</p>
+values because of the corruption process:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="va">comp</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_completeness.html">il_completeness</a></span><span class="op">(</span><span class="va">febrl4a</span>, <span class="va">febrl4b</span>, con <span class="op">=</span> <span class="va">con</span><span class="op">)</span></span>
@@ -155,10 +155,9 @@ values due to the corruption process:</p>
 <div class="section level2">
 <h2 id="define-the-specification">Define the specification<a class="anchor" aria-label="anchor" href="#define-the-specification"></a>
 </h2>
-<p>For linking (as opposed to deduplication), set
-<code>link_type = "link"</code> when creating the model. Comparisons use
-name similarity, date-of-birth matching, and postcode exact
-matching:</p>
+<p>For linkage across two tables, set <code>link_type = "link"</code>
+when you create the model. This spec uses name similarity, date-of-birth
+matching, and exact postcode matching:</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">given_name</span>, <span class="fu"><a href="../reference/cl_name.html">cl_name</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -199,7 +198,8 @@ matching:</p>
 <span><span class="co">#&gt;   Records (right): 5000</span></span>
 <span><span class="co">#&gt;   Comparisons: 4</span></span>
 <span><span class="co">#&gt;   Blocking rules: 2</span></span></code></pre></div>
-<p>Estimate prior match probability, u-probabilities, and run EM:</p>
+<p>Next, estimate the prior match probability and the u-probabilities,
+then run EM:</p>
 <div class="sourceCode" id="cb7"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_estimate_prior.html">il_estimate_prior</a></span><span class="op">(</span></span>
 <span>  <span class="va">model</span>,</span>
@@ -262,18 +262,18 @@ matching:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id  </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 2248      cluster_2248</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 2834      cluster_2834</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 4524      cluster_1298</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 4658      cluster_1912</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 999       cluster_1434</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 3045      cluster_1111</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 2906      cluster_2330</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 4783      cluster_4656</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 4808      cluster_291 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 2317      cluster_2317</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 3001      cluster_203 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 1434      cluster_1434</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>
 </h2>
-<p>The <code>rec_id</code> column encodes ground truth. Extract entity
-IDs and build pairwise labels:</p>
+<p>The <code>rec_id</code> column stores the ground truth. Extract
+entity IDs and build pairwise labels:</p>
 <div class="sourceCode" id="cb14"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># Extract entity number from rec_id (e.g., "rec-1070-org" -&gt; "1070")</span></span>
 <span><span class="va">entity_a</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/grep.html" class="external-link">sub</a></span><span class="op">(</span><span class="st">'^rec-(\\d+)-org$'</span>, <span class="st">'\\1'</span>, <span class="va">febrl4a</span><span class="op">$</span><span class="va">rec_id</span><span class="op">)</span></span>
@@ -307,9 +307,9 @@ IDs and build pairwise labels:</p>
 <span><span class="co">#&gt; [1] 7000</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/sum.html" class="external-link">sum</a></span><span class="op">(</span><span class="va">labels</span><span class="op">$</span><span class="va">is_match</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 5001</span></span></code></pre></div>
-<p>Because <code>labels</code> includes all true cross-table matches,
-any true match missed by the blocking rules is counted as a false
-negative in the evaluation curves below.</p>
+<p><code>labels</code> includes all true cross-table matches, so any
+true match missed by the blocking rules is counted as a false negative
+in the evaluation curves below.</p>
 <div class="section level3">
 <h3 id="accuracy-metrics">Accuracy metrics<a class="anchor" aria-label="anchor" href="#accuracy-metrics"></a>
 </h3>
@@ -319,7 +319,7 @@ negative in the evaluation curves below.</p>
 <p><img src="record-linkage_files/figure-html/accuracy-1.png" class="r-plt" alt="" width="576"></p>
 </div>
 <div class="section level3">
-<h3 id="roc-and-precisionrecall">ROC and Precision–Recall<a class="anchor" aria-label="anchor" href="#roc-and-precisionrecall"></a>
+<h3 id="roc-and-precision-recall">ROC and Precision-recall<a class="anchor" aria-label="anchor" href="#roc-and-precision-recall"></a>
 </h3>
 <div class="sourceCode" id="cb16"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">roc</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_roc.html">il_roc</a></span><span class="op">(</span><span class="va">model</span>, labels <span class="op">=</span> <span class="va">labels</span><span class="op">)</span></span>
@@ -337,9 +337,9 @@ negative in the evaluation curves below.</p>
 <div class="sourceCode" id="cb18"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
-<p><code>il_cleanup(model)</code> is model-scoped. If an interactive run
-failed before you kept the model object, call
-<code>il_cleanup_all(con)</code> to remove all <code>irelink</code>
+<p><code>il_cleanup(model)</code> only removes tables owned by that
+model. If an interactive run fails before you keep the model object,
+call <code>il_cleanup_all(con)</code> to remove all <code>irelink</code>
 tables from the connection before disconnecting.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>

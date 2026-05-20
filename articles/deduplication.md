@@ -1,13 +1,11 @@
 # Deduplication with Evaluation
 
-This vignette walks through a complete deduplication workflow on the
-`fake_1000` dataset, including model training, prediction, clustering,
-and evaluation against ground-truth labels. The dataset is the primary
-demo data from the Python
-[splink](https://github.com/moj-analytical-services/splink) library. It
-contains 1,000 records representing 181 unique people, each with varying
-numbers of duplicate entries corrupted with typos, missing values, and
-other realistic data-quality issues.
+This vignette walks through a full deduplication workflow on
+`fake_1000`, covering model training, prediction, clustering, and
+evaluation against ground-truth labels. The dataset comes from the
+Python [splink](https://github.com/moj-analytical-services/splink)
+library and contains 1,000 records for 181 unique people. Many records
+include typos, missing values, and other realistic data-quality issues.
 
 ## Setup
 
@@ -39,10 +37,10 @@ head(df)
 #> 6         5 Noah       Watson  2008-03-23 Bolton matthew78@ballard-mcdo…       1
 ```
 
-The `cluster` column is the ground truth: records sharing the same
+The `cluster` column is the ground truth, so records that share the same
 cluster value refer to the same person. There are 181 unique entities
-across 1000 records. Note that missing values appear as `NA`, reflecting
-real-world data-quality challenges.
+across 1000 records. Missing values appear as `NA`, which reflects a
+common real-world problem.
 
 Before building a model, profile the data to understand its completeness
 and value distributions:
@@ -71,8 +69,8 @@ autoplot(comp)
 
 ![](deduplication_files/figure-html/completeness-plot-1.png)
 
-Check column value distributions to inform blocking and comparison
-choices:
+Check column value distributions to help choose blocking rules and
+comparisons:
 
 ``` r
 
@@ -100,9 +98,9 @@ il_profile(df[, c('first_name', 'surname', 'city')], con = con, top_n = 5)
 ## Choose blocking rules
 
 [`il_suggest_blocking()`](http://christophertkenny.com/irelink/reference/il_suggest_blocking.md)
-enumerates columns and ranks them as blocking keys. A good blocking key
-has high `n_distinct` (narrow blocks, fewer pairs) and high `coverage`
-(few missing values):
+lists candidate blocking columns and ranks them. A good blocking key has
+high `n_distinct`, which creates narrow blocks and fewer pairs, and high
+`coverage`, which means fewer missing values:
 
 ``` r
 
@@ -123,10 +121,10 @@ among the top columns here.
 
 ## Define the specification
 
-Choose comparisons and blocking rules. Names use Jaro-Winkler
+Choose the comparisons and blocking rules. Names use Jaro-Winkler
 similarity, dates of birth use the
 [`cl_dob()`](http://christophertkenny.com/irelink/reference/cl_dob.md)
-helper, and city uses exact matching with term-frequency adjustments:
+helper, and city uses exact matching with term-frequency adjustment:
 
 ``` r
 
@@ -154,7 +152,7 @@ spec
 #>     3. city
 ```
 
-Estimate how many pairs each blocking rule generates:
+Estimate the number of pairs produced by each blocking rule:
 
 ``` r
 
@@ -180,7 +178,7 @@ il_count_pairs(
 model <- il_model(df, spec = spec, con = con)
 ```
 
-Estimate the prior match probability using deterministic rules:
+Estimate the prior match probability with deterministic rules:
 
 ``` r
 
@@ -192,7 +190,8 @@ model <- il_estimate_prior(
 )
 ```
 
-Estimate u-probabilities from random pairs and m-probabilities via EM:
+Estimate u-probabilities from random pairs and then estimate
+m-probabilities with EM:
 
 ``` r
 
@@ -241,8 +240,8 @@ summary(model)
 #>      u_estimation: 1
 ```
 
-The match weights chart shows the discriminative power of each
-comparison:
+The match weights chart shows how much each comparison separates matches
+from non-matches:
 
 ``` r
 
@@ -263,8 +262,8 @@ autoplot(model, type = 'parameters')
 ## Save and reuse the model
 
 Once you are satisfied with the parameters, save the model to disk. The
-saved file stores the spec and trained parameters so you can re-apply
-the model without retraining:
+saved file stores the spec and trained parameters so you can reuse the
+model without retraining:
 
 ``` r
 
@@ -272,9 +271,9 @@ path <- tempfile(fileext = '.rds')
 il_save(model, path)
 ```
 
-Load and attach the saved model to the same or different data with
+Load the saved model with
 [`il_load()`](http://christophertkenny.com/irelink/reference/il_load.md)
-and
+and attach it to the same data or to new data with
 [`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md):
 
 ``` r
@@ -297,8 +296,8 @@ head(predict(model2, threshold = 0.85))
 DBI::dbDisconnect(con2, shutdown = TRUE)
 ```
 
-This pattern supports the common production workflow: train once on a
-representative sample, save the model, and re-apply as new data arrives.
+This pattern is common in production workflows. Train once on a
+representative sample, save the model, and reuse it as new data arrives.
 
 ## Predict and cluster
 
@@ -320,7 +319,7 @@ autoplot(predictions)
 
 ![](deduplication_files/figure-html/histogram-1.png)
 
-Inspect how individual pairs are scored with a waterfall chart:
+Use a waterfall chart to inspect how an individual pair is scored:
 
 ``` r
 
@@ -338,18 +337,18 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 127       cluster_122
-#> 2 169       cluster_164
-#> 3 300       cluster_296
-#> 4 564       cluster_558
-#> 5 809       cluster_804
-#> 6 883       cluster_879
+#> 1 254       cluster_252
+#> 2 3         cluster_0  
+#> 3 141       cluster_133
+#> 4 262       cluster_261
+#> 5 782       cluster_777
+#> 6 925       cluster_924
 ```
 
 ## Evaluate against ground truth
 
-The `cluster` column in the original data provides ground-truth entity
-labels. Convert these to pairwise labels for evaluation:
+The `cluster` column in the original data provides the ground-truth
+entity labels. Convert them to pairwise labels for evaluation:
 
 ``` r
 
@@ -410,7 +409,7 @@ autoplot(roc)
 
 ![](deduplication_files/figure-html/roc-1.png)
 
-### Precision–recall curve
+### Precision-recall curve
 
 ``` r
 
@@ -441,7 +440,7 @@ head(errors)
 
 ### Unlinkables
 
-How many records cannot be linked at each threshold?
+How many records remain unlinkable at each threshold?
 
 ``` r
 
@@ -459,6 +458,7 @@ il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
 
-`il_cleanup(model)` is model-scoped. If an interactive run failed before
-you kept the model object, call `il_cleanup_all(con)` to remove all
-`irelink` tables from the connection before disconnecting.
+`il_cleanup(model)` only removes tables owned by that model. If an
+interactive run fails before you keep the model object, call
+`il_cleanup_all(con)` to remove all `irelink` tables from the connection
+before disconnecting.

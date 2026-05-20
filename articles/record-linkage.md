@@ -1,12 +1,13 @@
 # Record Linkage Across Datasets
 
-This vignette demonstrates linking records across two separate datasets
-using the FEBRL (Freely Extensible Biomedical Record Linkage) benchmark
-data. Dataset 4a contains 5,000 original records and dataset 4b contains
-5,000 duplicates — one for each original — corrupted with typographical
-errors, missing values, and transpositions. Ground truth is encoded in
-the `rec_id` column: records sharing the same base number (e.g.,
-`rec-1070-org` and `rec-1070-dup-0`) refer to the same entity.
+This vignette shows how to link records across two datasets using the
+FEBRL (Freely Extensible Biomedical Record Linkage) benchmark data.
+Dataset 4a contains 5,000 original records, and dataset 4b contains
+5,000 duplicates, one for each original. The duplicate records include
+typographical errors, missing values, and transpositions. Ground truth
+is stored in the `rec_id` column, so records that share the same base
+number, such as `rec-1070-org` and `rec-1070-dup-0`, refer to the same
+entity.
 
 ## Setup
 
@@ -52,7 +53,7 @@ head(febrl4b)
 ## Explore data quality
 
 Check completeness across both tables. Table B has more missing values
-due to the corruption process:
+because of the corruption process:
 
 ``` r
 
@@ -84,9 +85,9 @@ autoplot(comp)
 
 ## Define the specification
 
-For linking (as opposed to deduplication), set `link_type = "link"` when
-creating the model. Comparisons use name similarity, date-of-birth
-matching, and postcode exact matching:
+For linkage across two tables, set `link_type = "link"` when you create
+the model. This spec uses name similarity, date-of-birth matching, and
+exact postcode matching:
 
 ``` r
 
@@ -133,7 +134,8 @@ model
 #>   Blocking rules: 2
 ```
 
-Estimate prior match probability, u-probabilities, and run EM:
+Next, estimate the prior match probability and the u-probabilities, then
+run EM:
 
 ``` r
 
@@ -216,18 +218,18 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id  
 #>   <chr>     <chr>       
-#> 1 2248      cluster_2248
-#> 2 2834      cluster_2834
-#> 3 4524      cluster_1298
-#> 4 4658      cluster_1912
-#> 5 999       cluster_1434
-#> 6 3045      cluster_1111
+#> 1 2906      cluster_2330
+#> 2 4783      cluster_4656
+#> 3 4808      cluster_291 
+#> 4 2317      cluster_2317
+#> 5 3001      cluster_203 
+#> 6 1434      cluster_1434
 ```
 
 ## Evaluate against ground truth
 
-The `rec_id` column encodes ground truth. Extract entity IDs and build
-pairwise labels:
+The `rec_id` column stores the ground truth. Extract entity IDs and
+build pairwise labels:
 
 ``` r
 
@@ -265,9 +267,9 @@ sum(labels$is_match)
 #> [1] 5001
 ```
 
-Because `labels` includes all true cross-table matches, any true match
-missed by the blocking rules is counted as a false negative in the
-evaluation curves below.
+`labels` includes all true cross-table matches, so any true match missed
+by the blocking rules is counted as a false negative in the evaluation
+curves below.
 
 ### Accuracy metrics
 
@@ -279,7 +281,7 @@ autoplot(acc)
 
 ![](record-linkage_files/figure-html/accuracy-1.png)
 
-### ROC and Precision–Recall
+### ROC and Precision-recall
 
 ``` r
 
@@ -305,6 +307,7 @@ il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
 
-`il_cleanup(model)` is model-scoped. If an interactive run failed before
-you kept the model object, call `il_cleanup_all(con)` to remove all
-`irelink` tables from the connection before disconnecting.
+`il_cleanup(model)` only removes tables owned by that model. If an
+interactive run fails before you keep the model object, call
+`il_cleanup_all(con)` to remove all `irelink` tables from the connection
+before disconnecting.

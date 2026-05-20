@@ -1,23 +1,23 @@
 # Linking Banking Transactions
 
-This vignette replicates the [Splink “Linking banking transactions”
+This vignette reproduces the [Splink “Linking banking transactions”
 demo](https://moj-analytical-services.github.io/splink/demos/examples/duckdb/transactions.html)
-using `irelink`. It demonstrates two-table linking
-(`link_type = "link"`), matching each outgoing payment in the origin
-table to its corresponding incoming payment in the destination table.
+in `irelink`. It demonstrates two-table linkage with
+`link_type = "link"` by matching each outgoing payment in the origin
+table to the corresponding incoming payment in the destination table.
 
-The data is synthetic and designed to be challenging: amounts differ due
-to fees and exchange-rate effects, dates shift by a few days, and memos
-are sometimes truncated. Since every origin payment has exactly one
-destination counterpart, the prior match probability is `1 / n_origin`.
+The data is synthetic and intentionally challenging. Amounts differ
+because of fees and exchange-rate effects, dates can shift by a few
+days, and memos are sometimes truncated. Because each origin payment has
+exactly one destination counterpart, the prior match probability is
+`1 / n_origin`.
 
-This vignette requires the
-[nanoparquet](https://cran.r-project.org/package=nanoparquet) package to
-read the remote Parquet files and will only compile when the package and
-data URLs are both available. It also assumes DuckDB specifically: the
-blocking rules below use raw `.where` SQL with DuckDB date helpers such
-as [`strftime()`](https://rdrr.io/r/base/strptime.html) and
-`yearweek()`.
+This vignette requires
+[nanoparquet](https://cran.r-project.org/package=nanoparquet) to read
+the remote Parquet files, and it only compiles when the package and both
+data URLs are available. It also assumes DuckDB because the blocking
+rules below use raw `.where` SQL with DuckDB date helpers such as
+[`strftime()`](https://rdrr.io/r/base/strptime.html) and `yearweek()`.
 
 ## Load the data
 
@@ -44,10 +44,11 @@ il_profile(df_origin, memo, transaction_date, amount, con = con, top_n = 8)
 
 ## Choose blocking rules
 
-Because corresponding records differ systematically — amounts change due
-to fees, dates shift, memos are truncated — blocking rules must be
-generous enough to capture true matches while still reducing the pair
-space dramatically. The rules below use SQL expressions via `.where`:
+Because corresponding records differ in predictable ways, the blocking
+rules need to be broad enough to retain true matches while still
+shrinking the search space. Fees change amounts, dates shift, and memos
+are truncated, so the rules below use SQL expressions in `.where` rather
+than relying on exact agreement alone:
 
 ``` r
 
@@ -101,9 +102,9 @@ autoplot(counts)
 
 ## Define the specification
 
-The `transaction_date` comparison is one-sided: payments can only
-*arrive* after they are *sent*, so the comparison checks
-`destination_date - origin_date` is between 0 and *N* days:
+The `transaction_date` comparison is one-sided because a payment can
+only arrive after it is sent. The comparison therefore checks whether
+`destination_date - origin_date` is between 0 and `N` days:
 
 ``` r
 
@@ -156,9 +157,9 @@ spec
 ## Train the model
 
 Because this benchmark is one-to-one, set the prevalence prior directly
-with the exported
+with
 [`il_prior_prevalence()`](http://christophertkenny.com/irelink/reference/il_prior_prevalence.md)
-helper rather than mutating `model$params` internally:
+instead of changing `model$params` by hand:
 
 ``` r
 
@@ -244,6 +245,7 @@ il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
 
-`il_cleanup(model)` is model-scoped. If an interactive run failed before
-you kept the model object, call `il_cleanup_all(con)` to remove all
-`irelink` tables from the connection before disconnecting.
+`il_cleanup(model)` only removes tables owned by that model. If an
+interactive run fails before you keep the model object, call
+`il_cleanup_all(con)` to remove all `irelink` tables from the connection
+before disconnecting.

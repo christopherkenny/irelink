@@ -1,21 +1,21 @@
 # Translating from Splink
 
-`irelink` is a translation of the Python
+`irelink` translates the Python
 [splink](https://github.com/moj-analytical-services/splink) library into
-idiomatic R. This vignette maps splink’s API to `irelink` so that users
-familiar with splink can get started quickly.
+idiomatic R. This vignette maps common Splink patterns to `irelink` so
+you can get started quickly.
 
 ## Design differences
 
-Splink uses an object-oriented design centred on a `Linker` class.
-`irelink` instead uses a functional pipeline style that is natural in R.
-The `Linker` object’s namespaced methods (`linker.training.*`,
-`linker.inference.*`, etc.) become standalone functions that accept and
-return an `il_model` object.
+Splink uses an object-oriented design centered on a `Linker` class.
+`irelink` uses a functional pipeline that fits naturally in R. The
+`Linker` object’s namespaced methods such as `linker.training.*` and
+`linker.inference.*` become standalone functions that accept and return
+an `il_model` object.
 
-Splink bundles comparison levels into high-level “Comparison” classes
-(e.g., `JaroWinklerAtThresholds`). In `irelink`, the `cl_*()` functions
-serve the same role and can be passed directly to
+Splink bundles comparison levels into high-level comparison classes such
+as `JaroWinklerAtThresholds`. In `irelink`, the `cl_*()` functions fill
+the same role and can be passed directly to
 [`il_compare()`](http://christophertkenny.com/irelink/reference/il_compare.md).
 
 ## Core workflow
@@ -23,14 +23,14 @@ serve the same role and can be passed directly to
 [TABLE]
 
 `irelink` also supports `link_type = "link_and_dedupe"` for two-table
-jobs where duplicates may exist both within each input table and across
-the two tables.
+jobs where duplicates may exist within each input table and across the
+two tables.
 
 ## Comparison levels
 
-Comparison levels are the building blocks for scoring how similar two
-records are on a given field. Each `cl_*()` function corresponds to a
-splink comparison level class.
+Comparison levels are the building blocks used to score how similar two
+records are on a field. Each `cl_*()` function corresponds to a Splink
+comparison level class.
 
 | splink (Python) | irelink (R) |
 |----|----|
@@ -55,9 +55,9 @@ splink comparison level class.
 
 ## Domain-specific comparisons
 
-Splink provides high-level comparison classes that compose multiple
-levels for common field types. In `irelink`, these are helper functions
-that return a pre-configured set of levels.
+Splink provides high-level comparison classes for common field types. In
+`irelink`, these are helper functions that return preconfigured sets of
+levels.
 
 | splink (Python) | irelink (R) |
 |----|----|
@@ -94,28 +94,28 @@ that return a pre-configured set of levels.
 
 ## Blocking rules
 
-In splink, blocking rules are created with
-[`block_on()`](http://christophertkenny.com/irelink/reference/block_on.md).
-`irelink` uses the same function name. The difference is where they
-appear: splink passes them into `SettingsCreator`, while `irelink` adds
-them to a spec with
+In Splink, you create blocking rules with
+[`block_on()`](http://christophertkenny.com/irelink/reference/block_on.md),
+and `irelink` uses the same function name. The main difference is where
+the rules are used: Splink passes them into `SettingsCreator`, while
+`irelink` adds them to a spec with
 [`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md)
 or passes them directly to training functions.
 
 ``` r
 
-# irelink — blocking in the spec
+# blocking in the spec
 spec <- il_spec() |>
   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
   il_block_on(surname)
 
-# irelink — blocking in EM training
+# blocking in EM training
 model <- il_estimate_em(model, block_on(surname))
 ```
 
 ## Example: side-by-side deduplication
 
-Below is a minimal deduplication in both splink and `irelink`.
+Below is a minimal deduplication example in both Splink and `irelink`.
 
 **splink (Python):**
 
@@ -178,12 +178,12 @@ il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
 
-The examples above use probability thresholds because those are portable
-between Splink and `irelink`. Splink’s prediction `match_weight`
-includes the prior odds. In `irelink`, `match_weight` is evidence-only
-and `total_match_weight` is the prior-inclusive log2 odds. Match-weight
-thresholds therefore need that prior adjustment when you translate them
-between the two packages.
+The examples above use probability thresholds because those transfer
+cleanly between Splink and `irelink`. In Splink, prediction
+`match_weight` includes the prior odds. In `irelink`, `match_weight` is
+evidence only, and `total_match_weight` is the prior-inclusive log2
+odds. Keep that difference in mind if you translate match-weight
+thresholds between the two packages.
 
 ## Example: finding matches against new records
 
@@ -210,7 +210,7 @@ new_df <- data.frame(
 results <- il_find_matches(model, new_df, threshold = 0.5)
 ```
 
-Splink exposes a match-weight threshold for this workflow, while
+Splink uses a match-weight threshold for this workflow.
 [`il_find_matches()`](http://christophertkenny.com/irelink/reference/il_find_matches.md)
 filters on posterior match probability. Translate those thresholds with
 the same caution as in the prediction example above.

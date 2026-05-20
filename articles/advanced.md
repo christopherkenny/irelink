@@ -1,8 +1,8 @@
 # Advanced Workflows
 
-This vignette covers advanced `irelink` features for users who have
-completed the Getting Started or Deduplication vignettes. All examples
-use `fake_1000` and a shared in-memory DuckDB connection.
+This vignette covers advanced `irelink` workflows for readers who have
+already worked through the Getting Started or Deduplication vignette.
+All examples use `fake_1000` and a shared in-memory DuckDB connection.
 
 ## Setup
 
@@ -54,8 +54,8 @@ clusters <- il_cluster(pairs, threshold = 0.85)
 ## Training diagnostics
 
 [`il_training_history()`](http://christophertkenny.com/irelink/reference/il_training_history.md)
-returns the m and u parameter estimates at each EM iteration across all
-training sessions. Plot it to check whether parameters have converged:
+returns the m and u estimates from each EM iteration across all training
+sessions. Plot it to check convergence:
 
 ``` r
 
@@ -65,16 +65,15 @@ autoplot(hist)
 
 ![](advanced_files/figure-html/history-1.png)
 
-A well-converged model shows stable values in the final iterations. If
-estimates are still drifting, add more EM passes with different blocking
-rules or expand the set of candidate pairs.
+A well-converged model has stable values in the final iterations. If the
+estimates still drift, run more EM passes with different blocking rules
+or expand the candidate pairs.
 
 ## Pair inspection
 
 [`il_compare_records()`](http://christophertkenny.com/irelink/reference/il_compare_records.md)
-scores a single pair of records against the spec without requiring a
-full prediction pass. Use it to diagnose why a known match scores too
-low or a non-match scores too high.
+scores a single pair of records against the spec. Use it to see why a
+known match scores too low or a non-match scores too high.
 
 ``` r
 
@@ -88,12 +87,11 @@ il_compare_records(rec_a, rec_b, spec = model$spec, con = con)
 #> 1                0            -1         1          0           0
 ```
 
-The gamma columns show the comparison level reached on each field.
-Cross-reference these with `il_weights(model)` to read off the
-match-weight contribution of each level.
+The gamma columns show the comparison level reached on each field. Use
+`il_weights(model)` to see the match-weight contribution of each level.
 
-For a visual breakdown of how per-field gamma values sum to an overall
-match decision, draw a waterfall chart for any pair in the scored set:
+Use a waterfall chart to see how field-level scores combine into one
+match decision:
 
 ``` r
 
@@ -104,19 +102,19 @@ autoplot(pairs, which = 1)
 
 ## Lazy prediction for large data
 
-`predict(collect = FALSE)` keeps scored pairs in the database rather
-than collecting them into R. This lazy path requires a DuckDB or
-PostgreSQL backend; the examples here use DuckDB.
+`predict(collect = FALSE)` keeps scored pairs in the database instead of
+collecting them into R. This path requires DuckDB or PostgreSQL and is
+especially useful when materializing millions of rows would exhaust
+memory. The examples here use DuckDB, and
 [`il_cluster()`](http://christophertkenny.com/irelink/reference/il_cluster.md)
-detects the lazy reference and runs connected-components analysis
-entirely in SQL, avoiding a costly round-trip for datasets where
-materializing millions of rows would exhaust memory.
+detects the lazy reference so it can run connected-components analysis
+in SQL.
 
 ``` r
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,783 pairs in table __il_8660_1_predicted_4 (threshold = 0.5)
+#> <il_compared_lazy> 2,783 pairs in table __il_8662_1_predicted_4 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -132,10 +130,10 @@ nrow(clusters_lazy)
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
 and
 [`il_waterfall()`](http://christophertkenny.com/irelink/reference/il_waterfall.md)
-collect automatically when needed, so downstream analysis code is
-unchanged. Use the lazy path on DuckDB or PostgreSQL when candidate-pair
+collect automatically when needed, so downstream analysis code stays the
+same. Use the lazy path on DuckDB or PostgreSQL when candidate-pair
 counts exceed available memory. The lazy prediction table is
-model-scoped; `il_cleanup(model)` removes it along with the model’s
+model-scoped, and `il_cleanup(model)` removes it along with the model’s
 source and term-frequency tables.
 
 ## Chunked u estimation and SQL profiling
@@ -156,7 +154,8 @@ model <- il_estimate_u(
 model$params$u_estimation
 ```
 
-When investigating database performance, set `profile_sql = TRUE` on
+When you need to inspect database performance, set `profile_sql = TRUE`
+on
 [`il_estimate_u()`](http://christophertkenny.com/irelink/reference/il_estimate_u.md),
 [`il_estimate_prior()`](http://christophertkenny.com/irelink/reference/il_estimate_prior.md),
 or [`predict()`](https://rdrr.io/r/stats/predict.html) to collect
@@ -171,17 +170,18 @@ attr(pairs, 'sql_profile')
 ## Cluster diagnostics
 
 [`il_graph_metrics()`](http://christophertkenny.com/irelink/reference/il_graph_metrics.md)
-computes node-, edge-, and cluster-level summaries from the linkage
-graph. Use it to spot over-generous thresholds (clusters that are too
-large) or sparse connectivity (clusters with unexpectedly low density).
+computes node-level, edge-level, and cluster-level summaries from the
+linkage graph. Use it to spot thresholds that are too loose or clusters
+with unexpectedly low density.
 
 ``` r
 
 metrics <- il_graph_metrics(pairs, clusters)
 ```
 
-The cluster table reports size and internal edge density (edges /
-maximum possible edges for a cluster of that size):
+The cluster table reports size and internal edge density, which is the
+number of edges divided by the maximum possible number for a cluster of
+that size:
 
 ``` r
 
@@ -189,11 +189,11 @@ metrics$clusters
 #> # A tibble: 142 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralization
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_133       9      40   1.10                   0.196
-#>  2 cluster_243       1       2   0                     NA    
-#>  3 cluster_44       14      57   0.626                  0.167
-#>  4 cluster_476       2       1   1                     NA    
-#>  5 cluster_905       2       1   1                     NA    
+#>  1 cluster_164       8      37   1.32                   3    
+#>  2 cluster_176      26     114   0.351                  0.313
+#>  3 cluster_428       3       2   0.667                  1    
+#>  4 cluster_58        5      10   1                      0    
+#>  5 cluster_960       7      17   0.810                  0.267
 #>  6 cluster_149      16      61   0.508                  0.410
 #>  7 cluster_301      10      41   0.911                  0.111
 #>  8 cluster_362      19      74   0.430                  0.824
@@ -202,15 +202,13 @@ metrics$clusters
 #> # ℹ 132 more rows
 ```
 
-A high maximum cluster size combined with low density often indicates
-that a transitive link is pulling unrelated entities together. Consider
-raising the threshold in
-[`predict()`](https://rdrr.io/r/stats/predict.html) or
+A large maximum cluster size with low density often means a transitive
+link is pulling unrelated entities together. Consider raising the
+threshold in [`predict()`](https://rdrr.io/r/stats/predict.html) or
 [`il_cluster()`](http://christophertkenny.com/irelink/reference/il_cluster.md)
-and re-checking the metrics.
+and then checking the metrics again.
 
-The node table shows how many links each record participates in
-(degree):
+The node table shows how many links each record participates in:
 
 ``` r
 
@@ -218,12 +216,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 136       cluster_133      9            1.12
-#> 2 140       cluster_133      9            1.12
-#> 3 138       cluster_133      9            1.12
-#> 4 137       cluster_133     10            1.25
-#> 5 133       cluster_133     10            1.25
-#> 6 139       cluster_133     10            1.25
+#> 1 169       cluster_164      6           0.857
+#> 2 171       cluster_164      6           0.857
+#> 3 167       cluster_164      7           1    
+#> 4 165       cluster_164      8           1.14 
+#> 5 170       cluster_164      6           0.857
+#> 6 168       cluster_164     25           3.57
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -231,8 +229,8 @@ acting as hubs that inflate the cluster beyond its true membership.
 
 ## Phonetic blocking
 
-Standard equality blocking misses pairs where names are spelled
-differently but sound alike — for example, “Smith” / “Smyth” or “Jon” /
+Standard equality blocking misses pairs where names sound alike but are
+spelled differently. Examples include “Smith” and “Smyth” or “Jon” and
 “John”. Pass `.transform = il_soundex` to
 [`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md)
 or
@@ -249,7 +247,7 @@ spec_phon <- il_spec() |>
   il_block_on(surname, .transform = il_soundex)
 ```
 
-Use the same `.transform` argument when specifying the blocking rule for
+Use the same `.transform` argument when you specify a blocking rule for
 an EM training pass:
 
 ``` r
@@ -264,17 +262,17 @@ model_phon <- il_estimate_em(
 #> first_name
 ```
 
-Phonetic blocking increases recall at the cost of more candidate pairs.
-Use
+Phonetic blocking usually improves recall, but it also increases the
+number of candidate pairs. Use
 [`il_count_pairs()`](http://christophertkenny.com/irelink/reference/il_count_pairs.md)
-to check the volume trade-off before committing to a spec.
+to check that trade-off before you commit to a spec.
 
 ## Column transforms
 
 The `transform` argument in
 [`il_compare()`](http://christophertkenny.com/irelink/reference/il_compare.md)
 applies a function to both values before scoring. Use it to normalize
-case or strip whitespace before a similarity comparison:
+case or remove whitespace before a similarity comparison:
 
 ``` r
 
@@ -293,19 +291,18 @@ model_tr <- il_estimate_em(model_tr, block_on(surname))
 ```
 
 `tolower`, `toupper`, and `trimws` are translated to SQL on DuckDB and
-PostgreSQL, so the transform runs in-database at full speed. Custom R
-functions work on the R-side path only. When saving a model with
+PostgreSQL, so they run in the database. Custom R functions only work on
+the R-side path. When you save a model with
 [`il_save()`](http://christophertkenny.com/irelink/reference/il_save.md),
-`.rds` keeps the R object as-is. `.json` writes Splink settings SQL, so
-loaded comparisons come back as SQL-backed levels. Anonymous functions
-still produce a warning on save.
+`.rds` stores the R object as is, while `.json` writes Splink settings
+SQL so loaded comparisons come back as SQL-backed levels. Anonymous
+functions still produce a warning on save.
 
 ## Incremental matching
 
 [`il_find_matches()`](http://christophertkenny.com/irelink/reference/il_find_matches.md)
-scores new records against the data already loaded into a trained model
-without retraining. It applies the same blocking rules and comparison
-spec:
+scores new records against data that is already loaded into a trained
+model, using the same blocking rules and comparison spec.
 
 ``` r
 
@@ -345,11 +342,11 @@ Each row is a (new record, existing record) pair. `unique_id_l`
 identifies the new record (auto-assigned starting from 1) and
 `unique_id_r` identifies the matched record in the original dataset.
 
-This pairs naturally with
+This works well with
 [`il_load()`](http://christophertkenny.com/irelink/reference/il_load.md)
 and
-[`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md):
-load a saved model, attach it to the current database, and call
+[`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md).
+Load a saved model, attach it to the current database, and call
 [`il_find_matches()`](http://christophertkenny.com/irelink/reference/il_find_matches.md)
 for each incoming batch of new records.
 

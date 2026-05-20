@@ -2,21 +2,19 @@
 
 `irelink` implements the same Fellegi-Sunter probabilistic record
 linkage framework as [fastLink](https://github.com/kosukeimai/fastLink),
-but with a different API design and a SQL backend. This vignette maps
-fastLink’s API to `irelink` so that users familiar with fastLink can get
-started quickly.
+but it uses a different API and a SQL backend. This vignette maps common
+fastLink patterns to `irelink` so you can get started quickly.
 
 ## Design differences
 
 fastLink bundles data preparation, EM estimation, and matching into a
-single `fastLink()` call. `irelink` separates these into a pipeline of
-composable functions: define a spec, build a model, estimate parameters,
-then predict.
+single `fastLink()` call. `irelink` breaks that work into a pipeline of
+composable functions where you define a spec, build a model, estimate
+parameters, and then predict.
 
-fastLink’s Jaro-Winkler comparisons produce three agreement levels
-(agree / partially agree / disagree) controlled by `cut.a` and `cut.p`
-thresholds. `irelink` uses `cl_jaro_winkler(high, low)` to express the
-same two thresholds, giving the same three-level structure.
+fastLink’s Jaro-Winkler comparisons produce three agreement levels, and
+`cut.a` and `cut.p` control the thresholds. `irelink` uses
+`cl_jaro_winkler(high, low)` to express the same thresholds.
 
 fastLink’s `getMatches()` assigns a `dedupe.ids` column to flag
 duplicates. `irelink` uses
@@ -29,9 +27,9 @@ instead, which assigns a `cluster_id` to each record.
 
 ## Comparison functions
 
-fastLink compares string fields using Jaro-Winkler (default),
-Levenshtein, or Jaro, producing up to three agreement levels. Each maps
-to a `cl_*()` function in `irelink`.
+fastLink compares string fields with Jaro-Winkler by default, or with
+Levenshtein or Jaro. These produce up to three agreement levels. Each
+one maps to a `cl_*()` function in `irelink`.
 
 | fastLink | irelink |
 |----|----|
@@ -41,10 +39,10 @@ to a `cl_*()` function in `irelink`.
 | `numeric.match`, `cut.a.num` | `cl_numeric_diff(threshold)` |
 | exact agreement on non-string fields | [`cl_exact()`](http://christophertkenny.com/irelink/reference/cl_exact.md) |
 
-Note that Levenshtein thresholds in `irelink` are raw edit distances,
-not renormalized similarity scores as in fastLink.
-`cl_levenshtein(1, 2)` means “distance ≤ 1 is full agreement, distance ≤
-2 is partial agreement.”
+Levenshtein thresholds in `irelink` are raw edit distances. They are not
+renormalized similarity scores as in fastLink. `cl_levenshtein(1, 2)`
+means “distance \<= 1 is full agreement, and distance \<= 2 is partial
+agreement.”
 
 ## Key parameters
 
@@ -54,7 +52,7 @@ not renormalized similarity scores as in fastLink.
 | `cut.p` | second argument to [`cl_jaro_winkler()`](http://christophertkenny.com/irelink/reference/cl_jaro_winkler.md) |
 | `cut.a.num` | argument to [`cl_numeric_diff()`](http://christophertkenny.com/irelink/reference/cl_numeric_diff.md) |
 | `threshold.match` | `threshold` in [`predict()`](https://rdrr.io/r/stats/predict.html) |
-| `dedupe = FALSE` | default; `irelink` never enforces 1-to-1 matching |
+| `dedupe = FALSE` | default, `irelink` never enforces 1-to-1 matching |
 | `n.cores` | irelink uses DuckDB parallelism automatically |
 
 ## Example: side-by-side deduplication
@@ -110,20 +108,20 @@ il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
 
-The
 [`il_prior_prevalence()`](http://christophertkenny.com/irelink/reference/il_prior_prevalence.md)
-call replaces the training-driven prior with a population-level
-baseline, in the same way as resetting the prior after EM in fastLink
-workflows that use a heavily blocked training sample. If your training
-data is large and representative, this step is unnecessary.
+replaces the training-driven prior with a population-level baseline.
+This is similar to resetting the prior after EM in fastLink workflows
+that use a heavily blocked training sample, and you can skip it if your
+training data is large and representative.
 
 ## Blocking
 
 fastLink’s `blockData()` partitions records into groups and requires
-running `fastLink()` separately within each block, then reassembling the
-results. In `irelink`, blocking is declared in the spec with
-[`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md)
-and applied automatically — no manual loop is needed.
+running `fastLink()` separately within each block before combining the
+results. In `irelink`, you declare blocking in the spec with
+[`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md),
+and the package applies those rules automatically so you do not need a
+manual loop.
 
 **fastLink:**
 
@@ -153,18 +151,18 @@ spec <- il_spec() |>
   il_block_on(surname)
 ```
 
-fastLink also offers k-means blocking via
+fastLink also offers k-means blocking through
 `blockData(..., kmeans.block = ..., nclusters = ...)`. `irelink` does
-not have a built-in k-means blocking step because data lives in a SQL
-backend. For numeric fields,
+not include a built-in k-means blocking step because the data lives in a
+SQL backend. For numeric fields, the closest equivalent is
 [`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md)
-with pre-bucketed values is the nearest equivalent.
+with pre-bucketed values.
 
 ## Model inspection
 
-fastLink exposes learned parameters through `out$EM$patterns.w` — a
-table of agreement patterns and Fellegi-Sunter weights. `irelink`
-provides the same information visually.
+fastLink exposes learned parameters through `out$EM$patterns.w`, a table
+of agreement patterns and Fellegi-Sunter weights. `irelink` provides the
+same information visually.
 
 ``` r
 
@@ -174,9 +172,9 @@ autoplot(model, type = 'parameters')
 
 ## Evaluation
 
-fastLink requires constructing a confusion table by hand from
+fastLink requires you to build a confusion table by hand from
 `dedupe.ids` and a ground-truth column. `irelink` provides
-[`il_cluster_confusion_matrix()`](http://christophertkenny.com/irelink/reference/il_cluster_confusion_matrix.md)
+[`il_cluster_confusion_matrix()`](http://christophertkenny.com/irelink/reference/il_cluster_confusion_matrix.md),
 which does this directly from the model.
 
 **fastLink:**
