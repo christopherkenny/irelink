@@ -12,8 +12,8 @@
 <link rel="icon" sizes="any" href="../favicon.ico">
 <link rel="manifest" href="../site.webmanifest">
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="../deps/Fira_Sans-0.4.10/font.css" rel="stylesheet">
+<link href="../deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="../deps/Fira_Sans-0.4.10/font.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="../deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="../deps/headroom-0.11.0/headroom.min.js"></script><script src="../deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="../deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="../deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="../deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="../deps/search-1.0.0/fuse.min.js"></script><script src="../deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Deduplication with Evaluation">
@@ -310,12 +310,12 @@ re-apply the model without retraining:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 11</span></span></span>
 <span><span class="co">#&gt;   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob gamma_city</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         479         481                4             4         5          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         509         512                4             2         3          1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         535         536                4            -<span style="color: #BB0000;">1</span>         2          1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>         100         104                4            -<span style="color: #BB0000;">1</span>         5          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>         150         152                4             4         2          1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>         252         254                4             4         5          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           0           3                4            -<span style="color: #BB0000;">1</span>         5          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           1           3                4             4         2          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           6          11                4             4         2          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>          10          11                4             4         2          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>          52          57                4             4         5          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>          54          57                4            -<span style="color: #BB0000;">1</span>         5          0</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: gamma_email &lt;int&gt;, match_weight &lt;dbl&gt;, tf_adj_city &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   total_match_weight &lt;dbl&gt;, match_probability &lt;dbl&gt;</span></span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con2</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -346,12 +346,12 @@ arrives.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 68        cluster_63 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 477       cluster_476</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 557       cluster_550</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 699       cluster_694</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 870       cluster_867</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 940       cluster_933</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 254       cluster_252</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 3         cluster_0  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 141       cluster_133</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 262       cluster_261</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 782       cluster_777</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 925       cluster_924</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>
