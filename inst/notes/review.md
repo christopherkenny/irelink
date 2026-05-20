@@ -6,4 +6,6 @@
 - [x] `il_regex_extract()` docs are out of date.
 - [x] `il_comparator_score` docs are out of date too.
 - [x] All autoplot.* functions should be defined in `autoplot.R`.
-- [ ] We use tidyselect in a lot of places, but it is a suggests. Weigh in on if it is used in sufficient locations to upgrade it to an imports.
+- [x] We use tidyselect in a lot of places, but it is a suggests. Weigh in on if it is used in sufficient locations to upgrade it to an imports.
+- [x] There are a small number of \dontrun statements. These are not acceptable for package code. Identify how each use should be made into proper package code that runs and fix it.
+- [x] In some examples, I see things like throwawya renames, like df <- fake_20, which are both unnecessary and reduce clarity. search for cases like that and fix them.

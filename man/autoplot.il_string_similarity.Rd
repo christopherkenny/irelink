@@ -21,8 +21,5 @@ chart, making it easy to compare multiple string-distance metrics at a
 glance.
 }
 \examples{
-\dontrun{
-library(ggplot2)
-autoplot(il_string_similarity('John', 'Jon'))
-}
+ggplot2::autoplot(il_string_similarity('John', 'Jon'))
 }

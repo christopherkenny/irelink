@@ -20,10 +20,15 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' con <- DBI::dbConnect(duckdb::duckdb())
+#' spec <- il_spec() |>
+#'   il_compare(first_name, cl_exact()) |>
+#'   il_compare(surname, cl_exact())
+#' model <- il_model(fake_20, spec = spec, con = con)
 #' vectors <- il_comparison_vectors(model)
-#' autoplot(vectors)
-#' }
+#' ggplot2::autoplot(vectors)
+#' il_cleanup(model)
+#' DBI::dbDisconnect(con, shutdown = TRUE)
 il_comparison_vectors <- function(model, blocking = NULL, limit = NULL) {
   validate_il_model(model)
 

@@ -14,14 +14,13 @@
 #' @export
 #'
 #' @examples
-#' df <- fake_20
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' spec <- il_spec() |>
 #'   il_compare(first_name, cl_jaro_winkler(0.9, 0.7)) |>
 #'   il_compare(surname, cl_exact()) |>
 #'   il_compare(dob, cl_exact()) |>
 #'   il_block_on(surname)
-#' model <- il_model(df, spec = spec, con = con)
+#' model <- il_model(fake_20, spec = spec, con = con)
 #' model <- il_estimate_u(model)
 #'
 #' model <- il_estimate_m_from_column(model, city)

@@ -538,10 +538,7 @@ autoplot.il_comparison_vectors <- function(object, ...) {
 #' @exportS3Method ggplot2::autoplot
 #'
 #' @examples
-#' \dontrun{
-#' library(ggplot2)
-#' autoplot(il_string_similarity('John', 'Jon'))
-#' }
+#' ggplot2::autoplot(il_string_similarity('John', 'Jon'))
 autoplot.il_string_similarity <- function(object, ...) {
   long <- tibble::tibble(
     metric = names(object),

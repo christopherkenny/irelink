@@ -21,15 +21,15 @@
 - [x] R/il_cluster_confusion_matrix.R
 - [x] R/il_column_transforms.R
 - [x] R/il_comparator_score.R
-- [ ] R/il_compare.R
-- [ ] R/il_compare_records.R
-- [ ] R/il_comparison_vectors.R
-- [ ] R/il_completeness.R
-- [ ] R/il_confusion_matrix.R
-- [ ] R/il_count_pairs.R
-- [ ] R/il_deterministic_link.R
-- [ ] R/il_errors.R
-- [ ] R/il_estimate_em.R
+- [x] R/il_compare.R
+- [x] R/il_compare_records.R
+- [x] R/il_comparison_vectors.R
+- [x] R/il_completeness.R
+- [x] R/il_confusion_matrix.R
+- [x] R/il_count_pairs.R
+- [x] R/il_deterministic_link.R
+- [x] R/il_errors.R
+- [x] R/il_estimate_em.R
 - [ ] R/il_estimate_m_from_column.R
 - [ ] R/il_estimate_m_from_labels.R
 - [ ] R/il_estimate_prior.R
