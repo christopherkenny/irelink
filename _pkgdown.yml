@@ -17,6 +17,7 @@ articles:
       - record-linkage
       - transactions
       - from_splink
+      - from_fastLink
       - advanced
 
 reference:

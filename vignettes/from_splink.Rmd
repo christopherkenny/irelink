@@ -44,9 +44,7 @@ In `irelink`, the `cl_*()` functions serve the same role and can be passed direc
 | Deterministic link | `linker.deterministic_link()` | `il_deterministic_link(df, ...)` |
 | Find matches | `linker.inference.`<br>`find_matches_to_new_records(...)` | `il_find_matches(model, new_records, ...)` |
 
-`irelink` also supports `link_type = "link_and_dedupe"` for two-table jobs
-where duplicates may exist both within each input table and across the two
-tables.
+`irelink` also supports `link_type = "link_and_dedupe"` for two-table jobs where duplicates may exist both within each input table and across the two tables.
 
 ## Comparison levels
 
@@ -203,12 +201,10 @@ il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
 
-The examples above use probability thresholds because those are portable between
-Splink and `irelink`. Splink's prediction `match_weight` includes the prior
-odds. In `irelink`, `match_weight` is evidence-only and
-`total_match_weight` is the prior-inclusive log2 odds. Match-weight thresholds
-therefore need that prior adjustment when you translate them between the two
-packages.
+The examples above use probability thresholds because those are portable between Splink and `irelink`.
+Splink's prediction `match_weight` includes the prior odds.
+In `irelink`, `match_weight` is evidence-only and `total_match_weight` is the prior-inclusive log2 odds.
+Match-weight thresholds therefore need that prior adjustment when you translate them between the two packages.
 
 ## Example: finding matches against new records
 
@@ -234,6 +230,5 @@ new_df <- data.frame(
 results <- il_find_matches(model, new_df, threshold = 0.5)
 ```
 
-Splink exposes a match-weight threshold for this workflow, while
-`il_find_matches()` filters on posterior match probability. Translate those
-thresholds with the same caution as in the prediction example above.
+Splink exposes a match-weight threshold for this workflow, while `il_find_matches()` filters on posterior match probability.
+Translate those thresholds with the same caution as in the prediction example above.

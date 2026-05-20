@@ -1222,3 +1222,13 @@ If they are an issue, fix them and make a note in the doc on how you fixed it.
 
 Based on what you've done in `inst/refs/47--57`, write a stage summary, `inst/refs/stage-13-notes.md`.
 This should be an executive summary with key references back to the other files.
+
+## Polish (GPT-5.4 high)
+
+Go through each of the .Rmd files in this repo. Fix the line breaks so that
+sentences start on a new line and line breaks only occur at the end of a sentence.
+An IDE will handle wrapping and so these files should never be manually wrapped.
+
+## Translation vignette (Claude Code Sonnet 4.6)
+
+We need to create a from_fastLink.Rmd vignette, similar to the from_splink.Rmd one. Please use the inst/benchmarks/fastLink/ for starting examples that should help with massaging the information together

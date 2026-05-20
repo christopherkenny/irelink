@@ -14,15 +14,9 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette demonstrates linking records across two separate datasets
-using the FEBRL (Freely Extensible Biomedical Record Linkage)
-benchmark data.
-Dataset 4a contains 5,000 original records and dataset 4b contains
-5,000 duplicates — one for each original — corrupted with
-typographical errors, missing values, and transpositions.
-Ground truth is encoded in the `rec_id` column: records sharing the
-same base number (e.g., `rec-1070-org` and `rec-1070-dup-0`) refer to
-the same entity.
+This vignette demonstrates linking records across two separate datasets using the FEBRL (Freely Extensible Biomedical Record Linkage) benchmark data.
+Dataset 4a contains 5,000 original records and dataset 4b contains 5,000 duplicates — one for each original — corrupted with typographical errors, missing values, and transpositions.
+Ground truth is encoded in the `rec_id` column: records sharing the same base number (e.g., `rec-1070-org` and `rec-1070-dup-0`) refer to the same entity.
 
 ## Setup
 
@@ -55,10 +49,8 @@ autoplot(comp)
 
 ## Define the specification
 
-For linking (as opposed to deduplication), set `link_type = "link"` when
-creating the model.
-Comparisons use name similarity, date-of-birth matching, and postcode
-exact matching:
+For linking (as opposed to deduplication), set `link_type = "link"` when creating the model.
+Comparisons use name similarity, date-of-birth matching, and postcode exact matching:
 
 ```{r spec}
 spec <- il_spec() |>
@@ -172,9 +164,7 @@ nrow(labels)
 sum(labels$is_match)
 ```
 
-Because `labels` includes all true cross-table matches, any true match missed
-by the blocking rules is counted as a false negative in the evaluation curves
-below.
+Because `labels` includes all true cross-table matches, any true match missed by the blocking rules is counted as a false negative in the evaluation curves below.
 
 ### Accuracy metrics
 
@@ -202,6 +192,5 @@ il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
 
-`il_cleanup(model)` is model-scoped. If an interactive run failed before you
-kept the model object, call `il_cleanup_all(con)` to remove all `irelink`
-tables from the connection before disconnecting.
+`il_cleanup(model)` is model-scoped.
+If an interactive run failed before you kept the model object, call `il_cleanup_all(con)` to remove all `irelink` tables from the connection before disconnecting.

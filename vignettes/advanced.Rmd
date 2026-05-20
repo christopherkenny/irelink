@@ -14,8 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette covers advanced `irelink` features for users who have
-completed the Getting Started or Deduplication vignettes.
+This vignette covers advanced `irelink` features for users who have completed the Getting Started or Deduplication vignettes.
 All examples use `fake_1000` and a shared in-memory DuckDB connection.
 
 ## Setup
@@ -56,8 +55,7 @@ clusters <- il_cluster(pairs, threshold = 0.85)
 
 ## Training diagnostics
 
-`il_training_history()` returns the m and u parameter estimates at each
-EM iteration across all training sessions.
+`il_training_history()` returns the m and u parameter estimates at each EM iteration across all training sessions.
 Plot it to check whether parameters have converged:
 
 ```{r history, fig.width = 7, fig.height = 5}
@@ -66,15 +64,12 @@ autoplot(hist)
 ```
 
 A well-converged model shows stable values in the final iterations.
-If estimates are still drifting, add more EM passes with different
-blocking rules or expand the set of candidate pairs.
+If estimates are still drifting, add more EM passes with different blocking rules or expand the set of candidate pairs.
 
 ## Pair inspection
 
-`il_compare_records()` scores a single pair of records against the
-spec without requiring a full prediction pass.
-Use it to diagnose why a known match scores too low or a non-match
-scores too high.
+`il_compare_records()` scores a single pair of records against the spec without requiring a full prediction pass.
+Use it to diagnose why a known match scores too low or a non-match scores too high.
 
 ```{r compare-records}
 rec_a <- fake_1000[1, ]
@@ -84,11 +79,9 @@ il_compare_records(rec_a, rec_b, spec = model$spec, con = con)
 ```
 
 The gamma columns show the comparison level reached on each field.
-Cross-reference these with `il_weights(model)` to read off the
-match-weight contribution of each level.
+Cross-reference these with `il_weights(model)` to read off the match-weight contribution of each level.
 
-For a visual breakdown of how per-field gamma values sum to an overall
-match decision, draw a waterfall chart for any pair in the scored set:
+For a visual breakdown of how per-field gamma values sum to an overall match decision, draw a waterfall chart for any pair in the scored set:
 
 ```{r waterfall, fig.width = 6, fig.height = 3}
 autoplot(pairs, which = 1)
@@ -96,12 +89,9 @@ autoplot(pairs, which = 1)
 
 ## Lazy prediction for large data
 
-`predict(collect = FALSE)` keeps scored pairs in the database rather
-than collecting them into R. This lazy path requires a DuckDB or
-PostgreSQL backend; the examples here use DuckDB.
-`il_cluster()` detects the lazy reference and runs connected-components
-analysis entirely in SQL, avoiding a costly round-trip for datasets
-where materializing millions of rows would exhaust memory.
+`predict(collect = FALSE)` keeps scored pairs in the database rather than collecting them into R.
+This lazy path requires a DuckDB or PostgreSQL backend; the examples here use DuckDB.
+`il_cluster()` detects the lazy reference and runs connected-components analysis entirely in SQL, avoiding a costly round-trip for datasets where materializing millions of rows would exhaust memory.
 
 ```{r lazy}
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
@@ -115,17 +105,13 @@ clusters_lazy <- il_cluster(pairs_lazy, threshold = 0.85)
 nrow(clusters_lazy)
 ```
 
-`autoplot()` and `il_waterfall()` collect automatically when needed,
-so downstream analysis code is unchanged.
-Use the lazy path on DuckDB or PostgreSQL when candidate-pair counts
-exceed available memory.
-The lazy prediction table is model-scoped; `il_cleanup(model)` removes it
-along with the model's source and term-frequency tables.
+`autoplot()` and `il_waterfall()` collect automatically when needed, so downstream analysis code is unchanged.
+Use the lazy path on DuckDB or PostgreSQL when candidate-pair counts exceed available memory.
+The lazy prediction table is model-scoped; `il_cleanup(model)` removes it along with the model's source and term-frequency tables.
 
 ## Chunked u estimation and SQL profiling
 
-For larger datasets, `il_estimate_u()` can accumulate random-pair gamma counts
-in chunks and stop once every comparison level has enough support:
+For larger datasets, `il_estimate_u()` can accumulate random-pair gamma counts in chunks and stop once every comparison level has enough support:
 
 ```{r chunked-u, eval = FALSE}
 model <- il_estimate_u(
@@ -137,9 +123,7 @@ model <- il_estimate_u(
 model$params$u_estimation
 ```
 
-When investigating database performance, set `profile_sql = TRUE` on
-`il_estimate_u()`, `il_estimate_prior()`, or `predict()` to collect lightweight
-SQL timing metadata:
+When investigating database performance, set `profile_sql = TRUE` on `il_estimate_u()`, `il_estimate_prior()`, or `predict()` to collect lightweight SQL timing metadata:
 
 ```{r sql-profile, eval = FALSE}
 pairs <- predict(model, threshold = 0.5, profile_sql = TRUE)
@@ -148,26 +132,21 @@ attr(pairs, 'sql_profile')
 
 ## Cluster diagnostics
 
-`il_graph_metrics()` computes node-, edge-, and cluster-level summaries
-from the linkage graph.
-Use it to spot over-generous thresholds (clusters that are too large)
-or sparse connectivity (clusters with unexpectedly low density).
+`il_graph_metrics()` computes node-, edge-, and cluster-level summaries from the linkage graph.
+Use it to spot over-generous thresholds (clusters that are too large) or sparse connectivity (clusters with unexpectedly low density).
 
 ```{r graph-metrics}
 metrics <- il_graph_metrics(pairs, clusters)
 ```
 
-The cluster table reports size and internal edge density
-(edges / maximum possible edges for a cluster of that size):
+The cluster table reports size and internal edge density (edges / maximum possible edges for a cluster of that size):
 
 ```{r graph-clusters}
 metrics$clusters
 ```
 
-A high maximum cluster size combined with low density often indicates
-that a transitive link is pulling unrelated entities together.
-Consider raising the threshold in `predict()` or `il_cluster()` and
-re-checking the metrics.
+A high maximum cluster size combined with low density often indicates that a transitive link is pulling unrelated entities together.
+Consider raising the threshold in `predict()` or `il_cluster()` and re-checking the metrics.
 
 The node table shows how many links each record participates in (degree):
 
@@ -175,16 +154,12 @@ The node table shows how many links each record participates in (degree):
 head(metrics$nodes)
 ```
 
-Records with unusually high degree relative to their cluster size may
-be acting as hubs that inflate the cluster beyond its true membership.
+Records with unusually high degree relative to their cluster size may be acting as hubs that inflate the cluster beyond its true membership.
 
 ## Phonetic blocking
 
-Standard equality blocking misses pairs where names are spelled
-differently but sound alike — for example, "Smith" / "Smyth" or
-"Jon" / "John".
-Pass `.transform = il_soundex` to `il_block_on()` or `block_on()` to
-group names by phonetic code instead of exact spelling.
+Standard equality blocking misses pairs where names are spelled differently but sound alike — for example, "Smith" / "Smyth" or "Jon" / "John".
+Pass `.transform = il_soundex` to `il_block_on()` or `block_on()` to group names by phonetic code instead of exact spelling.
 
 ```{r phonetic-spec}
 spec_phon <- il_spec() |>
@@ -195,8 +170,7 @@ spec_phon <- il_spec() |>
   il_block_on(surname, .transform = il_soundex)
 ```
 
-Use the same `.transform` argument when specifying the blocking rule
-for an EM training pass:
+Use the same `.transform` argument when specifying the blocking rule for an EM training pass:
 
 ```{r phonetic-train}
 model_phon <- il_model(df, spec = spec_phon, con = con)
@@ -208,15 +182,12 @@ model_phon <- il_estimate_em(
 ```
 
 Phonetic blocking increases recall at the cost of more candidate pairs.
-Use `il_count_pairs()` to check the volume trade-off before committing
-to a spec.
+Use `il_count_pairs()` to check the volume trade-off before committing to a spec.
 
 ## Column transforms
 
-The `transform` argument in `il_compare()` applies a function to both
-values before scoring.
-Use it to normalize case or strip whitespace before a similarity
-comparison:
+The `transform` argument in `il_compare()` applies a function to both values before scoring.
+Use it to normalize case or strip whitespace before a similarity comparison:
 
 ```{r transform-spec}
 spec_tr <- il_spec() |>
@@ -231,17 +202,15 @@ model_tr <- il_estimate_u(model_tr, max_pairs = 1e5)
 model_tr <- il_estimate_em(model_tr, block_on(surname))
 ```
 
-`tolower`, `toupper`, and `trimws` are translated to SQL on DuckDB and
-PostgreSQL, so the transform runs in-database at full speed.
+`tolower`, `toupper`, and `trimws` are translated to SQL on DuckDB and PostgreSQL, so the transform runs in-database at full speed.
 Custom R functions work on the R-side path only.
 When saving a model with `il_save()`, `.rds` keeps the R object as-is.
-`.json` writes Splink settings SQL, so loaded comparisons come back as
-SQL-backed levels. Anonymous functions still produce a warning on save.
+`.json` writes Splink settings SQL, so loaded comparisons come back as SQL-backed levels.
+Anonymous functions still produce a warning on save.
 
 ## Incremental matching
 
-`il_find_matches()` scores new records against the data already loaded
-into a trained model without retraining.
+`il_find_matches()` scores new records against the data already loaded into a trained model without retraining.
 It applies the same blocking rules and comparison spec:
 
 ```{r find-matches}
@@ -258,19 +227,14 @@ matches
 ```
 
 Each row is a (new record, existing record) pair.
-`unique_id_l` identifies the new record (auto-assigned starting from 1)
-and `unique_id_r` identifies the matched record in the original dataset.
+`unique_id_l` identifies the new record (auto-assigned starting from 1) and `unique_id_r` identifies the matched record in the original dataset.
 
-This pairs naturally with `il_load()` and `il_attach()`: load a saved
-model, attach it to the current database, and call `il_find_matches()`
-for each incoming batch of new records.
+This pairs naturally with `il_load()` and `il_attach()`: load a saved model, attach it to the current database, and call `il_find_matches()` for each incoming batch of new records.
 
 ## Cleanup
 
-`il_cleanup(model)` only removes tables owned by that model, so it is safe when
-several models share the same connection. `il_cleanup_all(con)` is broader and
-is best reserved for failed runs or exploratory sessions where you want to
-clear every `irelink` table before disconnecting.
+`il_cleanup(model)` only removes tables owned by that model, so it is safe when several models share the same connection.
+`il_cleanup_all(con)` is broader and is best reserved for failed runs or exploratory sessions where you want to clear every `irelink` table before disconnecting.
 
 ```{r cleanup}
 il_cleanup(model)

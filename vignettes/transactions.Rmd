@@ -60,8 +60,7 @@ The data is synthetic and designed to be challenging: amounts differ due to fees
 Since every origin payment has exactly one destination counterpart, the prior match probability is `1 / n_origin`.
 
 This vignette requires the [nanoparquet](https://cran.r-project.org/package=nanoparquet) package to read the remote Parquet files and will only compile when the package and data URLs are both available.
-It also assumes DuckDB specifically: the blocking rules below use raw `.where`
-SQL with DuckDB date helpers such as `strftime()` and `yearweek()`.
+It also assumes DuckDB specifically: the blocking rules below use raw `.where` SQL with DuckDB date helpers such as `strftime()` and `yearweek()`.
 
 ## Load the data
 
@@ -85,10 +84,7 @@ il_profile(df_origin, memo, transaction_date, amount, con = con, top_n = 8)
 
 ## Choose blocking rules
 
-Because corresponding records differ systematically — amounts change due
-to fees, dates shift, memos are truncated — blocking rules must be
-generous enough to capture true matches while still reducing the pair
-space dramatically.
+Because corresponding records differ systematically — amounts change due to fees, dates shift, memos are truncated — blocking rules must be generous enough to capture true matches while still reducing the pair space dramatically.
 The rules below use SQL expressions via `.where`:
 
 ```{r count-pairs}
@@ -192,9 +188,7 @@ spec
 
 ## Train the model
 
-Because this benchmark is one-to-one, set the prevalence prior directly with
-the exported `il_prior_prevalence()` helper rather than mutating `model$params`
-internally:
+Because this benchmark is one-to-one, set the prevalence prior directly with the exported `il_prior_prevalence()` helper rather than mutating `model$params` internally:
 
 ```{r model}
 model <- il_model(
@@ -268,6 +262,5 @@ il_cleanup(model)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
 
-`il_cleanup(model)` is model-scoped. If an interactive run failed before you
-kept the model object, call `il_cleanup_all(con)` to remove all `irelink`
-tables from the connection before disconnecting.
+`il_cleanup(model)` is model-scoped.
+If an interactive run failed before you kept the model object, call `il_cleanup_all(con)` to remove all `irelink` tables from the connection before disconnecting.
