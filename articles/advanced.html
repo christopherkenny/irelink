@@ -179,7 +179,7 @@ exhaust memory.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pairs_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span>, collect <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">pairs_lazy</span></span>
-<span><span class="co">#&gt; &lt;il_compared_lazy&gt; 2,783 pairs in table __il_8627_1_predicted_4 (threshold = 0.5)</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;il_compared_lazy&gt; 2,783 pairs in table __il_8657_1_predicted_4 (threshold = 0.5)</span></span></code></pre></div>
 <p>Pass the lazy reference directly to <code><a href="../reference/il_cluster.html">il_cluster()</a></code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">clusters_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">pairs_lazy</span>, threshold <span class="op">=</span> <span class="fl">0.85</span><span class="op">)</span></span>
@@ -339,23 +339,23 @@ same blocking rules and comparison spec:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 17 × 5</span></span></span>
 <span><span class="co">#&gt;    unique_id_l unique_id_r match_weight total_match_weight match_probability</span></span>
 <span><span class="co">#&gt;          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>           1         237        2.28               2.37              0.838</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>           1         239        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>           1         364        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>           1         365        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>           1         241        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>           1         242        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>           1         362        2.28               2.37              0.838</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>           1         366        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>           1         367        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           1         789        2.31               2.41              0.841</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>           2         858        0.871              0.964             0.661</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>           1         240        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>           1         363        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>           2         859        2.31               2.41              0.841</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span>           2         864        0.871              0.964             0.661</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span>           1         238        2.31               2.41              0.841</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">17</span>           1         791        0.832              0.925             0.655</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>           2         858        0.871              0.964             0.661</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>           1         240        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>           1         363        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>           2         859        2.31               2.41              0.841</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>           2         864        0.871              0.964             0.661</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>           1         238        2.31               2.41              0.841</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>           1         791        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>           1         237        2.28               2.37              0.838</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>           1         239        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           1         364        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>           1         365        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>           1         241        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>           1         242        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>           1         362        2.28               2.37              0.838</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span>           1         366        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">16</span>           1         367        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">17</span>           1         789        2.31               2.41              0.841</span></span></code></pre></div>
 <p>Each row is a (new record, existing record) pair.
 <code>unique_id_l</code> identifies the new record (auto-assigned
 starting from 1) and <code>unique_id_r</code> identifies the matched
