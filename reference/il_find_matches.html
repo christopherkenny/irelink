@@ -30,6 +30,7 @@ arrive after the model has been trained."><meta property="og:image" content="htt
     <li><a class="dropdown-item" href="../articles/record-linkage.html">Record Linkage Across Datasets</a></li>
     <li><a class="dropdown-item" href="../articles/transactions.html">Linking Banking Transactions</a></li>
     <li><a class="dropdown-item" href="../articles/from_splink.html">Translating from Splink</a></li>
+    <li><a class="dropdown-item" href="../articles/from_fastLink.html">Translating from fastLink</a></li>
     <li><a class="dropdown-item" href="../articles/advanced.html">Advanced Workflows</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -141,9 +142,9 @@ and existing data.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #949494;"># A tibble: 3 × 5</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   unique_id_l unique_id_r match_weight total_match_weight match_probability</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>           1           1         3.86               3.81             0.933</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span>           1          11         3.86               3.81             0.933</span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span>           1           2         3.86               3.81             0.933</span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>           1          11         3.86               3.81             0.933</span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span>           1           1         3.86               3.81             0.933</span>
 <span class="r-in"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>

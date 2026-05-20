@@ -14,5 +14,7 @@
   Transactions](http://christophertkenny.com/irelink/articles/transactions.md):
 - [Translating from
   Splink](http://christophertkenny.com/irelink/articles/from_splink.md):
+- [Translating from
+  fastLink](http://christophertkenny.com/irelink/articles/from_fastLink.md):
 - [Advanced
   Workflows](http://christophertkenny.com/irelink/articles/advanced.md):

@@ -30,6 +30,7 @@ ggplot2::geom_col() and ggplot2::coord_flip()."><meta property="og:image" conten
     <li><a class="dropdown-item" href="../articles/record-linkage.html">Record Linkage Across Datasets</a></li>
     <li><a class="dropdown-item" href="../articles/transactions.html">Linking Banking Transactions</a></li>
     <li><a class="dropdown-item" href="../articles/from_splink.html">Translating from Splink</a></li>
+    <li><a class="dropdown-item" href="../articles/from_fastLink.html">Translating from fastLink</a></li>
     <li><a class="dropdown-item" href="../articles/advanced.html">Advanced Workflows</a></li>
   </ul></li>
 <li class="nav-item"><a class="nav-link" href="../news/index.html">Changelog</a></li>
@@ -136,9 +137,9 @@ one row per comparison contribution, and a final total.</p>
 <span class="r-out co"><span class="r-pr">#&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span> <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">1</span> Prior          1      -<span style="color: #BB0000;">0.051</span><span style="color: #BB0000; text-decoration: underline;">0</span> prior      0      -<span style="color: #BB0000;">0.051</span><span style="color: #BB0000; text-decoration: underline;">0</span></span>
 <span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">2</span> first_name     2       2.91   positive  -<span style="color: #BB0000;">0.051</span><span style="color: #BB0000; text-decoration: underline;">0</span>  2.86  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> surname        3       0.441  positive   2.86    3.30  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> dob            4      -<span style="color: #BB0000;">1.72</span>   negative   3.30    1.59  </span>
-<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> Final          5       1.59   final      0       1.59  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">3</span> surname        3       2.66   positive   2.86    5.52  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">4</span> dob            4       3.19   positive   5.52    8.71  </span>
+<span class="r-out co"><span class="r-pr">#&gt;</span> <span style="color: #BCBCBC;">5</span> Final          5       8.71   final      0       8.71  </span>
 <span class="r-in"><span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></span>
 </code></pre></div>
     </div>
