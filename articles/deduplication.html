@@ -310,12 +310,12 @@ re-apply the model without retraining:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 11</span></span></span>
 <span><span class="co">#&gt;   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob gamma_city</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           0           3                4            -<span style="color: #BB0000;">1</span>         5          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           1           3                4             4         2          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           6          11                4             4         2          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>          10          11                4             4         2          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>          52          57                4             4         5          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>          54          57                4            -<span style="color: #BB0000;">1</span>         5          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         479         481                4             4         5          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         509         512                4             2         3          1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         535         536                4            -<span style="color: #BB0000;">1</span>         2          1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>         100         104                4            -<span style="color: #BB0000;">1</span>         5          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>         150         152                4             4         2          1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>         252         254                4             4         5          0</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: gamma_email &lt;int&gt;, match_weight &lt;dbl&gt;, tf_adj_city &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   total_match_weight &lt;dbl&gt;, match_probability &lt;dbl&gt;</span></span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con2</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -346,12 +346,12 @@ arrives.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 61        cluster_58 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 921       cluster_918</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 932       cluster_924</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 944       cluster_941</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 954       cluster_947</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 167       cluster_164</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 411       cluster_409</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 526       cluster_517</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 685       cluster_684</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 520       cluster_517</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 882       cluster_879</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 931       cluster_924</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>
