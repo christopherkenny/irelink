@@ -69,7 +69,7 @@ initial blocking rules before training.</p>
 
 
 <dl><dt id="arg--data">.data<a class="anchor" aria-label="anchor" href="#arg--data"></a></dt>
-<dd><p>A data frame, dbplyr <code>tbl_lazy</code>, or character table name.</p></dd>
+<dd><p>A data frame, <a href="https://dbplyr.tidyverse.org/reference/tbl_lazy.html" class="external-link">dbplyr::tbl_lazy</a>, or character table name.</p></dd>
 
 
 <dt id="arg-columns">columns<a class="anchor" aria-label="anchor" href="#arg-columns"></a></dt>
@@ -78,7 +78,7 @@ initial blocking rules before training.</p>
 
 
 <dt id="arg-con">con<a class="anchor" aria-label="anchor" href="#arg-con"></a></dt>
-<dd><p>A DBI connection object. Optional when <code>.data</code> is already
+<dd><p>A DBI connection object from <code><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">DBI::dbConnect()</a></code>. Optional when <code>.data</code> is already
 registered in the database.</p></dd>
 
 
@@ -94,7 +94,7 @@ Set to <code>2</code> to also evaluate two-column combinations.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble with columns <code>rule</code>, <code>n_distinct</code>, <code>coverage</code>,
+    <p>A <code><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble()</a></code> with columns <code>rule</code>, <code>n_distinct</code>, <code>coverage</code>,
 <code>n_pairs</code>, <code>pct_of_cartesian</code>, and <code>score</code>, sorted by <code>score</code>
 descending. Higher scores indicate better blocking rules.</p>
     </div>

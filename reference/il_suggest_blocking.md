@@ -20,7 +20,9 @@ il_suggest_blocking(
 
 - .data:
 
-  A data frame, dbplyr `tbl_lazy`, or character table name.
+  A data frame,
+  [dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html),
+  or character table name.
 
 - columns:
 
@@ -29,8 +31,9 @@ il_suggest_blocking(
 
 - con:
 
-  A DBI connection object. Optional when `.data` is already registered
-  in the database.
+  A DBI connection object from
+  [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html).
+  Optional when `.data` is already registered in the database.
 
 - link_type:
 
@@ -44,7 +47,9 @@ il_suggest_blocking(
 
 ## Value
 
-A tibble with columns `rule`, `n_distinct`, `coverage`, `n_pairs`,
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+with columns `rule`, `n_distinct`, `coverage`, `n_pairs`,
 `pct_of_cartesian`, and `score`, sorted by `score` descending. Higher
 scores indicate better blocking rules.
 

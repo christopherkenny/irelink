@@ -26,9 +26,11 @@ il_waterfall(pairs, which = 1L)
 
 ## Value
 
-A tibble with columns `step`, `order`, `contribution`, `direction`,
-`start`, and `end`. The rows include the prior odds, one row per
-comparison contribution, and a final total.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+with columns `step`, `order`, `contribution`, `direction`, `start`, and
+`end`. The rows include the prior odds, one row per comparison
+contribution, and a final total.
 
 ## Examples
 

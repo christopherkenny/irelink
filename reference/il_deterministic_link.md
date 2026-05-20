@@ -21,8 +21,9 @@ il_deterministic_link(
 
 - .data:
 
-  A data frame, dbplyr `tbl_lazy`, or character table name (first or
-  only dataset).
+  A data frame,
+  [dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html),
+  or character table name (first or only dataset).
 
 - ...:
 
@@ -35,7 +36,10 @@ il_deterministic_link(
 
 - con:
 
-  A DBI connection object. Optional when `.data` is a `tbl_lazy`.
+  A DBI connection object from
+  [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html).
+  Optional when `.data` is a
+  [dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html).
 
 - link_type:
 
@@ -43,7 +47,9 @@ il_deterministic_link(
 
 ## Value
 
-A tibble of exact-match record pairs.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+of exact-match record pairs.
 
 ## Examples
 

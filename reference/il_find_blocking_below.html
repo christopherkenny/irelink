@@ -67,7 +67,7 @@ that keep the total number of candidate pairs below a given ceiling.</p>
 
 
 <dl><dt id="arg--data">.data<a class="anchor" aria-label="anchor" href="#arg--data"></a></dt>
-<dd><p>A data frame, dbplyr <code>tbl_lazy</code>, or character table name.</p></dd>
+<dd><p>A data frame, <a href="https://dbplyr.tidyverse.org/reference/tbl_lazy.html" class="external-link">dbplyr::tbl_lazy</a>, or character table name.</p></dd>
 
 
 <dt id="arg-max-pairs">max_pairs<a class="anchor" aria-label="anchor" href="#arg-max-pairs"></a></dt>
@@ -79,7 +79,7 @@ that keep the total number of candidate pairs below a given ceiling.</p>
 
 
 <dt id="arg-con">con<a class="anchor" aria-label="anchor" href="#arg-con"></a></dt>
-<dd><p>A DBI connection object.</p></dd>
+<dd><p>A DBI connection object from <code><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">DBI::dbConnect()</a></code>.</p></dd>
 
 
 <dt id="arg-link-type">link_type<a class="anchor" aria-label="anchor" href="#arg-link-type"></a></dt>
@@ -92,7 +92,7 @@ that keep the total number of candidate pairs below a given ceiling.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble of qualifying blocking rules, sorted by <code>n_pairs</code>
+    <p>A <code><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble()</a></code> of qualifying blocking rules, sorted by <code>n_pairs</code>
 ascending. Empty tibble if no rules qualify.</p>
     </div>
 

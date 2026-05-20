@@ -26,8 +26,10 @@ il_compare_records(record_a, record_b, spec, con = NULL)
 
 - con:
 
-  A DBI connection object. If `NULL` (default), a temporary DuckDB
-  connection is created and closed on exit.
+  A DBI connection object from
+  [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html).
+  If `NULL` (default), a temporary DuckDB connection is created and
+  closed on exit.
 
 ## Value
 

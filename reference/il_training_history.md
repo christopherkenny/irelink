@@ -20,8 +20,10 @@ il_training_history(model)
 
 ## Value
 
-A tibble with columns `session`, `iteration`, `comparison`,
-`gamma_level`, and `value`.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+with columns `session`, `iteration`, `comparison`, `gamma_level`, and
+`value`.
 
 ## Examples
 

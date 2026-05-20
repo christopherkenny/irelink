@@ -1,7 +1,8 @@
 # Create a Linkage Model
 
 Binds one or more datasets to a specification and a database connection,
-producing an untrained model. Accepts in-memory data frames, dbplyr lazy
+producing an untrained model. Accepts in-memory data frames,
+[dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html)
 table references, or character table names for data that already lives
 in a database.
 
@@ -21,9 +22,11 @@ il_model(
 
 - .data:
 
-  A data frame, tibble, dbplyr `tbl_lazy`, or character table name. The
-  first (or only) input dataset. If no `unique_id` column is present,
-  one is generated automatically.
+  A data frame,
+  [`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html),
+  [dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html),
+  or character table name. The first (or only) input dataset. If no
+  `unique_id` column is present, one is generated automatically.
 
 - ...:
 
@@ -39,9 +42,12 @@ il_model(
 
 - con:
 
-  A DBI connection object (e.g., from
-  `DBI::dbConnect(duckdb::duckdb())`). Optional when `.data` is a
-  `tbl_lazy`, the connection is extracted from the table reference.
+  A DBI connection object from
+  [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html)
+  (e.g., from `DBI::dbConnect(duckdb::duckdb())`). Optional when `.data`
+  is a
+  [dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html),
+  the connection is extracted from the table reference.
 
 - link_type:
 
@@ -53,10 +59,11 @@ An untrained `il_model` object, ready for training verbs.
 
 ## Details
 
-When `.data` is a `tbl_lazy` (from
-[`dplyr::tbl()`](https://dplyr.tidyverse.org/reference/tbl.html)), the
-connection is extracted automatically and data stays in-database with
-zero copying. A `unique_id` column is injected automatically if not
+When `.data` is a
+[dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html)
+(from [`dplyr::tbl()`](https://dplyr.tidyverse.org/reference/tbl.html)),
+the connection is extracted automatically and data stays in-database
+with zero copying. A `unique_id` column is injected automatically if not
 already present.
 
 ## Examples

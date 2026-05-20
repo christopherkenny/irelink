@@ -38,8 +38,12 @@ il_comparator_threshold_chart(
 
 - con:
 
-  A DBI connection. If `NULL`, uses R-side computation.
+  A DBI connection from
+  [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html).
+  If `NULL`, uses R-side computation.
 
 ## Value
 
-A `ggplot2` object.
+A
+[`ggplot2::ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html)
+object.

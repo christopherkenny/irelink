@@ -21,9 +21,14 @@ il_phonetic_chart(.data, col_1, col_2, con = NULL)
 
 - con:
 
-  A DBI connection. If provided and DuckDB or PostgreSQL, computes
-  Soundex in SQL.
+  A DBI connection from
+  [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html).
+  If provided and
+  [`duckdb::duckdb()`](https://r.duckdb.org/reference/duckdb.html) or
+  PostgreSQL, computes Soundex in SQL.
 
 ## Value
 
-A `ggplot2` object.
+A
+[`ggplot2::ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html)
+object.

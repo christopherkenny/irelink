@@ -72,12 +72,12 @@ comparison thresholds. Rows where either column is missing are omitted.</p>
 
 
 <dt id="arg-con">con<a class="anchor" aria-label="anchor" href="#arg-con"></a></dt>
-<dd><p>A DBI connection. If <code>NULL</code>, uses R-side computation.</p></dd>
+<dd><p>A DBI connection from <code><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">DBI::dbConnect()</a></code>. If <code>NULL</code>, uses R-side computation.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble with the two input columns and metric columns
+    <p>A <code><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble()</a></code> with the two input columns and metric columns
 <code>jaro_winkler</code>, <code>jaro</code>, <code>levenshtein</code>, <code>jaccard</code>, and <code>cosine</code>.
 Unsupported SQL-backend metrics are present as <code>NA</code>. The result has S3
 class <code>il_comparator_score</code>.</p>
@@ -85,7 +85,7 @@ class <code>il_comparator_score</code>.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>With <code>con = NULL</code>, all metrics are computed in R with
-<code><a href="https://rdrr.io/pkg/stringdist/man/stringdist.html" class="external-link">stringdist::stringdist()</a></code>. With a DuckDB or PostgreSQL connection,
+<code><a href="https://rdrr.io/pkg/stringdist/man/stringdist.html" class="external-link">stringdist::stringdist()</a></code>. With a <code><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb::duckdb()</a></code> or PostgreSQL connection,
 computation is pushed to SQL. SQL backends return the same column schema
 but may leave unsupported metrics as <code>NA</code>: DuckDB currently computes
 <code>jaro_winkler</code>, <code>jaro</code>, <code>levenshtein</code>, and <code>jaccard</code>; PostgreSQL computes

@@ -29,7 +29,9 @@ il_roc(model, labels = NULL, labels_col = NULL)
 
 ## Value
 
-A tibble with columns `threshold`, `fpr`, and `tpr`.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+with columns `threshold`, `fpr`, and `tpr`.
 
 ## Examples
 

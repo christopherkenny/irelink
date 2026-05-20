@@ -63,7 +63,7 @@ before training. Too many pairs is slow, while too few misses matches.</p>
 
 
 <dl><dt id="arg--data">.data<a class="anchor" aria-label="anchor" href="#arg--data"></a></dt>
-<dd><p>A data frame, dbplyr <code>tbl_lazy</code>, or character table name
+<dd><p>A data frame, <a href="https://dbplyr.tidyverse.org/reference/tbl_lazy.html" class="external-link">dbplyr::tbl_lazy</a>, or character table name
 (first or only dataset).</p></dd>
 
 
@@ -73,8 +73,8 @@ additional datasets for linkage.</p></dd>
 
 
 <dt id="arg-con">con<a class="anchor" aria-label="anchor" href="#arg-con"></a></dt>
-<dd><p>A DBI connection object. Optional when <code>.data</code> is a
-<code>tbl_lazy</code>.</p></dd>
+<dd><p>A DBI connection object from <code><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">DBI::dbConnect()</a></code>. Optional when <code>.data</code> is a
+<a href="https://dbplyr.tidyverse.org/reference/tbl_lazy.html" class="external-link">dbplyr::tbl_lazy</a>.</p></dd>
 
 
 <dt id="arg-link-type">link_type<a class="anchor" aria-label="anchor" href="#arg-link-type"></a></dt>
@@ -83,7 +83,7 @@ additional datasets for linkage.</p></dd>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble with columns <code>rule</code> and <code>n_pairs</code>. When blocking rules
+    <p>A <code><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble()</a></code> with columns <code>rule</code> and <code>n_pairs</code>. When blocking rules
 are supplied, it also includes <code>cumulative_pairs</code> and
 <code>pct_of_cartesian</code>.</p>
     </div>

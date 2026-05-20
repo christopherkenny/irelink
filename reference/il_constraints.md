@@ -16,4 +16,6 @@ il_constraints(model)
 
 ## Value
 
-A tibble of stored fixed-constraint metadata.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+of stored fixed-constraint metadata.

@@ -13,17 +13,23 @@ il_completeness(..., con = NULL)
 
 - ...:
 
-  One or more data frames, dbplyr `tbl_lazy` references, or character
-  table names to profile.
+  One or more data frames,
+  [dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html)
+  references, or character table names to profile.
 
 - con:
 
-  A DBI connection object. Optional when all inputs are `tbl_lazy`
+  A DBI connection object from
+  [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html).
+  Optional when all inputs are
+  [dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html)
   references.
 
 ## Value
 
-A tibble with columns `table`, `column`, `n_total`, `n_non_null`, and
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+with columns `table`, `column`, `n_total`, `n_non_null`, and
 `pct_non_null`.
 
 ## Examples

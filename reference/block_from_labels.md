@@ -27,12 +27,15 @@ block_from_labels(.data, labels, columns = NULL, con = NULL)
 
 - con:
 
-  A DBI connection.
+  A DBI connection from
+  [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html).
 
 ## Value
 
-A tibble with columns `column`, `recall` (fraction of true matches
-caught), and `n_matches_caught`.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+with columns `column`, `recall` (fraction of true matches caught), and
+`n_matches_caught`.
 
 ## Examples
 

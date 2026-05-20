@@ -21,4 +21,6 @@ autoplot(object, ...)
 
 ## Value
 
-A `ggplot2` object showing the top comparison patterns by frequency.
+A
+[`ggplot2::ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html)
+object showing the top comparison patterns by frequency.

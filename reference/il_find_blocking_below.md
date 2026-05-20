@@ -20,7 +20,9 @@ il_find_blocking_below(
 
 - .data:
 
-  A data frame, dbplyr `tbl_lazy`, or character table name.
+  A data frame,
+  [dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html),
+  or character table name.
 
 - max_pairs:
 
@@ -32,7 +34,8 @@ il_find_blocking_below(
 
 - con:
 
-  A DBI connection object.
+  A DBI connection object from
+  [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html).
 
 - link_type:
 
@@ -44,8 +47,10 @@ il_find_blocking_below(
 
 ## Value
 
-A tibble of qualifying blocking rules, sorted by `n_pairs` ascending.
-Empty tibble if no rules qualify.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+of qualifying blocking rules, sorted by `n_pairs` ascending. Empty
+tibble if no rules qualify.
 
 ## Examples
 

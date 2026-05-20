@@ -60,18 +60,18 @@ or more datasets.</p>
 
 
 <dl><dt id="arg--">...<a class="anchor" aria-label="anchor" href="#arg--"></a></dt>
-<dd><p>One or more data frames, dbplyr <code>tbl_lazy</code> references, or
+<dd><p>One or more data frames, <a href="https://dbplyr.tidyverse.org/reference/tbl_lazy.html" class="external-link">dbplyr::tbl_lazy</a> references, or
 character table names to profile.</p></dd>
 
 
 <dt id="arg-con">con<a class="anchor" aria-label="anchor" href="#arg-con"></a></dt>
-<dd><p>A DBI connection object. Optional when all inputs are
-<code>tbl_lazy</code> references.</p></dd>
+<dd><p>A DBI connection object from <code><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">DBI::dbConnect()</a></code>. Optional when all inputs are
+<a href="https://dbplyr.tidyverse.org/reference/tbl_lazy.html" class="external-link">dbplyr::tbl_lazy</a> references.</p></dd>
 
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble with columns <code>table</code>, <code>column</code>, <code>n_total</code>,
+    <p>A <code><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble()</a></code> with columns <code>table</code>, <code>column</code>, <code>n_total</code>,
 <code>n_non_null</code>, and <code>pct_non_null</code>.</p>
     </div>
 

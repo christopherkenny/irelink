@@ -2,8 +2,9 @@
 
 Computes summary statistics and value-frequency distributions for
 selected columns of a dataset. Useful for understanding data quality
-before defining comparison rules. Accepts data frames, dbplyr lazy table
-references, or character table names.
+before defining comparison rules. Accepts data frames,
+[dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html)
+table references, or character table names.
 
 ## Usage
 
@@ -15,7 +16,9 @@ il_profile(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL)
 
 - .data:
 
-  A data frame, dbplyr `tbl_lazy`, or character table name.
+  A data frame,
+  [dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html),
+  or character table name.
 
 - ...:
 
@@ -25,7 +28,10 @@ il_profile(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL)
 
 - con:
 
-  A DBI connection object. Optional when `.data` is a `tbl_lazy`.
+  A DBI connection object from
+  [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html).
+  Optional when `.data` is a
+  [dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html).
 
 - top_n:
 
@@ -39,7 +45,9 @@ il_profile(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL)
 
 ## Value
 
-A tibble of per-column summary statistics.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+of per-column summary statistics.
 
 ## Examples
 
@@ -87,10 +95,10 @@ il_profile(df, first_name, surname, con = con, top_n = 5)
 #>    column     value     n
 #>    <chr>      <chr> <dbl>
 #>  1 first_name Jane      3
-#>  2 first_name Jon       2
-#>  3 first_name Bob       2
-#>  4 first_name John      2
-#>  5 first_name Alice     2
+#>  2 first_name John      2
+#>  3 first_name Alice     2
+#>  4 first_name Tom       2
+#>  5 first_name Jon       2
 #>  6 surname    Doe       4
 #>  7 surname    Jones     4
 #>  8 surname    White     4

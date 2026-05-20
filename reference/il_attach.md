@@ -3,8 +3,9 @@
 Takes a loaded (or existing) `il_model` and binds it to new data and a
 fresh database connection, producing a model ready for
 [`predict()`](https://rdrr.io/r/stats/predict.html) or further training.
-Accepts in-memory data frames, dbplyr lazy table references, or
-character table names.
+Accepts in-memory data frames,
+[dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html)
+table references, or character table names.
 
 ## Usage
 
@@ -21,8 +22,10 @@ il_attach(model, .data, ..., con = NULL, link_type = NULL)
 
 - .data:
 
-  A data frame, tibble, dbplyr `tbl_lazy`, or character table name. The
-  first (or only) input dataset.
+  A data frame,
+  [`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html),
+  [dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html),
+  or character table name. The first (or only) input dataset.
 
 - ...:
 
@@ -30,8 +33,11 @@ il_attach(model, .data, ..., con = NULL, link_type = NULL)
 
 - con:
 
-  A DBI connection object. Optional when `.data` is a `tbl_lazy`, the
-  connection is extracted from the table reference.
+  A DBI connection object from
+  [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html).
+  Optional when `.data` is a
+  [dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html),
+  the connection is extracted from the table reference.
 
 - link_type:
 

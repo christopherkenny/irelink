@@ -18,7 +18,9 @@ il_unlinkables(model)
 
 ## Value
 
-A tibble with columns `threshold` and `pct_unlinkable`.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+with columns `threshold` and `pct_unlinkable`.
 
 ## Examples
 

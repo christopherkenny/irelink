@@ -16,7 +16,8 @@ il_cleanup_all(con)
 
 - con:
 
-  A DBI connection.
+  A DBI connection from
+  [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html).
 
 ## Value
 

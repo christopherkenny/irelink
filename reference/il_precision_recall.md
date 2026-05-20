@@ -29,7 +29,9 @@ il_precision_recall(model, labels = NULL, labels_col = NULL)
 
 ## Value
 
-A tibble with columns `threshold`, `precision`, and `recall`.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+with columns `threshold`, `precision`, and `recall`.
 
 ## Examples
 

@@ -22,4 +22,6 @@ autoplot(object, ...)
 
 ## Value
 
-A `ggplot` object.
+A
+[`ggplot2::ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html)
+object.

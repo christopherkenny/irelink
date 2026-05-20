@@ -22,24 +22,28 @@ il_comparator_score(.data, col_1, col_2, con = NULL)
 
 - con:
 
-  A DBI connection. If `NULL`, uses R-side computation.
+  A DBI connection from
+  [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html).
+  If `NULL`, uses R-side computation.
 
 ## Value
 
-A tibble with the two input columns and metric columns `jaro_winkler`,
-`jaro`, `levenshtein`, `jaccard`, and `cosine`. Unsupported SQL-backend
-metrics are present as `NA`. The result has S3 class
-`il_comparator_score`.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+with the two input columns and metric columns `jaro_winkler`, `jaro`,
+`levenshtein`, `jaccard`, and `cosine`. Unsupported SQL-backend metrics
+are present as `NA`. The result has S3 class `il_comparator_score`.
 
 ## Details
 
 With `con = NULL`, all metrics are computed in R with
 [`stringdist::stringdist()`](https://rdrr.io/pkg/stringdist/man/stringdist.html).
-With a DuckDB or PostgreSQL connection, computation is pushed to SQL.
-SQL backends return the same column schema but may leave unsupported
-metrics as `NA`: DuckDB currently computes `jaro_winkler`, `jaro`,
-`levenshtein`, and `jaccard`; PostgreSQL computes `levenshtein` and a
-`jaro_winkler` compatibility column backed by trigram `similarity()`.
+With a [`duckdb::duckdb()`](https://r.duckdb.org/reference/duckdb.html)
+or PostgreSQL connection, computation is pushed to SQL. SQL backends
+return the same column schema but may leave unsupported metrics as `NA`:
+DuckDB currently computes `jaro_winkler`, `jaro`, `levenshtein`, and
+`jaccard`; PostgreSQL computes `levenshtein` and a `jaro_winkler`
+compatibility column backed by trigram `similarity()`.
 
 ## Examples
 

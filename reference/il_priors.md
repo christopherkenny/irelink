@@ -16,4 +16,6 @@ il_priors(model)
 
 ## Value
 
-A tibble of stored prior metadata.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+of stored prior metadata.

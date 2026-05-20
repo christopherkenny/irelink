@@ -23,5 +23,7 @@ il_score_patterns(model, patterns)
 
 ## Value
 
-A tibble containing the input columns plus `match_weight` and
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+containing the input columns plus `match_weight` and
 `total_match_weight`, and `match_probability`.

@@ -72,7 +72,7 @@ all blocking columns are returned directly.</p>
 
 
 <dl><dt id="arg--data">.data<a class="anchor" aria-label="anchor" href="#arg--data"></a></dt>
-<dd><p>A data frame, dbplyr <code>tbl_lazy</code>, or character table name
+<dd><p>A data frame, <a href="https://dbplyr.tidyverse.org/reference/tbl_lazy.html" class="external-link">dbplyr::tbl_lazy</a>, or character table name
 (first or only dataset).</p></dd>
 
 
@@ -86,8 +86,8 @@ all blocking columns are returned directly.</p>
 
 
 <dt id="arg-con">con<a class="anchor" aria-label="anchor" href="#arg-con"></a></dt>
-<dd><p>A DBI connection object. Optional when <code>.data</code> is a
-<code>tbl_lazy</code>.</p></dd>
+<dd><p>A DBI connection object from <code><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">DBI::dbConnect()</a></code>. Optional when <code>.data</code> is a
+<a href="https://dbplyr.tidyverse.org/reference/tbl_lazy.html" class="external-link">dbplyr::tbl_lazy</a>.</p></dd>
 
 
 <dt id="arg-link-type">link_type<a class="anchor" aria-label="anchor" href="#arg-link-type"></a></dt>
@@ -97,7 +97,7 @@ all blocking columns are returned directly.</p>
 </dl></div>
     <div class="section level2">
     <h2 id="value">Value<a class="anchor" aria-label="anchor" href="#value"></a></h2>
-    <p>A tibble of exact-match record pairs.</p>
+    <p>A <code><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble::tibble()</a></code> of exact-match record pairs.</p>
     </div>
 
     <div class="section level2">

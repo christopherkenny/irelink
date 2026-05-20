@@ -51,7 +51,9 @@ il_cluster(
 
 ## Value
 
-A tibble with one row per input record, including a `cluster_id` column.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+with one row per input record, including a `cluster_id` column.
 
 ## Examples
 

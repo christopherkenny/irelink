@@ -33,9 +33,10 @@ il_errors(model, labels = NULL, threshold = 0.85, labels_col = NULL)
 
 ## Value
 
-A tibble of misclassified pairs with columns `unique_id_l`,
-`unique_id_r`, `match_weight`, `match_probability`, `true_label`, and
-`error_type`.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+of misclassified pairs with columns `unique_id_l`, `unique_id_r`,
+`match_weight`, `match_probability`, `true_label`, and `error_type`.
 
 ## Examples
 

@@ -29,9 +29,11 @@ il_comparison_vectors(model, blocking = NULL, limit = NULL)
 
 ## Value
 
-A tibble with one row per unique comparison vector and columns
-`gamma_<col>` for each comparison plus `count` (number of pairs with
-that pattern) and `proportion`. Class `il_comparison_vectors`.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+with one row per unique comparison vector and columns `gamma_<col>` for
+each comparison plus `count` (number of pairs with that pattern) and
+`proportion`. Class `il_comparison_vectors`.
 
 ## Details
 

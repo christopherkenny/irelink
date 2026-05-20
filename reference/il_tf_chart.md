@@ -32,7 +32,9 @@ il_tf_chart(model, col, n_most_freq = 10L, n_least_freq = 5L)
 
 ## Value
 
-A `ggplot` object.
+A
+[`ggplot2::ggplot()`](https://ggplot2.tidyverse.org/reference/ggplot.html)
+object.
 
 ## Examples
 

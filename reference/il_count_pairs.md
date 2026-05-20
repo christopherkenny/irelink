@@ -14,8 +14,9 @@ il_count_pairs(.data, ..., con = NULL, link_type = c("dedupe", "link"))
 
 - .data:
 
-  A data frame, dbplyr `tbl_lazy`, or character table name (first or
-  only dataset).
+  A data frame,
+  [dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html),
+  or character table name (first or only dataset).
 
 - ...:
 
@@ -25,7 +26,10 @@ il_count_pairs(.data, ..., con = NULL, link_type = c("dedupe", "link"))
 
 - con:
 
-  A DBI connection object. Optional when `.data` is a `tbl_lazy`.
+  A DBI connection object from
+  [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html).
+  Optional when `.data` is a
+  [dbplyr::tbl_lazy](https://dbplyr.tidyverse.org/reference/tbl_lazy.html).
 
 - link_type:
 
@@ -33,8 +37,10 @@ il_count_pairs(.data, ..., con = NULL, link_type = c("dedupe", "link"))
 
 ## Value
 
-A tibble with columns `rule` and `n_pairs`. When blocking rules are
-supplied, it also includes `cumulative_pairs` and `pct_of_cartesian`.
+A
+[`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
+with columns `rule` and `n_pairs`. When blocking rules are supplied, it
+also includes `cumulative_pairs` and `pct_of_cartesian`.
 
 ## Examples
 
