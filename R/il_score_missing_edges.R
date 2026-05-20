@@ -108,7 +108,7 @@ score_specific_pairs <- function(model, id_l, id_r, threshold = 0) {
   rownames(src_l) <- as.character(src_l$unique_id)
   rownames(src_r) <- as.character(src_r$unique_id)
 
-  if (any(!(id_l %in% rownames(src_l))) || any(!(id_r %in% rownames(src_r)))) {
+  if (!all((id_l %in% rownames(src_l))) || !all((id_r %in% rownames(src_r)))) {
     cli::cli_abort(
       'Could not find every requested pair ID in the model source tables.'
     )

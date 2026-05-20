@@ -59,7 +59,7 @@ il_register_tf <- function(model, col, tf_data, overwrite = FALSE) {
   if (
     !is.numeric(tf_values) ||
       anyNA(tf_values) ||
-      any(!is.finite(tf_values)) ||
+      !all(is.finite(tf_values)) ||
       any(tf_values <= 0 | tf_values > 1)
   ) {
     cli::cli_abort(
