@@ -78,7 +78,7 @@
 </h1>
 </div>
 <!-- badges: start -->
-<!-- badges: end -->
+
 <p><code>irelink</code> brings fast, scalable probabilistic record linkage to R. It implements the Fellegi-Sunter model to identify and link duplicate or related records across datasets that lack a shared unique identifier. Model parameters are estimated via unsupervised Expectation-Maximization, so no labeled training data is required. Comparison functions cover exact matching, Jaro-Winkler, Levenshtein, date differences, and geographic distance, letting you tailor the model to your data. Multiple SQL backends are supported through DBI, so the same code runs on SQLite, DuckDB, or PostgreSQL.</p>
 <p><code>irelink</code> is a translation of the Python <a href="https://github.com/moj-analytical-services/splink" class="external-link">splink</a> library into idiomatic R.</p>
 <div class="section level2">
@@ -94,6 +94,11 @@
 <p>Find duplicate records within a single dataset. The bundled <code>fake_20</code> dataset provides a small example for experimentation. <code>irelink</code> pushes data into a SQL database for efficient pair generation, so you need a DBI connection. Here we use an in-memory DuckDB instance.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="http://christophertkenny.com/irelink/">irelink</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'irelink'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:base':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     months</span></span>
 <span></span>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="va">fake_20</span></span>
 <span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
@@ -119,23 +124,23 @@
 <span><span class="co">#&gt;    unique_id cluster_id</span></span>
 <span><span class="co">#&gt;    &lt;chr&gt;     &lt;chr&gt;     </span></span>
 <span><span class="co">#&gt;  1 10        cluster_10</span></span>
-<span><span class="co">#&gt;  2 4         cluster_13</span></span>
-<span><span class="co">#&gt;  3 17        cluster_17</span></span>
-<span><span class="co">#&gt;  4 3         cluster_13</span></span>
-<span><span class="co">#&gt;  5 9         cluster_10</span></span>
-<span><span class="co">#&gt;  6 13        cluster_13</span></span>
-<span><span class="co">#&gt;  7 7         cluster_17</span></span>
-<span><span class="co">#&gt;  8 20        cluster_10</span></span>
+<span><span class="co">#&gt;  2 6         cluster_15</span></span>
+<span><span class="co">#&gt;  3 3         cluster_13</span></span>
+<span><span class="co">#&gt;  4 13        cluster_13</span></span>
+<span><span class="co">#&gt;  5 7         cluster_17</span></span>
+<span><span class="co">#&gt;  6 15        cluster_15</span></span>
+<span><span class="co">#&gt;  7 8         cluster_17</span></span>
+<span><span class="co">#&gt;  8 19        cluster_10</span></span>
 <span><span class="co">#&gt;  9 5         cluster_15</span></span>
-<span><span class="co">#&gt; 10 15        cluster_15</span></span>
-<span><span class="co">#&gt; 11 14        cluster_13</span></span>
-<span><span class="co">#&gt; 12 6         cluster_15</span></span>
-<span><span class="co">#&gt; 13 8         cluster_17</span></span>
-<span><span class="co">#&gt; 14 19        cluster_10</span></span>
-<span><span class="co">#&gt; 15 12        cluster_1 </span></span>
+<span><span class="co">#&gt; 10 4         cluster_13</span></span>
+<span><span class="co">#&gt; 11 17        cluster_17</span></span>
+<span><span class="co">#&gt; 12 14        cluster_13</span></span>
+<span><span class="co">#&gt; 13 20        cluster_10</span></span>
+<span><span class="co">#&gt; 14 9         cluster_10</span></span>
+<span><span class="co">#&gt; 15 2         cluster_1 </span></span>
 <span><span class="co">#&gt; 16 11        cluster_1 </span></span>
-<span><span class="co">#&gt; 17 2         cluster_1 </span></span>
-<span><span class="co">#&gt; 18 1         cluster_1</span></span></code></pre></div>
+<span><span class="co">#&gt; 17 1         cluster_1 </span></span>
+<span><span class="co">#&gt; 18 12        cluster_1</span></span></code></pre></div>
 <p><code><a href="reference/il_cleanup.html">il_cleanup()</a></code> drops the temporary tables owned by this model. Use <code>il_cleanup_all(con)</code> as an interactive escape hatch when a failed or exploratory session may have left several <code>irelink</code> models’ tables behind.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="reference/il_cleanup.html">il_cleanup</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
@@ -177,8 +182,8 @@
 <span><span class="co">#&gt;   unique_id_l unique_id_r gamma_given_name gamma_surname gamma_date_of_birth</span></span>
 <span><span class="co">#&gt; *       &lt;int&gt;       &lt;int&gt;            &lt;int&gt;         &lt;int&gt;               &lt;int&gt;</span></span>
 <span><span class="co">#&gt; 1         165          59                0             2                   1</span></span>
-<span><span class="co">#&gt; 2          24         160                0             2                   1</span></span>
-<span><span class="co">#&gt; 3          29          77                0             2                   1</span></span>
+<span><span class="co">#&gt; 2          29          77                0             2                   1</span></span>
+<span><span class="co">#&gt; 3          24         160                0             2                   1</span></span>
 <span><span class="co">#&gt; # ℹ 3 more variables: match_weight &lt;dbl&gt;, total_match_weight &lt;dbl&gt;,</span></span>
 <span><span class="co">#&gt; #   match_probability &lt;dbl&gt;</span></span></code></pre></div>
 <p>As in the prior example, <code><a href="reference/il_cleanup.html">il_cleanup()</a></code> drops this model’s temporary tables.</p>

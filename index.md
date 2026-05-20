@@ -33,6 +33,11 @@ DBI connection. Here we use an in-memory DuckDB instance.
 ``` r
 
 library(irelink)
+#> 
+#> Attaching package: 'irelink'
+#> The following object is masked from 'package:base':
+#> 
+#>     months
 
 df <- fake_20
 con <- DBI::dbConnect(duckdb::duckdb())
@@ -79,23 +84,23 @@ clusters
 #>    unique_id cluster_id
 #>    <chr>     <chr>     
 #>  1 10        cluster_10
-#>  2 4         cluster_13
-#>  3 17        cluster_17
-#>  4 3         cluster_13
-#>  5 9         cluster_10
-#>  6 13        cluster_13
-#>  7 7         cluster_17
-#>  8 20        cluster_10
+#>  2 6         cluster_15
+#>  3 3         cluster_13
+#>  4 13        cluster_13
+#>  5 7         cluster_17
+#>  6 15        cluster_15
+#>  7 8         cluster_17
+#>  8 19        cluster_10
 #>  9 5         cluster_15
-#> 10 15        cluster_15
-#> 11 14        cluster_13
-#> 12 6         cluster_15
-#> 13 8         cluster_17
-#> 14 19        cluster_10
-#> 15 12        cluster_1 
+#> 10 4         cluster_13
+#> 11 17        cluster_17
+#> 12 14        cluster_13
+#> 13 20        cluster_10
+#> 14 9         cluster_10
+#> 15 2         cluster_1 
 #> 16 11        cluster_1 
-#> 17 2         cluster_1 
-#> 18 1         cluster_1
+#> 17 1         cluster_1 
+#> 18 12        cluster_1
 ```
 
 [`il_cleanup()`](http://christophertkenny.com/irelink/reference/il_cleanup.md)
@@ -163,8 +168,8 @@ pairs
 #>   unique_id_l unique_id_r gamma_given_name gamma_surname gamma_date_of_birth
 #> *       <int>       <int>            <int>         <int>               <int>
 #> 1         165          59                0             2                   1
-#> 2          24         160                0             2                   1
-#> 3          29          77                0             2                   1
+#> 2          29          77                0             2                   1
+#> 3          24         160                0             2                   1
 #> # ℹ 3 more variables: match_weight <dbl>, total_match_weight <dbl>,
 #> #   match_probability <dbl>
 ```

@@ -82,7 +82,7 @@ il_largest_blocks(df, block_on(city), n = 3, con = con)
 #>   city   n_records n_pairs
 #>   <chr>      <dbl>   <dbl>
 #> 1 Paris          4       6
-#> 2 Berlin         4       6
-#> 3 Rome           4       6
+#> 2 Rome           4       6
+#> 3 Berlin         4       6
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
