@@ -2,7 +2,7 @@
 
 A tagged-value constructor that marks a numeric threshold as a distance
 in miles. Converted to kilometres internally by
-[`cl_distance_km()`](http://christophertkenny.com/irelink/reference/cl_distance_km.md).
+[`cl_geo_distance()`](http://christophertkenny.com/irelink/reference/cl_geo_distance.md).
 
 ## Usage
 
@@ -24,9 +24,9 @@ A tagged numeric with class `il_mi`.
 
 ``` r
 il_spec() |>
-  il_compare(c(lat, lon), cl_distance_km(mi(3), mi(30)))
+  il_compare(c(lat, lon), cl_geo_distance(mi(3), mi(30)))
 #> Linkage Specification
 #>   Comparisons (1):
-#>     lat, lon : distance_km
+#>     lat, lon : geo_distance
 #>   Blocking rules: (none)
 ```

@@ -44,7 +44,7 @@ splink comparison level class.
 | `AbsoluteDifferenceLevel` | [`cl_numeric_diff()`](http://christophertkenny.com/irelink/reference/cl_numeric_diff.md) |
 | `PercentageDifferenceLevel` | [`cl_pct_diff()`](http://christophertkenny.com/irelink/reference/cl_pct_diff.md) |
 | `AbsoluteTimeDifferenceAtThresholds` | [`cl_date_diff()`](http://christophertkenny.com/irelink/reference/cl_date_diff.md) |
-| `DistanceInKMLevel` | [`cl_distance_km()`](http://christophertkenny.com/irelink/reference/cl_distance_km.md) |
+| `DistanceInKMLevel` | [`cl_geo_distance()`](http://christophertkenny.com/irelink/reference/cl_geo_distance.md) |
 | `ArrayIntersectLevel` | [`cl_array_intersect()`](http://christophertkenny.com/irelink/reference/cl_array_intersect.md) |
 | `CustomLevel` | [`cl_custom()`](http://christophertkenny.com/irelink/reference/cl_custom.md) |
 | `NullLevel` | [`cl_null()`](http://christophertkenny.com/irelink/reference/cl_null.md) |

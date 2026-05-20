@@ -37,7 +37,7 @@ probabilistic record linkage engine into idiomatic R.
 - Numeric and distance:
   [`cl_numeric_diff()`](http://christophertkenny.com/irelink/reference/cl_numeric_diff.md),
   [`cl_pct_diff()`](http://christophertkenny.com/irelink/reference/cl_pct_diff.md),
-  [`cl_distance_km()`](http://christophertkenny.com/irelink/reference/cl_distance_km.md).
+  [`cl_geo_distance()`](http://christophertkenny.com/irelink/reference/cl_geo_distance.md).
 - Temporal:
   [`cl_date_diff()`](http://christophertkenny.com/irelink/reference/cl_date_diff.md)
   for date proximity with

@@ -239,7 +239,7 @@ field.
   : Date Difference Comparison
 - [`cl_time_diff()`](http://christophertkenny.com/irelink/reference/cl_time_diff.md)
   : Time Difference Comparison
-- [`cl_distance_km()`](http://christophertkenny.com/irelink/reference/cl_distance_km.md)
+- [`cl_geo_distance()`](http://christophertkenny.com/irelink/reference/cl_geo_distance.md)
   : Geographic Distance Comparison
 - [`cl_array_intersect()`](http://christophertkenny.com/irelink/reference/cl_array_intersect.md)
   : Array Intersection Comparison

@@ -182,12 +182,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 8         cluster_17
-#> 2 9         cluster_10
-#> 3 10        cluster_10
-#> 4 4         cluster_13
-#> 5 7         cluster_17
-#> 6 13        cluster_13
+#> 1 3         cluster_13
+#> 2 5         cluster_15
+#> 3 6         cluster_15
+#> 4 17        cluster_17
+#> 5 14        cluster_13
+#> 6 15        cluster_15
 ```
 
 Each record is assigned a `cluster_id`. Records sharing the same cluster
@@ -211,7 +211,7 @@ field types:
 | [`cl_pct_diff()`](http://christophertkenny.com/irelink/reference/cl_pct_diff.md) | Percentage difference |
 | [`cl_date_diff()`](http://christophertkenny.com/irelink/reference/cl_date_diff.md) | Date fields |
 | [`cl_time_diff()`](http://christophertkenny.com/irelink/reference/cl_time_diff.md) | Time fields |
-| [`cl_distance_km()`](http://christophertkenny.com/irelink/reference/cl_distance_km.md) | Geographic coordinates |
+| [`cl_geo_distance()`](http://christophertkenny.com/irelink/reference/cl_geo_distance.md) | Geographic coordinates |
 | [`cl_array_intersect()`](http://christophertkenny.com/irelink/reference/cl_array_intersect.md) | Array or set overlap |
 
 For common field types, domain-specific helpers compose multiple levels
