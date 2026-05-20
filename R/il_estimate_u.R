@@ -119,7 +119,9 @@ il_estimate_u <- function(
   counts <- result$counts
   # SQL NULLs come through as NA; treat as else/null level (0)
   for (gcol in paste0('gamma_', comp_names)) {
-    if (gcol %in% names(counts)) counts[[gcol]][is.na(counts[[gcol]])] <- 0L
+    if (gcol %in% names(counts)) {
+      counts[[gcol]][is.na(counts[[gcol]])] <- 0L
+    }
   }
   n_pairs <- result$n_pairs
 
@@ -153,12 +155,6 @@ il_estimate_u <- function(
     params_tbl$m <- NA_real_
   } else {
     old_params <- model$params$comparisons
-    # Normalize earlier format if needed
-    if (
-      'level' %in% names(old_params) && !'gamma_level' %in% names(old_params)
-    ) {
-      old_params <- migrate_params_to_gamma_level(old_params)
-    }
     params_tbl <- merge(
       params_tbl[, c('comparison', 'gamma_level', 'u')],
       old_params[, c('comparison', 'gamma_level', 'm')],

@@ -8,4 +8,5 @@
 - [x] All autoplot.* functions should be defined in `autoplot.R`.
 - [x] We use tidyselect in a lot of places, but it is a suggests. Weigh in on if it is used in sufficient locations to upgrade it to an imports.
 - [x] There are a small number of \dontrun statements. These are not acceptable for package code. Identify how each use should be made into proper package code that runs and fix it.
-- [x] In some examples, I see things like throwawya renames, like df <- fake_20, which are both unnecessary and reduce clarity. search for cases like that and fix them.
+- [x] In some examples, I see things like throwaway renames, like df <- fake_20, which are both unnecessary and reduce clarity. search for cases like that and fix them.
+- [x] Remove fake legacy updater `migrate_params_to_gamma_level()`.

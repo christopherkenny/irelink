@@ -30,10 +30,10 @@
 - [x] R/il_deterministic_link.R
 - [x] R/il_errors.R
 - [x] R/il_estimate_em.R
-- [ ] R/il_estimate_m_from_column.R
-- [ ] R/il_estimate_m_from_labels.R
-- [ ] R/il_estimate_prior.R
-- [ ] R/il_estimate_u.R
+- [x] R/il_estimate_m_from_column.R
+- [x] R/il_estimate_m_from_labels.R
+- [x] R/il_estimate_prior.R
+- [x] R/il_estimate_u.R
 - [ ] R/il_find_matches.R
 - [ ] R/il_graph_metrics.R
 - [ ] R/il_largest_blocks.R

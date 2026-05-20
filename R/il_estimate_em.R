@@ -254,11 +254,6 @@ il_estimate_em <- function(
   names(u_list) <- comp_names
 
   params <- model$params$comparisons
-  if (!is.null(params)) {
-    if ('level' %in% names(params) && !'gamma_level' %in% names(params)) {
-      params <- migrate_params_to_gamma_level(params)
-    }
-  }
 
   for (j in seq_len(n_comp)) {
     cn <- comp_names[j]

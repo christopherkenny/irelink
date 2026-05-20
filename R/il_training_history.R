@@ -70,10 +70,6 @@ il_training_history <- function(model) {
     )
   }
   result <- bind_training_history_rows(history)
-  # Normalize earlier format if needed
-  if ('level' %in% names(result) && !'gamma_level' %in% names(result)) {
-    result <- migrate_params_to_gamma_level(result)
-  }
   add_class(result, 'il_training_history')
 }
 

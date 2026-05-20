@@ -250,9 +250,6 @@ validate_level_distribution <- function(levels, expected_names) {
 remainder_weights <- function(model, col, level_names) {
   params <- model$params$comparisons
   if (!is.null(params)) {
-    if ('level' %in% names(params) && !'gamma_level' %in% names(params)) {
-      params <- migrate_params_to_gamma_level(params)
-    }
     rows <- params[params$comparison == col, , drop = FALSE]
     rows <- rows[
       match(as.integer(level_names), rows$gamma_level),

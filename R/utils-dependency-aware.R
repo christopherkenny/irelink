@@ -359,9 +359,6 @@ initialize_dependency_pattern_probs <- function(
     integer(1)
   )
   if (!is.null(params)) {
-    if ('level' %in% names(params) && !'gamma_level' %in% names(params)) {
-      params <- migrate_params_to_gamma_level(params)
-    }
     has_full <- all(vapply(
       seq_along(comp_names),
       function(j) {

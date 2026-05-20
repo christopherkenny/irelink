@@ -120,9 +120,6 @@ il_estimate_m_from_column <- function(model, label_col) {
 
   if (!is.null(model$params$comparisons)) {
     params <- model$params$comparisons
-    if ('level' %in% names(params) && !'gamma_level' %in% names(params)) {
-      params <- migrate_params_to_gamma_level(params)
-    }
     for (j in seq_along(comp_names)) {
       cn <- comp_names[j]
       gcol <- gamma_cols[j]

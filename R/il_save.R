@@ -207,13 +207,6 @@ write_model_json <- function(model, path) {
 model_to_json_settings <- function(model) {
   dialect <- model_json_dialect(model)
   params <- model$params
-  if (
-    !is.null(params$comparisons) &&
-      'level' %in% names(params$comparisons) &&
-      !'gamma_level' %in% names(params$comparisons)
-  ) {
-    params$comparisons <- migrate_params_to_gamma_level(params$comparisons)
-  }
 
   list(
     link_type = irelink_to_splink_link_type(model$link_type %||% 'dedupe'),
