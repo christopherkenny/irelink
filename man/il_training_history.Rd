@@ -10,7 +10,7 @@ il_training_history(model)
 \item{model}{A trained \code{il_model} object.}
 }
 \value{
-A tibble with columns \code{session}, \code{iteration}, \code{comparison},
+A \code{\link[tibble:tibble]{tibble::tibble()}} with columns \code{session}, \code{iteration}, \code{comparison},
 \code{gamma_level}, and \code{value}.
 }
 \description{

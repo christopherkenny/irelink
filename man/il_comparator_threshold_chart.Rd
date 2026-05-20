@@ -24,10 +24,10 @@ il_comparator_threshold_chart(
 \item{distance_threshold}{Integer threshold for distance metrics
 (<= to include). Applies to levenshtein.}
 
-\item{con}{A DBI connection. If \code{NULL}, uses R-side computation.}
+\item{con}{A DBI connection from \code{\link[DBI:dbConnect]{DBI::dbConnect()}}. If \code{NULL}, uses R-side computation.}
 }
 \value{
-A \code{ggplot2} object.
+A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object.
 }
 \description{
 Shows the distribution of pairwise similarity scores and highlights

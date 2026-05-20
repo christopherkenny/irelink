@@ -7,14 +7,14 @@
 il_completeness(..., con = NULL)
 }
 \arguments{
-\item{...}{One or more data frames, dbplyr \code{tbl_lazy} references, or
+\item{...}{One or more data frames, \link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy} references, or
 character table names to profile.}
 
-\item{con}{A DBI connection object. Optional when all inputs are
-\code{tbl_lazy} references.}
+\item{con}{A DBI connection object from \code{\link[DBI:dbConnect]{DBI::dbConnect()}}. Optional when all inputs are
+\link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy} references.}
 }
 \value{
-A tibble with columns \code{table}, \code{column}, \code{n_total},
+A \code{\link[tibble:tibble]{tibble::tibble()}} with columns \code{table}, \code{column}, \code{n_total},
 \code{n_non_null}, and \code{pct_non_null}.
 }
 \description{

@@ -10,7 +10,7 @@
 #' @param n_most_freq Number of most-frequent values to label. Default 10.
 #' @param n_least_freq Number of least-frequent values to label. Default 5.
 #'
-#' @return A `ggplot` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @export
 #'
 #' @examples

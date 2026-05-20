@@ -10,7 +10,7 @@
 #'   containing ground-truth cluster/entity IDs. When provided, pairwise
 #'   labels are derived automatically via [labels_from_column()].
 #'
-#' @return A tibble with one row per threshold, containing columns
+#' @return A [tibble::tibble()] with one row per threshold, containing columns
 #'   `threshold`, `tp`, `fp`, `fn`, `tn`, `fn_blocking_miss`,
 #'   `precision`, `recall`, `f1`, `f2`, `f0_5`, `specificity`, `npv`,
 #'   `accuracy`, `p4`, and `phi`.

@@ -16,7 +16,7 @@ histogram.}
 \item{...}{Additional arguments (currently unused).}
 }
 \value{
-A \code{ggplot} object.
+A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object.
 }
 \description{
 Produces a match-weight histogram from scored pairs, or a waterfall

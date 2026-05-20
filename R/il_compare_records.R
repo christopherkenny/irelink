@@ -9,7 +9,7 @@
 #' @param record_b A named list or single-row data frame representing the
 #'   second record.
 #' @param spec An `il_spec` object describing the comparisons to perform.
-#' @param con A DBI connection object. If `NULL` (default), a temporary
+#' @param con A DBI connection object from [DBI::dbConnect()]. If `NULL` (default), a temporary
 #'   DuckDB connection is created and closed on exit.
 #'
 #' @return A single-row tibble of per-comparison gamma values.

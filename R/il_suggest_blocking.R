@@ -4,17 +4,17 @@
 #' that balances pair reduction against field coverage. Useful for choosing
 #' initial blocking rules before training.
 #'
-#' @param .data A data frame, dbplyr `tbl_lazy`, or character table name.
+#' @param .data A data frame, [dbplyr::tbl_lazy], or character table name.
 #' @param columns Character vector of column names to evaluate. When
 #'   `NULL` (the default), all non-ID columns are tried.
-#' @param con A DBI connection object. Optional when `.data` is already
+#' @param con A DBI connection object from [DBI::dbConnect()]. Optional when `.data` is already
 #'   registered in the database.
 #' @param link_type One of `"dedupe"` (default) or `"link"`.
 #' @param max_depth Maximum number of columns to combine in a single
 #'   blocking rule. Defaults to `1` (single-column rules only).
 #'   Set to `2` to also evaluate two-column combinations.
 #'
-#' @return A tibble with columns `rule`, `n_distinct`, `coverage`,
+#' @return A [tibble::tibble()] with columns `rule`, `n_distinct`, `coverage`,
 #'   `n_pairs`, `pct_of_cartesian`, and `score`, sorted by `score`
 #'   descending. Higher scores indicate better blocking rules.
 #' @export
@@ -183,14 +183,14 @@ evaluate_column_combos <- function(
 #' Searches for single-column (and optionally two-column) blocking rules
 #' that keep the total number of candidate pairs below a given ceiling.
 #'
-#' @param .data A data frame, dbplyr `tbl_lazy`, or character table name.
+#' @param .data A data frame, [dbplyr::tbl_lazy], or character table name.
 #' @param max_pairs Maximum number of pairs allowed.
 #' @param columns Character vector of column names. `NULL` for all.
-#' @param con A DBI connection object.
+#' @param con A DBI connection object from [DBI::dbConnect()].
 #' @param link_type One of `"dedupe"` (default) or `"link"`.
 #' @param max_depth Maximum depth of column combinations (default `2`).
 #'
-#' @return A tibble of qualifying blocking rules, sorted by `n_pairs`
+#' @return A [tibble::tibble()] of qualifying blocking rules, sorted by `n_pairs`
 #'   ascending. Empty tibble if no rules qualify.
 #' @export
 #'
@@ -228,9 +228,9 @@ il_find_blocking_below <- function(
 #'   `is_match`.
 #' @param columns Character vector of column names to evaluate. `NULL`
 #'   for all non-ID columns.
-#' @param con A DBI connection.
+#' @param con A DBI connection from [DBI::dbConnect()].
 #'
-#' @return A tibble with columns `column`, `recall` (fraction of true
+#' @return A [tibble::tibble()] with columns `column`, `recall` (fraction of true
 #'   matches caught), and `n_matches_caught`.
 #' @export
 #'

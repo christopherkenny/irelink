@@ -15,10 +15,10 @@ block_from_labels(.data, labels, columns = NULL, con = NULL)
 \item{columns}{Character vector of column names to evaluate. \code{NULL}
 for all non-ID columns.}
 
-\item{con}{A DBI connection.}
+\item{con}{A DBI connection from \code{\link[DBI:dbConnect]{DBI::dbConnect()}}.}
 }
 \value{
-A tibble with columns \code{column}, \code{recall} (fraction of true
+A \code{\link[tibble:tibble]{tibble::tibble()}} with columns \code{column}, \code{recall} (fraction of true
 matches caught), and \code{n_matches_caught}.
 }
 \description{

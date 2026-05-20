@@ -17,7 +17,7 @@ enabled for at least one comparison column.}
 \item{n_least_freq}{Number of least-frequent values to label. Default 5.}
 }
 \value{
-A \code{ggplot} object.
+A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object.
 }
 \description{
 Visualizes the distribution of term frequencies for a column in the

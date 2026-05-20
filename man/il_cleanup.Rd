@@ -15,7 +15,7 @@ be cleaned up.}
 }
 \description{
 Cleans up the temporary tables owned by a single \code{il_model}. This is safe
-to call on a shared DBI connection containing other live \code{irelink} models.
+to call on a shared DBI connection from \code{\link[DBI:dbConnect]{DBI::dbConnect()}} containing other live \code{irelink} models.
 Use \code{\link[=il_cleanup_all]{il_cleanup_all()}} only when you explicitly want to remove every
 \code{irelink} table from the connection.
 }

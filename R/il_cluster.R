@@ -22,7 +22,7 @@
 #'   If a data frame, it must contain columns `unique_id` and
 #'   `source_dataset`, and `unique_id` values must be unique.
 #'
-#' @return A tibble with one row per input record, including a
+#' @return A [tibble::tibble()] with one row per input record, including a
 #'   `cluster_id` column.
 #' @export
 #'

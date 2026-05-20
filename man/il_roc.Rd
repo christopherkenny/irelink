@@ -16,7 +16,7 @@ match indicator. Required unless \code{labels_col} is provided.}
 containing ground-truth cluster/entity IDs.}
 }
 \value{
-A tibble with columns \code{threshold}, \code{fpr}, and \code{tpr}.
+A \code{\link[tibble:tibble]{tibble::tibble()}} with columns \code{threshold}, \code{fpr}, and \code{tpr}.
 }
 \description{
 Returns a tidy tibble of false-positive rates and true-positive rates

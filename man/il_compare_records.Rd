@@ -15,7 +15,7 @@ second record.}
 
 \item{spec}{An \code{il_spec} object describing the comparisons to perform.}
 
-\item{con}{A DBI connection object. If \code{NULL} (default), a temporary
+\item{con}{A DBI connection object from \code{\link[DBI:dbConnect]{DBI::dbConnect()}}. If \code{NULL} (default), a temporary
 DuckDB connection is created and closed on exit.}
 }
 \value{

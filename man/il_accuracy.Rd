@@ -17,7 +17,7 @@ containing ground-truth cluster/entity IDs. When provided, pairwise
 labels are derived automatically via \code{\link[=labels_from_column]{labels_from_column()}}.}
 }
 \value{
-A tibble with one row per threshold, containing columns
+A \code{\link[tibble:tibble]{tibble::tibble()}} with one row per threshold, containing columns
 \code{threshold}, \code{tp}, \code{fp}, \code{fn}, \code{tn}, \code{fn_blocking_miss},
 \code{precision}, \code{recall}, \code{f1}, \code{f2}, \code{f0_5}, \code{specificity}, \code{npv},
 \code{accuracy}, \code{p4}, and \code{phi}.

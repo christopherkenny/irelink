@@ -12,7 +12,7 @@
 \item{...}{Additional arguments (currently unused).}
 }
 \value{
-A \code{ggplot} object.
+A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object.
 }
 \description{
 Draws a faceted bar chart of value frequencies per column, from data

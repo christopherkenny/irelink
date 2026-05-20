@@ -7,19 +7,19 @@
 il_count_pairs(.data, ..., con = NULL, link_type = c("dedupe", "link"))
 }
 \arguments{
-\item{.data}{A data frame, dbplyr \code{tbl_lazy}, or character table name
+\item{.data}{A data frame, \link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}, or character table name
 (first or only dataset).}
 
 \item{...}{Blocking rules created by \code{\link[=block_on]{block_on()}}, and optionally
 additional datasets for linkage.}
 
-\item{con}{A DBI connection object. Optional when \code{.data} is a
-\code{tbl_lazy}.}
+\item{con}{A DBI connection object from \code{\link[DBI:dbConnect]{DBI::dbConnect()}}. Optional when \code{.data} is a
+\link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}.}
 
 \item{link_type}{One of \code{"dedupe"} (default) or \code{"link"}.}
 }
 \value{
-A tibble with columns \code{rule} and \code{n_pairs}. When blocking rules
+A \code{\link[tibble:tibble]{tibble::tibble()}} with columns \code{rule} and \code{n_pairs}. When blocking rules
 are supplied, it also includes \code{cumulative_pairs} and
 \code{pct_of_cartesian}.
 }

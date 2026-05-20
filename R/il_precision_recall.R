@@ -10,7 +10,7 @@
 #' @param labels_col Optional string naming a column in the original data
 #'   containing ground-truth cluster/entity IDs.
 #'
-#' @return A tibble with columns `threshold`, `precision`, and `recall`.
+#' @return A [tibble::tibble()] with columns `threshold`, `precision`, and `recall`.
 #' @export
 #'
 #' @examples

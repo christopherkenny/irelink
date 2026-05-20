@@ -1,7 +1,7 @@
 #' Remove Model-Owned Temporary Tables from Database
 #'
 #' Cleans up the temporary tables owned by a single `il_model`. This is safe
-#' to call on a shared DBI connection containing other live `irelink` models.
+#' to call on a shared DBI connection from [DBI::dbConnect()] containing other live `irelink` models.
 #' Use [il_cleanup_all()] only when you explicitly want to remove every
 #' `irelink` table from the connection.
 #'
@@ -98,7 +98,7 @@ il_cleanup <- function(model) {
 #' failed runs or exploratory sessions. Prefer [il_cleanup()] when cleaning up a
 #' specific live model on a shared connection.
 #'
-#' @param con A DBI connection.
+#' @param con A DBI connection from [DBI::dbConnect()].
 #'
 #' @return `con`, invisibly.
 #' @export

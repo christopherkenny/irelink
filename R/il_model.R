@@ -2,24 +2,24 @@
 #'
 #' Binds one or more datasets to a specification and a database
 #' connection, producing an untrained model. Accepts in-memory data
-#' frames, dbplyr lazy table references, or character table names for
+#' frames, [dbplyr::tbl_lazy] table references, or character table names for
 #' data that already lives in a database.
 #'
-#' When `.data` is a `tbl_lazy` (from [dplyr::tbl()]), the connection
+#' When `.data` is a [dbplyr::tbl_lazy] (from [dplyr::tbl()]), the connection
 #' is extracted automatically and data stays in-database with zero
 #' copying. A `unique_id` column is injected automatically if not
 #' already present.
 #'
-#' @param .data A data frame, tibble, dbplyr `tbl_lazy`, or character
+#' @param .data A data frame, [tibble::tibble()], [dbplyr::tbl_lazy], or character
 #'   table name. The first (or only) input dataset. If no `unique_id`
 #'   column is present, one is generated automatically.
 #' @param ... Additional datasets for multi-table linkage (same types
 #'   as `.data`).
 #' @param spec An `il_spec` object built with [il_spec()], [il_compare()],
 #'   and [il_block_on()].
-#' @param con A DBI connection object (e.g., from
+#' @param con A DBI connection object from [DBI::dbConnect()] (e.g., from
 #'   `DBI::dbConnect(duckdb::duckdb())`). Optional when `.data` is a
-#'   `tbl_lazy`, the connection is extracted from the table reference.
+#'   [dbplyr::tbl_lazy], the connection is extracted from the table reference.
 #' @param link_type One of `"dedupe"` (default), `"link"`, or
 #'   `"link_and_dedupe"`.
 #'
@@ -137,7 +137,7 @@ il_model <- function(
 #'
 #' Takes a loaded (or existing) `il_model` and binds it to new data and a
 #' fresh database connection, producing a model ready for [predict()] or
-#' further training. Accepts in-memory data frames, dbplyr lazy table
+#' further training. Accepts in-memory data frames, [dbplyr::tbl_lazy] table
 #' references, or character table names.
 #'
 #' This is the key function for the production workflow:
@@ -150,11 +150,11 @@ il_model <- function(
 #' parameters as a warm start.
 #'
 #' @param model An `il_model` object, typically from [il_load()].
-#' @param .data A data frame, tibble, dbplyr `tbl_lazy`, or character
+#' @param .data A data frame, [tibble::tibble()], [dbplyr::tbl_lazy], or character
 #'   table name. The first (or only) input dataset.
 #' @param ... Additional datasets for multi-table linkage.
-#' @param con A DBI connection object. Optional when `.data` is a
-#'   `tbl_lazy`, the connection is extracted from the table reference.
+#' @param con A DBI connection object from [DBI::dbConnect()]. Optional when `.data` is a
+#'   [dbplyr::tbl_lazy], the connection is extracted from the table reference.
 #' @param link_type Optionally override the model's link type. If `NULL`
 #'   (default), uses the link type stored in the model.
 #'

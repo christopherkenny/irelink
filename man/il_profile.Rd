@@ -7,14 +7,14 @@
 il_profile(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL)
 }
 \arguments{
-\item{.data}{A data frame, dbplyr \code{tbl_lazy}, or character table name.}
+\item{.data}{A data frame, \link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}, or character table name.}
 
 \item{...}{Columns to profile, specified as unquoted names or as
 character strings containing raw SQL expressions (e.g.,
 \code{"city || ' ' || first_name"}). If empty, all columns are profiled.}
 
-\item{con}{A DBI connection object. Optional when \code{.data} is a
-\code{tbl_lazy}.}
+\item{con}{A DBI connection object from \code{\link[DBI:dbConnect]{DBI::dbConnect()}}. Optional when \code{.data} is a
+\link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}.}
 
 \item{top_n}{Integer. Number of most-frequent values to return per
 column. Defaults to \code{NULL} (return all values).}
@@ -23,13 +23,13 @@ column. Defaults to \code{NULL} (return all values).}
 column. Defaults to \code{NULL} (return all values).}
 }
 \value{
-A tibble of per-column summary statistics.
+A \code{\link[tibble:tibble]{tibble::tibble()}} of per-column summary statistics.
 }
 \description{
 Computes summary statistics and value-frequency distributions for
 selected columns of a dataset. Useful for understanding data quality
-before defining comparison rules. Accepts data frames, dbplyr lazy
-table references, or character table names.
+before defining comparison rules. Accepts data frames,
+\link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy} table references, or character table names.
 }
 \examples{
 df <- data.frame(

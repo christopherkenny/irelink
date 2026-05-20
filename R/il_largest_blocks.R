@@ -4,15 +4,15 @@
 #' that produce the most record pairs. This helps diagnose skew, where a
 #' single dominant key can create a quadratic explosion of pairs.
 #'
-#' @param .data A data frame, dbplyr `tbl_lazy`, or character table name
+#' @param .data A data frame, [dbplyr::tbl_lazy], or character table name
 #'   (first or only dataset).
 #' @param rule A blocking rule created by [block_on()].
 #' @param n Integer. Number of largest bins to return. Defaults to `5`.
-#' @param con A DBI connection object. Optional when `.data` is a
-#'   `tbl_lazy`.
+#' @param con A DBI connection object from [DBI::dbConnect()]. Optional when `.data` is a
+#'   [dbplyr::tbl_lazy].
 #' @param link_type One of `"dedupe"` (default) or `"link"`.
 #'
-#' @return A tibble with one row per blocking-key combination, sorted by
+#' @return A [tibble::tibble()] with one row per blocking-key combination, sorted by
 #'   descending pair count. Columns are the blocking-key values plus
 #'   `n_records` and `n_pairs`.
 #' @export

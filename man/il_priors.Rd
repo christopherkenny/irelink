@@ -10,7 +10,7 @@ il_priors(model)
 \item{model}{An \code{il_model} object.}
 }
 \value{
-A tibble of stored prior metadata.
+A \code{\link[tibble:tibble]{tibble::tibble()}} of stored prior metadata.
 }
 \description{
 Inspect Model Priors

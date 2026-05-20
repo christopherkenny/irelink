@@ -12,7 +12,7 @@
 #'   `"parameters"` shows m and u probabilities side by side.
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return A `ggplot` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_model <- function(object, type = c('weights', 'parameters'), ...) {
   type <- match.arg(type)
@@ -93,7 +93,7 @@ autoplot.il_model <- function(object, type = c('weights', 'parameters'), ...) {
 #'   histogram.
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return A `ggplot` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_compared <- function(object, which = NULL, ...) {
   if (!is.null(which)) {
@@ -153,7 +153,7 @@ autoplot.il_compared_lazy <- function(object, which = NULL, ...) {
 #' @param object An `il_accuracy` tibble.
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return A `ggplot` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_accuracy <- function(object, ...) {
   long <- rbind(
@@ -197,7 +197,7 @@ autoplot.il_accuracy <- function(object, ...) {
 #' @param object An `il_roc` tibble.
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return A `ggplot` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_roc <- function(object, ...) {
   object <- object[order(object$fpr, object$tpr), ]
@@ -230,7 +230,7 @@ autoplot.il_roc <- function(object, ...) {
 #' @param object An `il_precision_recall` tibble.
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return A `ggplot` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_precision_recall <- function(object, ...) {
   object <- object[order(object$recall, -object$precision), ]
@@ -262,7 +262,7 @@ autoplot.il_precision_recall <- function(object, ...) {
 #' @param object An `il_unlinkables` tibble.
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return A `ggplot` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_unlinkables <- function(object, ...) {
   object |>
@@ -291,7 +291,7 @@ autoplot.il_unlinkables <- function(object, ...) {
 #'   or `"raw"` to show the total pairs each rule generates independently.
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return A `ggplot` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_count_pairs <- function(
   object,
@@ -368,7 +368,7 @@ autoplot.il_count_pairs <- function(
 #' @param object An `il_profile` tibble.
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return A `ggplot` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_profile <- function(object, ...) {
   object$facet_value <- paste(object$column, object$value, sep = '___')
@@ -397,7 +397,7 @@ autoplot.il_profile <- function(object, ...) {
 #' @param object An `il_training_history` tibble.
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return A `ggplot` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_training_history <- function(object, ...) {
   object |>
@@ -434,7 +434,7 @@ autoplot.il_training_history <- function(object, ...) {
 #' @param object An `il_completeness` tibble.
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return A `ggplot` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_completeness <- function(object, ...) {
   object |>
@@ -462,7 +462,7 @@ autoplot.il_completeness <- function(object, ...) {
 #' @param object An `il_comparator_score` tibble.
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return A `ggplot2` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_comparator_score <- function(object, ...) {
   metric_cols <- intersect(
@@ -497,7 +497,7 @@ autoplot.il_comparator_score <- function(object, ...) {
 #' @param object An `il_comparison_vectors` tibble.
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return A `ggplot2` object showing the top comparison patterns by
+#' @return A [ggplot2::ggplot()] object showing the top comparison patterns by
 #'   frequency.
 #' @exportS3Method ggplot2::autoplot
 autoplot.il_comparison_vectors <- function(object, ...) {
@@ -534,7 +534,7 @@ autoplot.il_comparison_vectors <- function(object, ...) {
 #'   [il_string_similarity()]).
 #' @param ... Additional arguments (currently unused).
 #'
-#' @return A `ggplot` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @exportS3Method ggplot2::autoplot
 #'
 #' @examples

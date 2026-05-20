@@ -13,12 +13,12 @@ il_suggest_blocking(
 )
 }
 \arguments{
-\item{.data}{A data frame, dbplyr \code{tbl_lazy}, or character table name.}
+\item{.data}{A data frame, \link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}, or character table name.}
 
 \item{columns}{Character vector of column names to evaluate. When
 \code{NULL} (the default), all non-ID columns are tried.}
 
-\item{con}{A DBI connection object. Optional when \code{.data} is already
+\item{con}{A DBI connection object from \code{\link[DBI:dbConnect]{DBI::dbConnect()}}. Optional when \code{.data} is already
 registered in the database.}
 
 \item{link_type}{One of \code{"dedupe"} (default) or \code{"link"}.}
@@ -28,7 +28,7 @@ blocking rule. Defaults to \code{1} (single-column rules only).
 Set to \code{2} to also evaluate two-column combinations.}
 }
 \value{
-A tibble with columns \code{rule}, \code{n_distinct}, \code{coverage},
+A \code{\link[tibble:tibble]{tibble::tibble()}} with columns \code{rule}, \code{n_distinct}, \code{coverage},
 \code{n_pairs}, \code{pct_of_cartesian}, and \code{score}, sorted by \code{score}
 descending. Higher scores indicate better blocking rules.
 }

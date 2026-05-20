@@ -636,7 +636,7 @@ prepare_dependency_scored_query <- function(
 #' @param patterns A data frame containing either comparison columns named like
 #'   the model comparisons or gamma columns named `gamma_<comparison>`.
 #'
-#' @return A tibble containing the input columns plus `match_weight` and
+#' @return A [tibble::tibble()] containing the input columns plus `match_weight` and
 #'   `total_match_weight`, and `match_probability`.
 #' @export
 il_score_patterns <- function(model, patterns) {

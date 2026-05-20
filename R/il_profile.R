@@ -2,21 +2,21 @@
 #'
 #' Computes summary statistics and value-frequency distributions for
 #' selected columns of a dataset. Useful for understanding data quality
-#' before defining comparison rules. Accepts data frames, dbplyr lazy
-#' table references, or character table names.
+#' before defining comparison rules. Accepts data frames,
+#' [dbplyr::tbl_lazy] table references, or character table names.
 #'
-#' @param .data A data frame, dbplyr `tbl_lazy`, or character table name.
+#' @param .data A data frame, [dbplyr::tbl_lazy], or character table name.
 #' @param ... Columns to profile, specified as unquoted names or as
 #'   character strings containing raw SQL expressions (e.g.,
 #'   `"city || ' ' || first_name"`). If empty, all columns are profiled.
-#' @param con A DBI connection object. Optional when `.data` is a
-#'   `tbl_lazy`.
+#' @param con A DBI connection object from [DBI::dbConnect()]. Optional when `.data` is a
+#'   [dbplyr::tbl_lazy].
 #' @param top_n Integer. Number of most-frequent values to return per
 #'   column. Defaults to `NULL` (return all values).
 #' @param bottom_n Integer. Number of least-frequent values to return per
 #'   column. Defaults to `NULL` (return all values).
 #'
-#' @return A tibble of per-column summary statistics.
+#' @return A [tibble::tibble()] of per-column summary statistics.
 #' @export
 #'
 #' @examples

@@ -13,7 +13,7 @@ il_score_patterns(model, patterns)
 the model comparisons or gamma columns named \verb{gamma_<comparison>}.}
 }
 \value{
-A tibble containing the input columns plus \code{match_weight} and
+A \code{\link[tibble:tibble]{tibble::tibble()}} containing the input columns plus \code{match_weight} and
 \code{total_match_weight}, and \code{match_probability}.
 }
 \description{

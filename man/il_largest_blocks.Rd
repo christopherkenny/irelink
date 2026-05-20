@@ -13,20 +13,20 @@ il_largest_blocks(
 )
 }
 \arguments{
-\item{.data}{A data frame, dbplyr \code{tbl_lazy}, or character table name
+\item{.data}{A data frame, \link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}, or character table name
 (first or only dataset).}
 
 \item{rule}{A blocking rule created by \code{\link[=block_on]{block_on()}}.}
 
 \item{n}{Integer. Number of largest bins to return. Defaults to \code{5}.}
 
-\item{con}{A DBI connection object. Optional when \code{.data} is a
-\code{tbl_lazy}.}
+\item{con}{A DBI connection object from \code{\link[DBI:dbConnect]{DBI::dbConnect()}}. Optional when \code{.data} is a
+\link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}.}
 
 \item{link_type}{One of \code{"dedupe"} (default) or \code{"link"}.}
 }
 \value{
-A tibble with one row per blocking-key combination, sorted by
+A \code{\link[tibble:tibble]{tibble::tibble()}} with one row per blocking-key combination, sorted by
 descending pair count. Columns are the blocking-key values plus
 \code{n_records} and \code{n_pairs}.
 }

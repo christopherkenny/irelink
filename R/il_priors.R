@@ -128,7 +128,7 @@ il_constrain_m <- function(model, col, exact = NULL, levels = NULL) {
 #' Inspect Model Priors
 #'
 #' @param model An `il_model` object.
-#' @return A tibble of stored prior metadata.
+#' @return A [tibble::tibble()] of stored prior metadata.
 #' @export
 il_priors <- function(model) {
   validate_il_model(model)
@@ -138,7 +138,7 @@ il_priors <- function(model) {
 #' Inspect Model Constraints
 #'
 #' @param model An `il_model` object.
-#' @return A tibble of stored fixed-constraint metadata.
+#' @return A [tibble::tibble()] of stored fixed-constraint metadata.
 #' @export
 il_constraints <- function(model) {
   validate_il_model(model)

@@ -6,7 +6,7 @@
 #'
 #' @param model A trained `il_model` object.
 #'
-#' @return A tibble with columns `threshold` and `pct_unlinkable`.
+#' @return A [tibble::tibble()] with columns `threshold` and `pct_unlinkable`.
 #' @export
 #'
 #' @examples

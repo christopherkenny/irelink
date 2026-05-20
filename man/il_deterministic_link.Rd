@@ -13,7 +13,7 @@ il_deterministic_link(
 )
 }
 \arguments{
-\item{.data}{A data frame, dbplyr \code{tbl_lazy}, or character table name
+\item{.data}{A data frame, \link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}, or character table name
 (first or only dataset).}
 
 \item{...}{Additional datasets for multi-table linkage.}
@@ -21,14 +21,14 @@ il_deterministic_link(
 \item{spec}{An \code{il_spec} object with blocking rules defined via
 \code{\link[=il_block_on]{il_block_on()}}.}
 
-\item{con}{A DBI connection object. Optional when \code{.data} is a
-\code{tbl_lazy}.}
+\item{con}{A DBI connection object from \code{\link[DBI:dbConnect]{DBI::dbConnect()}}. Optional when \code{.data} is a
+\link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}.}
 
 \item{link_type}{One of \code{"dedupe"} (default), \code{"link"}, or
 \code{"link_and_dedupe"}.}
 }
 \value{
-A tibble of exact-match record pairs.
+A \code{\link[tibble:tibble]{tibble::tibble()}} of exact-match record pairs.
 }
 \description{
 Finds exact-match record pairs using the blocking rules in the

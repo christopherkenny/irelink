@@ -8,7 +8,7 @@
 #' @param which An integer index identifying which row (pair) to
 #'   decompose. Defaults to `1L`.
 #'
-#' @return A tibble with columns `step`, `order`, `contribution`,
+#' @return A [tibble::tibble()] with columns `step`, `order`, `contribution`,
 #'   `direction`, `start`, and `end`. The rows include the prior odds,
 #'   one row per comparison contribution, and a final total.
 #' @export

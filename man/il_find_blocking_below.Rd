@@ -14,20 +14,20 @@ il_find_blocking_below(
 )
 }
 \arguments{
-\item{.data}{A data frame, dbplyr \code{tbl_lazy}, or character table name.}
+\item{.data}{A data frame, \link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}, or character table name.}
 
 \item{max_pairs}{Maximum number of pairs allowed.}
 
 \item{columns}{Character vector of column names. \code{NULL} for all.}
 
-\item{con}{A DBI connection object.}
+\item{con}{A DBI connection object from \code{\link[DBI:dbConnect]{DBI::dbConnect()}}.}
 
 \item{link_type}{One of \code{"dedupe"} (default) or \code{"link"}.}
 
 \item{max_depth}{Maximum depth of column combinations (default \code{2}).}
 }
 \value{
-A tibble of qualifying blocking rules, sorted by \code{n_pairs}
+A \code{\link[tibble:tibble]{tibble::tibble()}} of qualifying blocking rules, sorted by \code{n_pairs}
 ascending. Empty tibble if no rules qualify.
 }
 \description{

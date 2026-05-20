@@ -5,7 +5,7 @@
 #' comparison thresholds. Rows where either column is missing are omitted.
 #'
 #' With `con = NULL`, all metrics are computed in R with
-#' [stringdist::stringdist()]. With a DuckDB or PostgreSQL connection,
+#' [stringdist::stringdist()]. With a [duckdb::duckdb()] or PostgreSQL connection,
 #' computation is pushed to SQL. SQL backends return the same column schema
 #' but may leave unsupported metrics as `NA`: DuckDB currently computes
 #' `jaro_winkler`, `jaro`, `levenshtein`, and `jaccard`; PostgreSQL computes
@@ -15,9 +15,9 @@
 #' @param .data A data frame or character table name. Table names require
 #'   `con`.
 #' @param col_1,col_2 Column names (unquoted or character).
-#' @param con A DBI connection. If `NULL`, uses R-side computation.
+#' @param con A DBI connection from [DBI::dbConnect()]. If `NULL`, uses R-side computation.
 #'
-#' @return A tibble with the two input columns and metric columns
+#' @return A [tibble::tibble()] with the two input columns and metric columns
 #'   `jaro_winkler`, `jaro`, `levenshtein`, `jaccard`, and `cosine`.
 #'   Unsupported SQL-backend metrics are present as `NA`. The result has S3
 #'   class `il_comparator_score`.
@@ -139,9 +139,9 @@ comparator_score_r <- function(.data, col_1, col_2) {
 #'   (>= to include). Applies to jaro_winkler, jaro, jaccard, cosine.
 #' @param distance_threshold Integer threshold for distance metrics
 #'   (<= to include). Applies to levenshtein.
-#' @param con A DBI connection. If `NULL`, uses R-side computation.
+#' @param con A DBI connection from [DBI::dbConnect()]. If `NULL`, uses R-side computation.
 #'
-#' @return A `ggplot2` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @export
 il_comparator_threshold_chart <- function(
   .data,
@@ -214,10 +214,10 @@ il_comparator_threshold_chart <- function(
 #'
 #' @param .data A data frame or character table name.
 #' @param col_1,col_2 Column names (unquoted or character).
-#' @param con A DBI connection. If provided and DuckDB or PostgreSQL, computes
-#'   Soundex in SQL.
+#' @param con A DBI connection from [DBI::dbConnect()]. If provided and [duckdb::duckdb()] or
+#'   PostgreSQL, computes Soundex in SQL.
 #'
-#' @return A `ggplot2` object.
+#' @return A [ggplot2::ggplot()] object.
 #' @export
 il_phonetic_chart <- function(.data, col_1, col_2, con = NULL) {
   col_1 <- as.character(rlang::ensym(col_1))

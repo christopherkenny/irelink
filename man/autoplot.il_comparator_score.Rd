@@ -12,7 +12,7 @@
 \item{...}{Additional arguments (currently unused).}
 }
 \value{
-A \code{ggplot2} object.
+A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object.
 }
 \description{
 Plot Batch Comparator Scores

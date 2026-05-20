@@ -3,12 +3,12 @@
 #' Computes the percentage of non-null values for each column across one
 #' or more datasets.
 #'
-#' @param ... One or more data frames, dbplyr `tbl_lazy` references, or
+#' @param ... One or more data frames, [dbplyr::tbl_lazy] references, or
 #'   character table names to profile.
-#' @param con A DBI connection object. Optional when all inputs are
-#'   `tbl_lazy` references.
+#' @param con A DBI connection object from [DBI::dbConnect()]. Optional when all inputs are
+#'   [dbplyr::tbl_lazy] references.
 #'
-#' @return A tibble with columns `table`, `column`, `n_total`,
+#' @return A [tibble::tibble()] with columns `table`, `column`, `n_total`,
 #'   `n_non_null`, and `pct_non_null`.
 #' @export
 #'

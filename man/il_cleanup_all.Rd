@@ -7,7 +7,7 @@
 il_cleanup_all(con)
 }
 \arguments{
-\item{con}{A DBI connection.}
+\item{con}{A DBI connection from \code{\link[DBI:dbConnect]{DBI::dbConnect()}}.}
 }
 \value{
 \code{con}, invisibly.

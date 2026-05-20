@@ -5,7 +5,7 @@
 #' arrive after the model has been trained.
 #'
 #' @param model A trained `il_model` object.
-#' @param new_records A data frame, dbplyr `tbl_lazy`, or character table
+#' @param new_records A data frame, [dbplyr::tbl_lazy], or character table
 #'   name of new records to match against the model's existing data.
 #' @param threshold A numeric value between 0 and 1. Only matches at or
 #'   above this probability are returned. Defaults to `0.85`.

@@ -13,7 +13,7 @@
 #' @param limit Maximum number of pairs to sample. Defaults to `NULL`
 #'   (all pairs).
 #'
-#' @return A tibble with one row per unique comparison vector and
+#' @return A [tibble::tibble()] with one row per unique comparison vector and
 #'   columns `gamma_<col>` for each comparison plus `count` (number
 #'   of pairs with that pattern) and `proportion`. Class
 #'   `il_comparison_vectors`.

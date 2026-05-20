@@ -16,7 +16,7 @@ match indicator. Required unless \code{labels_col} is provided.}
 containing ground-truth cluster/entity IDs.}
 }
 \value{
-A tibble with columns \code{threshold}, \code{precision}, and \code{recall}.
+A \code{\link[tibble:tibble]{tibble::tibble()}} with columns \code{threshold}, \code{precision}, and \code{recall}.
 }
 \description{
 Returns a tidy tibble of precision and recall values at each

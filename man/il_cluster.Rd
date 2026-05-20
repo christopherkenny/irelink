@@ -35,7 +35,7 @@ If a data frame, it must contain columns \code{unique_id} and
 \code{source_dataset}, and \code{unique_id} values must be unique.}
 }
 \value{
-A tibble with one row per input record, including a
+A \code{\link[tibble:tibble]{tibble::tibble()}} with one row per input record, including a
 \code{cluster_id} column.
 }
 \description{

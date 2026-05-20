@@ -10,7 +10,7 @@ il_constraints(model)
 \item{model}{An \code{il_model} object.}
 }
 \value{
-A tibble of stored fixed-constraint metadata.
+A \code{\link[tibble:tibble]{tibble::tibble()}} of stored fixed-constraint metadata.
 }
 \description{
 Inspect Model Constraints

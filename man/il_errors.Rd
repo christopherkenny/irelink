@@ -19,7 +19,7 @@ as matches. Defaults to \code{0.85}.}
 containing ground-truth cluster/entity IDs.}
 }
 \value{
-A tibble of misclassified pairs with columns \code{unique_id_l},
+A \code{\link[tibble:tibble]{tibble::tibble()}} of misclassified pairs with columns \code{unique_id_l},
 \code{unique_id_r}, \code{match_weight}, \code{match_probability}, \code{true_label},
 and \code{error_type}.
 }

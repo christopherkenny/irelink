@@ -13,7 +13,7 @@ il_model(
 )
 }
 \arguments{
-\item{.data}{A data frame, tibble, dbplyr \code{tbl_lazy}, or character
+\item{.data}{A data frame, \code{\link[tibble:tibble]{tibble::tibble()}}, \link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}, or character
 table name. The first (or only) input dataset. If no \code{unique_id}
 column is present, one is generated automatically.}
 
@@ -23,9 +23,9 @@ as \code{.data}).}
 \item{spec}{An \code{il_spec} object built with \code{\link[=il_spec]{il_spec()}}, \code{\link[=il_compare]{il_compare()}},
 and \code{\link[=il_block_on]{il_block_on()}}.}
 
-\item{con}{A DBI connection object (e.g., from
+\item{con}{A DBI connection object from \code{\link[DBI:dbConnect]{DBI::dbConnect()}} (e.g., from
 \code{DBI::dbConnect(duckdb::duckdb())}). Optional when \code{.data} is a
-\code{tbl_lazy}, the connection is extracted from the table reference.}
+\link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}, the connection is extracted from the table reference.}
 
 \item{link_type}{One of \code{"dedupe"} (default), \code{"link"}, or
 \code{"link_and_dedupe"}.}
@@ -36,11 +36,11 @@ An untrained \code{il_model} object, ready for training verbs.
 \description{
 Binds one or more datasets to a specification and a database
 connection, producing an untrained model. Accepts in-memory data
-frames, dbplyr lazy table references, or character table names for
+frames, \link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy} table references, or character table names for
 data that already lives in a database.
 }
 \details{
-When \code{.data} is a \code{tbl_lazy} (from \code{\link[dplyr:tbl]{dplyr::tbl()}}), the connection
+When \code{.data} is a \link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy} (from \code{\link[dplyr:tbl]{dplyr::tbl()}}), the connection
 is extracted automatically and data stays in-database with zero
 copying. A \code{unique_id} column is injected automatically if not
 already present.

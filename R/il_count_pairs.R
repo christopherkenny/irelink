@@ -4,15 +4,15 @@
 #' performing full comparisons. Useful for tuning blocking strategies
 #' before training. Too many pairs is slow, while too few misses matches.
 #'
-#' @param .data A data frame, dbplyr `tbl_lazy`, or character table name
+#' @param .data A data frame, [dbplyr::tbl_lazy], or character table name
 #'   (first or only dataset).
 #' @param ... Blocking rules created by [block_on()], and optionally
 #'   additional datasets for linkage.
-#' @param con A DBI connection object. Optional when `.data` is a
-#'   `tbl_lazy`.
+#' @param con A DBI connection object from [DBI::dbConnect()]. Optional when `.data` is a
+#'   [dbplyr::tbl_lazy].
 #' @param link_type One of `"dedupe"` (default) or `"link"`.
 #'
-#' @return A tibble with columns `rule` and `n_pairs`. When blocking rules
+#' @return A [tibble::tibble()] with columns `rule` and `n_pairs`. When blocking rules
 #'   are supplied, it also includes `cumulative_pairs` and
 #'   `pct_of_cartesian`.
 #' @export

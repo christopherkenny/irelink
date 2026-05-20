@@ -16,7 +16,7 @@ uses all blocking rules from the model spec.}
 (all pairs).}
 }
 \value{
-A tibble with one row per unique comparison vector and
+A \code{\link[tibble:tibble]{tibble::tibble()}} with one row per unique comparison vector and
 columns \verb{gamma_<col>} for each comparison plus \code{count} (number
 of pairs with that pattern) and \code{proportion}. Class
 \code{il_comparison_vectors}.

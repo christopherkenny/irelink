@@ -34,14 +34,14 @@
 - [x] R/il_estimate_m_from_labels.R
 - [x] R/il_estimate_prior.R
 - [x] R/il_estimate_u.R
-- [ ] R/il_find_matches.R
-- [ ] R/il_graph_metrics.R
-- [ ] R/il_largest_blocks.R
-- [ ] R/il_model.R
-- [ ] R/il_parameters.R
-- [ ] R/il_phonetic.R
-- [ ] R/il_precision_recall.R
-- [ ] R/il_priors.R
+- [x] R/il_find_matches.R
+- [x] R/il_graph_metrics.R
+- [x] R/il_largest_blocks.R
+- [x] R/il_model.R
+- [x] R/il_parameters.R
+- [x] R/il_phonetic.R
+- [x] R/il_precision_recall.R
+- [x] R/il_priors.R
 - [ ] R/il_profile.R
 - [ ] R/il_register_tf.R
 - [ ] R/il_roc.R

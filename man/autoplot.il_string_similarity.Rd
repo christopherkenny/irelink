@@ -13,7 +13,7 @@
 \item{...}{Additional arguments (currently unused).}
 }
 \value{
-A \code{ggplot} object.
+A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object.
 }
 \description{
 Visualizes the output of \code{\link[=il_string_similarity]{il_string_similarity()}} as a horizontal bar

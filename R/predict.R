@@ -429,7 +429,7 @@ predict_lazy <- function(
 #' @param model The `il_model` that produced the pairs.
 #' @param row_index_l Optional integer vector of left row indices.
 #' @param row_index_r Optional integer vector of right row indices.
-#' @return A tibble of one-to-one greedy matches.
+#' @return A [tibble::tibble()] of one-to-one greedy matches.
 #' @noRd
 greedy_match_pairs <- function(
   pairs,
@@ -514,7 +514,7 @@ pair_row_indices <- function(pairs, model) {
 }
 
 #' Build a unique_id -> row-index lookup for a registered source table
-#' @param con A DBI connection.
+#' @param con A DBI connection from [DBI::dbConnect()].
 #' @param tbl Table name.
 #' @return A named integer vector.
 #' @noRd

@@ -9,7 +9,7 @@ il_find_matches(model, new_records, threshold = 0.85)
 \arguments{
 \item{model}{A trained \code{il_model} object.}
 
-\item{new_records}{A data frame, dbplyr \code{tbl_lazy}, or character table
+\item{new_records}{A data frame, \link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}, or character table
 name of new records to match against the model's existing data.}
 
 \item{threshold}{A numeric value between 0 and 1. Only matches at or

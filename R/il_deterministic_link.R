@@ -5,17 +5,17 @@
 #' common first step before probabilistic linkage. Pairs that match on
 #' all blocking columns are returned directly.
 #'
-#' @param .data A data frame, dbplyr `tbl_lazy`, or character table name
+#' @param .data A data frame, [dbplyr::tbl_lazy], or character table name
 #'   (first or only dataset).
 #' @param ... Additional datasets for multi-table linkage.
 #' @param spec An `il_spec` object with blocking rules defined via
 #'   [il_block_on()].
-#' @param con A DBI connection object. Optional when `.data` is a
-#'   `tbl_lazy`.
+#' @param con A DBI connection object from [DBI::dbConnect()]. Optional when `.data` is a
+#'   [dbplyr::tbl_lazy].
 #' @param link_type One of `"dedupe"` (default), `"link"`, or
 #'   `"link_and_dedupe"`.
 #'
-#' @return A tibble of exact-match record pairs.
+#' @return A [tibble::tibble()] of exact-match record pairs.
 #' @export
 #'
 #' @examples

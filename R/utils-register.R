@@ -75,13 +75,13 @@ il_track_table <- function(
 
 #' Normalize data input to a database table reference
 #'
-#' Accepts a data.frame, a dbplyr `tbl_lazy`, or a character table name
+#' Accepts a data.frame, a [dbplyr::tbl_lazy], or a character table name
 #' and returns a standardized list describing the data's location in the
 #' database. For data.frames, uploads via `dbWriteTable`. For database
 #' references, materializes a table to inject `unique_id` if missing.
 #'
-#' @param data A data.frame, `tbl_lazy`, or character table name.
-#' @param con A DBI connection (optional when `data` is `tbl_lazy`).
+#' @param data A data.frame, [dbplyr::tbl_lazy], or character table name.
+#' @param con A DBI connection from [DBI::dbConnect()] (optional when `data` is [dbplyr::tbl_lazy]).
 #' @param tbl_name Internal table/view name to create.
 #' @param add_unique_id Logical. If TRUE, injects a `unique_id` column
 #'   when one is not already present.
@@ -94,7 +94,7 @@ register_data <- function(
   tbl_name = '__il_data',
   add_unique_id = TRUE
 ) {
-  # ---- tbl_lazy (dbplyr lazy table reference) ----
+  # ---- tbl_lazy ([dbplyr::tbl_lazy] table reference) ----
   if (inherits(data, 'tbl_lazy')) {
     rlang::check_installed(
       'dbplyr',
@@ -161,7 +161,7 @@ register_data <- function(
   if (is.character(data) && length(data) == 1L) {
     if (is.null(con)) {
       cli::cli_abort(
-        'A DBI connection ({.arg con}) is required when {.arg data} is a table name.'
+        'A DBI connection from [DBI::dbConnect()] ({.arg con}) is required when {.arg data} is a table name.'
       )
     }
 
@@ -216,7 +216,7 @@ register_data <- function(
   if (is.data.frame(data)) {
     if (is.null(con)) {
       cli::cli_abort(
-        'A DBI connection ({.arg con}) is required when {.arg data} is a data frame.'
+        'A DBI connection from [DBI::dbConnect()] ({.arg con}) is required when {.arg data} is a data frame.'
       )
     }
 
@@ -252,7 +252,7 @@ register_data <- function(
 
 #' Count rows in a tbl_lazy without collecting
 #' @param tbl A tbl_lazy object.
-#' @param con A DBI connection.
+#' @param con A DBI connection from [DBI::dbConnect()].
 #' @return Integer row count.
 #' @noRd
 count_tbl_lazy <- function(tbl, con) {
@@ -269,7 +269,7 @@ count_tbl_lazy <- function(tbl, con) {
 }
 
 #' Drop a view or table created by register_data
-#' @param con A DBI connection.
+#' @param con A DBI connection from [DBI::dbConnect()].
 #' @param tbl_name The name of the view/table to drop.
 #' @noRd
 drop_registered <- function(con, tbl_name) {
@@ -295,7 +295,7 @@ validate_data_frame_unique_id <- function(data) {
 }
 
 #' Validate unique_id in a registered database table or view
-#' @param con A DBI connection.
+#' @param con A DBI connection from [DBI::dbConnect()].
 #' @param tbl_name Registered table/view name.
 #' @param columns Registered column names.
 #' @noRd

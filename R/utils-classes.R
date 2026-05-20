@@ -46,7 +46,7 @@ validate_il_spec <- function(x) {
 #'
 #' @param spec An `il_spec` object.
 #' @param data A list of data frames.
-#' @param con A DBI connection or `NULL`.
+#' @param con A DBI connection from [DBI::dbConnect()] or `NULL`.
 #' @param link_type A character string.
 #' @param params A list of trained parameters.
 #' @param trained Logical indicating whether the model has been trained.
@@ -210,7 +210,7 @@ add_class <- function(x, cls) {
 #' Avoids collecting millions of rows into R when the downstream consumer
 #' (e.g., [il_cluster()]) can operate directly in SQL.
 #'
-#' @param con A valid DBI connection.
+#' @param con A valid DBI connection from [DBI::dbConnect()].
 #' @param predicted_tbl Character table name in the database.
 #' @param model The `il_model` that produced the predictions.
 #' @param threshold Numeric threshold used during prediction.

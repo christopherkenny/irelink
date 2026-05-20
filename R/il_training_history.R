@@ -6,7 +6,7 @@
 #'
 #' @param model A trained `il_model` object.
 #'
-#' @return A tibble with columns `session`, `iteration`, `comparison`,
+#' @return A [tibble::tibble()] with columns `session`, `iteration`, `comparison`,
 #'   `gamma_level`, and `value`.
 #' @export
 #'

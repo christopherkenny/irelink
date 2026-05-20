@@ -17,7 +17,7 @@ cc_tbl <- function(name, prefix = NULL) {
 #' Creates a minimal connected-component edge table with just the two ID columns
 #' and optional match_probability for threshold filtering.
 #'
-#' @param con DBI connection.
+#' @param con DBI connection from [DBI::dbConnect()].
 #' @param pairs An il_compared tibble (or data frame with unique_id_l/r).
 #' @param threshold Optional. If non-NULL, only edges at or above this
 #'   match probability are uploaded.
@@ -47,7 +47,7 @@ cc_upload_edges <- function(con, pairs, threshold = NULL, prefix = NULL) {
 #' - neighbours: bidirectional edges (each edge in both directions)
 #' - representatives: initial representative = self for every node
 #'
-#' @param con DBI connection.
+#' @param con DBI connection from [DBI::dbConnect()].
 #' @param edges_tbl Name of the edges table.
 #' @return Invisibly, the representative table name.
 #' @noRd
@@ -95,7 +95,7 @@ cc_initialise <- function(con, edges_tbl, prefix = NULL) {
 #' across all its neighbours. Then update the node->representative mapping.
 #' Split into stable (no outgoing cross-cluster edges) and unstable.
 #'
-#' @param con DBI connection.
+#' @param con DBI connection from [DBI::dbConnect()].
 #' @param iteration Integer iteration number (for table naming).
 #' @return A list with `stable_tbl` and `unstable_tbl` names, and
 #'   `n_remaining` (number of cross-cluster edges remaining).
@@ -210,10 +210,10 @@ cc_iterate <- function(con, iteration, prefix = NULL) {
 #' Iterates representative propagation until convergence, then merges
 #' all stable cluster tables into a single output.
 #'
-#' @param con DBI connection.
+#' @param con DBI connection from [DBI::dbConnect()].
 #' @param edges_tbl Name of the edges table (unique_id_l, unique_id_r).
 #' @param max_iterations Safety valve (default 100).
-#' @return A tibble with columns `node_id` and `cluster_id`.
+#' @return A [tibble::tibble()] with columns `node_id` and `cluster_id`.
 #' @noRd
 solve_cc_sql <- function(
   con,
@@ -308,7 +308,7 @@ solve_cc_sql <- function(
 #' For each node, keeps only the edge with the highest match_probability.
 #' An edge survives only if it is the best link for BOTH endpoints.
 #'
-#' @param con DBI connection.
+#' @param con DBI connection from [DBI::dbConnect()].
 #' @param edges_tbl Name of edges table (must have unique_id_l,
 #'   unique_id_r, match_probability).
 #' @return Name of the filtered edges table.
@@ -409,14 +409,14 @@ sql_best_link_filter <- function(
 #' collisions, (3) keep mutual best pairs, (4) merge. Repeat until
 #' no more merges are possible.
 #'
-#' @param con DBI connection.
+#' @param con DBI connection from [DBI::dbConnect()].
 #' @param edges_tbl Name of edges table (unique_id_l, unique_id_r,
 #'   match_probability).
 #' @param source_dataset Named character vector mapping unique_id ->
 #'   source_dataset.
 #' @param ties_method How to break ties: `"lowest_id"` or `"drop"`.
 #' @param max_iterations Safety valve (default 100).
-#' @return A tibble with columns `node_id` and `cluster_id`.
+#' @return A [tibble::tibble()] with columns `node_id` and `cluster_id`.
 #' @noRd
 solve_one_to_one_sql <- function(
   con,
@@ -612,7 +612,7 @@ solve_one_to_one_sql <- function(
 #'   source_dataset.
 #' @param ties_method How to break ties: `"lowest_id"` or `"drop"`.
 #' @param max_iterations Safety valve (default 100).
-#' @return A tibble with columns `unique_id` and `cluster_id`.
+#' @return A [tibble::tibble()] with columns `unique_id` and `cluster_id`.
 #' @noRd
 solve_one_to_one_r <- function(
   pairs,
@@ -772,7 +772,7 @@ solve_one_to_one_r <- function(
 #' Calculates node degree and cluster size using a LEFT JOIN on
 #' bidirectional edges plus a window function.
 #'
-#' @param con DBI connection.
+#' @param con DBI connection from [DBI::dbConnect()].
 #' @param cc_output_tbl Name of the CC output table (node_id, cluster_id).
 #' @param edges_tbl Name of the original edges table.
 #' @return Name of the node metrics table.
@@ -817,7 +817,7 @@ sql_node_metrics <- function(con, cc_output_tbl, edges_tbl, prefix = NULL) {
 #' Calculates n_nodes, n_edges, density, and centralisation from the
 #' node metrics table in a single GROUP BY pass.
 #'
-#' @param con DBI connection.
+#' @param con DBI connection from [DBI::dbConnect()].
 #' @param node_metrics_tbl Name of the node metrics table.
 #' @return Name of the cluster metrics table.
 #' @noRd

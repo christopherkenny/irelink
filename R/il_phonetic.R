@@ -133,7 +133,7 @@ soundex_one <- function(s) {
 #' Creates `il_soundex` as a DuckDB MACRO so that phonetic blocking
 #' runs entirely inside the database engine.
 #'
-#' @param con A DBI connection to DuckDB.
+#' @param con A DBI connection from [DBI::dbConnect()] to [duckdb::duckdb()].
 #' @noRd
 register_phonetic_macros <- function(con) {
   dialect <- detect_dialect(con)

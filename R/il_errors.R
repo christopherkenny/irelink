@@ -12,7 +12,7 @@
 #' @param labels_col Optional string naming a column in the original data
 #'   containing ground-truth cluster/entity IDs.
 #'
-#' @return A tibble of misclassified pairs with columns `unique_id_l`,
+#' @return A [tibble::tibble()] of misclassified pairs with columns `unique_id_l`,
 #'   `unique_id_r`, `match_weight`, `match_probability`, `true_label`,
 #'   and `error_type`.
 #' @export

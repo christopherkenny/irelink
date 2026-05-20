@@ -21,7 +21,7 @@ time_diff_to_seconds <- function(value, unit) {
 }
 
 #' Detect the SQL dialect from a DBI connection
-#' @param con A DBI connection object.
+#' @param con A DBI connection object from [DBI::dbConnect()].
 #' @return A character string: "duckdb", "sqlite", or "generic".
 #' @noRd
 detect_dialect <- function(con) {
@@ -1452,7 +1452,7 @@ build_blocking_condition <- function(
 #'
 #' Counts pairs produced by a blocking rule, handling dedupe vs link.
 #'
-#' @param con A DBI connection.
+#' @param con A DBI connection from [DBI::dbConnect()].
 #' @param tbl_l Left table name.
 #' @param tbl_r Right table name (same as tbl_l for dedupe).
 #' @param where A SQL WHERE fragment for blocking.
@@ -1537,7 +1537,7 @@ blocked_pair_rows_sql <- function(
 #' Unlike summing per-rule counts, this counts a pair only once even when it is
 #' produced by multiple blocking rules.
 #'
-#' @param con A DBI connection.
+#' @param con A DBI connection from [DBI::dbConnect()].
 #' @param tbl_l Left table name.
 #' @param tbl_r Right table name.
 #' @param rules List of il_blocking_rule objects.

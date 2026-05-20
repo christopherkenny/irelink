@@ -12,7 +12,7 @@
 \item{...}{Additional arguments (currently unused).}
 }
 \value{
-A \code{ggplot2} object showing the top comparison patterns by
+A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object showing the top comparison patterns by
 frequency.
 }
 \description{

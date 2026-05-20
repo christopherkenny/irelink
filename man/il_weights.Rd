@@ -10,7 +10,7 @@ il_weights(model)
 \item{model}{A trained \code{il_model} object.}
 }
 \value{
-A tibble with columns \code{comparison}, \code{gamma_level}, \code{m_prob},
+A \code{\link[tibble:tibble]{tibble::tibble()}} with columns \code{comparison}, \code{gamma_level}, \code{m_prob},
 \code{u_prob}, and \code{weight}.
 }
 \description{

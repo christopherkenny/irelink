@@ -10,7 +10,7 @@ il_unlinkables(model)
 \item{model}{A trained \code{il_model} object.}
 }
 \value{
-A tibble with columns \code{threshold} and \code{pct_unlinkable}.
+A \code{\link[tibble:tibble]{tibble::tibble()}} with columns \code{threshold} and \code{pct_unlinkable}.
 }
 \description{
 Calculates the proportion of records that cannot be linked at each
