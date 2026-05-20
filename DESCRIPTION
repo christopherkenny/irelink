@@ -56,7 +56,8 @@ Imports:
     glue,
     rlang,
     stringdist,
-    tibble
+    tibble,
+    tidyselect
 Suggests:
     dbplyr,
     dplyr,
@@ -67,7 +68,6 @@ Suggests:
     rmarkdown,
     RSQLite,
     testthat (>= 3.0.0),
-    tidyselect,
     withr
 Config/testthat/edition: 3
 URL: http://christophertkenny.com/irelink/

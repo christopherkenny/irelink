@@ -6,3 +6,4 @@
 - [x] `il_regex_extract()` docs are out of date.
 - [x] `il_comparator_score` docs are out of date too.
 - [x] All autoplot.* functions should be defined in `autoplot.R`.
+- [ ] We use tidyselect in a lot of places, but it is a suggests. Weigh in on if it is used in sufficient locations to upgrade it to an imports.

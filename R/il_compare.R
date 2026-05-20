@@ -144,11 +144,6 @@ resolve_spec_selectors <- function(spec, columns, column_classes = NULL) {
     return(spec)
   }
 
-  rlang::check_installed(
-    'tidyselect',
-    reason = 'to resolve tidyselect helpers in il_compare().'
-  )
-
   data_proxy <- make_tidyselect_proxy(columns, column_classes)
   resolved <- list()
   for (comp in spec$comparisons) {
