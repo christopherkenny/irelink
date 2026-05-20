@@ -136,7 +136,7 @@ Records sharing the same cluster are considered to be the same entity.
 | `cl_pct_diff()` | Percentage difference |
 | `cl_date_diff()` | Date fields |
 | `cl_time_diff()` | Time fields |
-| `cl_distance_km()` | Geographic coordinates |
+| `cl_geo_distance()` | Geographic coordinates |
 | `cl_array_intersect()` | Array or set overlap |
 
 For common field types, domain-specific helpers compose multiple levels into a single call:

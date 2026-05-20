@@ -661,7 +661,7 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     return(gamma)
   }
 
-  if (method == 'distance_km') {
+  if (method == 'geo_distance') {
     lat_l <- val_l[[1]]
     lon_l <- val_l[[2]]
     lat_r <- val_r[[1]]
@@ -976,7 +976,7 @@ compute_gamma_matrix <- function(pairs, comparisons) {
   for (j in seq_len(n_comp)) {
     comp <- comparisons[[j]]
     col <- comp$columns
-    if (length(col) == 2L && identical(comp$method$method, 'distance_km')) {
+    if (length(col) == 2L && identical(comp$method$method, 'geo_distance')) {
       val_l <- pairs[paste0('l_', col)]
       val_r <- pairs[paste0('r_', col)]
     } else {

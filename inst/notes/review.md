@@ -1,0 +1,2 @@
+- [ ] autoplot: should formatC be used here or is this excessive?
+- [x] Rename the geographic distance constructor to cl_geo_distance().

@@ -339,9 +339,9 @@ sql_gamma_case <- function(comp, dialect) {
   thresholds <- level$thresholds
   tf <- comp$transform
 
-  if (length(col) == 2L && method != 'distance_km') {
+  if (length(col) == 2L && method != 'geo_distance') {
     cli::cli_abort(
-      'Only {.fn cl_distance_km} comparisons can use two columns.'
+      'Only {.fn cl_geo_distance} comparisons can use two columns.'
     )
   }
 
@@ -524,10 +524,10 @@ sql_gamma_case <- function(comp, dialect) {
     ))
   }
 
-  if (method == 'distance_km') {
+  if (method == 'geo_distance') {
     if (length(col) != 2L) {
       cli::cli_abort(
-        '{.fn cl_distance_km} comparisons require latitude and longitude columns.'
+        '{.fn cl_geo_distance} comparisons require latitude and longitude columns.'
       )
     }
     lat_l <- sql_transform_col(sql_col_ref('l', col[1]), tf, dialect)
@@ -1293,12 +1293,26 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
-  if (method == 'distance_km') {
+  if (method == 'geo_distance') {
+    if (length(col) != 2L) {
+      cli::cli_abort(
+        '{.fn cl_geo_distance} comparisons require latitude and longitude columns.'
+      )
+    }
+    lat_l <- sql_col_ref('l', col[1])
+    lon_l <- sql_col_ref('l', col[2])
+    lat_r <- sql_col_ref('r', col[1])
+    lon_r <- sql_col_ref('r', col[2])
+    dist <- glue::glue(
+      '2 * 6371 * ASIN(SQRT(POWER(SIN(RADIANS(({lat_r} - {lat_l}) / 2)), 2) + ',
+      'COS(RADIANS({lat_l})) * COS(RADIANS({lat_r})) * ',
+      'POWER(SIN(RADIANS(({lon_r} - {lon_l}) / 2)), 2)))'
+    )
     thresholds <- level$thresholds
     parts <- vapply(
       thresholds,
       function(t) {
-        glue::glue('WHEN distance_km({lcol}, {rcol}) <= {t} THEN {t}')
+        glue::glue('WHEN {dist} <= {t} THEN {t}')
       },
       character(1)
     )

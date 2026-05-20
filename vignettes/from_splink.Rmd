@@ -65,7 +65,7 @@ Each `cl_*()` function corresponds to a splink comparison level class.
 | `AbsoluteDifferenceLevel` | `cl_numeric_diff()` |
 | `PercentageDifferenceLevel` | `cl_pct_diff()` |
 | `AbsoluteTimeDifferenceAtThresholds` | `cl_date_diff()` |
-| `DistanceInKMLevel` | `cl_distance_km()` |
+| `DistanceInKMLevel` | `cl_geo_distance()` |
 | `ArrayIntersectLevel` | `cl_array_intersect()` |
 | `CustomLevel` | `cl_custom()` |
 | `NullLevel` | `cl_null()` |

@@ -69,10 +69,10 @@ il_compare <- function(
   col_expr <- rlang::enquo(col)
   selected <- extract_col_names(col_expr)
   columns <- selected$columns
-  if (identical(method$method, 'distance_km')) {
+  if (identical(method$method, 'geo_distance')) {
     if (!is.null(selected$selector) || length(columns) != 2L) {
       cli::cli_abort(
-        '{.fn cl_distance_km} comparisons must select exactly two concrete columns: latitude and longitude.'
+        '{.fn cl_geo_distance} comparisons must select exactly two concrete columns: latitude and longitude.'
       )
     }
     entry <- list(

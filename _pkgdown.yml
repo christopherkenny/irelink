@@ -51,7 +51,7 @@ reference:
       - cl_pct_diff
       - cl_date_diff
       - cl_time_diff
-      - cl_distance_km
+      - cl_geo_distance
       - cl_array_intersect
       - cl_array_subset
       - cl_array_min_distance

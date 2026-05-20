@@ -191,7 +191,7 @@ print.il_seconds <- function(x, ...) {
 #' Create a Distance in Kilometres
 #'
 #' A tagged-value constructor that marks a numeric threshold as a distance
-#' in kilometres. Use inside [cl_distance_km()] for self-documenting
+#' in kilometres. Use inside [cl_geo_distance()] for self-documenting
 #' thresholds.
 #'
 #' @param n A non-negative numeric value.
@@ -201,7 +201,7 @@ print.il_seconds <- function(x, ...) {
 #'
 #' @examples
 #' il_spec() |>
-#'   il_compare(c(lat, lon), cl_distance_km(km(5), km(50)))
+#'   il_compare(c(lat, lon), cl_geo_distance(km(5), km(50)))
 km <- function(n) {
   check_unit_input(n, 'km')
   structure(list(value = n, unit = 'km'), class = 'il_km')
@@ -210,7 +210,7 @@ km <- function(n) {
 #' Create a Distance in Miles
 #'
 #' A tagged-value constructor that marks a numeric threshold as a distance
-#' in miles. Converted to kilometres internally by [cl_distance_km()].
+#' in miles. Converted to kilometres internally by [cl_geo_distance()].
 #'
 #' @param n A non-negative numeric value.
 #'
@@ -219,7 +219,7 @@ km <- function(n) {
 #'
 #' @examples
 #' il_spec() |>
-#'   il_compare(c(lat, lon), cl_distance_km(mi(3), mi(30)))
+#'   il_compare(c(lat, lon), cl_geo_distance(mi(3), mi(30)))
 mi <- function(n) {
   check_unit_input(n, 'mi')
   structure(list(value = n, unit = 'mi'), class = 'il_mi')

@@ -152,32 +152,32 @@ test_that('cl_date_diff() rejects invalid metrics', {
   expect_error(cl_date_diff(km(30)))
 })
 
-# --- cl_distance_km() -----------------------------------------------------
+# --- cl_geo_distance() -----------------------------------------------------
 # From: test_km_distance_level.py
 
-test_that('cl_distance_km() creates a geographic distance level', {
-  lev <- cl_distance_km(km(0.1), km(1), km(10), km(300))
+test_that('cl_geo_distance() creates a geographic distance level', {
+  lev <- cl_geo_distance(km(0.1), km(1), km(10), km(300))
   expect_s3_class(lev, 'il_comparison_level')
-  expect_equal(lev$method, 'distance_km')
+  expect_equal(lev$method, 'geo_distance')
 })
 
-test_that('cl_distance_km() accepts bare numerics as km', {
-  lev <- cl_distance_km(1, 5, 10)
-  expect_s3_class(lev, 'il_comparison_level')
-})
-
-test_that('cl_distance_km() accepts miles', {
-  lev <- cl_distance_km(mi(1), mi(5))
+test_that('cl_geo_distance() accepts bare numerics as km', {
+  lev <- cl_geo_distance(1, 5, 10)
   expect_s3_class(lev, 'il_comparison_level')
 })
 
-test_that('cl_distance_km() rejects negative bare numerics', {
-  expect_error(cl_distance_km(-1))
+test_that('cl_geo_distance() accepts miles', {
+  lev <- cl_geo_distance(mi(1), mi(5))
+  expect_s3_class(lev, 'il_comparison_level')
 })
 
-test_that('cl_distance_km() uses a two-column comparison and computes R gamma', {
+test_that('cl_geo_distance() rejects negative bare numerics', {
+  expect_error(cl_geo_distance(-1))
+})
+
+test_that('cl_geo_distance() uses a two-column comparison and computes R gamma', {
   spec <- il_spec() |>
-    il_compare(c(lat, lon), cl_distance_km(km(1), km(500)))
+    il_compare(c(lat, lon), cl_geo_distance(km(1), km(500)))
 
   expect_equal(spec$comparisons[[1]]$columns, c('lat', 'lon'))
   expect_equal(comparison_name(spec$comparisons[[1]]), 'lat_lon')
@@ -193,11 +193,11 @@ test_that('cl_distance_km() uses a two-column comparison and computes R gamma', 
   expect_equal(gamma[, 1], c(2L, 0L))
 })
 
-test_that('cl_distance_km() has active SQL gamma support', {
+test_that('cl_geo_distance() has active SQL gamma support', {
   sql <- sql_gamma_case(
     list(
       columns = c('lat', 'lon'),
-      method = cl_distance_km(km(1)),
+      method = cl_geo_distance(km(1)),
       transform = NULL
     ),
     dialect = 'duckdb'

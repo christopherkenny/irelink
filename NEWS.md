@@ -12,7 +12,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 ## Comparison library
 
 - String similarity: `cl_exact()`, `cl_levenshtein()`, `cl_damerau_levenshtein()`, `cl_jaro()`, `cl_jaro_winkler()`, `cl_jaccard()`, `cl_cosine()`.
-- Numeric and distance: `cl_numeric_diff()`, `cl_pct_diff()`, `cl_distance_km()`.
+- Numeric and distance: `cl_numeric_diff()`, `cl_pct_diff()`, `cl_geo_distance()`.
 - Temporal: `cl_date_diff()` for date proximity with `days()`, `months()`, `years()` helpers; `cl_time_diff()` for sub-day precision with `seconds()`, `minutes()`, `hours()` helpers.
 - Collections: `cl_array_intersect()`, `cl_array_subset()`, `cl_array_min_distance()`.
 - Domain-specific: `cl_name()`, `cl_first_last_name()` / `cl_forename_surname()` (both accept a companion column for the surname and handle first/last swap detection), `cl_dob()`, `cl_email()`, `cl_domain()`, `cl_zip_code()` (exact, 5-digit ZIP+4, and 3-digit Sectional Center Facility prefix levels), `cl_postcode()`.

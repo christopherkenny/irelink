@@ -14,10 +14,10 @@ A tagged numeric with class \code{il_km}.
 }
 \description{
 A tagged-value constructor that marks a numeric threshold as a distance
-in kilometres. Use inside \code{\link[=cl_distance_km]{cl_distance_km()}} for self-documenting
+in kilometres. Use inside \code{\link[=cl_geo_distance]{cl_geo_distance()}} for self-documenting
 thresholds.
 }
 \examples{
 il_spec() |>
-  il_compare(c(lat, lon), cl_distance_km(km(5), km(50)))
+  il_compare(c(lat, lon), cl_geo_distance(km(5), km(50)))
 }
