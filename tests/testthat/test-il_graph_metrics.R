@@ -199,8 +199,8 @@ test_that('il_graph_metrics() computes node centrality', {
   expect_equal(leaf$node_centrality, 1 / 3, tolerance = 0.01)
 })
 
-test_that('il_graph_metrics() includes cluster_centralisation', {
-  # Triangle: fully connected — all nodes degree 2 — centralisation = 0
+test_that('il_graph_metrics() includes cluster_centralization', {
+  # Triangle: fully connected — all nodes degree 2 — centralization = 0
   pairs <- tibble::tibble(
     unique_id_l = c('1', '2', '1'),
     unique_id_r = c('2', '3', '3'),
@@ -213,9 +213,9 @@ test_that('il_graph_metrics() includes cluster_centralisation', {
   )
 
   metrics <- il_graph_metrics(pairs, clusters)
-  expect_true('cluster_centralisation' %in% names(metrics$clusters))
+  expect_true('cluster_centralization' %in% names(metrics$clusters))
   # 3 nodes, all degree 2 -> (3*2 - 6) / (2*1) = 0
-  expect_equal(metrics$clusters$cluster_centralisation, 0, tolerance = 0.01)
+  expect_equal(metrics$clusters$cluster_centralization, 0, tolerance = 0.01)
 })
 
 test_that('il_graph_metrics() validates pair and cluster columns', {

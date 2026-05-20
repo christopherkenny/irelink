@@ -177,13 +177,13 @@ autoplot.il_accuracy <- function(object, ...) {
     ggplot2::geom_line(ggplot2::aes(
       x = .data[['threshold']],
       y = .data[['value']],
-      colour = .data[['metric']]
+      color = .data[['metric']]
     )) +
     ggplot2::labs(
       title = 'Accuracy Metrics by Threshold',
       x = 'Match Probability Threshold',
       y = 'Value',
-      colour = 'Metric'
+      color = 'Metric'
     ) +
     ggplot2::theme_minimal()
 }
@@ -403,14 +403,14 @@ autoplot.il_training_history <- function(object, ...) {
     ggplot2::geom_line(ggplot2::aes(
       x = .data[['iteration']],
       y = .data[['value']],
-      colour = factor(.data[['session']]),
+      color = factor(.data[['session']]),
       linetype = factor(.data[['gamma_level']]),
       group = interaction(.data[['session']], .data[['gamma_level']])
     )) +
     ggplot2::geom_point(ggplot2::aes(
       x = .data[['iteration']],
       y = .data[['value']],
-      colour = factor(.data[['session']]),
+      color = factor(.data[['session']]),
       group = interaction(.data[['session']], .data[['gamma_level']])
     )) +
     ggplot2::facet_wrap(~ .data[['comparison']], scales = 'free_y') +
@@ -418,7 +418,7 @@ autoplot.il_training_history <- function(object, ...) {
       title = 'EM Training History',
       x = 'Iteration',
       y = 'm probability',
-      colour = 'EM session',
+      color = 'EM session',
       linetype = 'Gamma level'
     ) +
     ggplot2::theme_minimal()
@@ -544,7 +544,7 @@ autoplot.il_string_similarity <- function(object, ...) {
   if (length(lv_idx) == 1L && !is.na(long$score[lv_idx])) {
     max_lv <- max(long$score[lv_idx], 1)
     long$score[lv_idx] <- 1 - long$score[lv_idx] / (max_lv + 1)
-    long$metric[lv_idx] <- 'levenshtein\n(normalised)'
+    long$metric[lv_idx] <- 'levenshtein\n(normalized)'
   }
 
   long$metric <- factor(long$metric, levels = rev(long$metric))

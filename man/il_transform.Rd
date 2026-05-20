@@ -8,7 +8,7 @@ il_transform(...)
 }
 \arguments{
 \item{...}{Two or more functions to compose, in application order.
-Each must be a recognised transform (e.g. \code{tolower}, \code{toupper}, \code{trimws},
+Each must be a recognized transform (e.g. \code{tolower}, \code{toupper}, \code{trimws},
 \link{il_soundex}, \link{il_metaphone}, \link{il_dmetaphone}).}
 }
 \value{

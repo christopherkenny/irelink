@@ -1,4 +1,4 @@
-test_that('fix_u = TRUE, fix_m = FALSE is the default (current behaviour)', {
+test_that('fix_u = TRUE, fix_m = FALSE is the default (current behavior)', {
   con <- test_con()
   on.exit(test_discon(con))
 

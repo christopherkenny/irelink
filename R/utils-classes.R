@@ -2,7 +2,7 @@
 #'
 #' Adds a custom S3 class in front of the existing class vector so that
 #' methods like `autoplot()` can dispatch on it while preserving the
-#' underlying tibble behaviour.
+#' underlying tibble behavior.
 #'
 #' @param x A tibble.
 #' @param cls Character string. The class name to prepend.

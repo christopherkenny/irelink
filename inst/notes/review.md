@@ -16,3 +16,4 @@
 - [x] I spy some uses of `<<-` and `->` within package code, which is absolutely not ever allowed. Please rewrite those to be properly scoped and avoid hacks.
 - [x] Classes are somewhat inconsistently defined, with many of them being thrown into `utils-classes.R`. Let's correct this and move all of the class creators into the correct files. For example, move new_il_spec to il_spec.R.
 - [x] Some functions have hard coded colors in (searching `'#` returns a number of them). Remove every case of this and allow colors and fills to be ggplot defaults
+- [ ] There remain some britishisms in the code. Can you please make the code use proper English? For example, neighbors is wrong.

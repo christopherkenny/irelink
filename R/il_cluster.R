@@ -214,7 +214,7 @@ cluster_sql <- function(
     result <- rbind(result, iso_df)
   }
 
-  # Normalise cluster IDs
+  # normalize cluster IDs
   result$cluster_id <- paste0('cluster_', result$cluster_id)
 
   tibble::tibble(
@@ -485,9 +485,9 @@ cluster_lazy <- function(
   )
 }
 
-#' Normalise source_dataset argument to a named character vector
+#' normalize source_dataset argument to a named character vector
 #' @noRd
-normalise_source_dataset <- function(sd) {
+normalize_source_dataset <- function(sd) {
   if (is.null(sd)) {
     return(NULL)
   }
@@ -589,10 +589,10 @@ pair_input_columns <- function(pairs) {
   names(pairs)
 }
 
-#' Validate and normalise source-dataset mappings
+#' Validate and normalize source-dataset mappings
 #' @noRd
 prepare_cluster_source_dataset <- function(source_dataset, pairs, method) {
-  source_dataset <- normalise_source_dataset(source_dataset)
+  source_dataset <- normalize_source_dataset(source_dataset)
 
   if (!is.null(source_dataset) && method != 'best_link') {
     cli::cli_warn(

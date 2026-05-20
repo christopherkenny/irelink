@@ -50,15 +50,15 @@
 - [x] R/il_spec.R
 - [x] R/il_string_similarity.R
 - [x] R/il_suggest_blocking.R
-- [ ] R/il_tf_chart.R
-- [ ] R/il_training_history.R
-- [ ] R/il_transform.R
-- [ ] R/il_unlinkables.R
-- [ ] R/il_waterfall.R
-- [ ] R/il_weights.R
-- [ ] R/irelink-package.R
-- [ ] R/predict.R
-- [ ] R/utils-cc.R
+- [x] R/il_tf_chart.R
+- [x] R/il_training_history.R
+- [x] R/il_transform.R
+- [x] R/il_unlinkables.R
+- [x] R/il_waterfall.R
+- [x] R/il_weights.R
+- [x] R/irelink-package.R
+- [x] R/predict.R
+- [x] R/utils-cc.R
 - [x] R/utils-classes.R
 - [ ] R/utils-comparison-helpers.R
 - [ ] R/utils-data.R

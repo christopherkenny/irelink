@@ -10,7 +10,7 @@
 #' `il_transform(tolower, trimws)` becomes `TRIM(LOWER(col))`.
 #'
 #' @param ... Two or more functions to compose, in application order.
-#'   Each must be a recognised transform (e.g. `tolower`, `toupper`, `trimws`,
+#'   Each must be a recognized transform (e.g. `tolower`, `toupper`, `trimws`,
 #'   [il_soundex], [il_metaphone], [il_dmetaphone]).
 #'
 #' @return A function of class `il_transform_chain` that applies all

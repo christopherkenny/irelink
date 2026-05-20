@@ -41,32 +41,32 @@ cc_upload_edges <- function(con, pairs, threshold = NULL, prefix = NULL) {
   tbl
 }
 
-#' Initialise the CC algorithm tables
+#' Initialize the CC algorithm tables
 #'
 #' Creates:
-#' - neighbours: bidirectional edges (each edge in both directions)
+#' - neighbors: bidirectional edges (each edge in both directions)
 #' - representatives: initial representative = self for every node
 #'
 #' @param con DBI connection from [DBI::dbConnect()].
 #' @param edges_tbl Name of the edges table.
 #' @return Invisibly, the representative table name.
 #' @noRd
-cc_initialise <- function(con, edges_tbl, prefix = NULL) {
-  neighbours_tbl <- cc_tbl('neighbours', prefix)
+cc_initialize <- function(con, edges_tbl, prefix = NULL) {
+  neighbors_tbl <- cc_tbl('neighbors', prefix)
   repr_tbl <- cc_tbl('representatives', prefix)
 
   # Bidirectional edge list
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {neighbours_tbl}'))
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {neighbors_tbl}'))
   DBI::dbExecute(
     con,
     glue::glue(
-      'CREATE TABLE {neighbours_tbl} AS ',
+      'CREATE TABLE {neighbors_tbl} AS ',
       'SELECT unique_id_l AS node_id, unique_id_l AS node_rep, ',
-      '       unique_id_r AS neighbour, unique_id_r AS neighbour_rep ',
+      '       unique_id_r AS neighbor, unique_id_r AS neighbor_rep ',
       'FROM {edges_tbl} ',
       'UNION ALL ',
       'SELECT unique_id_r AS node_id, unique_id_r AS node_rep, ',
-      '       unique_id_l AS neighbour, unique_id_l AS neighbour_rep ',
+      '       unique_id_l AS neighbor, unique_id_l AS neighbor_rep ',
       'FROM {edges_tbl}'
     )
   )
@@ -92,7 +92,7 @@ cc_initialise <- function(con, edges_tbl, prefix = NULL) {
 #' Run one iteration of representative propagation
 #'
 #' For each current representative, compute the minimum representative
-#' across all its neighbours. Then update the node->representative mapping.
+#' across all its neighbors. Then update the node->representative mapping.
 #' Split into stable (no outgoing cross-cluster edges) and unstable.
 #'
 #' @param con DBI connection from [DBI::dbConnect()].
@@ -101,15 +101,15 @@ cc_initialise <- function(con, edges_tbl, prefix = NULL) {
 #'   `n_remaining` (number of cross-cluster edges remaining).
 #' @noRd
 cc_iterate <- function(con, iteration, prefix = NULL) {
-  neighbours_tbl <- cc_tbl('neighbours', prefix)
+  neighbors_tbl <- cc_tbl('neighbors', prefix)
   repr_tbl <- cc_tbl('representatives', prefix)
   updates_tbl <- cc_tbl('rep_updates', prefix)
   new_repr_tbl <- cc_tbl(paste0('repr_', iteration), prefix)
   stable_tbl <- cc_tbl(paste0('stable_', iteration), prefix)
   unstable_tbl <- cc_tbl(paste0('unstable_', iteration), prefix)
-  new_neighbours_tbl <- cc_tbl(paste0('neighbours_', iteration), prefix)
+  new_neighbors_tbl <- cc_tbl(paste0('neighbors_', iteration), prefix)
 
-  # Step 1: Compute new representatives (min across neighbours + self)
+  # Step 1: Compute new representatives (min across neighbors + self)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {updates_tbl}'))
   DBI::dbExecute(
     con,
@@ -118,9 +118,9 @@ cc_iterate <- function(con, iteration, prefix = NULL) {
       'SELECT old_rep, MIN(representative) AS representative, ',
       '       MIN(stable) AS stable ',
       'FROM (',
-      '  SELECT node_rep AS old_rep, neighbour_rep AS representative, ',
+      '  SELECT node_rep AS old_rep, neighbor_rep AS representative, ',
       '         0 AS stable ',
-      '  FROM {neighbours_tbl} ',
+      '  FROM {neighbors_tbl} ',
       '  UNION ALL ',
       '  SELECT representative AS old_rep, representative, 1 AS stable ',
       '  FROM {repr_tbl}',
@@ -161,17 +161,17 @@ cc_iterate <- function(con, iteration, prefix = NULL) {
     )
   )
 
-  # Step 4: Filter neighbours to only cross-cluster edges
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {new_neighbours_tbl}'))
+  # Step 4: Filter neighbors to only cross-cluster edges
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {new_neighbors_tbl}'))
   DBI::dbExecute(
     con,
     glue::glue(
-      'CREATE TABLE {new_neighbours_tbl} AS ',
+      'CREATE TABLE {new_neighbors_tbl} AS ',
       'SELECT l.representative AS node_rep, n.node_id, ',
-      '       n.neighbour, r.representative AS neighbour_rep ',
-      'FROM {neighbours_tbl} n ',
+      '       n.neighbor, r.representative AS neighbor_rep ',
+      'FROM {neighbors_tbl} n ',
       'INNER JOIN {new_repr_tbl} l ON l.node_id = n.node_id ',
-      'INNER JOIN {new_repr_tbl} r ON r.node_id = n.neighbour ',
+      'INNER JOIN {new_repr_tbl} r ON r.node_id = n.neighbor ',
       'WHERE l.representative <> r.representative'
     )
   )
@@ -179,17 +179,17 @@ cc_iterate <- function(con, iteration, prefix = NULL) {
   # Count remaining cross-cluster edges
   n_remaining <- DBI::dbGetQuery(
     con,
-    glue::glue('SELECT COUNT(*) AS n FROM {new_neighbours_tbl}')
+    glue::glue('SELECT COUNT(*) AS n FROM {new_neighbors_tbl}')
   )$n
 
   # Rotate: new tables become current for next iteration
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {updates_tbl}'))
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {neighbours_tbl}'))
+  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {neighbors_tbl}'))
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {repr_tbl}'))
   DBI::dbExecute(
     con,
     glue::glue(
-      'ALTER TABLE {new_neighbours_tbl} RENAME TO {neighbours_tbl}'
+      'ALTER TABLE {new_neighbors_tbl} RENAME TO {neighbors_tbl}'
     )
   )
   DBI::dbExecute(
@@ -246,7 +246,7 @@ solve_cc_sql <- function(
     return(output_tbl)
   }
 
-  cc_initialise(con, edges_tbl, prefix = prefix)
+  cc_initialize(con, edges_tbl, prefix = prefix)
 
   stable_tables <- character(0)
   for (i in seq_len(max_iterations)) {
@@ -287,7 +287,7 @@ solve_cc_sql <- function(
   DBI::dbExecute(
     con,
     glue::glue(
-      'DROP TABLE IF EXISTS {cc_tbl("neighbours", prefix)}'
+      'DROP TABLE IF EXISTS {cc_tbl("neighbors", prefix)}'
     )
   )
 
@@ -787,9 +787,9 @@ sql_node_metrics <- function(con, cc_output_tbl, edges_tbl, prefix = NULL) {
     con,
     glue::glue(
       'CREATE TABLE {bidir_tbl} AS ',
-      'SELECT unique_id_l AS node, unique_id_r AS neighbour FROM {edges_tbl} ',
+      'SELECT unique_id_l AS node, unique_id_r AS neighbor FROM {edges_tbl} ',
       'UNION ALL ',
-      'SELECT unique_id_r AS node, unique_id_l AS neighbour FROM {edges_tbl}'
+      'SELECT unique_id_r AS node, unique_id_l AS neighbor FROM {edges_tbl}'
     )
   )
 
@@ -800,7 +800,7 @@ sql_node_metrics <- function(con, cc_output_tbl, edges_tbl, prefix = NULL) {
     glue::glue(
       'CREATE TABLE {node_metrics_tbl} AS ',
       'SELECT c.node_id, c.cluster_id, ',
-      '  CAST(COUNT(n.neighbour) AS INTEGER) AS node_degree, ',
+      '  CAST(COUNT(n.neighbor) AS INTEGER) AS node_degree, ',
       '  CAST(COUNT(*) OVER (PARTITION BY c.cluster_id) AS INTEGER) AS cluster_size ',
       'FROM {cc_output_tbl} c ',
       'LEFT JOIN {bidir_tbl} n ON c.node_id = n.node ',
@@ -814,7 +814,7 @@ sql_node_metrics <- function(con, cc_output_tbl, edges_tbl, prefix = NULL) {
 
 #' Compute cluster-level graph metrics in SQL
 #'
-#' Calculates n_nodes, n_edges, density, and centralisation from the
+#' Calculates n_nodes, n_edges, density, and centralization from the
 #' node metrics table in a single GROUP BY pass.
 #'
 #' @param con DBI connection from [DBI::dbConnect()].
@@ -838,7 +838,7 @@ sql_cluster_metrics <- function(con, node_metrics_tbl, prefix = NULL) {
       '  CASE WHEN COUNT(*) > 2 ',
       '    THEN (1.0 * COUNT(*) * MAX(node_degree) - SUM(node_degree)) / ',
       '         ((COUNT(*) - 1.0) * (COUNT(*) - 2.0)) ',
-      '    ELSE NULL END AS cluster_centralisation ',
+      '    ELSE NULL END AS cluster_centralization ',
       'FROM {node_metrics_tbl} ',
       'GROUP BY cluster_id'
     )

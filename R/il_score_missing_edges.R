@@ -59,7 +59,7 @@ il_score_missing_edges <- function(model, pairs, clusters, threshold = 0) {
   }
   con <- model$con
 
-  # Build set of existing scored pairs (normalised: smaller id first)
+  # Build set of existing scored pairs (normalized: smaller id first)
   existing_set <- unique(canonical_pair_key(
     pairs$unique_id_l,
     pairs$unique_id_r

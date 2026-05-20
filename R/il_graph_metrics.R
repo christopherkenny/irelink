@@ -145,7 +145,7 @@ graph_metrics_sql <- function(con, pairs, clusters) {
     n_nodes = as.integer(clusters_raw$n_nodes),
     n_edges = as.integer(clusters_raw$n_edges),
     density = clusters_raw$density,
-    cluster_centralisation = clusters_raw$cluster_centralisation
+    cluster_centralization = clusters_raw$cluster_centralization
   )
 
   # Edge-level (compute bridges via igraph, merge back)
@@ -232,7 +232,7 @@ graph_metrics_r <- function(pairs, clusters) {
     n_nodes = n_nodes_vec,
     n_edges = n_edges_vec,
     density = density_vec,
-    cluster_centralisation = vapply(
+    cluster_centralization = vapply(
       seq_along(cluster_ids),
       function(i) {
         n <- n_nodes_vec[i]
