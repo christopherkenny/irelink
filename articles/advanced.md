@@ -116,7 +116,7 @@ materializing millions of rows would exhaust memory.
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,783 pairs in table __il_8628_1_predicted_4 (threshold = 0.5)
+#> <il_compared_lazy> 2,783 pairs in table __il_8638_1_predicted_4 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -194,11 +194,11 @@ metrics$clusters
 #>  3 cluster_428       3       2   0.667                  1    
 #>  4 cluster_58        5      10   1                      0    
 #>  5 cluster_960       7      17   0.810                  0.267
-#>  6 cluster_814       7      23   1.10                   0.1  
-#>  7 cluster_394       9      32   0.889                  0.143
-#>  8 cluster_404       4       4   0.667                  0.667
-#>  9 cluster_971       5       6   0.65                   0.583
-#> 10 cluster_332       6      15   1                      0.3  
+#>  6 cluster_194      10      35   0.778                  0.139
+#>  7 cluster_20        3       2   0.667                  1    
+#>  8 cluster_276       3       4   1.5                    4.5  
+#>  9 cluster_289       7      17   0.810                  0.267
+#> 10 cluster_686       7      18   0.857                  0.2  
 #> # ℹ 132 more rows
 ```
 
@@ -218,12 +218,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 167       cluster_164      7           1    
-#> 2 164       cluster_164      8           1.14 
-#> 3 165       cluster_164      8           1.14 
-#> 4 171       cluster_164      6           0.857
-#> 5 166       cluster_164      8           1.14 
-#> 6 170       cluster_164      6           0.857
+#> 1 169       cluster_164      6           0.857
+#> 2 171       cluster_164      6           0.857
+#> 3 167       cluster_164      7           1    
+#> 4 165       cluster_164      8           1.14 
+#> 5 170       cluster_164      6           0.857
+#> 6 168       cluster_164     25           3.57
 ```
 
 Records with unusually high degree relative to their cluster size may be

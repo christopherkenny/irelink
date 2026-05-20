@@ -179,7 +179,7 @@ exhaust memory.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pairs_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span>, collect <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">pairs_lazy</span></span>
-<span><span class="co">#&gt; &lt;il_compared_lazy&gt; 2,783 pairs in table __il_8628_1_predicted_4 (threshold = 0.5)</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;il_compared_lazy&gt; 2,783 pairs in table __il_8638_1_predicted_4 (threshold = 0.5)</span></span></code></pre></div>
 <p>Pass the lazy reference directly to <code><a href="../reference/il_cluster.html">il_cluster()</a></code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">clusters_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">pairs_lazy</span>, threshold <span class="op">=</span> <span class="fl">0.85</span><span class="op">)</span></span>
@@ -235,11 +235,11 @@ maximum possible edges for a cluster of that size):</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> cluster_428       3       2   0.667                  1    </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> cluster_58        5      10   1                      0    </span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> cluster_960       7      17   0.810                  0.267</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> cluster_814       7      23   1.10                   0.1  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_394       9      32   0.889                  0.143</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_404       4       4   0.667                  0.667</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_971       5       6   0.65                   0.583</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_332       6      15   1                      0.3  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> cluster_194      10      35   0.778                  0.139</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_20        3       2   0.667                  1    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_276       3       4   1.5                    4.5  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_289       7      17   0.810                  0.267</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_686       7      18   0.857                  0.2  </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 132 more rows</span></span></span></code></pre></div>
 <p>A high maximum cluster size combined with low density often indicates
 that a transitive link is pulling unrelated entities together. Consider
@@ -252,12 +252,12 @@ raising the threshold in <code><a href="https://rdrr.io/r/stats/predict.html" cl
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id  degree node_centrality</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 167       cluster_164      7           1    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 164       cluster_164      8           1.14 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 165       cluster_164      8           1.14 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 171       cluster_164      6           0.857</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 166       cluster_164      8           1.14 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 170       cluster_164      6           0.857</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 169       cluster_164      6           0.857</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 171       cluster_164      6           0.857</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 167       cluster_164      7           1    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 165       cluster_164      8           1.14 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 170       cluster_164      6           0.857</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 168       cluster_164     25           3.57</span></span></code></pre></div>
 <p>Records with unusually high degree relative to their cluster size may
 be acting as hubs that inflate the cluster beyond its true
 membership.</p>
