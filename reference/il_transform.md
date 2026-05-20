@@ -19,7 +19,7 @@ il_transform(...)
 - ...:
 
   Two or more functions to compose, in application order. Each must be a
-  recognised transform (e.g. `tolower`, `toupper`, `trimws`,
+  recognized transform (e.g. `tolower`, `toupper`, `trimws`,
   [il_soundex](http://christophertkenny.com/irelink/reference/phonetic.md),
   [il_metaphone](http://christophertkenny.com/irelink/reference/phonetic.md),
   [il_dmetaphone](http://christophertkenny.com/irelink/reference/phonetic.md)).
