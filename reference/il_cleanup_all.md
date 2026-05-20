@@ -25,8 +25,16 @@ il_cleanup_all(con)
 ## Examples
 
 ``` r
+df <- data.frame(
+  unique_id = 1:4,
+  name = c('Ann', 'Anne', 'Bob', 'Rob')
+)
 con <- DBI::dbConnect(duckdb::duckdb())
-# ... exploratory work that may have created several irelink models ...
+spec <- il_spec() |>
+  il_compare(name, cl_jaro_winkler(0.9)) |>
+  il_block_on(name)
+model <- il_model(df, spec = spec, con = con)
+
 il_cleanup_all(con)
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

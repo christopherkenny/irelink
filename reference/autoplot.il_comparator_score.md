@@ -1,6 +1,6 @@
-# Plot batch comparator scores
+# Plot Batch Comparator Scores
 
-Plot batch comparator scores
+Plot Batch Comparator Scores
 
 ## Usage
 
@@ -17,7 +17,7 @@ autoplot(object, ...)
 
 - ...:
 
-  Ignored.
+  Additional arguments (currently unused).
 
 ## Value
 

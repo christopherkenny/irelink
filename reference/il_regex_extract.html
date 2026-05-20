@@ -69,13 +69,12 @@ PostgreSQL, the computation is pushed into SQL.</p>
 
 
 <dl><dt id="arg-pattern">pattern<a class="anchor" aria-label="anchor" href="#arg-pattern"></a></dt>
-<dd><p>A POSIX-style regular expression.</p></dd>
+<dd><p>A regular expression.</p></dd>
 
 
 <dt id="arg-group">group<a class="anchor" aria-label="anchor" href="#arg-group"></a></dt>
-<dd><p>Integer capture group (0 = whole match). Currently only
-group 0 is supported in the R fallback. SQL backends support
-numbered groups.</p></dd>
+<dd><p>Integer capture group to extract. Use <code>0</code> for the whole
+match, or a positive integer for a numbered capture group.</p></dd>
 
 </dl></div>
     <div class="section level2">

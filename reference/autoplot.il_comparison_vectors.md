@@ -1,6 +1,6 @@
-# Plot comparison vector distribution
+# Plot Comparison Vector Distribution
 
-Plot comparison vector distribution
+Plot Comparison Vector Distribution
 
 ## Usage
 
@@ -17,7 +17,7 @@ autoplot(object, ...)
 
 - ...:
 
-  Ignored.
+  Additional arguments (currently unused).
 
 ## Value
 

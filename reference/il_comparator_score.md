@@ -1,8 +1,8 @@
 # Batch String Similarity Scores
 
-Computes multiple string-similarity metrics between two columns of a
-data frame. Useful for profiling data quality and choosing comparison
-thresholds. On DuckDB, computation is pushed to SQL.
+Computes string-similarity metrics between two columns of a data frame
+or database table. Useful for profiling data quality and choosing
+comparison thresholds. Rows where either column is missing are omitted.
 
 ## Usage
 
@@ -14,7 +14,7 @@ il_comparator_score(.data, col_1, col_2, con = NULL)
 
 - .data:
 
-  A data frame or character table name.
+  A data frame or character table name. Table names require `con`.
 
 - col_1, col_2:
 
@@ -26,9 +26,20 @@ il_comparator_score(.data, col_1, col_2, con = NULL)
 
 ## Value
 
-A tibble with `col_1`, `col_2`, and similarity columns: `jaro_winkler`,
-`jaro`, `levenshtein`, `jaccard`, and `cosine`. S3 class
+A tibble with the two input columns and metric columns `jaro_winkler`,
+`jaro`, `levenshtein`, `jaccard`, and `cosine`. Unsupported SQL-backend
+metrics are present as `NA`. The result has S3 class
 `il_comparator_score`.
+
+## Details
+
+With `con = NULL`, all metrics are computed in R with
+[`stringdist::stringdist()`](https://rdrr.io/pkg/stringdist/man/stringdist.html).
+With a DuckDB or PostgreSQL connection, computation is pushed to SQL.
+SQL backends return the same column schema but may leave unsupported
+metrics as `NA`: DuckDB currently computes `jaro_winkler`, `jaro`,
+`levenshtein`, and `jaccard`; PostgreSQL computes `levenshtein` and a
+`jaro_winkler` compatibility column backed by trigram `similarity()`.
 
 ## Examples
 

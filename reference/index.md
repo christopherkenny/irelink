@@ -186,7 +186,7 @@ Examine parameters, weights, and training diagnostics.
 - [`il_comparison_vectors()`](http://christophertkenny.com/irelink/reference/il_comparison_vectors.md)
   : Comparison Vector Distribution
 - [`autoplot(`*`<il_comparison_vectors>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_comparison_vectors.md)
-  : Plot comparison vector distribution
+  : Plot Comparison Vector Distribution
 - [`print(`*`<il_model>`*`)`](http://christophertkenny.com/irelink/reference/print.il_model.md)
   : Print an irelink Model
 - [`print(`*`<il_spec>`*`)`](http://christophertkenny.com/irelink/reference/print.il_spec.md)
@@ -261,7 +261,7 @@ Explore and summarize input data before linkage.
 - [`il_comparator_score()`](http://christophertkenny.com/irelink/reference/il_comparator_score.md)
   : Batch String Similarity Scores
 - [`autoplot(`*`<il_comparator_score>`*`)`](http://christophertkenny.com/irelink/reference/autoplot.il_comparator_score.md)
-  : Plot batch comparator scores
+  : Plot Batch Comparator Scores
 - [`il_comparator_threshold_chart()`](http://christophertkenny.com/irelink/reference/il_comparator_threshold_chart.md)
   : Comparator Score Threshold Chart
 - [`il_phonetic_chart()`](http://christophertkenny.com/irelink/reference/il_phonetic_chart.md)
