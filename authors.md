@@ -28,13 +28,16 @@
 
 ## Citation
 
+Source:
+[`DESCRIPTION`](https://github.com/christopherkenny/irelink/blob/main/DESCRIPTION)
+
 Kenny C (2026). *irelink: Fast Probabilistic Record Linkage*. R package
-version 0.0.0.9000, <http://christophertkenny.com/irelink/>.
+version 0.0.1, <http://christophertkenny.com/irelink/>.
 
     @Manual{,
       title = {irelink: Fast Probabilistic Record Linkage},
       author = {Christopher T. Kenny},
       year = {2026},
-      note = {R package version 0.0.0.9000},
+      note = {R package version 0.0.1},
       url = {http://christophertkenny.com/irelink/},
     }

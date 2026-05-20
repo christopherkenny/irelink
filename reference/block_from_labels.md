@@ -41,9 +41,20 @@ with columns `column`, `recall` (fraction of true matches caught), and
 
 ``` r
 con <- DBI::dbConnect(duckdb::duckdb())
-block_from_labels(fake_1000, fake_1000_labels, con = con)
-#> Warning: Unknown or uninitialised column: `is_match`.
-#> Error in labels[as.logical(labels$is_match), , drop = FALSE]: Can't subset rows with `as.logical(labels$is_match)`.
-#> ✖ Logical subscript `as.logical(labels$is_match)` must be size 1 or 3176, not 0.
+labels <- data.frame(
+  unique_id_l = fake_1000_labels$unique_id_l,
+  unique_id_r = fake_1000_labels$unique_id_r,
+  is_match = as.integer(fake_1000_labels$clerical_match_score >= 0.5)
+)
+block_from_labels(fake_1000, labels, con = con)
+#> # A tibble: 6 × 3
+#>   column     recall n_matches_caught
+#>   <chr>       <dbl>            <int>
+#> 1 cluster     0.673             1367
+#> 2 dob         0.403              819
+#> 3 city        0.390              792
+#> 4 email       0.359              730
+#> 5 surname     0.258              525
+#> 6 first_name  0.242              492
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

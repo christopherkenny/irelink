@@ -1,6 +1,6 @@
 # Changelog
 
-## irelink 0.0.0.9000
+## irelink 0.0.1
 
 Initial development release, translating Python’s
 [splink](https://github.com/moj-analytical-services/splink)

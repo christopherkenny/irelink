@@ -15,6 +15,10 @@ Useful links:
 
 - <http://christophertkenny.com/irelink/>
 
+- <https://github.com/christopherkenny/irelink>
+
+- Report bugs at <https://github.com/christopherkenny/irelink/issues>
+
 ## Author
 
 **Maintainer**: Christopher T. Kenny <ctkenny@proton.me>

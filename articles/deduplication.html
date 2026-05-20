@@ -26,7 +26,7 @@
 
     <a class="navbar-brand me-2" href="../index.html">irelink</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.0.9000</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.0.1</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -57,6 +57,7 @@
 <li class="nav-item"><form class="form-inline" role="search">
  <input class="form-control" type="search" name="search-input" id="search-input" autocomplete="off" aria-label="Search site" placeholder="Search for" data-search-index="../search.json">
 </form></li>
+<li class="nav-item"><a class="external-link nav-link" href="https://github.com/christopherkenny/irelink/" aria-label="GitHub"><span class="fa fab fa-github fa-lg"></span></a></li>
       </ul>
 </div>
 
@@ -72,7 +73,7 @@
       <img src="../logo.png" class="logo" alt=""><h1>Deduplication with Evaluation</h1>
             
       
-
+      <small class="dont-index">Source: <a href="https://github.com/christopherkenny/irelink/blob/main/vignettes/deduplication.Rmd" class="external-link"><code>vignettes/deduplication.Rmd</code></a></small>
       <div class="d-none name"><code>deduplication.Rmd</code></div>
     </div>
 
@@ -311,12 +312,12 @@ same data or to new data with <code><a href="../reference/il_attach.html">il_att
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 11</span></span></span>
 <span><span class="co">#&gt;   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob gamma_city</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>      <span style="color: #949494; font-style: italic;">&lt;int&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>         479         481                4             4         5          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>         509         512                4             2         3          1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>         535         536                4            -<span style="color: #BB0000;">1</span>         2          1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>         100         104                4            -<span style="color: #BB0000;">1</span>         5          0</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>         150         152                4             4         2          1</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>         252         254                4             4         5          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           2           3                4             4         2          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           8          11                4             4         2          0</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>          27          30                4             1         2          1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>          28          30                4            -<span style="color: #BB0000;">1</span>         2          1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>          29          31                4             4         3          1</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>          33          36                4             4         5          1</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 5 more variables: gamma_email &lt;int&gt;, match_weight &lt;dbl&gt;, tf_adj_city &lt;dbl&gt;,</span></span></span>
 <span><span class="co">#&gt; <span style="color: #949494;">#   total_match_weight &lt;dbl&gt;, match_probability &lt;dbl&gt;</span></span></span>
 <span><span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbDisconnect.html" class="external-link">dbDisconnect</a></span><span class="op">(</span><span class="va">con2</span>, shutdown <span class="op">=</span> <span class="cn">TRUE</span><span class="op">)</span></span></code></pre></div>
@@ -348,12 +349,12 @@ scored:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>      </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 139       cluster_133</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 165       cluster_164</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 684       cluster_684</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 741       cluster_738</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 796       cluster_792</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 927       cluster_924</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 61        cluster_58 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 921       cluster_918</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 932       cluster_924</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 944       cluster_941</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 954       cluster_947</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 167       cluster_164</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>
