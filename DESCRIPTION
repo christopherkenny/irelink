@@ -1,6 +1,6 @@
 Package: irelink
 Title: Fast Probabilistic Record Linkage
-Version: 0.0.0.9000
+Version: 0.0.1
 Authors@R: c(
     person(given = "Christopher T.",
            family = "Kenny",
@@ -70,7 +70,8 @@ Suggests:
     testthat (>= 3.0.0),
     withr
 Config/testthat/edition: 3
-URL: http://christophertkenny.com/irelink/
+URL: http://christophertkenny.com/irelink/, https://github.com/christopherkenny/irelink
+BugReports: https://github.com/christopherkenny/irelink/issues
 VignetteBuilder: knitr
 LazyData: true
 Config/Needs/website: christopherkenny/ctktemplate

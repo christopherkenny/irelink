@@ -14,6 +14,8 @@ Performs fast, scalable probabilistic record linkage and deduplication using the
 Useful links:
 \itemize{
   \item \url{http://christophertkenny.com/irelink/}
+  \item \url{https://github.com/christopherkenny/irelink}
+  \item Report bugs at \url{https://github.com/christopherkenny/irelink/issues}
 }
 
 }

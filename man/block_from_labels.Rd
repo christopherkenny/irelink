@@ -28,6 +28,11 @@ blocking keys.
 }
 \examples{
 con <- DBI::dbConnect(duckdb::duckdb())
-block_from_labels(fake_1000, fake_1000_labels, con = con)
+labels <- data.frame(
+  unique_id_l = fake_1000_labels$unique_id_l,
+  unique_id_r = fake_1000_labels$unique_id_r,
+  is_match = as.integer(fake_1000_labels$clerical_match_score >= 0.5)
+)
+block_from_labels(fake_1000, labels, con = con)
 DBI::dbDisconnect(con, shutdown = TRUE)
 }

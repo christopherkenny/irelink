@@ -1253,3 +1253,14 @@ Review the stage documents in inst/refs/.
 Then review the NEWS.
 The stages are sequential and so things may have been updated.
 Make sure that the NEWS covers major features of the package sufficiently, including making sure all comments are up-to-date in the sense that they have not been superceded by a later stage and that anything introduced in later stages are also covered in the NEWS.
+
+
+## What's next (Codex 5.5 medium)
+
+This package provides high speed record linkage in R via DBI, as a port + expansion of splink.
+The key design choice is that the package does not directly interface with the databases, using DBI as the access layer. We currently know we support duckdb, Postgresql, and sqlite.
+How hard would it be to support spark via DBI?
+I konw this might require a new SQL engine via a suggests to sparklyr or other DBI package.
+Give me a sense of what would be involved and the feasibility.
+What does spark get us that the magic of duckdb does not?
+Write this up in inst/refs/58-explore-spark.md.
