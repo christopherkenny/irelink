@@ -69,16 +69,20 @@
 #'
 #' model <- il_estimate_u(model)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_estimate_u <- function(model, max_pairs = 1e6,
-                          min_count_per_level = NULL,
-                          chunk_size = NULL,
-                          profile_sql = FALSE) {
+il_estimate_u <- function(
+  model,
+  max_pairs = 1e6,
+  min_count_per_level = NULL,
+  chunk_size = NULL,
+  profile_sql = FALSE
+) {
   validate_il_model(model)
   profile <- il_new_sql_profile(profile_sql)
   max_pairs <- validate_positive_count(max_pairs, 'max_pairs')
   if (!is.null(min_count_per_level)) {
     min_count_per_level <- validate_positive_count(
-      min_count_per_level, 'min_count_per_level'
+      min_count_per_level,
+      'min_count_per_level'
     )
   }
   if (!is.null(chunk_size)) {
@@ -97,7 +101,8 @@ il_estimate_u <- function(model, max_pairs = 1e6,
       profile = profile
     )
   } else {
-    result <- get_random_pairs_with_gammas(model,
+    result <- get_random_pairs_with_gammas(
+      model,
       max_pairs = max_pairs,
       profile = profile
     )
@@ -131,12 +136,15 @@ il_estimate_u <- function(model, max_pairs = 1e6,
     }
     u_vals <- u_vals / sum(u_vals)
     for (k in seq(0L, n_levels - 1L)) {
-      rows <- c(rows, list(data.frame(
-        comparison = cn,
-        gamma_level = k,
-        u = u_vals[k + 1L],
-        stringsAsFactors = FALSE
-      )))
+      rows <- c(
+        rows,
+        list(data.frame(
+          comparison = cn,
+          gamma_level = k,
+          u = u_vals[k + 1L],
+          stringsAsFactors = FALSE
+        ))
+      )
     }
   }
   params_tbl <- tibble::as_tibble(do.call(rbind, rows))
@@ -146,13 +154,16 @@ il_estimate_u <- function(model, max_pairs = 1e6,
   } else {
     old_params <- model$params$comparisons
     # Normalize earlier format if needed
-    if ('level' %in% names(old_params) && !'gamma_level' %in% names(old_params)) {
+    if (
+      'level' %in% names(old_params) && !'gamma_level' %in% names(old_params)
+    ) {
       old_params <- migrate_params_to_gamma_level(old_params)
     }
     params_tbl <- merge(
       params_tbl[, c('comparison', 'gamma_level', 'u')],
       old_params[, c('comparison', 'gamma_level', 'm')],
-      by = c('comparison', 'gamma_level'), all.x = TRUE
+      by = c('comparison', 'gamma_level'),
+      all.x = TRUE
     )
     params_tbl <- tibble::as_tibble(params_tbl)
   }
@@ -175,8 +186,9 @@ il_estimate_u <- function(model, max_pairs = 1e6,
 #' Validate count-like scalar arguments
 #' @noRd
 validate_positive_count <- function(x, arg) {
-  if (!is.numeric(x) || length(x) != 1L || is.na(x) ||
-    !is.finite(x) || x <= 0) {
+  if (
+    !is.numeric(x) || length(x) != 1L || is.na(x) || !is.finite(x) || x <= 0
+  ) {
     cli::cli_abort('{.arg {arg}} must be a positive finite number.')
   }
   as.integer(x)

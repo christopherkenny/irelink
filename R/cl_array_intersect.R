@@ -22,7 +22,9 @@ cl_array_intersect <- function(...) {
     cli::cli_abort('Thresholds for {.fn cl_array_intersect} must be numeric.')
   }
   if (any(thresholds < 0)) {
-    cli::cli_abort('Thresholds for {.fn cl_array_intersect} must be non-negative.')
+    cli::cli_abort(
+      'Thresholds for {.fn cl_array_intersect} must be non-negative.'
+    )
   }
   if (length(thresholds) > 1L && is.unsorted(rev(thresholds))) {
     cli::cli_warn(
@@ -73,14 +75,18 @@ cl_array_min_distance <- function(fn = c('jaro_winkler', 'levenshtein'), ...) {
       cli::cli_abort('Jaro-Winkler thresholds must be between 0 and 1.')
     }
     if (is.unsorted(rev(thresholds))) {
-      cli::cli_warn('Jaro-Winkler thresholds should be in descending order (strictest first).')
+      cli::cli_warn(
+        'Jaro-Winkler thresholds should be in descending order (strictest first).'
+      )
     }
   } else {
     if (any(thresholds < 0)) {
       cli::cli_abort('Levenshtein thresholds must be non-negative.')
     }
     if (is.unsorted(thresholds)) {
-      cli::cli_warn('Levenshtein thresholds should be in ascending order (strictest first).')
+      cli::cli_warn(
+        'Levenshtein thresholds should be in ascending order (strictest first).'
+      )
     }
   }
   new_comparison_level('array_min_distance', fn = fn, thresholds = thresholds)

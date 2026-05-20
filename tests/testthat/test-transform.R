@@ -25,7 +25,10 @@ test_that('JSON save writes Splink SQL for transformed comparisons and loaded mo
   loaded <- il_load(path)
 
   expect_null(raw$comparisons[[1]]$comparison_description)
-  expect_match(raw$comparisons[[1]]$comparison_levels[[1]]$sql_condition, 'LOWER')
+  expect_match(
+    raw$comparisons[[1]]$comparison_levels[[1]]$sql_condition,
+    'LOWER'
+  )
   expect_null(loaded$spec$comparisons[[1]]$transform)
   expect_null(loaded$spec$comparisons[[2]]$transform)
 
@@ -51,7 +54,8 @@ test_that('transform = tolower produces LOWER() in SQL gamma', {
 test_that('transform = toupper produces UPPER() in SQL gamma', {
   comp <- list(
     columns = 'name',
-    method = structure(list(method = 'jaro_winkler', thresholds = c(0.9, 0.7)),
+    method = structure(
+      list(method = 'jaro_winkler', thresholds = c(0.9, 0.7)),
       class = 'il_comparison_level'
     ),
     transform = toupper

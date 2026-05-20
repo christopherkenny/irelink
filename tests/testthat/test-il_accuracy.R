@@ -139,7 +139,11 @@ test_that('il_accuracy() and il_confusion_matrix() agree for lazy inputs without
 
   acc <- il_accuracy(model, labels_col = 'cluster')
   best <- acc[which.max(acc$f1), , drop = FALSE]
-  cm <- il_confusion_matrix(model, labels_col = 'cluster', threshold = best$threshold)
+  cm <- il_confusion_matrix(
+    model,
+    labels_col = 'cluster',
+    threshold = best$threshold
+  )
 
   expect_equal(cm$tp, best$tp)
   expect_equal(cm$fp, best$fp)

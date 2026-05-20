@@ -59,8 +59,10 @@ il_completeness <- function(..., con = NULL) {
 
   for (i in seq_along(inputs)) {
     tbl_name <- il_scratch_table_name(paste0('completeness_', i))
-    reg <- register_data(inputs[[i]],
-      con = con, tbl_name = tbl_name,
+    reg <- register_data(
+      inputs[[i]],
+      con = con,
+      tbl_name = tbl_name,
       add_unique_id = FALSE
     )
     con <- reg$con
@@ -72,7 +74,9 @@ il_completeness <- function(..., con = NULL) {
     rows <- lapply(col_names, function(col_nm) {
       quoted_col <- DBI::dbQuoteIdentifier(con, col_nm)
       quoted_tbl <- DBI::dbQuoteIdentifier(con, tbl_name)
-      sql <- glue::glue('SELECT COUNT({quoted_col}) AS n_non_null FROM {quoted_tbl}')
+      sql <- glue::glue(
+        'SELECT COUNT({quoted_col}) AS n_non_null FROM {quoted_tbl}'
+      )
       res <- DBI::dbGetQuery(con, sql)
       tibble::tibble(
         table = paste0('table_', i),

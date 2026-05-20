@@ -60,25 +60,32 @@ test_that('il_save() creates a valid settings JSON file', {
 
   raw <- jsonlite::read_json(tmp, simplifyVector = FALSE)
   expect_type(raw, 'list')
-  expect_named(raw, c(
-    'link_type',
-    'probability_two_random_records_match',
-    'em_convergence',
-    'max_iterations',
-    'retain_matching_columns',
-    'retain_intermediate_calculation_columns',
-    'additional_columns_to_retain',
-    'unique_id_column_name',
-    'source_dataset_column_name',
-    'comparison_vector_value_column_prefix',
-    'sql_dialect',
-    'blocking_rules_to_generate_predictions',
-    'comparisons'
-  ))
+  expect_named(
+    raw,
+    c(
+      'link_type',
+      'probability_two_random_records_match',
+      'em_convergence',
+      'max_iterations',
+      'retain_matching_columns',
+      'retain_intermediate_calculation_columns',
+      'additional_columns_to_retain',
+      'unique_id_column_name',
+      'source_dataset_column_name',
+      'comparison_vector_value_column_prefix',
+      'sql_dialect',
+      'blocking_rules_to_generate_predictions',
+      'comparisons'
+    )
+  )
   expect_equal(raw$link_type, 'dedupe_only')
   expect_true(length(raw$comparisons) > 0L)
   expect_true(length(raw$blocking_rules_to_generate_predictions) > 0L)
-  expect_false(any(grepl('__irelink__', readLines(tmp, warn = FALSE), fixed = TRUE)))
+  expect_false(any(grepl(
+    '__irelink__',
+    readLines(tmp, warn = FALSE),
+    fixed = TRUE
+  )))
 })
 
 test_that('il_save() still creates a valid RDS file', {

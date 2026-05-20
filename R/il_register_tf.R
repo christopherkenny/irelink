@@ -46,14 +46,22 @@ il_register_tf <- function(model, col, tf_data, overwrite = FALSE) {
     )
   }
   if (anyNA(tf_data[[col]])) {
-    cli::cli_abort('{.arg tf_data} value column {.field {col}} must not contain missing values.')
+    cli::cli_abort(
+      '{.arg tf_data} value column {.field {col}} must not contain missing values.'
+    )
   }
   if (anyDuplicated(tf_data[[col]]) > 0L) {
-    cli::cli_abort('{.arg tf_data} value column {.field {col}} must contain unique values.')
+    cli::cli_abort(
+      '{.arg tf_data} value column {.field {col}} must contain unique values.'
+    )
   }
   tf_values <- tf_data[[tf_col_name]]
-  if (!is.numeric(tf_values) || anyNA(tf_values) ||
-    any(!is.finite(tf_values)) || any(tf_values <= 0 | tf_values > 1)) {
+  if (
+    !is.numeric(tf_values) ||
+      anyNA(tf_values) ||
+      any(!is.finite(tf_values)) ||
+      any(tf_values <= 0 | tf_values > 1)
+  ) {
     cli::cli_abort(
       '{.arg tf_data} frequency column {.field {tf_col_name}} must contain finite probabilities with 0 < value <= 1.'
     )
@@ -73,9 +81,12 @@ il_register_tf <- function(model, col, tf_data, overwrite = FALSE) {
     )
   }
 
-  DBI::dbExecute(con, glue::glue(
-    'DROP TABLE IF EXISTS {sql_quote_identifier(tf_tbl)}'
-  ))
+  DBI::dbExecute(
+    con,
+    glue::glue(
+      'DROP TABLE IF EXISTS {sql_quote_identifier(tf_tbl)}'
+    )
+  )
   DBI::dbWriteTable(con, tf_tbl, tf_data[, expected_cols])
 
   model$data$tf_tables[[col]] <- tf_tbl

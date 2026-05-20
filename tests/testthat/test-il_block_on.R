@@ -182,7 +182,8 @@ test_that('print.il_spec shows per-column formula transforms', {
 test_that('il_block_on() accepts a named list .transform', {
   spec <- il_spec() |>
     il_block_on(
-      first_name, surname,
+      first_name,
+      surname,
       .transform = list(first_name = il_substr(1, 3), surname = il_substr(1, 4))
     )
   expect_s3_class(spec, 'il_spec')
@@ -202,7 +203,8 @@ test_that('named list .transform must match blocking columns', {
   expect_error(
     il_block_on(
       il_spec(),
-      first_name, surname,
+      first_name,
+      surname,
       .transform = list(first_name = tolower)
     ),
     class = 'il_error_type'
@@ -231,7 +233,11 @@ test_that('il_block_on() errors on unnamed list .transform', {
 test_that('il_block_on() errors on list with non-function entries', {
   expect_snapshot(
     error = TRUE,
-    il_block_on(il_spec(), first_name, .transform = list(first_name = 'not_a_function'))
+    il_block_on(
+      il_spec(),
+      first_name,
+      .transform = list(first_name = 'not_a_function')
+    )
   )
 })
 

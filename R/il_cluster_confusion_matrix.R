@@ -43,10 +43,14 @@
 #'
 #' il_cluster_confusion_matrix(model, labels_col = 'cluster', threshold = 0.85)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_cluster_confusion_matrix <- function(model, labels_col, threshold = 0.85,
-                                        method = c('connected', 'best_link'),
-                                        ties_method = c('lowest_id', 'drop'),
-                                        source_dataset = NULL) {
+il_cluster_confusion_matrix <- function(
+  model,
+  labels_col,
+  threshold = 0.85,
+  method = c('connected', 'best_link'),
+  ties_method = c('lowest_id', 'drop'),
+  source_dataset = NULL
+) {
   validate_il_model(model)
   method <- match.arg(method)
   ties_method <- match.arg(ties_method)
@@ -56,7 +60,9 @@ il_cluster_confusion_matrix <- function(model, labels_col, threshold = 0.85,
       '{.fn il_cluster_confusion_matrix} currently supports deduplication models only.'
     )
   }
-  if (!is.character(labels_col) || length(labels_col) != 1L || is.na(labels_col)) {
+  if (
+    !is.character(labels_col) || length(labels_col) != 1L || is.na(labels_col)
+  ) {
     cli::cli_abort('{.arg labels_col} must be a single column name.')
   }
   if (!(labels_col %in% model$data$columns)) {
@@ -137,10 +143,13 @@ cluster_confusion_counts_sql <- function(model, clusters_tbl, labels_col) {
 
 #' Build a SQL table of cluster assignments from lazy predictions
 #' @noRd
-cluster_assignments_lazy_sql <- function(pairs, threshold = NULL,
-                                         method = c('connected', 'best_link'),
-                                         ties_method = c('lowest_id', 'drop'),
-                                         source_dataset = NULL) {
+cluster_assignments_lazy_sql <- function(
+  pairs,
+  threshold = NULL,
+  method = c('connected', 'best_link'),
+  ties_method = c('lowest_id', 'drop'),
+  source_dataset = NULL
+) {
   method <- match.arg(method)
   ties_method <- match.arg(ties_method)
   if (!is.null(threshold)) {
@@ -164,11 +173,14 @@ cluster_assignments_lazy_sql <- function(pairs, threshold = NULL,
     threshold_where <- glue::glue(' WHERE match_probability >= {threshold}')
   }
 
-  DBI::dbExecute(con, glue::glue(
-    'CREATE TABLE {edges_tbl} AS ',
-    'SELECT unique_id_l, unique_id_r, match_probability ',
-    'FROM {predicted_tbl}{threshold_where}'
-  ))
+  DBI::dbExecute(
+    con,
+    glue::glue(
+      'CREATE TABLE {edges_tbl} AS ',
+      'SELECT unique_id_l, unique_id_r, match_probability ',
+      'FROM {predicted_tbl}{threshold_where}'
+    )
+  )
   on.exit(drop_registered(con, edges_tbl), add = TRUE)
 
   cc_output_tbl <- if (method == 'best_link') {
@@ -182,13 +194,19 @@ cluster_assignments_lazy_sql <- function(pairs, threshold = NULL,
         prefix = cc_prefix
       )
     } else {
-      filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method,
+      filtered_tbl <- sql_best_link_filter(
+        con,
+        edges_tbl,
+        ties_method,
         prefix = cc_prefix
       )
       DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
-      DBI::dbExecute(con, glue::glue(
-        'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
-      ))
+      DBI::dbExecute(
+        con,
+        glue::glue(
+          'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
+        )
+      )
       solve_cc_sql(con, edges_tbl, collect = FALSE, prefix = cc_prefix)
     }
   } else {
@@ -199,16 +217,22 @@ cluster_assignments_lazy_sql <- function(pairs, threshold = NULL,
   final_tbl <- cc_tbl('cluster_eval', cc_prefix)
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {final_tbl}'))
   sql <- paste0(
-    'CREATE TABLE ', final_tbl, ' AS ',
+    'CREATE TABLE ',
+    final_tbl,
+    ' AS ',
     'WITH all_ids AS (',
-    '  SELECT DISTINCT CAST(unique_id_l AS VARCHAR) AS unique_id FROM ', predicted_tbl,
+    '  SELECT DISTINCT CAST(unique_id_l AS VARCHAR) AS unique_id FROM ',
+    predicted_tbl,
     ' UNION ',
-    '  SELECT DISTINCT CAST(unique_id_r AS VARCHAR) AS unique_id FROM ', predicted_tbl,
+    '  SELECT DISTINCT CAST(unique_id_r AS VARCHAR) AS unique_id FROM ',
+    predicted_tbl,
     ') ',
     'SELECT all_ids.unique_id, ',
     "COALESCE('cluster_' || CAST(cc.cluster_id AS VARCHAR), 'cluster_' || all_ids.unique_id) AS cluster_id ",
     'FROM all_ids ',
-    'LEFT JOIN ', cc_output_tbl, ' cc ',
+    'LEFT JOIN ',
+    cc_output_tbl,
+    ' cc ',
     '  ON all_ids.unique_id = CAST(cc.node_id AS VARCHAR)'
   )
   DBI::dbExecute(con, sql)
@@ -235,7 +259,10 @@ cluster_confusion_counts_r <- function(model, clusters, labels_col) {
   )
   base$pred_group <- unname(cluster_map[base$unique_id])
   missing_cluster <- is.na(base$pred_group)
-  base$pred_group[missing_cluster] <- paste0('singleton_', base$unique_id[missing_cluster])
+  base$pred_group[missing_cluster] <- paste0(
+    'singleton_',
+    base$unique_id[missing_cluster]
+  )
 
   true_group <- base[[labels_col]]
   true_dup <- !is.na(true_group) & duplicated(true_group)

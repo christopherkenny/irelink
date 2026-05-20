@@ -7,13 +7,14 @@
 #' @return Numeric value in seconds.
 #' @noRd
 time_diff_to_seconds <- function(value, unit) {
-  mult <- switch(unit,
+  mult <- switch(
+    unit,
     'seconds' = 1,
     'minutes' = 60,
-    'hours'   = 3600,
-    'days'    = 86400,
-    'months'  = 86400 * 30,
-    'years'   = 86400 * 365,
+    'hours' = 3600,
+    'days' = 86400,
+    'months' = 86400 * 30,
+    'years' = 86400 * 365,
     1
   )
   value * mult
@@ -49,9 +50,14 @@ sql_quote_identifier <- function(x) {
   if (!is.character(x) || anyNA(x)) {
     cli::cli_abort('SQL identifiers must be non-missing character strings.')
   }
-  vapply(x, function(val) {
-    paste0('"', gsub('"', '""', val, fixed = TRUE), '"')
-  }, character(1), USE.NAMES = FALSE)
+  vapply(
+    x,
+    function(val) {
+      paste0('"', gsub('"', '""', val, fixed = TRUE), '"')
+    },
+    character(1),
+    USE.NAMES = FALSE
+  )
 }
 
 #' Build an aliased column reference
@@ -70,7 +76,9 @@ sql_identifier_csv <- function(x) {
 #' @noRd
 sql_date_diff_expr <- function(lcol, rcol, dialect) {
   if (identical(dialect, 'duckdb')) {
-    return(glue::glue('ABS(TRY_CAST({lcol} AS DATE) - TRY_CAST({rcol} AS DATE))'))
+    return(glue::glue(
+      'ABS(TRY_CAST({lcol} AS DATE) - TRY_CAST({rcol} AS DATE))'
+    ))
   }
   if (identical(dialect, 'postgres')) {
     return(glue::glue('ABS(CAST({lcol} AS DATE) - CAST({rcol} AS DATE))'))
@@ -164,18 +172,25 @@ transform_to_sql_fn <- function(transform) {
 #' @noRd
 transform_to_name <- function(transform) {
   if (is.list(transform)) {
-    parts <- vapply(names(transform), function(nm) {
-      paste0(nm, ': ', transform_to_name(transform[[nm]]))
-    }, character(1))
+    parts <- vapply(
+      names(transform),
+      function(nm) {
+        paste0(nm, ': ', transform_to_name(transform[[nm]]))
+      },
+      character(1)
+    )
     return(paste(parts, collapse = ', '))
   }
   if (is_transform_chain(transform)) {
     names <- vapply(
-      attr(transform, 'transforms'), transform_to_name,
+      attr(transform, 'transforms'),
+      transform_to_name,
       character(1)
     )
     if (anyNA(names)) {
-      cli::cli_warn('Custom transform in chain cannot be serialized; it will be lost on save/load.')
+      cli::cli_warn(
+        'Custom transform in chain cannot be serialized; it will be lost on save/load.'
+      )
       return(NA_character_)
     }
     return(paste(names, collapse = ' -> '))
@@ -201,7 +216,9 @@ transform_to_name <- function(transform) {
   if (is_column_transform(transform)) {
     return(column_transform_to_name(transform))
   }
-  cli::cli_warn('Custom transform cannot be serialized; it will be lost on save/load.')
+  cli::cli_warn(
+    'Custom transform cannot be serialized; it will be lost on save/load.'
+  )
   NULL
 }
 
@@ -283,16 +300,18 @@ phonetic_transform_sql <- function(transform, col_ref, dialect = NULL) {
 #' Validate that a phonetic function is supported by a SQL dialect
 #' @noRd
 validate_phonetic_dialect <- function(fn_name, dialect) {
-  supported <- switch(fn_name,
-    'il_soundex'    = c('duckdb', 'postgres'),
-    'il_metaphone'  = 'postgres',
+  supported <- switch(
+    fn_name,
+    'il_soundex' = c('duckdb', 'postgres'),
+    'il_metaphone' = 'postgres',
     'il_dmetaphone' = 'postgres',
     character(0)
   )
   if (!dialect %in% supported) {
-    label <- switch(fn_name,
-      'il_soundex'    = 'Soundex',
-      'il_metaphone'  = 'Metaphone',
+    label <- switch(
+      fn_name,
+      'il_soundex' = 'Soundex',
+      'il_metaphone' = 'Metaphone',
       'il_dmetaphone' = 'Double Metaphone'
     )
     cli::cli_abort(c(
@@ -348,98 +367,153 @@ sql_gamma_case <- function(comp, dialect) {
 
   if (method == 'jaro_winkler') {
     n <- length(thresholds)
-    whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue('WHEN {null_guard} AND jaro_winkler_similarity({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}')
-    }, character(1))
+    whens <- vapply(
+      seq_along(thresholds),
+      function(i) {
+        glue::glue(
+          'WHEN {null_guard} AND jaro_winkler_similarity({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}'
+        )
+      },
+      character(1)
+    )
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'jaro') {
     n <- length(thresholds)
-    whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue('WHEN {null_guard} AND jaro_similarity({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}')
-    }, character(1))
+    whens <- vapply(
+      seq_along(thresholds),
+      function(i) {
+        glue::glue(
+          'WHEN {null_guard} AND jaro_similarity({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}'
+        )
+      },
+      character(1)
+    )
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'jaccard') {
     n <- length(thresholds)
-    whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue('WHEN {null_guard} AND jaccard({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}')
-    }, character(1))
+    whens <- vapply(
+      seq_along(thresholds),
+      function(i) {
+        glue::glue(
+          'WHEN {null_guard} AND jaccard({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}'
+        )
+      },
+      character(1)
+    )
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'cosine') {
     n <- length(thresholds)
-    whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue('WHEN {null_guard} AND cosine_similarity({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}')
-    }, character(1))
+    whens <- vapply(
+      seq_along(thresholds),
+      function(i) {
+        glue::glue(
+          'WHEN {null_guard} AND cosine_similarity({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}'
+        )
+      },
+      character(1)
+    )
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'levenshtein') {
     n <- length(thresholds)
-    whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue('WHEN {null_guard} AND levenshtein({lcol}, {rcol}) <= {thresholds[i]} THEN {n - i + 1L}')
-    }, character(1))
+    whens <- vapply(
+      seq_along(thresholds),
+      function(i) {
+        glue::glue(
+          'WHEN {null_guard} AND levenshtein({lcol}, {rcol}) <= {thresholds[i]} THEN {n - i + 1L}'
+        )
+      },
+      character(1)
+    )
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'damerau_levenshtein') {
     n <- length(thresholds)
-    whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue('WHEN {null_guard} AND damerau_levenshtein({lcol}, {rcol}) <= {thresholds[i]} THEN {n - i + 1L}')
-    }, character(1))
+    whens <- vapply(
+      seq_along(thresholds),
+      function(i) {
+        glue::glue(
+          'WHEN {null_guard} AND damerau_levenshtein({lcol}, {rcol}) <= {thresholds[i]} THEN {n - i + 1L}'
+        )
+      },
+      character(1)
+    )
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'numeric_diff') {
     n <- length(thresholds)
-    whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue('WHEN {null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) <= {thresholds[i]} THEN {n - i + 1L}')
-    }, character(1))
+    whens <- vapply(
+      seq_along(thresholds),
+      function(i) {
+        glue::glue(
+          'WHEN {null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) <= {thresholds[i]} THEN {n - i + 1L}'
+        )
+      },
+      character(1)
+    )
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'pct_diff') {
     n <- length(thresholds)
-    whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue(
-        'WHEN {null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) / ',
-        'NULLIF(GREATEST(ABS(CAST({lcol} AS DOUBLE)), ABS(CAST({rcol} AS DOUBLE))), 0) < {thresholds[i]} THEN {n - i + 1L}'
-      )
-    }, character(1))
+    whens <- vapply(
+      seq_along(thresholds),
+      function(i) {
+        glue::glue(
+          'WHEN {null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) / ',
+          'NULLIF(GREATEST(ABS(CAST({lcol} AS DOUBLE)), ABS(CAST({rcol} AS DOUBLE))), 0) < {thresholds[i]} THEN {n - i + 1L}'
+        )
+      },
+      character(1)
+    )
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'date_diff') {
     n <- length(thresholds)
-    whens <- vapply(seq_along(thresholds), function(i) {
-      mult <- switch(level$units[i],
-        'days' = 1,
-        'months' = 30,
-        'years' = 365,
-        1
-      )
-      days_val <- thresholds[i] * mult
-      diff_expr <- sql_date_diff_expr(lcol, rcol, dialect)
-      glue::glue(
-        'WHEN {null_guard} AND {diff_expr} <= {days_val} THEN {n - i + 1L}'
-      )
-    }, character(1))
+    whens <- vapply(
+      seq_along(thresholds),
+      function(i) {
+        mult <- switch(
+          level$units[i],
+          'days' = 1,
+          'months' = 30,
+          'years' = 365,
+          1
+        )
+        days_val <- thresholds[i] * mult
+        diff_expr <- sql_date_diff_expr(lcol, rcol, dialect)
+        glue::glue(
+          'WHEN {null_guard} AND {diff_expr} <= {days_val} THEN {n - i + 1L}'
+        )
+      },
+      character(1)
+    )
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'time_diff') {
     n <- length(thresholds)
-    whens <- vapply(seq_along(thresholds), function(i) {
-      secs_val <- time_diff_to_seconds(thresholds[i], level$units[i])
-      diff_expr <- sql_time_diff_expr(lcol, rcol, dialect)
-      glue::glue(
-        'WHEN {null_guard} AND {diff_expr} <= {secs_val} THEN {n - i + 1L}'
-      )
-    }, character(1))
+    whens <- vapply(
+      seq_along(thresholds),
+      function(i) {
+        secs_val <- time_diff_to_seconds(thresholds[i], level$units[i])
+        diff_expr <- sql_time_diff_expr(lcol, rcol, dialect)
+        glue::glue(
+          'WHEN {null_guard} AND {diff_expr} <= {secs_val} THEN {n - i + 1L}'
+        )
+      },
+      character(1)
+    )
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
@@ -470,17 +544,29 @@ sql_gamma_case <- function(comp, dialect) {
       'POWER(SIN(RADIANS(({lon_r} - {lon_l}) / 2)), 2)))'
     )
     n <- length(thresholds)
-    whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue('WHEN {null_guard2} AND {dist} <= {thresholds[i]} THEN {n - i + 1L}')
-    }, character(1))
+    whens <- vapply(
+      seq_along(thresholds),
+      function(i) {
+        glue::glue(
+          'WHEN {null_guard2} AND {dist} <= {thresholds[i]} THEN {n - i + 1L}'
+        )
+      },
+      character(1)
+    )
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
   if (method == 'array_intersect') {
     n <- length(thresholds)
-    whens <- vapply(seq_along(thresholds), function(i) {
-      glue::glue('WHEN {null_guard} AND ARRAY_LENGTH(ARRAY_INTERSECT({lcol}, {rcol})) >= {thresholds[i]} THEN {n - i + 1L}')
-    }, character(1))
+    whens <- vapply(
+      seq_along(thresholds),
+      function(i) {
+        glue::glue(
+          'WHEN {null_guard} AND ARRAY_LENGTH(ARRAY_INTERSECT({lcol}, {rcol})) >= {thresholds[i]} THEN {n - i + 1L}'
+        )
+      },
+      character(1)
+    )
     return(glue::glue('CASE {paste(whens, collapse = " ")} ELSE 0 END'))
   }
 
@@ -498,7 +584,9 @@ sql_gamma_case <- function(comp, dialect) {
       .open = '{',
       .close = '}'
     )
-    return(glue::glue('CASE WHEN {null_guard} AND ({sql_expr}) THEN 1 ELSE 0 END'))
+    return(glue::glue(
+      'CASE WHEN {null_guard} AND ({sql_expr}) THEN 1 ELSE 0 END'
+    ))
   }
 
   if (method == 'array_min_distance') {
@@ -506,14 +594,21 @@ sql_gamma_case <- function(comp, dialect) {
   }
 
   if (method == 'levels') {
-    has_null_level <- any(vapply(level$levels, function(l) {
-      isTRUE(l$is_null_level)
-    }, logical(1)))
+    has_null_level <- any(vapply(
+      level$levels,
+      function(l) {
+        isTRUE(l$is_null_level)
+      },
+      logical(1)
+    ))
 
     # Build multi-level CASE from sublevels (skip null and else)
-    sublevels <- Filter(function(l) {
-      !isTRUE(l$is_null_level) && !isTRUE(l$is_else_level)
-    }, level$levels)
+    sublevels <- Filter(
+      function(l) {
+        !isTRUE(l$is_null_level) && !isTRUE(l$is_else_level)
+      },
+      level$levels
+    )
     n <- length(sublevels)
     null_when <- if (has_null_level) {
       glue::glue('WHEN NOT ({null_guard}) THEN -1 ')
@@ -525,11 +620,22 @@ sql_gamma_case <- function(comp, dialect) {
         'CASE {null_when}WHEN {null_guard} AND {lcol} = {rcol} THEN 1 ELSE 0 END'
       ))
     }
-    whens <- vapply(seq_along(sublevels), function(i) {
-      sub <- sublevels[[i]]
-      cond <- sql_sublevel_condition(sub, col, dialect, null_guard, lcol, rcol)
-      glue::glue('WHEN {cond} THEN {n - i + 1L}')
-    }, character(1))
+    whens <- vapply(
+      seq_along(sublevels),
+      function(i) {
+        sub <- sublevels[[i]]
+        cond <- sql_sublevel_condition(
+          sub,
+          col,
+          dialect,
+          null_guard,
+          lcol,
+          rcol
+        )
+        glue::glue('WHEN {cond} THEN {n - i + 1L}')
+      },
+      character(1)
+    )
     return(glue::glue(
       'CASE {null_when}{paste(whens, collapse = " ")} ELSE 0 END'
     ))
@@ -550,9 +656,14 @@ sql_gamma_case <- function(comp, dialect) {
 #' @param rcol Transformed right column reference.
 #' @return A SQL condition string.
 #' @noRd
-sql_sublevel_condition <- function(sub, col, dialect, null_guard,
-                                   lcol = sql_col_ref('l', col),
-                                   rcol = sql_col_ref('r', col)) {
+sql_sublevel_condition <- function(
+  sub,
+  col,
+  dialect,
+  null_guard,
+  lcol = sql_col_ref('l', col),
+  rcol = sql_col_ref('r', col)
+) {
   method <- sub$method
 
   if (method == 'exact') {
@@ -560,11 +671,15 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
   }
   if (method == 'jaro_winkler') {
     t <- sub$thresholds[1]
-    return(glue::glue('{null_guard} AND jaro_winkler_similarity({lcol}, {rcol}) >= {t}'))
+    return(glue::glue(
+      '{null_guard} AND jaro_winkler_similarity({lcol}, {rcol}) >= {t}'
+    ))
   }
   if (method == 'jaro') {
     t <- sub$thresholds[1]
-    return(glue::glue('{null_guard} AND jaro_similarity({lcol}, {rcol}) >= {t}'))
+    return(glue::glue(
+      '{null_guard} AND jaro_similarity({lcol}, {rcol}) >= {t}'
+    ))
   }
   if (method == 'jaccard') {
     t <- sub$thresholds[1]
@@ -572,7 +687,9 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
   }
   if (method == 'cosine') {
     t <- sub$thresholds[1]
-    return(glue::glue('{null_guard} AND cosine_similarity({lcol}, {rcol}) >= {t}'))
+    return(glue::glue(
+      '{null_guard} AND cosine_similarity({lcol}, {rcol}) >= {t}'
+    ))
   }
   if (method == 'levenshtein') {
     t <- sub$thresholds[1]
@@ -580,11 +697,15 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
   }
   if (method == 'damerau_levenshtein') {
     t <- sub$thresholds[1]
-    return(glue::glue('{null_guard} AND damerau_levenshtein({lcol}, {rcol}) <= {t}'))
+    return(glue::glue(
+      '{null_guard} AND damerau_levenshtein({lcol}, {rcol}) <= {t}'
+    ))
   }
   if (method == 'numeric_diff') {
     t <- sub$thresholds[1]
-    return(glue::glue('{null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) <= {t}'))
+    return(glue::glue(
+      '{null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) <= {t}'
+    ))
   }
   if (method == 'pct_diff') {
     t <- sub$thresholds[1]
@@ -595,12 +716,7 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
   }
   if (method == 'date_diff') {
     t <- sub$thresholds[1]
-    mult <- switch(sub$units[1],
-      'days' = 1,
-      'months' = 30,
-      'years' = 365,
-      1
-    )
+    mult <- switch(sub$units[1], 'days' = 1, 'months' = 30, 'years' = 365, 1)
     days_val <- t * mult
     diff_expr <- sql_date_diff_expr(lcol, rcol, dialect)
     return(glue::glue('{null_guard} AND {diff_expr} <= {days_val}'))
@@ -613,7 +729,9 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
   }
   if (method == 'soundex') {
     soundex_fn <- if (identical(dialect, 'duckdb')) 'il_soundex' else 'soundex'
-    return(glue::glue('{null_guard} AND {soundex_fn}({lcol}) = {soundex_fn}({rcol})'))
+    return(glue::glue(
+      '{null_guard} AND {soundex_fn}({lcol}) = {soundex_fn}({rcol})'
+    ))
   }
   if (method == 'array_subset') {
     return(glue::glue(
@@ -643,21 +761,40 @@ sql_sublevel_condition <- function(sub, col, dialect, null_guard,
     return(glue::glue('{null_guard} AND ({sql_expr})'))
   }
   if (method == 'and') {
-    parts <- vapply(sub$children, sql_sublevel_condition, character(1),
-      col = col, dialect = dialect, null_guard = null_guard,
-      lcol = lcol, rcol = rcol
+    parts <- vapply(
+      sub$children,
+      sql_sublevel_condition,
+      character(1),
+      col = col,
+      dialect = dialect,
+      null_guard = null_guard,
+      lcol = lcol,
+      rcol = rcol
     )
     return(glue::glue('({paste(parts, collapse = ") AND (")})'))
   }
   if (method == 'or') {
-    parts <- vapply(sub$children, sql_sublevel_condition, character(1),
-      col = col, dialect = dialect, null_guard = null_guard,
-      lcol = lcol, rcol = rcol
+    parts <- vapply(
+      sub$children,
+      sql_sublevel_condition,
+      character(1),
+      col = col,
+      dialect = dialect,
+      null_guard = null_guard,
+      lcol = lcol,
+      rcol = rcol
     )
     return(glue::glue('({paste(parts, collapse = ") OR (")})'))
   }
   if (method == 'not') {
-    part <- sql_sublevel_condition(sub$child, col, dialect, null_guard, lcol, rcol)
+    part <- sql_sublevel_condition(
+      sub$child,
+      col,
+      dialect,
+      null_guard,
+      lcol,
+      rcol
+    )
     return(glue::glue('{null_guard} AND NOT ({part})'))
   }
   # Default: exact match
@@ -677,8 +814,16 @@ sql_array_min_distance_inner <- function(fn, col) {
   }
   qcol <- sql_quote_identifier(col)
   paste0(
-    '(SELECT ', agg, '(', dist_fn, ') ',
-    'FROM UNNEST(l.', qcol, ') AS t1(lv), UNNEST(r.', qcol, ') AS t2(rv))'
+    '(SELECT ',
+    agg,
+    '(',
+    dist_fn,
+    ') ',
+    'FROM UNNEST(l.',
+    qcol,
+    ') AS t1(lv), UNNEST(r.',
+    qcol,
+    ') AS t2(rv))'
   )
 }
 
@@ -692,15 +837,31 @@ sql_array_min_distance_case <- function(level, col, null_guard) {
   op <- if (fn == 'jaro_winkler') '>=' else '<='
   inner <- sql_array_min_distance_inner(fn, col)
 
-  when_clauses <- vapply(seq_along(thresholds), function(i) {
-    paste0('WHEN m ', op, ' ', thresholds[i], ' THEN ', n - i + 1L)
-  }, character(1))
+  when_clauses <- vapply(
+    seq_along(thresholds),
+    function(i) {
+      paste0('WHEN m ', op, ' ', thresholds[i], ' THEN ', n - i + 1L)
+    },
+    character(1)
+  )
 
   inner_case <- paste0(
-    'SELECT CASE ', paste(when_clauses, collapse = ' '), ' ELSE 0 END ',
-    'FROM (SELECT ', if (fn == 'jaro_winkler') 'MAX' else 'MIN',
-    '(', if (fn == 'jaro_winkler') 'jaro_winkler_similarity(lv, rv)' else 'levenshtein(lv, rv)',
-    ') AS m FROM UNNEST(l.', sql_quote_identifier(col), ') AS t1(lv), UNNEST(r.', sql_quote_identifier(col), ') AS t2(rv)) sub_m'
+    'SELECT CASE ',
+    paste(when_clauses, collapse = ' '),
+    ' ELSE 0 END ',
+    'FROM (SELECT ',
+    if (fn == 'jaro_winkler') 'MAX' else 'MIN',
+    '(',
+    if (fn == 'jaro_winkler') {
+      'jaro_winkler_similarity(lv, rv)'
+    } else {
+      'levenshtein(lv, rv)'
+    },
+    ') AS m FROM UNNEST(l.',
+    sql_quote_identifier(col),
+    ') AS t1(lv), UNNEST(r.',
+    sql_quote_identifier(col),
+    ') AS t2(rv)) sub_m'
   )
 
   glue::glue(
@@ -718,9 +879,13 @@ sql_array_min_distance_case <- function(level, col, null_guard) {
 #' @param limit Optional integer limit on pairs.
 #' @return A SQL query string.
 #' @noRd
-build_gamma_query <- function(model, blocking_rules, limit = NULL,
-                              deduplicate = FALSE,
-                              blocked_pairs_tbl = NULL) {
+build_gamma_query <- function(
+  model,
+  blocking_rules,
+  limit = NULL,
+  deduplicate = FALSE,
+  blocked_pairs_tbl = NULL
+) {
   con <- model$con
   dialect <- detect_dialect(con)
   tbl_l <- model$data$tbl_l
@@ -730,12 +895,16 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL,
   has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
 
   # Gamma SELECT expressions
-  gamma_exprs <- vapply(comparisons, function(comp) {
-    expr <- sql_gamma_case(comp, dialect)
-    glue::glue(
-      '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
-    )
-  }, character(1))
+  gamma_exprs <- vapply(
+    comparisons,
+    function(comp) {
+      expr <- sql_gamma_case(comp, dialect)
+      glue::glue(
+        '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+      )
+    },
+    character(1)
+  )
   gamma_select <- paste(gamma_exprs, collapse = ', ')
 
   # TF SELECT expressions (scalar subqueries against pre-computed TF tables)
@@ -769,40 +938,56 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL,
   for (tp in table_pairs) {
     if (length(blocking_rules) > 0L) {
       prior_conds <- character(0)
-      parts <- vapply(seq_along(blocking_rules), function(i) {
-        br <- blocking_rules[[i]]
-        cond <- build_blocking_condition(br$columns, br$where,
-          transform = br$transform,
-          dialect = dialect
-        )
-        from_l <- sql_explode_from(tp$from_l, br$explode, dialect)
-        from_r <- sql_explode_from(tp$from_r, br$explode, dialect)
-        # Exclude pairs already matched by earlier blocking rules
-        if (length(prior_conds) > 0L) {
-          exclude <- paste('COALESCE(', prior_conds, ', FALSE)',
-            collapse = ' OR '
+      parts <- vapply(
+        seq_along(blocking_rules),
+        function(i) {
+          br <- blocking_rules[[i]]
+          cond <- build_blocking_condition(
+            br$columns,
+            br$where,
+            transform = br$transform,
+            dialect = dialect
           )
-          full_cond <- paste0(
-            tp$join_cond, ' AND ', cond,
-            ' AND NOT (', exclude, ')'
+          from_l <- sql_explode_from(tp$from_l, br$explode, dialect)
+          from_r <- sql_explode_from(tp$from_r, br$explode, dialect)
+          # Exclude pairs already matched by earlier blocking rules
+          if (length(prior_conds) > 0L) {
+            exclude <- paste(
+              'COALESCE(',
+              prior_conds,
+              ', FALSE)',
+              collapse = ' OR '
+            )
+            full_cond <- paste0(
+              tp$join_cond,
+              ' AND ',
+              cond,
+              ' AND NOT (',
+              exclude,
+              ')'
+            )
+          } else {
+            full_cond <- paste0(tp$join_cond, ' AND ', cond)
+          }
+          prior_conds <<- c(prior_conds, cond)
+          glue::glue(
+            '{select_prefix}',
+            'FROM {from_l} l, {from_r} r ',
+            'WHERE {full_cond}'
           )
-        } else {
-          full_cond <- paste0(tp$join_cond, ' AND ', cond)
-        }
-        prior_conds <<- c(prior_conds, cond)
-        glue::glue(
-          '{select_prefix}',
-          'FROM {from_l} l, {from_r} r ',
-          'WHERE {full_cond}'
-        )
-      }, character(1))
+        },
+        character(1)
+      )
       all_parts <- c(all_parts, parts)
     } else {
-      all_parts <- c(all_parts, glue::glue(
-        '{select_prefix}',
-        'FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
-        'WHERE {tp$join_cond}'
-      ))
+      all_parts <- c(
+        all_parts,
+        glue::glue(
+          '{select_prefix}',
+          'FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
+          'WHERE {tp$join_cond}'
+        )
+      )
     }
   }
 
@@ -830,8 +1015,11 @@ build_gamma_query <- function(model, blocking_rules, limit = NULL,
 
 #' Build gamma SQL from a materialized blocked-pairs table
 #' @noRd
-build_gamma_query_from_blocked_pairs <- function(model, blocked_pairs_tbl,
-                                                 gamma_select) {
+build_gamma_query_from_blocked_pairs <- function(
+  model,
+  blocked_pairs_tbl,
+  gamma_select
+) {
   tbl_l <- model$data$tbl_l
   tbl_r <- model$data$tbl_r %||% tbl_l
   has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
@@ -845,18 +1033,24 @@ build_gamma_query_from_blocked_pairs <- function(model, blocked_pairs_tbl,
     list(list(source_l = 'l', source_r = 'l', from_l = tbl_l, from_r = tbl_l))
   }
 
-  parts <- vapply(combos, function(combo) {
-    glue::glue(
-      'SELECT b.l_unique_id, b.r_unique_id, {gamma_select} ',
-      'FROM {sql_quote_identifier(blocked_pairs_tbl)} b ',
-      'INNER JOIN {sql_quote_identifier(combo$from_l)} l ON l.unique_id = b.l_unique_id ',
-      'INNER JOIN {sql_quote_identifier(combo$from_r)} r ON r.unique_id = b.r_unique_id ',
-      "WHERE b.source_l = '{combo$source_l}' ",
-      "AND b.source_r = '{combo$source_r}'"
-    )
-  }, character(1))
+  parts <- vapply(
+    combos,
+    function(combo) {
+      glue::glue(
+        'SELECT b.l_unique_id, b.r_unique_id, {gamma_select} ',
+        'FROM {sql_quote_identifier(blocked_pairs_tbl)} b ',
+        'INNER JOIN {sql_quote_identifier(combo$from_l)} l ON l.unique_id = b.l_unique_id ',
+        'INNER JOIN {sql_quote_identifier(combo$from_r)} r ON r.unique_id = b.r_unique_id ',
+        "WHERE b.source_l = '{combo$source_l}' ",
+        "AND b.source_r = '{combo$source_r}'"
+      )
+    },
+    character(1)
+  )
 
-  glue::glue('SELECT DISTINCT * FROM ({paste(parts, collapse = " UNION ALL ")}) AS pairs')
+  glue::glue(
+    'SELECT DISTINCT * FROM ({paste(parts, collapse = " UNION ALL ")}) AS pairs'
+  )
 }
 
 #' Build the list of (from_l, from_r, join_cond) table-pair combos
@@ -883,7 +1077,11 @@ sql_explode_from <- function(tbl, explode_cols, dialect) {
   if (dialect == 'duckdb') {
     qexplode <- sql_quote_identifier(explode_cols)
     exclude_clause <- paste(qexplode, collapse = ', ')
-    unnest_exprs <- paste0('UNNEST(', qexplode, ') AS ', qexplode,
+    unnest_exprs <- paste0(
+      'UNNEST(',
+      qexplode,
+      ') AS ',
+      qexplode,
       collapse = ', '
     )
     return(glue::glue(
@@ -892,12 +1090,16 @@ sql_explode_from <- function(tbl, explode_cols, dialect) {
   }
   if (dialect == 'postgres') {
     # PostgreSQL: CROSS JOIN LATERAL UNNEST for each array column
-    laterals <- vapply(seq_along(explode_cols), function(i) {
-      qcol <- sql_quote_identifier(explode_cols[[i]])
-      glue::glue(
-        'CROSS JOIN LATERAL UNNEST({qcol}) AS _unnest_{i}({qcol})'
-      )
-    }, character(1))
+    laterals <- vapply(
+      seq_along(explode_cols),
+      function(i) {
+        qcol <- sql_quote_identifier(explode_cols[[i]])
+        glue::glue(
+          'CROSS JOIN LATERAL UNNEST({qcol}) AS _unnest_{i}({qcol})'
+        )
+      },
+      character(1)
+    )
     return(glue::glue(
       '(SELECT * FROM {qtbl} {paste(laterals, collapse = " ")})'
     ))
@@ -920,7 +1122,8 @@ build_table_pairs <- function(tbl_l, tbl_r, link_type, has_two_tables) {
   if (!has_two_tables || link_type == 'dedupe') {
     # Single table dedupe
     return(list(list(
-      from_l = tbl_l, from_r = tbl_l,
+      from_l = tbl_l,
+      from_r = tbl_l,
       join_cond = 'l.unique_id < r.unique_id'
     )))
   }
@@ -928,7 +1131,8 @@ build_table_pairs <- function(tbl_l, tbl_r, link_type, has_two_tables) {
   if (link_type == 'link') {
     # Cross-table only, no dedup guard needed (different tables)
     return(list(list(
-      from_l = tbl_l, from_r = tbl_r,
+      from_l = tbl_l,
+      from_r = tbl_r,
       join_cond = '1=1'
     )))
   }
@@ -937,11 +1141,13 @@ build_table_pairs <- function(tbl_l, tbl_r, link_type, has_two_tables) {
   list(
     list(from_l = tbl_l, from_r = tbl_r, join_cond = '1=1'),
     list(
-      from_l = tbl_l, from_r = tbl_l,
+      from_l = tbl_l,
+      from_r = tbl_l,
       join_cond = 'l.unique_id < r.unique_id'
     ),
     list(
-      from_l = tbl_r, from_r = tbl_r,
+      from_l = tbl_r,
+      from_r = tbl_r,
       join_cond = 'l.unique_id < r.unique_id'
     )
   )
@@ -964,62 +1170,94 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
 
   if (method == 'jaro_winkler') {
     thresholds <- level$thresholds
-    fn_name <- if (dialect == 'sqlite') 'jaro_winkler_similarity' else 'jaro_winkler_similarity'
-    parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN {fn_name}({lcol}, {rcol}) >= {t} THEN {t}')
-    }, character(1))
+    fn_name <- if (dialect == 'sqlite') {
+      'jaro_winkler_similarity'
+    } else {
+      'jaro_winkler_similarity'
+    }
+    parts <- vapply(
+      thresholds,
+      function(t) {
+        glue::glue('WHEN {fn_name}({lcol}, {rcol}) >= {t} THEN {t}')
+      },
+      character(1)
+    )
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == 'jaro') {
     thresholds <- level$thresholds
-    parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN jaro_similarity({lcol}, {rcol}) >= {t} THEN {t}')
-    }, character(1))
+    parts <- vapply(
+      thresholds,
+      function(t) {
+        glue::glue('WHEN jaro_similarity({lcol}, {rcol}) >= {t} THEN {t}')
+      },
+      character(1)
+    )
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method %in% c('levenshtein', 'damerau_levenshtein')) {
     thresholds <- level$thresholds
     fn_name <- method
-    parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN {fn_name}({lcol}, {rcol}) <= {t} THEN {t}')
-    }, character(1))
+    parts <- vapply(
+      thresholds,
+      function(t) {
+        glue::glue('WHEN {fn_name}({lcol}, {rcol}) <= {t} THEN {t}')
+      },
+      character(1)
+    )
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == 'jaccard') {
     thresholds <- level$thresholds
-    parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN jaccard({lcol}, {rcol}) >= {t} THEN {t}')
-    }, character(1))
+    parts <- vapply(
+      thresholds,
+      function(t) {
+        glue::glue('WHEN jaccard({lcol}, {rcol}) >= {t} THEN {t}')
+      },
+      character(1)
+    )
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == 'cosine') {
     thresholds <- level$thresholds
-    parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN cosine_similarity({lcol}, {rcol}) >= {t} THEN {t}')
-    }, character(1))
+    parts <- vapply(
+      thresholds,
+      function(t) {
+        glue::glue('WHEN cosine_similarity({lcol}, {rcol}) >= {t} THEN {t}')
+      },
+      character(1)
+    )
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == 'numeric_diff') {
     thresholds <- level$thresholds
-    parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN ABS({lcol} - {rcol}) <= {t} THEN {t}')
-    }, character(1))
+    parts <- vapply(
+      thresholds,
+      function(t) {
+        glue::glue('WHEN ABS({lcol} - {rcol}) <= {t} THEN {t}')
+      },
+      character(1)
+    )
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == 'pct_diff') {
     thresholds <- level$thresholds
-    parts <- vapply(thresholds, function(t) {
-      glue::glue(
-        'WHEN ABS({lcol} - {rcol}) / ',
-        'NULLIF(GREATEST(ABS({lcol}), ABS({rcol})), 0) <= {t} THEN {t}'
-      )
-    }, character(1))
+    parts <- vapply(
+      thresholds,
+      function(t) {
+        glue::glue(
+          'WHEN ABS({lcol} - {rcol}) / ',
+          'NULLIF(GREATEST(ABS({lcol}), ABS({rcol})), 0) <= {t} THEN {t}'
+        )
+      },
+      character(1)
+    )
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
@@ -1028,7 +1266,8 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
     units <- level$units
     parts <- character(length(thresholds))
     for (i in seq_along(thresholds)) {
-      days_val <- switch(units[i],
+      days_val <- switch(
+        units[i],
         'days' = thresholds[i],
         'months' = thresholds[i] * 30,
         'years' = thresholds[i] * 365,
@@ -1056,17 +1295,25 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
 
   if (method == 'distance_km') {
     thresholds <- level$thresholds
-    parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN distance_km({lcol}, {rcol}) <= {t} THEN {t}')
-    }, character(1))
+    parts <- vapply(
+      thresholds,
+      function(t) {
+        glue::glue('WHEN distance_km({lcol}, {rcol}) <= {t} THEN {t}')
+      },
+      character(1)
+    )
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
   if (method == 'array_intersect') {
     thresholds <- level$thresholds
-    parts <- vapply(thresholds, function(t) {
-      glue::glue('WHEN array_intersect_count({lcol}, {rcol}) >= {t} THEN {t}')
-    }, character(1))
+    parts <- vapply(
+      thresholds,
+      function(t) {
+        glue::glue('WHEN array_intersect_count({lcol}, {rcol}) >= {t} THEN {t}')
+      },
+      character(1)
+    )
     return(glue::glue("CASE {paste(parts, collapse = ' ')} ELSE -1 END"))
   }
 
@@ -1091,9 +1338,13 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
   }
 
   if (method == 'levels') {
-    parts <- vapply(level$levels, function(l) {
-      sql_for_comparison_level(l, col, dialect = dialect)
-    }, character(1))
+    parts <- vapply(
+      level$levels,
+      function(l) {
+        sql_for_comparison_level(l, col, dialect = dialect)
+      },
+      character(1)
+    )
     return(paste(parts, collapse = '\n'))
   }
 
@@ -1109,16 +1360,30 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
 #' @noRd
 build_select_aliases <- function(cols) {
   list(
-    left = paste(vapply(cols, function(col) {
-      glue::glue(
-        '{sql_col_ref("l", col)} AS {sql_quote_identifier(paste0("l_", col))}'
-      )
-    }, character(1)), collapse = ', '),
-    right = paste(vapply(cols, function(col) {
-      glue::glue(
-        '{sql_col_ref("r", col)} AS {sql_quote_identifier(paste0("r_", col))}'
-      )
-    }, character(1)), collapse = ', ')
+    left = paste(
+      vapply(
+        cols,
+        function(col) {
+          glue::glue(
+            '{sql_col_ref("l", col)} AS {sql_quote_identifier(paste0("l_", col))}'
+          )
+        },
+        character(1)
+      ),
+      collapse = ', '
+    ),
+    right = paste(
+      vapply(
+        cols,
+        function(col) {
+          glue::glue(
+            '{sql_col_ref("r", col)} AS {sql_quote_identifier(paste0("r_", col))}'
+          )
+        },
+        character(1)
+      ),
+      collapse = ', '
+    )
   )
 }
 
@@ -1130,16 +1395,24 @@ build_select_aliases <- function(cols) {
 #' @param dialect Optional SQL dialect string for phonetic transforms.
 #' @return A character string like `"l.col1 = r.col1 AND l.col2 = r.col2"`.
 #' @noRd
-build_blocking_condition <- function(columns, where = NULL, transform = NULL,
-                                     dialect = NULL) {
+build_blocking_condition <- function(
+  columns,
+  where = NULL,
+  transform = NULL,
+  dialect = NULL
+) {
   parts <- character(0)
   if (length(columns) > 0L) {
-    parts <- vapply(columns, function(col) {
-      col_tf <- if (is.list(transform)) transform[[col]] else transform
-      lcol <- sql_transform_col(sql_col_ref('l', col), col_tf, dialect)
-      rcol <- sql_transform_col(sql_col_ref('r', col), col_tf, dialect)
-      glue::glue('{lcol} = {rcol}')
-    }, character(1))
+    parts <- vapply(
+      columns,
+      function(col) {
+        col_tf <- if (is.list(transform)) transform[[col]] else transform
+        lcol <- sql_transform_col(sql_col_ref('l', col), col_tf, dialect)
+        rcol <- sql_transform_col(sql_col_ref('r', col), col_tf, dialect)
+        glue::glue('{lcol} = {rcol}')
+      },
+      character(1)
+    )
   }
   if (!is.null(where) && !is.na(where) && nzchar(where)) {
     parts <- c(parts, where)
@@ -1185,31 +1458,43 @@ count_blocked_pairs <- function(con, tbl_l, tbl_r, where, dedupe = TRUE) {
 #' @param dialect SQL dialect string.
 #' @return SQL selecting source/id columns for blocked pairs.
 #' @noRd
-blocked_pair_rows_sql <- function(tbl_l, tbl_r, rule, link_type,
-                                  has_two_tables, dialect) {
-  block_where <- build_blocking_condition(rule$columns, rule$where,
+blocked_pair_rows_sql <- function(
+  tbl_l,
+  tbl_r,
+  rule,
+  link_type,
+  has_two_tables,
+  dialect
+) {
+  block_where <- build_blocking_condition(
+    rule$columns,
+    rule$where,
     transform = rule$transform,
     dialect = dialect
   )
   table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
-  parts <- vapply(seq_along(table_pairs), function(i) {
-    tp <- table_pairs[[i]]
-    source_l <- if (identical(tp$from_l, tbl_l)) 'l' else 'r'
-    source_r <- if (identical(tp$from_r, tbl_l)) 'l' else 'r'
-    from_l <- sql_explode_from(tp$from_l, rule$explode, dialect)
-    from_r <- sql_explode_from(tp$from_r, rule$explode, dialect)
-    where_parts <- c(tp$join_cond)
-    if (nzchar(block_where)) {
-      where_parts <- c(where_parts, block_where)
-    }
-    where_clause <- paste(where_parts, collapse = ' AND ')
-    glue::glue(
-      "SELECT '{source_l}' AS source_l, l.unique_id AS unique_id_l, ",
-      "'{source_r}' AS source_r, r.unique_id AS unique_id_r ",
-      'FROM {from_l} l, {from_r} r ',
-      'WHERE {where_clause}'
-    )
-  }, character(1))
+  parts <- vapply(
+    seq_along(table_pairs),
+    function(i) {
+      tp <- table_pairs[[i]]
+      source_l <- if (identical(tp$from_l, tbl_l)) 'l' else 'r'
+      source_r <- if (identical(tp$from_r, tbl_l)) 'l' else 'r'
+      from_l <- sql_explode_from(tp$from_l, rule$explode, dialect)
+      from_r <- sql_explode_from(tp$from_r, rule$explode, dialect)
+      where_parts <- c(tp$join_cond)
+      if (nzchar(block_where)) {
+        where_parts <- c(where_parts, block_where)
+      }
+      where_clause <- paste(where_parts, collapse = ' AND ')
+      glue::glue(
+        "SELECT '{source_l}' AS source_l, l.unique_id AS unique_id_l, ",
+        "'{source_r}' AS source_r, r.unique_id AS unique_id_r ",
+        'FROM {from_l} l, {from_r} r ',
+        'WHERE {where_clause}'
+      )
+    },
+    character(1)
+  )
   paste(parts, collapse = ' UNION ALL ')
 }
 
@@ -1226,13 +1511,31 @@ blocked_pair_rows_sql <- function(tbl_l, tbl_r, rule, link_type,
 #' @param dialect SQL dialect string.
 #' @return Numeric count of unique blocked pairs.
 #' @noRd
-count_unique_blocked_pairs <- function(con, tbl_l, tbl_r, rules, link_type,
-                                       dialect, profile = NULL) {
+count_unique_blocked_pairs <- function(
+  con,
+  tbl_l,
+  tbl_r,
+  rules,
+  link_type,
+  dialect,
+  profile = NULL
+) {
   has_two_tables <- !is.null(tbl_r) && !identical(tbl_r, tbl_l)
   tbl_r <- tbl_r %||% tbl_l
-  parts <- vapply(rules, function(rule) {
-    blocked_pair_rows_sql(tbl_l, tbl_r, rule, link_type, has_two_tables, dialect)
-  }, character(1))
+  parts <- vapply(
+    rules,
+    function(rule) {
+      blocked_pair_rows_sql(
+        tbl_l,
+        tbl_r,
+        rule,
+        link_type,
+        has_two_tables,
+        dialect
+      )
+    },
+    character(1)
+  )
   union_sql <- paste(parts, collapse = ' UNION ALL ')
   sql <- glue::glue(
     'SELECT COUNT(*) AS n FROM (',
@@ -1240,7 +1543,9 @@ count_unique_blocked_pairs <- function(con, tbl_l, tbl_r, rules, link_type,
     'FROM ({union_sql}) AS blocked_pairs',
     ') AS unique_blocked_pairs'
   )
-  res <- il_db_get_query(con, sql,
+  res <- il_db_get_query(
+    con,
+    sql,
     step = 'estimate_prior.count_unique_blocked_pairs',
     profile = profile
   )
@@ -1261,9 +1566,13 @@ count_unique_blocked_pairs <- function(con, tbl_l, tbl_r, rules, link_type,
 #' @noRd
 sql_weight_case <- function(comp_name, m_vec, u_vec) {
   weights <- log2(pmax(m_vec, 1e-10) / pmax(u_vec, 1e-10))
-  whens <- vapply(seq_along(weights), function(i) {
-    glue::glue('WHEN {i - 1L} THEN {weights[i]}')
-  }, character(1))
+  whens <- vapply(
+    seq_along(weights),
+    function(i) {
+      glue::glue('WHEN {i - 1L} THEN {weights[i]}')
+    },
+    character(1)
+  )
   gamma_col <- sql_quote_identifier(paste0('gamma_', comp_name))
   glue::glue(
     'CAST(CASE {gamma_col} {paste(whens, collapse = " ")} ELSE 0.0 END AS DOUBLE)'
@@ -1284,9 +1593,13 @@ sql_weight_case <- function(comp_name, m_vec, u_vec) {
 #' @param tf_minimum_u_value Numeric floor for TF denominator (default 0.0).
 #' @return A SQL expression string.
 #' @noRd
-sql_tf_adj_expr <- function(col, max_level, u_exact,
-                            tf_adjustment_weight = 1.0,
-                            tf_minimum_u_value = 0.0) {
+sql_tf_adj_expr <- function(
+  col,
+  max_level,
+  u_exact,
+  tf_adjustment_weight = 1.0,
+  tf_minimum_u_value = 0.0
+) {
   if (tf_adjustment_weight == 0) {
     return('CAST(0.0 AS DOUBLE)')
   }
@@ -1337,9 +1650,12 @@ sql_tf_adj_expr <- function(col, max_level, u_exact,
 #' @param threshold Numeric match-probability threshold.
 #' @return A SQL query string.
 #' @noRd
-build_scored_query <- function(model, threshold = 0.85,
-                               threshold_match_weight = NULL,
-                               blocked_pairs_tbl = NULL) {
+build_scored_query <- function(
+  model,
+  threshold = 0.85,
+  threshold_match_weight = NULL,
+  blocked_pairs_tbl = NULL
+) {
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
   prior <- clamp_probability(safe_prior(model))
@@ -1347,15 +1663,21 @@ build_scored_query <- function(model, threshold = 0.85,
   blocking_rules <- model$spec$blocking_rules
 
   mu <- extract_mu_vectors(params, comp_names)
-  gamma_sql <- build_gamma_query(model, blocking_rules,
+  gamma_sql <- build_gamma_query(
+    model,
+    blocking_rules,
     blocked_pairs_tbl = blocked_pairs_tbl
   )
 
   # Per-comparison weight CASE expressions
-  weight_parts <- vapply(seq_along(comparisons), function(j) {
-    cn <- comp_names[j]
-    sql_weight_case(cn, mu$m_levels[[cn]], mu$u_levels[[cn]])
-  }, character(1))
+  weight_parts <- vapply(
+    seq_along(comparisons),
+    function(j) {
+      cn <- comp_names[j]
+      sql_weight_case(cn, mu$m_levels[[cn]], mu$u_levels[[cn]])
+    },
+    character(1)
+  )
 
   # TF adjustment CASE expressions (both for sum and as separate columns)
   tf_parts <- character(0)
@@ -1394,9 +1716,17 @@ build_scored_query <- function(model, threshold = 0.85,
   outer_tf_adj <- ''
   if (length(tf_adj_selects) > 0L) {
     inner_tf_adj <- paste0(', ', paste(tf_adj_selects, collapse = ', '))
-    tf_col_names <- vapply(comparisons[vapply(comparisons, function(c) {
-      isTRUE(c$method$term_frequency)
-    }, logical(1))], function(c) c$columns, character(1))
+    tf_col_names <- vapply(
+      comparisons[vapply(
+        comparisons,
+        function(c) {
+          isTRUE(c$method$term_frequency)
+        },
+        logical(1)
+      )],
+      function(c) c$columns,
+      character(1)
+    )
     outer_tf_adj <- paste0(
       ', ',
       sql_identifier_csv(paste0('tf_adj_', tf_col_names))
@@ -1523,9 +1853,13 @@ build_greedy_query <- function(model, inner_sql) {
 #' @noRd
 greedy_result_columns <- function(model) {
   comp_names <- comparison_names(model$spec$comparisons)
-  tf_cols <- vapply(model$spec$comparisons, function(c) {
-    if (isTRUE(c$method$term_frequency)) c$columns else NA_character_
-  }, character(1))
+  tf_cols <- vapply(
+    model$spec$comparisons,
+    function(c) {
+      if (isTRUE(c$method$term_frequency)) c$columns else NA_character_
+    },
+    character(1)
+  )
   tf_cols <- tf_cols[!is.na(tf_cols)]
 
   c(
@@ -1568,17 +1902,31 @@ build_fields_join_query <- function(model, inner_sql) {
     setdiff(DBI::dbListFields(con, tbl_r), 'unique_id')
   }
 
-  l_cols <- paste(vapply(field_cols_l, function(col) {
-    qcol <- DBI::dbQuoteIdentifier(con, col)
-    qalias <- DBI::dbQuoteIdentifier(con, paste0(col, '_l'))
-    glue::glue('l.{qcol} AS {qalias}')
-  }, character(1)), collapse = ', ')
+  l_cols <- paste(
+    vapply(
+      field_cols_l,
+      function(col) {
+        qcol <- DBI::dbQuoteIdentifier(con, col)
+        qalias <- DBI::dbQuoteIdentifier(con, paste0(col, '_l'))
+        glue::glue('l.{qcol} AS {qalias}')
+      },
+      character(1)
+    ),
+    collapse = ', '
+  )
 
-  r_cols <- paste(vapply(field_cols_r, function(col) {
-    qcol <- DBI::dbQuoteIdentifier(con, col)
-    qalias <- DBI::dbQuoteIdentifier(con, paste0(col, '_r'))
-    glue::glue('r.{qcol} AS {qalias}')
-  }, character(1)), collapse = ', ')
+  r_cols <- paste(
+    vapply(
+      field_cols_r,
+      function(col) {
+        qcol <- DBI::dbQuoteIdentifier(con, col)
+        qalias <- DBI::dbQuoteIdentifier(con, paste0(col, '_r'))
+        glue::glue('r.{qcol} AS {qalias}')
+      },
+      character(1)
+    ),
+    collapse = ', '
+  )
 
   qtbl_l <- DBI::dbQuoteIdentifier(con, tbl_l)
   qtbl_r <- DBI::dbQuoteIdentifier(con, tbl_r)

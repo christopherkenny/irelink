@@ -98,8 +98,10 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     }
   }
   tbl_new <- il_table_name(model, 'find_new', il_table_suffix())
-  reg <- register_data(new_records,
-    con = con, tbl_name = tbl_new,
+  reg <- register_data(
+    new_records,
+    con = con,
+    tbl_name = tbl_new,
     add_unique_id = TRUE
   )
   on.exit(drop_registered(con, tbl_new), add = TRUE)
@@ -116,12 +118,16 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
 
   if (dialect_has_fuzzy_sql(dialect)) {
     # SQL-first: compute gammas in database
-    gamma_exprs <- vapply(comparisons, function(comp) {
-      expr <- sql_gamma_case(comp, dialect)
-      glue::glue(
-        '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
-      )
-    }, character(1))
+    gamma_exprs <- vapply(
+      comparisons,
+      function(comp) {
+        expr <- sql_gamma_case(comp, dialect)
+        glue::glue(
+          '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+        )
+      },
+      character(1)
+    )
     gamma_select <- paste(gamma_exprs, collapse = ', ')
 
     # TF SELECT expressions
@@ -132,18 +138,24 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     }
 
     if (length(blocking_rules) > 0L) {
-      block_parts <- vapply(blocking_rules, function(br) {
-        cond <- build_blocking_condition(br$columns, br$where,
-          transform = br$transform,
-          dialect = dialect
-        )
-        glue::glue(
-          'SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ',
-          '{gamma_select} ',
-          'FROM {qtbl_new} l, {qtbl_existing} r ',
-          'WHERE {cond}'
-        )
-      }, character(1))
+      block_parts <- vapply(
+        blocking_rules,
+        function(br) {
+          cond <- build_blocking_condition(
+            br$columns,
+            br$where,
+            transform = br$transform,
+            dialect = dialect
+          )
+          glue::glue(
+            'SELECT l.unique_id AS l_unique_id, r.unique_id AS r_unique_id, ',
+            '{gamma_select} ',
+            'FROM {qtbl_new} l, {qtbl_existing} r ',
+            'WHERE {cond}'
+          )
+        },
+        character(1)
+      )
       inner <- paste(block_parts, collapse = ' UNION ')
     } else {
       inner <- glue::glue(
@@ -154,7 +166,11 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     }
     sql <- glue::glue('SELECT DISTINCT * FROM ({inner}) AS pairs')
     if (dependency_aware) {
-      score_tbl <- il_table_name(model, 'find_dependency_scores', il_table_suffix())
+      score_tbl <- il_table_name(
+        model,
+        'find_dependency_scores',
+        il_table_suffix()
+      )
       prepared <- prepare_dependency_scored_query(
         model,
         gamma_sql = sql,
@@ -216,21 +232,37 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     # Select only columns that exist in both new_records (l) and existing (r)
     existing_cols <- model$data$columns
     r_cols <- intersect(needed_cols, existing_cols)
-    sel_l <- paste(vapply(new_cols, function(col) {
-      glue::glue(
-        '{sql_col_ref("l", col)} AS {sql_quote_identifier(paste0("l_", col))}'
-      )
-    }, character(1)), collapse = ', ')
-    sel_r <- paste(vapply(r_cols, function(col) {
-      glue::glue(
-        '{sql_col_ref("r", col)} AS {sql_quote_identifier(paste0("r_", col))}'
-      )
-    }, character(1)), collapse = ', ')
+    sel_l <- paste(
+      vapply(
+        new_cols,
+        function(col) {
+          glue::glue(
+            '{sql_col_ref("l", col)} AS {sql_quote_identifier(paste0("l_", col))}'
+          )
+        },
+        character(1)
+      ),
+      collapse = ', '
+    )
+    sel_r <- paste(
+      vapply(
+        r_cols,
+        function(col) {
+          glue::glue(
+            '{sql_col_ref("r", col)} AS {sql_quote_identifier(paste0("r_", col))}'
+          )
+        },
+        character(1)
+      ),
+      collapse = ', '
+    )
 
     all_pair_frames <- list()
     if (length(blocking_rules) > 0L) {
       for (br in blocking_rules) {
-        block_where <- build_blocking_condition(br$columns, br$where,
+        block_where <- build_blocking_condition(
+          br$columns,
+          br$where,
           transform = br$transform,
           dialect = dialect
         )
@@ -260,7 +292,9 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     gamma_mat <- compute_gamma_matrix(pairs, comparisons)
     if (dependency_aware) {
       scored_patterns <- dependency_pattern_score(
-        gamma_mat, comp_names, model$params$dependency_aware
+        gamma_mat,
+        comp_names,
+        model$params$dependency_aware
       )
       match_weight <- scored_patterns$match_weight
       total_mw <- scored_patterns$total_match_weight

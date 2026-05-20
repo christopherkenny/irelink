@@ -225,14 +225,20 @@ test_that('il_graph_metrics() validates pair and cluster columns', {
     match_probability = 0.95,
     match_weight = 4.25
   )
-  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+  pairs <- structure(
+    pairs,
+    class = c('il_compared', 'tbl_df', 'tbl', 'data.frame')
+  )
   clusters <- tibble::tibble(
     unique_id = c('1', '2'),
     cluster_id = c('A', 'A')
   )
 
   expect_error(
-    il_graph_metrics(pairs[, c('unique_id_l', 'unique_id_r', 'match_probability')], clusters),
+    il_graph_metrics(
+      pairs[, c('unique_id_l', 'unique_id_r', 'match_probability')],
+      clusters
+    ),
     'match_weight'
   )
   expect_error(

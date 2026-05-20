@@ -61,7 +61,10 @@ test_that('il_profile() mixes bare column names and SQL expressions', {
   )
 
   result <- il_profile(df, first_name, 'city || first_name', con = con)
-  expect_identical(sort(unique(result$column)), sort(c('first_name', 'city || first_name')))
+  expect_identical(
+    sort(unique(result$column)),
+    sort(c('first_name', 'city || first_name'))
+  )
 })
 
 test_that('il_profile() works with multiple columns', {

@@ -13,8 +13,13 @@ il_new_sql_profile <- function(enabled = FALSE) {
 
 #' Append a SQL profile entry
 #' @noRd
-il_profile_append <- function(profile, step, elapsed, rows = NA_integer_,
-                              statement = NULL) {
+il_profile_append <- function(
+  profile,
+  step,
+  elapsed,
+  rows = NA_integer_,
+  statement = NULL
+) {
   if (is.null(profile)) {
     return(invisible(NULL))
   }
@@ -47,7 +52,10 @@ il_db_execute <- function(con, sql, step = NULL, profile = NULL) {
   timing <- system.time({
     result <- DBI::dbExecute(con, sql)
   })
-  il_profile_append(profile, step, timing[['elapsed']],
+  il_profile_append(
+    profile,
+    step,
+    timing[['elapsed']],
     rows = result,
     statement = sql
   )
@@ -60,7 +68,10 @@ il_db_get_query <- function(con, sql, step = NULL, profile = NULL) {
   timing <- system.time({
     result <- DBI::dbGetQuery(con, sql)
   })
-  il_profile_append(profile, step, timing[['elapsed']],
+  il_profile_append(
+    profile,
+    step,
+    timing[['elapsed']],
     rows = nrow(result),
     statement = sql
   )

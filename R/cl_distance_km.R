@@ -23,24 +23,28 @@ cl_distance_km <- function(...) {
     cli::cli_abort('{.fn cl_distance_km} requires at least one threshold.')
   }
   mi_to_km <- 1.609344
-  thresholds <- vapply(args, function(a) {
-    if (is.numeric(a) && length(a) == 1L) {
-      check_unit_input(a, 'cl_distance_km')
-      return(a)
-    }
-    if (is.list(a) && !is.null(a$unit)) {
-      if (a$unit == 'km') {
-        return(a$value)
+  thresholds <- vapply(
+    args,
+    function(a) {
+      if (is.numeric(a) && length(a) == 1L) {
+        check_unit_input(a, 'cl_distance_km')
+        return(a)
       }
-      if (a$unit == 'mi') {
-        return(a$value * mi_to_km)
+      if (is.list(a) && !is.null(a$unit)) {
+        if (a$unit == 'km') {
+          return(a$value)
+        }
+        if (a$unit == 'mi') {
+          return(a$value * mi_to_km)
+        }
+        cli::cli_abort(
+          '{.fn cl_distance_km} accepts {.val km} or {.val mi} units, not {.val {a$unit}}.'
+        )
       }
-      cli::cli_abort(
-        '{.fn cl_distance_km} accepts {.val km} or {.val mi} units, not {.val {a$unit}}.'
-      )
-    }
-    cli::cli_abort('Invalid threshold for {.fn cl_distance_km}.')
-  }, numeric(1))
+      cli::cli_abort('Invalid threshold for {.fn cl_distance_km}.')
+    },
+    numeric(1)
+  )
   if (length(thresholds) > 1L && is.unsorted(thresholds)) {
     cli::cli_warn(
       'Thresholds for {.fn cl_distance_km} should be in ascending order; re-ordering.'

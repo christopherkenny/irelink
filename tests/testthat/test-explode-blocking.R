@@ -64,19 +64,25 @@ test_that('explode blocking works end-to-end with DuckDB arrays', {
   on.exit(test_discon(con), add = TRUE)
 
   # Create table with an array column
-  DBI::dbExecute(con, '
+  DBI::dbExecute(
+    con,
+    '
     CREATE TABLE arr_test (
       unique_id INTEGER,
       name VARCHAR,
       emails VARCHAR[]
     )
-  ')
-  DBI::dbExecute(con, "
+  '
+  )
+  DBI::dbExecute(
+    con,
+    "
     INSERT INTO arr_test VALUES
       (1, 'Alice', ['alice@a.com', 'alice@b.com']),
       (2, 'Bob',   ['bob@a.com']),
       (3, 'Carol', ['alice@b.com', 'carol@c.com'])
-  ")
+  "
+  )
 
   spec <- il_spec() |>
     il_compare(name, cl_exact()) |>

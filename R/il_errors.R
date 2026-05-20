@@ -73,7 +73,12 @@
 #'
 #' il_errors(model, labels = labels, threshold = 0.85)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_errors <- function(model, labels = NULL, threshold = 0.85, labels_col = NULL) {
+il_errors <- function(
+  model,
+  labels = NULL,
+  threshold = 0.85,
+  labels_col = NULL
+) {
   labels <- resolve_labels(model, labels, labels_col)
   scored <- score_labeled_pairs(model, labels)
   label_probs <- scored$label_probs

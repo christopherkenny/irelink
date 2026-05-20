@@ -24,34 +24,43 @@ cl_date_diff <- function(...) {
     cli::cli_abort('{.fn cl_date_diff} requires at least one threshold.')
   }
   valid_units <- c('days', 'months', 'years')
-  thresholds <- vapply(args, function(a) {
-    if (is.numeric(a) && length(a) == 1L) {
-      check_unit_input(a, 'cl_date_diff')
-      return(a)
-    }
-    if (is.list(a) && !is.null(a$unit)) {
-      if (!a$unit %in% valid_units) {
-        cli::cli_abort(
-          '{.fn cl_date_diff} accepts {.or {.val {valid_units}}} units, not {.val {a$unit}}.'
-        )
+  thresholds <- vapply(
+    args,
+    function(a) {
+      if (is.numeric(a) && length(a) == 1L) {
+        check_unit_input(a, 'cl_date_diff')
+        return(a)
       }
-      return(a$value)
-    }
-    cli::cli_abort('Invalid threshold for {.fn cl_date_diff}.')
-  }, numeric(1))
-  units <- vapply(args, function(a) {
-    if (is.numeric(a) && length(a) == 1L) {
-      return('days')
-    }
-    a$unit
-  }, character(1))
-  days_values <- thresholds * vapply(units, function(unit) {
-    switch(unit,
-      days = 1,
-      months = 30,
-      years = 365
+      if (is.list(a) && !is.null(a$unit)) {
+        if (!a$unit %in% valid_units) {
+          cli::cli_abort(
+            '{.fn cl_date_diff} accepts {.or {.val {valid_units}}} units, not {.val {a$unit}}.'
+          )
+        }
+        return(a$value)
+      }
+      cli::cli_abort('Invalid threshold for {.fn cl_date_diff}.')
+    },
+    numeric(1)
+  )
+  units <- vapply(
+    args,
+    function(a) {
+      if (is.numeric(a) && length(a) == 1L) {
+        return('days')
+      }
+      a$unit
+    },
+    character(1)
+  )
+  days_values <- thresholds *
+    vapply(
+      units,
+      function(unit) {
+        switch(unit, days = 1, months = 30, years = 365)
+      },
+      numeric(1)
     )
-  }, numeric(1))
   if (length(days_values) > 1L && is.unsorted(days_values)) {
     cli::cli_warn(
       'Thresholds for {.fn cl_date_diff} should be in ascending order; re-ordering.'

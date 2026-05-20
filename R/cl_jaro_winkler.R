@@ -18,7 +18,11 @@
 #'   il_compare(surname, cl_jaro_winkler(0.9, term_frequency = TRUE))
 cl_jaro_winkler <- function(..., term_frequency = FALSE) {
   thresholds <- check_similarity_thresholds(c(...), 'cl_jaro_winkler')
-  new_comparison_level('jaro_winkler', thresholds = thresholds, term_frequency = term_frequency)
+  new_comparison_level(
+    'jaro_winkler',
+    thresholds = thresholds,
+    term_frequency = term_frequency
+  )
 }
 
 #' Jaro String Similarity Comparison
@@ -39,5 +43,9 @@ cl_jaro_winkler <- function(..., term_frequency = FALSE) {
 #'   il_compare(name, cl_jaro(0.9))
 cl_jaro <- function(..., term_frequency = FALSE) {
   thresholds <- check_similarity_thresholds(c(...), 'cl_jaro')
-  new_comparison_level('jaro', thresholds = thresholds, term_frequency = term_frequency)
+  new_comparison_level(
+    'jaro',
+    thresholds = thresholds,
+    term_frequency = term_frequency
+  )
 }

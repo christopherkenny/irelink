@@ -12,7 +12,14 @@ test_that('il_deterministic_link() returns a tibble of exact-match pairs', {
     unique_id = 1:6,
     first_name = c('John', 'John', 'Mary', 'Mary', 'Jane', 'Bob'),
     surname = c('Smith', 'Smith', 'Jones', 'Jones', 'Taylor', 'Brown'),
-    dob = c('1990-01-01', '1990-01-01', '1985-05-15', '1985-05-15', '1992-03-20', '1980-12-01')
+    dob = c(
+      '1990-01-01',
+      '1990-01-01',
+      '1985-05-15',
+      '1985-05-15',
+      '1992-03-20',
+      '1980-12-01'
+    )
   )
 
   spec <- il_spec() |>
@@ -26,7 +33,8 @@ test_that('il_deterministic_link() returns a tibble of exact-match pairs', {
   expect_true(nrow(result) > 0)
   # John Smith should match John Smith
   expect_true(any(
-    result$unique_id_l == 1 & result$unique_id_r == 2 |
+    result$unique_id_l == 1 &
+      result$unique_id_r == 2 |
       result$unique_id_l == 2 & result$unique_id_r == 1
   ))
 })

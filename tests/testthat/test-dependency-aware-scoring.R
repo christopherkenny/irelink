@@ -29,12 +29,19 @@ test_that('dependency-aware scoring learns field dependence', {
       estimator_mode = 'dependency-aware'
     )
 
-  patterns <- data.frame(gamma_a = c(0L, 1L, 0L, 1L), gamma_b = c(0L, 0L, 1L, 1L))
+  patterns <- data.frame(
+    gamma_a = c(0L, 1L, 0L, 1L),
+    gamma_b = c(0L, 0L, 1L, 1L)
+  )
   score_i <- il_score_patterns(independent, patterns)
   score_d <- il_score_patterns(dependent, patterns)
 
-  expect_true(any(abs(score_i$match_probability - score_d$match_probability) > 1e-6))
-  expect_true(all(score_d$match_probability > 0 & score_d$match_probability < 1))
+  expect_true(any(
+    abs(score_i$match_probability - score_d$match_probability) > 1e-6
+  ))
+  expect_true(all(
+    score_d$match_probability > 0 & score_d$match_probability < 1
+  ))
 })
 
 test_that('dependency-aware scoring treats missing states as explicit levels', {
@@ -83,12 +90,18 @@ test_that('dependency-aware model scores compatible larger pattern tables', {
       estimator_mode = 'dependency-aware'
     )
 
-  scored <- il_score_patterns(model, data.frame(
-    gamma_a = c(0L, 0L, 1L, 1L),
-    gamma_b = c(0L, 1L, 0L, 1L),
-    n = c(100L, 5L, 7L, 2L)
-  ))
-  scored_single <- il_score_patterns(model, data.frame(gamma_a = 0L, gamma_b = 1L))
+  scored <- il_score_patterns(
+    model,
+    data.frame(
+      gamma_a = c(0L, 0L, 1L, 1L),
+      gamma_b = c(0L, 1L, 0L, 1L),
+      n = c(100L, 5L, 7L, 2L)
+    )
+  )
+  scored_single <- il_score_patterns(
+    model,
+    data.frame(gamma_a = 0L, gamma_b = 1L)
+  )
 
   expect_equal(nrow(scored), 4L)
   expect_true(all(is.finite(scored$match_weight)))
@@ -139,13 +152,19 @@ test_that('dependency-aware scoring rejects unsupported combinations', {
   expect_error(
     model |>
       il_prior_prevalence(0.2, strength = 10) |>
-      il_estimate_em(block_on(.where = '1=1'), estimator_mode = 'dependency-aware'),
+      il_estimate_em(
+        block_on(.where = '1=1'),
+        estimator_mode = 'dependency-aware'
+      ),
     'Regularizing priors'
   )
   expect_error(
     model |>
       il_constrain_m(a, exact = 0.9) |>
-      il_estimate_em(block_on(.where = '1=1'), estimator_mode = 'dependency-aware'),
+      il_estimate_em(
+        block_on(.where = '1=1'),
+        estimator_mode = 'dependency-aware'
+      ),
     'Fixed field constraints'
   )
 
@@ -157,7 +176,11 @@ test_that('dependency-aware scoring rejects unsupported combinations', {
   withr::defer(test_discon(con))
   model_tf <- il_model(df, spec = spec_tf, con = con)
   expect_error(
-    il_estimate_em(model_tf, block_on(.where = '1=1'), estimator_mode = 'dependency-aware'),
+    il_estimate_em(
+      model_tf,
+      block_on(.where = '1=1'),
+      estimator_mode = 'dependency-aware'
+    ),
     'Term-frequency'
   )
 
@@ -250,7 +273,9 @@ test_that('dependency-aware predict supports DuckDB lazy scoring via pattern loo
   lazy_pairs <- collect_il_compared_lazy(lazy)
 
   collected <- collected[order(collected$unique_id_l, collected$unique_id_r), ]
-  lazy_pairs <- lazy_pairs[order(lazy_pairs$unique_id_l, lazy_pairs$unique_id_r), ]
+  lazy_pairs <- lazy_pairs[
+    order(lazy_pairs$unique_id_l, lazy_pairs$unique_id_r),
+  ]
 
   expect_s3_class(lazy, 'il_compared_lazy')
   expect_equal(lazy_pairs$unique_id_l, collected$unique_id_l)
@@ -283,7 +308,9 @@ test_that('dependency-aware il_find_matches scores through the SQL pattern looku
 
   expect_true(nrow(matches) > 0L)
   expect_true(all(is.finite(matches$match_weight)))
-  expect_true(all(matches$match_probability > 0 & matches$match_probability < 1))
+  expect_true(all(
+    matches$match_probability > 0 & matches$match_probability < 1
+  ))
 })
 
 test_that('dependency-aware SQL score lookups do not use shared table names', {

@@ -52,18 +52,24 @@ print.il_spec <- function(x, ...) {
     for (i in seq_along(rules)) {
       rule <- rules[[i]]
       has_cols <- length(rule$columns) > 0L
-      has_where <- !is.null(rule$where) && !is.na(rule$where) && nzchar(rule$where)
+      has_where <- !is.null(rule$where) &&
+        !is.na(rule$where) &&
+        nzchar(rule$where)
       has_tf <- !is.null(rule$transform)
       col_labels <- if (has_tf && is.list(rule$transform)) {
-        vapply(rule$columns, function(col) {
-          tf <- rule$transform[[col]]
-          if (!is.null(tf)) {
-            nm <- transform_to_name(tf)
-            if (!is.null(nm)) paste0(col, ' [', nm, ']') else col
-          } else {
-            col
-          }
-        }, character(1))
+        vapply(
+          rule$columns,
+          function(col) {
+            tf <- rule$transform[[col]]
+            if (!is.null(tf)) {
+              nm <- transform_to_name(tf)
+              if (!is.null(nm)) paste0(col, ' [', nm, ']') else col
+            } else {
+              col
+            }
+          },
+          character(1)
+        )
       } else {
         rule$columns
       }

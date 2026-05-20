@@ -111,9 +111,18 @@ test_that('boolean composition computes R-side gamma inside cl_levels()', {
   or_level <- cl_levels(cl_or(cl_exact(), cl_jaro_winkler(0.9)), cl_else())
   not_level <- cl_levels(cl_not(cl_exact()), cl_else())
 
-  expect_equal(compute_gamma(c('john', 'john'), c('john', 'jon'), and_level), c(1L, 0L))
-  expect_equal(compute_gamma(c('john', 'john'), c('john', 'jon'), or_level), c(1L, 1L))
-  expect_equal(compute_gamma(c('john', 'john'), c('john', 'jon'), not_level), c(0L, 1L))
+  expect_equal(
+    compute_gamma(c('john', 'john'), c('john', 'jon'), and_level),
+    c(1L, 0L)
+  )
+  expect_equal(
+    compute_gamma(c('john', 'john'), c('john', 'jon'), or_level),
+    c(1L, 1L)
+  )
+  expect_equal(
+    compute_gamma(c('john', 'john'), c('john', 'jon'), not_level),
+    c(0L, 1L)
+  )
 })
 
 test_that('boolean composition generates SQL conditions inside cl_levels()', {

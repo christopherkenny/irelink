@@ -62,7 +62,10 @@ test_that('il_score_missing_edges() finds unscored within-cluster pairs', {
   )
   if (nrow(missing) > 0) {
     missing_keys <- paste0(
-      pmin(as.character(missing$unique_id_l), as.character(missing$unique_id_r)),
+      pmin(
+        as.character(missing$unique_id_l),
+        as.character(missing$unique_id_r)
+      ),
       '|',
       pmax(as.character(missing$unique_id_l), as.character(missing$unique_id_r))
     )
@@ -121,7 +124,12 @@ test_that('il_score_missing_edges() validates inputs', {
     'cluster_id'
   )
   expect_error(
-    il_score_missing_edges(model, pairs, tibble::tibble(unique_id = '1', cluster_id = 'a'), threshold = NA_real_),
+    il_score_missing_edges(
+      model,
+      pairs,
+      tibble::tibble(unique_id = '1', cluster_id = 'a'),
+      threshold = NA_real_
+    ),
     'threshold'
   )
 })
@@ -154,5 +162,7 @@ test_that('il_score_missing_edges() includes gamma and TF adjustment columns', {
 
   missing <- il_score_missing_edges(model, pairs, clusters, threshold = 0)
 
-  expect_true(all(c('gamma_first_name', 'gamma_city', 'tf_adj_city') %in% names(missing)))
+  expect_true(all(
+    c('gamma_first_name', 'gamma_city', 'tf_adj_city') %in% names(missing)
+  ))
 })

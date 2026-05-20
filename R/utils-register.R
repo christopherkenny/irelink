@@ -48,12 +48,16 @@ il_scratch_table_name <- function(purpose, suffix = NULL) {
 #' @param owner One of "model", "call", or "lazy".
 #' @return Updated model.
 #' @noRd
-il_track_table <- function(model, tbl_name,
-                           owner = c('model', 'call', 'lazy')) {
+il_track_table <- function(
+  model,
+  tbl_name,
+  owner = c('model', 'call', 'lazy')
+) {
   owner <- match.arg(owner)
   if (is.null(model$data$tables)) {
     model$data$tables <- data.frame(
-      table = character(), owner = character(),
+      table = character(),
+      owner = character(),
       stringsAsFactors = FALSE
     )
   }
@@ -84,11 +88,18 @@ il_track_table <- function(model, tbl_name,
 #' @return A list with `tbl_name`, `con`, `n_records`, `columns`, and
 #'   `needs_cleanup` (logical).
 #' @noRd
-register_data <- function(data, con = NULL, tbl_name = '__il_data',
-                          add_unique_id = TRUE) {
+register_data <- function(
+  data,
+  con = NULL,
+  tbl_name = '__il_data',
+  add_unique_id = TRUE
+) {
   # ---- tbl_lazy (dbplyr lazy table reference) ----
   if (inherits(data, 'tbl_lazy')) {
-    rlang::check_installed('dbplyr', reason = 'to use database table references.')
+    rlang::check_installed(
+      'dbplyr',
+      reason = 'to use database table references.'
+    )
     remote_con <- dbplyr::remote_con(data)
     con <- con %||% remote_con
     cols <- colnames(data)
@@ -264,7 +275,10 @@ count_tbl_lazy <- function(tbl, con) {
 #' @noRd
 drop_registered <- function(con, tbl_name) {
   qtbl_name <- sql_quote_identifier(tbl_name)
-  try(DBI::dbExecute(con, glue::glue('DROP VIEW IF EXISTS {qtbl_name}')), silent = TRUE)
+  try(
+    DBI::dbExecute(con, glue::glue('DROP VIEW IF EXISTS {qtbl_name}')),
+    silent = TRUE
+  )
   try(DBI::dbRemoveTable(con, tbl_name, fail_if_missing = FALSE), silent = TRUE)
 }
 
@@ -288,12 +302,15 @@ validate_data_frame_unique_id <- function(data) {
 #' @noRd
 validate_registered_unique_id <- function(con, tbl_name, columns) {
   qtbl_name <- sql_quote_identifier(tbl_name)
-  res <- DBI::dbGetQuery(con, glue::glue(
-    'SELECT COUNT(*) AS n, ',
-    'SUM(CASE WHEN unique_id IS NULL THEN 1 ELSE 0 END) AS n_missing, ',
-    'COUNT(DISTINCT unique_id) AS n_distinct ',
-    'FROM {qtbl_name}'
-  ))
+  res <- DBI::dbGetQuery(
+    con,
+    glue::glue(
+      'SELECT COUNT(*) AS n, ',
+      'SUM(CASE WHEN unique_id IS NULL THEN 1 ELSE 0 END) AS n_missing, ',
+      'COUNT(DISTINCT unique_id) AS n_distinct ',
+      'FROM {qtbl_name}'
+    )
+  )
   if (as.numeric(res$n_missing[1]) > 0) {
     cli::cli_abort('{.field unique_id} must not contain missing values.')
   }

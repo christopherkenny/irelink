@@ -6,10 +6,17 @@ test_that('il_suggest_blocking returns ranked rules', {
   result <- il_suggest_blocking(df, con = con)
   expect_true(is.data.frame(result))
   expect_true(nrow(result) > 0)
-  expect_true(all(c(
-    'rule', 'n_distinct', 'coverage', 'n_pairs',
-    'pct_of_cartesian', 'score'
-  ) %in% names(result)))
+  expect_true(all(
+    c(
+      'rule',
+      'n_distinct',
+      'coverage',
+      'n_pairs',
+      'pct_of_cartesian',
+      'score'
+    ) %in%
+      names(result)
+  ))
   # Should be sorted by score descending
   expect_true(all(diff(result$score) <= 0))
 })
@@ -31,7 +38,8 @@ test_that('il_suggest_blocking with specific columns', {
   on.exit(test_discon(con))
 
   df <- fake_1000
-  result <- il_suggest_blocking(df,
+  result <- il_suggest_blocking(
+    df,
     columns = c('first_name', 'surname'),
     con = con
   )

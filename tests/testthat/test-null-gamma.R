@@ -15,10 +15,7 @@ test_that('cl_levels assigns gamma -1 to null matches', {
 })
 
 test_that('null gamma contributes zero match weight', {
-  gamma_mat <- matrix(c(-1L, 0L, 1L),
-    ncol = 1,
-    dimnames = list(NULL, 'name')
-  )
+  gamma_mat <- matrix(c(-1L, 0L, 1L), ncol = 1, dimnames = list(NULL, 'name'))
   mu <- list(
     m_levels = list(name = c(0.2, 0.8)),
     u_levels = list(name = c(0.8, 0.2))

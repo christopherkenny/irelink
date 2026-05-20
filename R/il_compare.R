@@ -45,10 +45,15 @@
 #'   il_compare(first_name, cl_jaro_winkler(0.9, term_frequency = TRUE),
 #'     tf_adjustment_weight = 0.5, tf_minimum_u_value = 0.001
 #'   )
-il_compare <- function(spec, col, method, ...,
-                       transform = NULL,
-                       tf_adjustment_weight = 1.0,
-                       tf_minimum_u_value = 0.0) {
+il_compare <- function(
+  spec,
+  col,
+  method,
+  ...,
+  transform = NULL,
+  tf_adjustment_weight = 1.0,
+  tf_minimum_u_value = 0.0
+) {
   if (!inherits(spec, 'il_spec')) {
     cli::cli_abort(
       '{.arg spec} must be an {.cls il_spec} object, not {.obj_type_friendly {spec}}.',
@@ -71,7 +76,9 @@ il_compare <- function(spec, col, method, ...,
       )
     }
     entry <- list(
-      columns = columns, method = method, transform = transform,
+      columns = columns,
+      method = method,
+      transform = transform,
       tf_adjustment_weight = tf_adjustment_weight,
       tf_minimum_u_value = tf_minimum_u_value
     )
@@ -80,7 +87,9 @@ il_compare <- function(spec, col, method, ...,
   }
   for (column in columns) {
     entry <- list(
-      columns = column, method = method, transform = transform,
+      columns = column,
+      method = method,
+      transform = transform,
       tf_adjustment_weight = tf_adjustment_weight,
       tf_minimum_u_value = tf_minimum_u_value
     )
@@ -123,9 +132,15 @@ extract_col_names <- function(quo) {
 # Resolve data-dependent tidyselect comparisons once model columns are known.
 # Bare-name comparisons are already concrete and pass through unchanged.
 resolve_spec_selectors <- function(spec, columns, column_classes = NULL) {
-  if (!any(vapply(spec$comparisons, function(comp) {
-    isTRUE(comp$deferred_select) && !is.null(comp$selector)
-  }, logical(1)))) {
+  if (
+    !any(vapply(
+      spec$comparisons,
+      function(comp) {
+        isTRUE(comp$deferred_select) && !is.null(comp$selector)
+      },
+      logical(1)
+    ))
+  ) {
     return(spec)
   }
 
@@ -168,14 +183,18 @@ resolve_spec_selectors <- function(spec, columns, column_classes = NULL) {
 
 make_tidyselect_proxy <- function(columns, column_classes = NULL) {
   if (is.null(column_classes)) {
-    column_classes <- stats::setNames(rep(NA_character_, length(columns)), columns)
+    column_classes <- stats::setNames(
+      rep(NA_character_, length(columns)),
+      columns
+    )
   }
   proxy <- lapply(columns, function(col) {
     cls <- column_classes[[col]] %||% NA_character_
     if (is.na(cls)) {
       return(logical())
     }
-    switch(cls,
+    switch(
+      cls,
       character = character(),
       factor = factor(),
       integer = integer(),

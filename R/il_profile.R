@@ -64,8 +64,10 @@ il_profile <- function(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL) {
   col_exprs <- rlang::enquos(...)
 
   tbl_name <- il_scratch_table_name('profile')
-  reg <- register_data(.data,
-    con = con, tbl_name = tbl_name,
+  reg <- register_data(
+    .data,
+    con = con,
+    tbl_name = tbl_name,
     add_unique_id = FALSE
   )
   con <- reg$con
@@ -85,7 +87,10 @@ il_profile <- function(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL) {
         list(label = expr, sql_expr = expr)
       } else {
         nm <- as.character(expr)
-        list(label = nm, sql_expr = as.character(DBI::dbQuoteIdentifier(con, nm)))
+        list(
+          label = nm,
+          sql_expr = as.character(DBI::dbQuoteIdentifier(con, nm))
+        )
       }
     })
   }

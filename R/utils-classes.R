@@ -53,9 +53,14 @@ validate_il_spec <- function(x) {
 #'
 #' @return An `il_model` object.
 #' @noRd
-new_il_model <- function(spec = new_il_spec(), data = list(), con = NULL,
-                         link_type = 'dedupe', params = list(),
-                         trained = FALSE) {
+new_il_model <- function(
+  spec = new_il_spec(),
+  data = list(),
+  con = NULL,
+  link_type = 'dedupe',
+  params = list(),
+  trained = FALSE
+) {
   structure(
     list(
       spec = spec,
@@ -131,11 +136,16 @@ validate_il_compared <- function(x) {
 #'
 #' @return An `il_comparison_level` S3 object.
 #' @noRd
-new_comparison_level <- function(method, ..., is_null_level = FALSE,
-                                 is_else_level = FALSE) {
+new_comparison_level <- function(
+  method,
+  ...,
+  is_null_level = FALSE,
+  is_else_level = FALSE
+) {
   structure(
     c(
-      list(method = method), list(...),
+      list(method = method),
+      list(...),
       list(is_null_level = is_null_level, is_else_level = is_else_level)
     ),
     class = 'il_comparison_level'
@@ -163,9 +173,13 @@ n_gamma_levels <- function(comp_method) {
   }
 
   if (method == 'levels') {
-    n <- sum(vapply(comp_method$levels, function(l) {
-      !isTRUE(l$is_null_level) && !isTRUE(l$is_else_level)
-    }, logical(1)))
+    n <- sum(vapply(
+      comp_method$levels,
+      function(l) {
+        !isTRUE(l$is_null_level) && !isTRUE(l$is_else_level)
+      },
+      logical(1)
+    ))
     return(max(n + 1L, 2L))
   }
 
@@ -204,12 +218,18 @@ add_class <- function(x, cls) {
 #'
 #' @return An `il_compared_lazy` S3 object.
 #' @noRd
-new_il_compared_lazy <- function(con, predicted_tbl, model,
-                                 threshold = 0.85, n_pairs = NULL,
-                                 sql_profile = NULL) {
+new_il_compared_lazy <- function(
+  con,
+  predicted_tbl,
+  model,
+  threshold = 0.85,
+  n_pairs = NULL,
+  sql_profile = NULL
+) {
   if (is.null(n_pairs)) {
     n_pairs <- DBI::dbGetQuery(
-      con, glue::glue('SELECT COUNT(*) AS n FROM {predicted_tbl}')
+      con,
+      glue::glue('SELECT COUNT(*) AS n FROM {predicted_tbl}')
     )$n
   }
   structure(
@@ -230,7 +250,9 @@ print.il_compared_lazy <- function(x, ...) {
   cat(
     sprintf(
       '<il_compared_lazy> %s pairs in table %s (threshold = %s)\n',
-      format(x$n_pairs, big.mark = ','), x$predicted_tbl, x$threshold
+      format(x$n_pairs, big.mark = ','),
+      x$predicted_tbl,
+      x$threshold
     )
   )
   invisible(x)
@@ -240,7 +262,8 @@ print.il_compared_lazy <- function(x, ...) {
 format.il_compared_lazy <- function(x, ...) {
   sprintf(
     '<il_compared_lazy> [%s pairs, tbl=%s]',
-    format(x$n_pairs, big.mark = ','), x$predicted_tbl
+    format(x$n_pairs, big.mark = ','),
+    x$predicted_tbl
   )
 }
 
@@ -251,7 +274,8 @@ format.il_compared_lazy <- function(x, ...) {
 #' @noRd
 collect_il_compared_lazy <- function(x, ...) {
   result <- DBI::dbGetQuery(
-    x$con, glue::glue('SELECT * FROM {x$predicted_tbl}')
+    x$con,
+    glue::glue('SELECT * FROM {x$predicted_tbl}')
   )
   result <- tibble::as_tibble(result)
   new_il_compared(result, model = x$model)

@@ -65,7 +65,9 @@ il_training_history <- function(model) {
   validate_il_model(model)
   history <- model$params$history
   if (is.null(history) || length(history) == 0L) {
-    cli::cli_abort('No training history available. Run {.fn il_estimate_em} first.')
+    cli::cli_abort(
+      'No training history available. Run {.fn il_estimate_em} first.'
+    )
   }
   result <- bind_training_history_rows(history)
   # Normalize earlier format if needed

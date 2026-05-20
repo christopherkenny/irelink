@@ -221,14 +221,29 @@ test_that('DuckDB il_soundex macro matches R-side for known pairs', {
 
   register_phonetic_macros(con)
 
-  pairs <- data.frame(name = c(
-    'Smith', 'Smyth', 'Robert', 'Rupert',
-    'Johnson', 'Jonson', 'Lee', 'Stephen', 'Steven',
-    'Ashcraft', 'Ashcroft', 'Tymczak', 'Pfister'
-  ))
+  pairs <- data.frame(
+    name = c(
+      'Smith',
+      'Smyth',
+      'Robert',
+      'Rupert',
+      'Johnson',
+      'Jonson',
+      'Lee',
+      'Stephen',
+      'Steven',
+      'Ashcraft',
+      'Ashcroft',
+      'Tymczak',
+      'Pfister'
+    )
+  )
   DBI::dbWriteTable(con, '__test_names', pairs, overwrite = TRUE)
 
-  result <- DBI::dbGetQuery(con, 'SELECT name, il_soundex(name) AS code FROM __test_names')
+  result <- DBI::dbGetQuery(
+    con,
+    'SELECT name, il_soundex(name) AS code FROM __test_names'
+  )
 
   r_codes <- il_soundex(pairs$name)
   expect_equal(result$code, r_codes)
@@ -336,8 +351,14 @@ test_that('JSON save writes plain phonetic blocking SQL and loaded model predict
   raw <- jsonlite::read_json(path, simplifyVector = FALSE)
   loaded <- il_load(path)
 
-  expect_no_match(raw$blocking_rules_to_generate_predictions[[1]]$blocking_rule, '__irelink__')
-  expect_match(raw$blocking_rules_to_generate_predictions[[1]]$blocking_rule, 'soundex|il_soundex')
+  expect_no_match(
+    raw$blocking_rules_to_generate_predictions[[1]]$blocking_rule,
+    '__irelink__'
+  )
+  expect_match(
+    raw$blocking_rules_to_generate_predictions[[1]]$blocking_rule,
+    'soundex|il_soundex'
+  )
   expect_null(loaded$spec$blocking_rules[[1]]$transform)
   expect_null(loaded$spec$blocking_rules[[2]]$transform)
 

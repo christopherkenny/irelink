@@ -64,11 +64,17 @@
 #'
 #' exact_matches <- il_deterministic_link(df, spec = spec, con = con)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_deterministic_link <- function(.data, ..., spec, con = NULL,
-                                  link_type = c(
-                                    'dedupe', 'link',
-                                    'link_and_dedupe'
-                                  )) {
+il_deterministic_link <- function(
+  .data,
+  ...,
+  spec,
+  con = NULL,
+  link_type = c(
+    'dedupe',
+    'link',
+    'link_and_dedupe'
+  )
+) {
   link_type <- match.arg(link_type)
   validate_il_spec(spec)
   extra_inputs <- list(...)
@@ -88,22 +94,37 @@ il_deterministic_link <- function(.data, ..., spec, con = NULL,
 
   if (length(blocking_rules) > 0L) {
     dialect <- detect_dialect(con)
-    block_sqls <- vapply(blocking_rules, function(br) {
-      paste0('(', build_blocking_condition(br$columns,
-        transform = br$transform,
-        dialect = dialect
-      ), ')')
-    }, character(1))
+    block_sqls <- vapply(
+      blocking_rules,
+      function(br) {
+        paste0(
+          '(',
+          build_blocking_condition(
+            br$columns,
+            transform = br$transform,
+            dialect = dialect
+          ),
+          ')'
+        )
+      },
+      character(1)
+    )
     block_where <- paste(block_sqls, collapse = ' OR ')
   } else {
     block_where <- '1 = 1'
   }
 
   # Push exact-match filter for all comparison columns into SQL
-  exact_conds <- vapply(comparisons, function(comp) {
-    col <- comp$columns
-    glue::glue('l.{col} IS NOT NULL AND r.{col} IS NOT NULL AND l.{col} = r.{col}')
-  }, character(1))
+  exact_conds <- vapply(
+    comparisons,
+    function(comp) {
+      col <- comp$columns
+      glue::glue(
+        'l.{col} IS NOT NULL AND r.{col} IS NOT NULL AND l.{col} = r.{col}'
+      )
+    },
+    character(1)
+  )
   exact_where <- paste(exact_conds, collapse = ' AND ')
 
   sql <- glue::glue(

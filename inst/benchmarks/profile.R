@@ -2,17 +2,43 @@
 devtools::load_all()
 set.seed(42)
 
-first_names <- c("John", "Jane", "Alice", "Bob", "Carol",
-                 "David", "Eve", "Frank", "Grace", "Hank")
-surnames <- c("Smith", "Johnson", "Williams", "Brown", "Jones",
-              "Garcia", "Miller", "Davis", "Wilson", "Moore")
+first_names <- c(
+  "John",
+  "Jane",
+  "Alice",
+  "Bob",
+  "Carol",
+  "David",
+  "Eve",
+  "Frank",
+  "Grace",
+  "Hank"
+)
+surnames <- c(
+  "Smith",
+  "Johnson",
+  "Williams",
+  "Brown",
+  "Jones",
+  "Garcia",
+  "Miller",
+  "Davis",
+  "Wilson",
+  "Moore"
+)
 n <- 1000
 df <- data.frame(
   unique_id = seq_len(n),
   first_name = sample(first_names, n, replace = TRUE),
   surname = sample(surnames, n, replace = TRUE),
-  dob = as.character(as.Date("1960-01-01") + sample(0:20000, n, replace = TRUE)),
-  city = sample(c("Portland","Seattle","Denver","Austin","Boston"), n, replace = TRUE),
+  dob = as.character(
+    as.Date("1960-01-01") + sample(0:20000, n, replace = TRUE)
+  ),
+  city = sample(
+    c("Portland", "Seattle", "Denver", "Austin", "Boston"),
+    n,
+    replace = TRUE
+  ),
   stringsAsFactors = FALSE
 )
 spec <- il_spec() |>
@@ -31,7 +57,9 @@ model <- il_model(df, spec = spec, con = con)
 
 # U estimation breakdown
 t1 <- system.time(pairs_u <- get_all_pairs(model, max_pairs = 1e6))["elapsed"]
-t2 <- system.time(gm <- compute_gamma_matrix(pairs_u, spec$comparisons))["elapsed"]
+t2 <- system.time(gm <- compute_gamma_matrix(pairs_u, spec$comparisons))[
+  "elapsed"
+]
 
 # compute_gamma per method (on u-est pairs)
 gamma_times <- lapply(seq_along(spec$comparisons), \(j) {
@@ -39,17 +67,29 @@ gamma_times <- lapply(seq_along(spec$comparisons), \(j) {
   val_l <- pairs_u[[paste0("l_", comp$columns)]]
   val_r <- pairs_u[[paste0("r_", comp$columns)]]
   t <- system.time(compute_gamma(val_l, val_r, comp$method))["elapsed"]
-  tibble::tibble(column = comp$columns, method = comp$method$method, elapsed = t, n_pairs = length(val_l))
-}) |> dplyr::bind_rows()
+  tibble::tibble(
+    column = comp$columns,
+    method = comp$method$method,
+    elapsed = t,
+    n_pairs = length(val_l)
+  )
+}) |>
+  dplyr::bind_rows()
 
 # EM breakdown
 model <- il_estimate_u(model, profile_sql = TRUE)
-t4 <- system.time(pairs_em <- get_blocked_pairs(model, block_on(surname)))["elapsed"]
-t5 <- system.time(gm_em <- compute_gamma_matrix(pairs_em, spec$comparisons))["elapsed"]
+t4 <- system.time(pairs_em <- get_blocked_pairs(model, block_on(surname)))[
+  "elapsed"
+]
+t5 <- system.time(gm_em <- compute_gamma_matrix(pairs_em, spec$comparisons))[
+  "elapsed"
+]
 
 # Profile scoring
 comp_names <- vapply(spec$comparisons, \(c) c$columns, character(1))
-t6 <- system.time(mu <- extract_mu_vectors(model$params$comparisons, comp_names))["elapsed"]
+t6 <- system.time(
+  mu <- extract_mu_vectors(model$params$comparisons, comp_names)
+)["elapsed"]
 t7 <- system.time(mw <- score_gamma_matrix(gm_em, mu))["elapsed"]
 t8 <- system.time(weight_to_probability(mw, 0.05))["elapsed"]
 
@@ -75,7 +115,8 @@ t9 <- system.time({
     log_nonmatch <- log_nonmatch + ifelse(g == 1L, lu_1, lu_0)
   }
   max_log <- pmax(log_match, log_nonmatch)
-  weights <- exp(log_match - max_log) / (exp(log_match - max_log) + exp(log_nonmatch - max_log))
+  weights <- exp(log_match - max_log) /
+    (exp(log_match - max_log) + exp(log_nonmatch - max_log))
 })["elapsed"]
 
 t10 <- system.time({
@@ -98,10 +139,16 @@ t11 <- system.time({
 
 tibble::tibble(
   stage = c(
-    "get_all_pairs", "compute_gamma_matrix (u)",
-    "get_blocked_pairs", "compute_gamma_matrix (em)",
-    "extract_mu_vectors", "score_gamma_matrix", "weight_to_probability",
-    "E-step", "M-step", "pair dedup"
+    "get_all_pairs",
+    "compute_gamma_matrix (u)",
+    "get_blocked_pairs",
+    "compute_gamma_matrix (em)",
+    "extract_mu_vectors",
+    "score_gamma_matrix",
+    "weight_to_probability",
+    "E-step",
+    "M-step",
+    "pair dedup"
   ),
   elapsed = c(t1, t2, t4, t5, t6, t7, t8, t9, t10, t11)
 )

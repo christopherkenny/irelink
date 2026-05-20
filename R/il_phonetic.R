@@ -70,10 +70,32 @@ soundex_one <- function(s) {
 
   # Soundex code map
   codes <- c(
-    A = '0', B = '1', C = '2', D = '3', E = '0', F = '1', G = '2',
-    H = '0', I = '0', J = '2', K = '2', L = '4', M = '5', N = '5',
-    O = '0', P = '1', Q = '2', R = '6', S = '2', T = '3', U = '0',
-    V = '1', W = '0', X = '2', Y = '0', Z = '2'
+    A = '0',
+    B = '1',
+    C = '2',
+    D = '3',
+    E = '0',
+    F = '1',
+    G = '2',
+    H = '0',
+    I = '0',
+    J = '2',
+    K = '2',
+    L = '4',
+    M = '5',
+    N = '5',
+    O = '0',
+    P = '1',
+    Q = '2',
+    R = '6',
+    S = '2',
+    T = '3',
+    U = '0',
+    V = '1',
+    W = '0',
+    X = '2',
+    Y = '0',
+    Z = '2'
   )
   vowels <- c('A', 'E', 'I', 'O', 'U', 'Y')
   separators <- c('H', 'W')
@@ -122,24 +144,41 @@ register_phonetic_macros <- function(con) {
   letters_only <- "regexp_replace(upper(CAST(s AS VARCHAR)), '[^A-Z]', '', 'g')"
   first_letter <- paste0('substr(', letters_only, ', 1, 1)')
   first_code <- paste0(
-    'translate(', first_letter, ', ',
+    'translate(',
+    first_letter,
+    ', ',
     "'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '01230120022455012623010202')"
   )
   coded_tail <- paste0(
     'translate(',
-    "replace(replace(substr(", letters_only, ", 2), 'H', ''), 'W', '')",
+    "replace(replace(substr(",
+    letters_only,
+    ", 2), 'H', ''), 'W', '')",
     ", 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '01230120022455012623010202')"
   )
   dedup <- dedup_adjacent(coded_tail)
   trimmed <- paste0(
-    'CASE WHEN left(', dedup, ', 1) = ', first_code,
-    ' THEN substr(', dedup, ', 2) ELSE ', dedup, ' END'
+    'CASE WHEN left(',
+    dedup,
+    ', 1) = ',
+    first_code,
+    ' THEN substr(',
+    dedup,
+    ', 2) ELSE ',
+    dedup,
+    ' END'
   )
 
   macro_sql <- paste0(
     'CREATE OR REPLACE MACRO il_soundex(s) AS (',
-    'CASE WHEN s IS NULL OR length(', letters_only, ') = 0 THEN NULL ELSE ',
-    'left(', first_letter, " || replace((", trimmed, "), '0', '') || '000', 4) ",
+    'CASE WHEN s IS NULL OR length(',
+    letters_only,
+    ') = 0 THEN NULL ELSE ',
+    'left(',
+    first_letter,
+    " || replace((",
+    trimmed,
+    "), '0', '') || '000', 4) ",
     'END)'
   )
   DBI::dbExecute(con, macro_sql)

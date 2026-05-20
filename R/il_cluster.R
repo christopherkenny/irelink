@@ -78,10 +78,13 @@
 #' pairs <- predict(model, threshold = 0.5)
 #' clusters <- il_cluster(pairs)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_cluster <- function(pairs, threshold = NULL,
-                       method = c('connected', 'best_link'),
-                       ties_method = c('lowest_id', 'drop'),
-                       source_dataset = NULL) {
+il_cluster <- function(
+  pairs,
+  threshold = NULL,
+  method = c('connected', 'best_link'),
+  ties_method = c('lowest_id', 'drop'),
+  source_dataset = NULL
+) {
   method <- match.arg(method)
   ties_method <- match.arg(ties_method)
   if (!is.null(threshold)) {
@@ -107,11 +110,19 @@ il_cluster <- function(pairs, threshold = NULL,
   # Try SQL path first (DuckDB / PostgreSQL)
   model <- attr(pairs, 'model')
   con <- if (!is.null(model)) model$con else NULL
-  use_sql <- !is.null(con) && DBI::dbIsValid(con) &&
+  use_sql <- !is.null(con) &&
+    DBI::dbIsValid(con) &&
     detect_dialect(con) %in% c('duckdb', 'postgres')
 
   if (use_sql) {
-    return(cluster_sql(con, pairs, threshold, method, ties_method, source_dataset))
+    return(cluster_sql(
+      con,
+      pairs,
+      threshold,
+      method,
+      ties_method,
+      source_dataset
+    ))
   }
 
   # Fallback: igraph (works for SQLite or when no connection available)
@@ -120,10 +131,18 @@ il_cluster <- function(pairs, threshold = NULL,
 
 #' SQL-path clustering (DuckDB/PostgreSQL)
 #' @noRd
-cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id',
-                        source_dataset = NULL) {
+cluster_sql <- function(
+  con,
+  pairs,
+  threshold,
+  method,
+  ties_method = 'lowest_id',
+  source_dataset = NULL
+) {
   cc_prefix <- il_scratch_table_name('cc')
-  edges_tbl <- cc_upload_edges(con, pairs,
+  edges_tbl <- cc_upload_edges(
+    con,
+    pairs,
     threshold = threshold,
     prefix = cc_prefix
   )
@@ -134,7 +153,10 @@ cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id'
       # Iterative one-to-one: merge clusters step-by-step, re-evaluating
       # dataset constraints after each merge (splink's approach).
       result <- solve_one_to_one_sql(
-        con, edges_tbl, source_dataset, ties_method,
+        con,
+        edges_tbl,
+        source_dataset,
+        ties_method,
         prefix = cc_prefix
       )
       # Add isolated nodes
@@ -156,13 +178,19 @@ cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id'
         cluster_id = result$cluster_id
       ))
     }
-    filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method,
+    filtered_tbl <- sql_best_link_filter(
+      con,
+      edges_tbl,
+      ties_method,
       prefix = cc_prefix
     )
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
-    DBI::dbExecute(con, glue::glue(
-      'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
-    ))
+    DBI::dbExecute(
+      con,
+      glue::glue(
+        'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
+      )
+    )
   }
 
   result <- solve_cc_sql(con, edges_tbl, prefix = cc_prefix)
@@ -194,8 +222,13 @@ cluster_sql <- function(con, pairs, threshold, method, ties_method = 'lowest_id'
 
 #' igraph-path clustering (fallback for SQLite or no DB connection)
 #' @noRd
-cluster_igraph <- function(pairs, threshold, method, ties_method = 'lowest_id',
-                           source_dataset = NULL) {
+cluster_igraph <- function(
+  pairs,
+  threshold,
+  method,
+  ties_method = 'lowest_id',
+  source_dataset = NULL
+) {
   all_ids <- unique(c(
     as.character(pairs$unique_id_l),
     as.character(pairs$unique_id_r)
@@ -213,7 +246,10 @@ cluster_igraph <- function(pairs, threshold, method, ties_method = 'lowest_id',
     pairs <- best_link_filter(pairs, ties_method)
   }
 
-  rlang::check_installed('igraph', reason = 'for clustering without a DuckDB or PostgreSQL connection.')
+  rlang::check_installed(
+    'igraph',
+    reason = 'for clustering without a DuckDB or PostgreSQL connection.'
+  )
 
   edges <- data.frame(
     from = as.character(pairs$unique_id_l),
@@ -248,7 +284,9 @@ best_link_filter <- function(pairs, ties_method = 'lowest_id') {
   best_prob <- stats::setNames(rep(-Inf, length(all_nodes)), all_nodes)
 
   for (i in seq_len(nrow(pairs))) {
-    if (prob[i] > best_prob[id_l[i]]) best_prob[id_l[i]] <- prob[i]
+    if (prob[i] > best_prob[id_l[i]]) {
+      best_prob[id_l[i]] <- prob[i]
+    }
     if (prob[i] > best_prob[id_r[i]]) best_prob[id_r[i]] <- prob[i]
   }
 
@@ -274,12 +312,18 @@ best_link_filter <- function(pairs, ties_method = 'lowest_id') {
     all_nodes2 <- unique(c(id_l, id_r))
     best_prob2 <- stats::setNames(rep(-Inf, length(all_nodes2)), all_nodes2)
     for (i in seq_len(nrow(pairs))) {
-      if (prob[i] > best_prob2[id_l[i]]) best_prob2[id_l[i]] <- prob[i]
+      if (prob[i] > best_prob2[id_l[i]]) {
+        best_prob2[id_l[i]] <- prob[i]
+      }
       if (prob[i] > best_prob2[id_r[i]]) best_prob2[id_r[i]] <- prob[i]
     }
-    keep <- vapply(seq_len(nrow(pairs)), function(i) {
-      prob[i] == best_prob2[id_l[i]] && prob[i] == best_prob2[id_r[i]]
-    }, logical(1))
+    keep <- vapply(
+      seq_len(nrow(pairs)),
+      function(i) {
+        prob[i] == best_prob2[id_l[i]] && prob[i] == best_prob2[id_r[i]]
+      },
+      logical(1)
+    )
     return(pairs[keep, , drop = FALSE])
   }
 
@@ -296,25 +340,36 @@ best_link_filter <- function(pairs, ties_method = 'lowest_id') {
       } else {
         prev_prob <- prob[prev]
         prev_partner <- if (nd == id_l[prev]) id_r[prev] else id_l[prev]
-        if (prob[i] > prev_prob ||
-          (prob[i] == prev_prob && partner < prev_partner)) {
+        if (
+          prob[i] > prev_prob ||
+            (prob[i] == prev_prob && partner < prev_partner)
+        ) {
           best_idx[nd] <- i
         }
       }
     }
   }
 
-  keep <- vapply(seq_len(nrow(pairs)), function(i) {
-    isTRUE(best_idx[id_l[i]] == i) && isTRUE(best_idx[id_r[i]] == i)
-  }, logical(1))
+  keep <- vapply(
+    seq_len(nrow(pairs)),
+    function(i) {
+      isTRUE(best_idx[id_l[i]] == i) && isTRUE(best_idx[id_r[i]] == i)
+    },
+    logical(1)
+  )
 
   pairs[keep, , drop = FALSE]
 }
 
 #' Cluster directly from a lazy prediction table (no round-trip)
 #' @noRd
-cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
-                         source_dataset = NULL) {
+cluster_lazy <- function(
+  pairs,
+  threshold,
+  method,
+  ties_method = 'lowest_id',
+  source_dataset = NULL
+) {
   con <- pairs$con
   predicted_tbl <- pairs$predicted_tbl
   cc_prefix <- il_scratch_table_name('cc')
@@ -328,27 +383,36 @@ cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
     threshold_where <- glue::glue(' WHERE match_probability >= {threshold}')
   }
 
-  DBI::dbExecute(con, glue::glue(
-    'CREATE TABLE {edges_tbl} AS ',
-    'SELECT unique_id_l, unique_id_r, match_probability ',
-    'FROM {predicted_tbl}{threshold_where}'
-  ))
+  DBI::dbExecute(
+    con,
+    glue::glue(
+      'CREATE TABLE {edges_tbl} AS ',
+      'SELECT unique_id_l, unique_id_r, match_probability ',
+      'FROM {predicted_tbl}{threshold_where}'
+    )
+  )
   on.exit(drop_registered(con, edges_tbl), add = TRUE)
 
   if (method == 'best_link') {
     if (!is.null(source_dataset)) {
       # Iterative one-to-one clustering
       result <- solve_one_to_one_sql(
-        con, edges_tbl, source_dataset, ties_method,
+        con,
+        edges_tbl,
+        source_dataset,
+        ties_method,
         prefix = cc_prefix
       )
-      all_ids <- DBI::dbGetQuery(con, glue::glue(
-        'SELECT DISTINCT id FROM (',
-        'SELECT unique_id_l AS id FROM {predicted_tbl} ',
-        'UNION ',
-        'SELECT unique_id_r AS id FROM {predicted_tbl}',
-        ') sub'
-      ))$id
+      all_ids <- DBI::dbGetQuery(
+        con,
+        glue::glue(
+          'SELECT DISTINCT id FROM (',
+          'SELECT unique_id_l AS id FROM {predicted_tbl} ',
+          'UNION ',
+          'SELECT unique_id_r AS id FROM {predicted_tbl}',
+          ') sub'
+        )
+      )$id
 
       isolated <- setdiff(all_ids, result$node_id)
       if (length(isolated) > 0L) {
@@ -364,25 +428,34 @@ cluster_lazy <- function(pairs, threshold, method, ties_method = 'lowest_id',
         cluster_id = result$cluster_id
       ))
     }
-    filtered_tbl <- sql_best_link_filter(con, edges_tbl, ties_method,
+    filtered_tbl <- sql_best_link_filter(
+      con,
+      edges_tbl,
+      ties_method,
       prefix = cc_prefix
     )
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
-    DBI::dbExecute(con, glue::glue(
-      'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
-    ))
+    DBI::dbExecute(
+      con,
+      glue::glue(
+        'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
+      )
+    )
   }
 
   result <- solve_cc_sql(con, edges_tbl, prefix = cc_prefix)
 
   # Collect all unique IDs from the predicted table for isolated-node detection
-  all_ids <- DBI::dbGetQuery(con, glue::glue(
-    'SELECT DISTINCT id FROM (',
-    'SELECT unique_id_l AS id FROM {predicted_tbl} ',
-    'UNION ',
-    'SELECT unique_id_r AS id FROM {predicted_tbl}',
-    ') sub'
-  ))$id
+  all_ids <- DBI::dbGetQuery(
+    con,
+    glue::glue(
+      'SELECT DISTINCT id FROM (',
+      'SELECT unique_id_l AS id FROM {predicted_tbl} ',
+      'UNION ',
+      'SELECT unique_id_r AS id FROM {predicted_tbl}',
+      ') sub'
+    )
+  )$id
 
   in_result <- result$node_id
   isolated <- setdiff(all_ids, in_result)
@@ -416,13 +489,19 @@ normalise_source_dataset <- function(sd) {
       )
     }
     if (anyNA(sd$unique_id) || any(sd$unique_id == '')) {
-      cli::cli_abort('{.field unique_id} in {.arg source_dataset} must not contain missing values.')
+      cli::cli_abort(
+        '{.field unique_id} in {.arg source_dataset} must not contain missing values.'
+      )
     }
     if (anyNA(sd$source_dataset)) {
-      cli::cli_abort('{.field source_dataset} in {.arg source_dataset} must not contain missing values.')
+      cli::cli_abort(
+        '{.field source_dataset} in {.arg source_dataset} must not contain missing values.'
+      )
     }
     if (anyDuplicated(sd$unique_id) > 0L) {
-      cli::cli_abort('{.arg source_dataset} must map each {.field unique_id} at most once.')
+      cli::cli_abort(
+        '{.arg source_dataset} must map each {.field unique_id} at most once.'
+      )
     }
     out <- as.character(sd$source_dataset)
     names(out) <- as.character(sd$unique_id)
@@ -430,13 +509,19 @@ normalise_source_dataset <- function(sd) {
   }
   if (is.character(sd) && !is.null(names(sd))) {
     if (anyNA(names(sd)) || any(names(sd) == '')) {
-      cli::cli_abort('{.arg source_dataset} must have a non-missing name for every mapping.')
+      cli::cli_abort(
+        '{.arg source_dataset} must have a non-missing name for every mapping.'
+      )
     }
     if (anyNA(sd)) {
-      cli::cli_abort('{.arg source_dataset} must not contain missing source-dataset values.')
+      cli::cli_abort(
+        '{.arg source_dataset} must not contain missing source-dataset values.'
+      )
     }
     if (anyDuplicated(names(sd)) > 0L) {
-      cli::cli_abort('{.arg source_dataset} must map each {.field unique_id} at most once.')
+      cli::cli_abort(
+        '{.arg source_dataset} must map each {.field unique_id} at most once.'
+      )
     }
     return(sd)
   }
@@ -447,8 +532,11 @@ normalise_source_dataset <- function(sd) {
 
 #' Validate public clustering input columns
 #' @noRd
-validate_cluster_pairs <- function(pairs, threshold = NULL,
-                                   method = c('connected', 'best_link')) {
+validate_cluster_pairs <- function(
+  pairs,
+  threshold = NULL,
+  method = c('connected', 'best_link')
+) {
   method <- match.arg(method)
 
   if (!inherits(pairs, 'il_compared_lazy') && !is.data.frame(pairs)) {
@@ -485,7 +573,9 @@ pair_input_columns <- function(pairs) {
     return(DBI::dbListFields(pairs$con, pairs$predicted_tbl))
   }
   if (!is.data.frame(pairs)) {
-    cli::cli_abort('{.arg pairs} must be a data frame, tibble, or {.cls il_compared_lazy} object.')
+    cli::cli_abort(
+      '{.arg pairs} must be a data frame, tibble, or {.cls il_compared_lazy} object.'
+    )
   }
   names(pairs)
 }
@@ -524,16 +614,18 @@ prepare_cluster_source_dataset <- function(source_dataset, pairs, method) {
 #' @noRd
 cluster_input_ids <- function(pairs) {
   if (inherits(pairs, 'il_compared_lazy')) {
-    return(DBI::dbGetQuery(
-      pairs$con,
-      glue::glue(
-        'SELECT DISTINCT id FROM (',
-        'SELECT unique_id_l AS id FROM {pairs$predicted_tbl} ',
-        'UNION ',
-        'SELECT unique_id_r AS id FROM {pairs$predicted_tbl}',
-        ') sub'
-      )
-    )$id)
+    return(
+      DBI::dbGetQuery(
+        pairs$con,
+        glue::glue(
+          'SELECT DISTINCT id FROM (',
+          'SELECT unique_id_l AS id FROM {pairs$predicted_tbl} ',
+          'UNION ',
+          'SELECT unique_id_r AS id FROM {pairs$predicted_tbl}',
+          ') sub'
+        )
+      )$id
+    )
   }
 
   unique(c(

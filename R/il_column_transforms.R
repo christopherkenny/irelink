@@ -20,17 +20,28 @@
 #' spec <- il_spec() |>
 #'   il_block_on(last_name, .transform = il_substr(1, 3))
 il_substr <- function(start, length) {
-  if (!is.numeric(start) || length(start) != 1L || start < 1L || start != as.integer(start)) {
+  if (
+    !is.numeric(start) ||
+      length(start) != 1L ||
+      start < 1L ||
+      start != as.integer(start)
+  ) {
     cli::cli_abort('{.arg start} must be a positive integer.')
   }
-  if (!is.numeric(length) || length(length) != 1L || length < 1L || length != as.integer(length)) {
+  if (
+    !is.numeric(length) ||
+      length(length) != 1L ||
+      length < 1L ||
+      length != as.integer(length)
+  ) {
     cli::cli_abort('{.arg length} must be a positive integer.')
   }
   start <- as.integer(start)
   length <- as.integer(length)
   fn <- function(x) substr(x, start, start + length - 1L)
   new_column_transform(
-    fn, 'il_substr',
+    fn,
+    'il_substr',
     list(start = start, length = length)
   )
 }
@@ -59,8 +70,12 @@ il_regex_extract <- function(pattern, group = 0L) {
   if (!is.character(pattern) || length(pattern) != 1L) {
     cli::cli_abort('{.arg pattern} must be a single character string.')
   }
-  if (!is.numeric(group) || length(group) != 1L || group < 0L ||
-    group != as.integer(group)) {
+  if (
+    !is.numeric(group) ||
+      length(group) != 1L ||
+      group < 0L ||
+      group != as.integer(group)
+  ) {
     cli::cli_abort('{.arg group} must be a non-negative integer.')
   }
   group <- as.integer(group)
@@ -98,7 +113,8 @@ il_regex_extract <- function(pattern, group = 0L) {
     result
   }
   new_column_transform(
-    fn, 'il_regex_extract',
+    fn,
+    'il_regex_extract',
     list(pattern = pattern, group = group)
   )
 }
@@ -231,15 +247,19 @@ il_array_element <- function(position = c('first', 'last')) {
   position <- match.arg(position)
   fn <- function(x) {
     if (is.list(x)) {
-      vapply(x, function(el) {
-        if (length(el) == 0L) {
-          NA_character_
-        } else if (position == 'first') {
-          as.character(el[[1L]])
-        } else {
-          as.character(el[[length(el)]])
-        }
-      }, character(1))
+      vapply(
+        x,
+        function(el) {
+          if (length(el) == 0L) {
+            NA_character_
+          } else if (position == 'first') {
+            as.character(el[[1L]])
+          } else {
+            as.character(el[[length(el)]])
+          }
+        },
+        character(1)
+      )
     } else {
       x
     }
@@ -275,31 +295,53 @@ column_transform_sql <- function(transform, col_ref, dialect = NULL) {
   type <- attr(transform, 'transform_type')
   p <- attr(transform, 'params')
 
-  switch(type,
+  switch(
+    type,
     'il_substr' = paste0(
-      'SUBSTRING(', col_ref, ', ', p$start, ', ', p$length, ')'
+      'SUBSTRING(',
+      col_ref,
+      ', ',
+      p$start,
+      ', ',
+      p$length,
+      ')'
     ),
     'il_regex_extract' = {
       inner <- paste0(
-        'regexp_extract(', col_ref, ', ', sql_quote_literal(p$pattern),
-        ', ', p$group, ')'
+        'regexp_extract(',
+        col_ref,
+        ', ',
+        sql_quote_literal(p$pattern),
+        ', ',
+        p$group,
+        ')'
       )
       paste0('NULLIF(', inner, ', ', sql_quote_literal(''), ')')
     },
     'il_nullif' = paste0(
-      'NULLIF(', col_ref, ', ', sql_quote_literal(p$value), ')'
+      'NULLIF(',
+      col_ref,
+      ', ',
+      sql_quote_literal(p$value),
+      ')'
     ),
     'il_cast_to_string' = paste0('CAST(', col_ref, ' AS VARCHAR)'),
     'il_try_parse_date' = {
       if (identical(dialect, 'duckdb')) {
         paste0(
-          'CAST(try_strptime(', col_ref, ', ',
-          sql_quote_literal(p$format), ') AS DATE)'
+          'CAST(try_strptime(',
+          col_ref,
+          ', ',
+          sql_quote_literal(p$format),
+          ') AS DATE)'
         )
       } else if (identical(dialect, 'postgres')) {
         paste0(
-          'TO_DATE(', col_ref, ', ',
-          sql_quote_literal(strptime_to_postgres_format(p$format)), ')'
+          'TO_DATE(',
+          col_ref,
+          ', ',
+          sql_quote_literal(strptime_to_postgres_format(p$format)),
+          ')'
         )
       } else {
         cli::cli_abort(
@@ -312,8 +354,11 @@ column_transform_sql <- function(transform, col_ref, dialect = NULL) {
         paste0('try_strptime(', col_ref, ', ', sql_quote_literal(p$format), ')')
       } else if (identical(dialect, 'postgres')) {
         paste0(
-          'TO_TIMESTAMP(', col_ref, ', ',
-          sql_quote_literal(strptime_to_postgres_format(p$format)), ')'
+          'TO_TIMESTAMP(',
+          col_ref,
+          ', ',
+          sql_quote_literal(strptime_to_postgres_format(p$format)),
+          ')'
         )
       } else {
         cli::cli_abort(
@@ -376,13 +421,24 @@ strptime_to_postgres_format <- function(format) {
 column_transform_to_name <- function(transform) {
   type <- attr(transform, 'transform_type')
   p <- attr(transform, 'params')
-  switch(type,
+  switch(
+    type,
     'il_substr' = paste0('il_substr(', p$start, ',', p$length, ')'),
-    'il_regex_extract' = paste0('il_regex_extract("', p$pattern, '",', p$group, ')'),
+    'il_regex_extract' = paste0(
+      'il_regex_extract("',
+      p$pattern,
+      '",',
+      p$group,
+      ')'
+    ),
     'il_nullif' = paste0('il_nullif("', p$value, '")'),
     'il_cast_to_string' = 'il_cast_to_string()',
     'il_try_parse_date' = paste0('il_try_parse_date("', p$format, '")'),
-    'il_try_parse_timestamp' = paste0('il_try_parse_timestamp("', p$format, '")'),
+    'il_try_parse_timestamp' = paste0(
+      'il_try_parse_timestamp("',
+      p$format,
+      '")'
+    ),
     'il_array_element' = paste0('il_array_element("', p$position, '")'),
     NA_character_
   )

@@ -87,5 +87,8 @@ test_that('autoplot(il_profile) orders values within each facet', {
   surname_panel <- panel_map$PANEL[panel_map$column == 'surname']
   surname_rows <- built$data[[1]][built$data[[1]]$PANEL == surname_panel, ]
 
-  expect_lt(surname_rows$x[surname_rows$y == 1], surname_rows$x[surname_rows$y == 10])
+  expect_lt(
+    surname_rows$x[surname_rows$y == 1],
+    surname_rows$x[surname_rows$y == 10]
+  )
 })

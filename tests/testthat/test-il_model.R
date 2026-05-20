@@ -95,7 +95,13 @@ test_that("il_model() with link_type='link' accepts two datasets", {
     surname = c('Smyth', 'Jones', 'Williams')
   )
 
-  model <- il_model(df1, df2, spec = make_test_spec(), con = con, link_type = 'link')
+  model <- il_model(
+    df1,
+    df2,
+    spec = make_test_spec(),
+    con = con,
+    link_type = 'link'
+  )
   expect_s3_class(model, 'il_model')
 })
 
@@ -134,7 +140,14 @@ test_that('il_model() errors when more than two datasets are supplied', {
   )
 
   expect_error(
-    il_model(df, df, df, spec = make_test_spec(), con = con, link_type = 'link'),
+    il_model(
+      df,
+      df,
+      df,
+      spec = make_test_spec(),
+      con = con,
+      link_type = 'link'
+    ),
     'at most two datasets'
   )
 })

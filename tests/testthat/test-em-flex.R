@@ -65,7 +65,9 @@ test_that('fix_m = TRUE keeps m fixed', {
 
   expect_equal(m_before, m_after)
   # But u should have changed
-  expect_false(all(abs(m4$params$comparisons$u - model$params$comparisons$u) < 1e-10))
+  expect_false(all(
+    abs(m4$params$comparisons$u - model$params$comparisons$u) < 1e-10
+  ))
 })
 
 test_that('both fixed errors', {

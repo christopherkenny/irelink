@@ -4,10 +4,18 @@
 
 test_that('domain bundles return il_comparison_level objects', {
   bundles <- list(
-    cl_name(), cl_email(), cl_dob(), cl_postcode(),
-    cl_forename_surname(), cl_zip_code()
+    cl_name(),
+    cl_email(),
+    cl_dob(),
+    cl_postcode(),
+    cl_forename_surname(),
+    cl_zip_code()
   )
-  classes <- vapply(bundles, function(b) inherits(b, 'il_comparison_level'), logical(1))
+  classes <- vapply(
+    bundles,
+    function(b) inherits(b, 'il_comparison_level'),
+    logical(1)
+  )
   expect_true(all(classes))
 })
 
@@ -85,7 +93,9 @@ test_that('cl_dob() accepts custom thresholds', {
 
 test_that('cl_dob() custom thresholds change level count', {
   default_lev <- cl_dob()
-  custom_lev <- cl_dob(thresholds = list(days(7), months(6), years(1), years(5)))
+  custom_lev <- cl_dob(
+    thresholds = list(days(7), months(6), years(1), years(5))
+  )
   expect_equal(
     length(custom_lev$levels),
     length(default_lev$levels) + 1L
@@ -104,7 +114,11 @@ test_that('cl_postcode() has at least 4 match levels', {
 })
 
 test_that('cl_postcode() appends geo levels when lat/lon supplied', {
-  lev <- cl_postcode(lat_col = 'lat', long_col = 'lon', km_thresholds = c(5, 50))
+  lev <- cl_postcode(
+    lat_col = 'lat',
+    long_col = 'lon',
+    km_thresholds = c(5, 50)
+  )
   methods <- vapply(lev$levels, `[[`, character(1), 'method')
   # Two extra custom levels before else
   expect_equal(sum(methods == 'custom'), 5L) # 3 prefix + 2 geo
@@ -112,7 +126,11 @@ test_that('cl_postcode() appends geo levels when lat/lon supplied', {
 })
 
 test_that('cl_postcode() geo SQL embeds lat/lon column names', {
-  lev <- cl_postcode(lat_col = 'latitude', long_col = 'longitude', km_thresholds = 10)
+  lev <- cl_postcode(
+    lat_col = 'latitude',
+    long_col = 'longitude',
+    km_thresholds = 10
+  )
   custom_levels <- Filter(function(l) l$method == 'custom', lev$levels)
   geo_sqls <- vapply(custom_levels, `[[`, character(1), 'sql_expr')
   geo_sql <- geo_sqls[grepl('ASIN', geo_sqls)][1]
@@ -162,7 +180,11 @@ test_that('cl_zip_code() uses fixed-width SUBSTR for prefix levels', {
 })
 
 test_that('cl_zip_code() appends geo levels when lat/lon supplied', {
-  lev <- cl_zip_code(lat_col = 'lat', long_col = 'lon', km_thresholds = c(1, 10))
+  lev <- cl_zip_code(
+    lat_col = 'lat',
+    long_col = 'lon',
+    km_thresholds = c(1, 10)
+  )
   methods <- vapply(lev$levels, `[[`, character(1), 'method')
   expect_equal(sum(methods == 'custom'), 4L) # 2 prefix + 2 geo
 })

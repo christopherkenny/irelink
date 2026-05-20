@@ -41,7 +41,12 @@ test_that('include_fields = TRUE works on lazy path (collect = FALSE)', {
   model <- il_estimate_u(model)
   model <- il_estimate_em(model, block_on(surname))
 
-  lazy <- predict(model, threshold = 0.5, collect = FALSE, include_fields = TRUE)
+  lazy <- predict(
+    model,
+    threshold = 0.5,
+    collect = FALSE,
+    include_fields = TRUE
+  )
   pairs <- collect_il_compared_lazy(lazy)
 
   expect_true(nrow(pairs) > 0)

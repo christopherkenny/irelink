@@ -94,14 +94,17 @@
 #'
 #' pairs <- predict(model, threshold = 0.5)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-predict.il_model <- function(object, threshold = 0.85,
-                             threshold_match_weight = NULL,
-                             type = c('pairs', 'weights'),
-                             collect = TRUE,
-                             include_fields = FALSE,
-                             greedy = FALSE,
-                             profile_sql = FALSE,
-                             ...) {
+predict.il_model <- function(
+  object,
+  threshold = 0.85,
+  threshold_match_weight = NULL,
+  type = c('pairs', 'weights'),
+  collect = TRUE,
+  include_fields = FALSE,
+  greedy = FALSE,
+  profile_sql = FALSE,
+  ...
+) {
   type <- match.arg(type)
   validate_trained_model(object)
 
@@ -114,7 +117,8 @@ predict.il_model <- function(object, threshold = 0.85,
     NULL
   } else {
     validate_finite_numeric_scalar(
-      threshold_match_weight, 'threshold_match_weight'
+      threshold_match_weight,
+      'threshold_match_weight'
     )
   }
   collect <- validate_logical_scalar(collect, 'collect')
@@ -139,7 +143,9 @@ predict.il_model <- function(object, threshold = 0.85,
         '{.arg collect = FALSE} requires a DuckDB or PostgreSQL backend.'
       )
     }
-    return(predict_lazy(object, threshold,
+    return(predict_lazy(
+      object,
+      threshold,
       threshold_match_weight = threshold_match_weight,
       include_fields = include_fields,
       greedy = greedy,
@@ -157,7 +163,8 @@ predict.il_model <- function(object, threshold = 0.85,
     )
     if (dependency_aware) {
       gamma_sql <- build_gamma_query(
-        object, blocking_rules,
+        object,
+        blocking_rules,
         blocked_pairs_tbl = object$data$blocked_pairs[['predict']] %||% NULL
       )
       score_tbl <- il_table_name(object, 'dependency_scores', il_table_suffix())
@@ -175,7 +182,9 @@ predict.il_model <- function(object, threshold = 0.85,
       }
       scored_sql <- prepared$scored_sql
     } else {
-      scored_sql <- build_scored_query(object, threshold,
+      scored_sql <- build_scored_query(
+        object,
+        threshold,
         threshold_match_weight = threshold_match_weight,
         blocked_pairs_tbl = object$data$blocked_pairs[['predict']] %||% NULL
       )
@@ -186,7 +195,9 @@ predict.il_model <- function(object, threshold = 0.85,
     if (include_fields) {
       scored_sql <- build_fields_join_query(object, scored_sql)
     }
-    result <- tibble::as_tibble(il_db_get_query(object$con, scored_sql,
+    result <- tibble::as_tibble(il_db_get_query(
+      object$con,
+      scored_sql,
       step = 'predict.collect',
       profile = profile
     ))
@@ -218,7 +229,9 @@ predict.il_model <- function(object, threshold = 0.85,
   n_comp <- length(comparisons)
   if (identical(object$params$estimator_mode, 'dependency-aware')) {
     scored_patterns <- dependency_pattern_score(
-      gamma_mat, comp_names, object$params$dependency_aware
+      gamma_mat,
+      comp_names,
+      object$params$dependency_aware
     )
     match_weight <- scored_patterns$match_weight
     total_mw <- scored_patterns$total_match_weight
@@ -233,11 +246,17 @@ predict.il_model <- function(object, threshold = 0.85,
     tf_adj_list <- NULL
     if (length(tf_cols) > 0L && !is.null(result_data$tf_data)) {
       tf_adj <- compute_tf_adjustment(
-        gamma_mat, result_data$tf_data, comparisons, mu
+        gamma_mat,
+        result_data$tf_data,
+        comparisons,
+        mu
       )
       match_weight <- match_weight + tf_adj
       tf_adj_list <- compute_tf_adjustment_matrix(
-        gamma_mat, result_data$tf_data, comparisons, mu
+        gamma_mat,
+        result_data$tf_data,
+        comparisons,
+        mu
       )
     }
 
@@ -264,7 +283,11 @@ predict.il_model <- function(object, threshold = 0.85,
   }
 
   if (!is.null(threshold_match_weight)) {
-    result <- result[result$match_weight >= threshold_match_weight, , drop = FALSE]
+    result <- result[
+      result$match_weight >= threshold_match_weight,
+      ,
+      drop = FALSE
+    ]
   } else {
     result <- result[result$match_probability >= threshold, , drop = FALSE]
   }
@@ -292,17 +315,22 @@ predict.il_model <- function(object, threshold = 0.85,
 #'   threshold.
 #' @return An `il_compared_lazy` object.
 #' @noRd
-predict_lazy <- function(model, threshold, threshold_match_weight = NULL,
-                         include_fields = FALSE,
-                         greedy = FALSE,
-                         profile = NULL) {
+predict_lazy <- function(
+  model,
+  threshold,
+  threshold_match_weight = NULL,
+  include_fields = FALSE,
+  greedy = FALSE,
+  profile = NULL
+) {
   con <- model$con
   predicted_tbl <- il_table_name(model, 'predicted', il_table_suffix())
   lazy_model <- il_track_table(model, predicted_tbl, owner = 'lazy')
   dependency_aware <- identical(model$params$estimator_mode, 'dependency-aware')
   if (dependency_aware) {
     gamma_sql <- build_gamma_query(
-      model, model$spec$blocking_rules,
+      model,
+      model$spec$blocking_rules,
       blocked_pairs_tbl = model$data$blocked_pairs[['predict']] %||% NULL
     )
     score_tbl <- il_table_name(model, 'dependency_scores', il_table_suffix())
@@ -315,18 +343,33 @@ predict_lazy <- function(model, threshold, threshold_match_weight = NULL,
     )
     on.exit(drop_registered(con, prepared$score_tbl), add = TRUE)
     if (is.null(prepared$scored_sql)) {
-      il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {predicted_tbl}'),
-        step = 'predict_lazy.drop_empty', profile = profile
+      il_db_execute(
+        con,
+        glue::glue('DROP TABLE IF EXISTS {predicted_tbl}'),
+        step = 'predict_lazy.drop_empty',
+        profile = profile
       )
       empty <- empty_scored_pairs(model)
-      empty_select <- paste(vapply(names(empty), function(nm) {
-        type <- if (is.integer(empty[[nm]])) 'INTEGER' else 'DOUBLE'
-        glue::glue('CAST(NULL AS {type}) AS {nm}')
-      }, character(1)), collapse = ', ')
-      il_db_execute(con, glue::glue(
-        'CREATE TABLE {predicted_tbl} AS ',
-        'SELECT {empty_select} WHERE FALSE'
-      ), step = 'predict_lazy.create_empty', profile = profile)
+      empty_select <- paste(
+        vapply(
+          names(empty),
+          function(nm) {
+            type <- if (is.integer(empty[[nm]])) 'INTEGER' else 'DOUBLE'
+            glue::glue('CAST(NULL AS {type}) AS {nm}')
+          },
+          character(1)
+        ),
+        collapse = ', '
+      )
+      il_db_execute(
+        con,
+        glue::glue(
+          'CREATE TABLE {predicted_tbl} AS ',
+          'SELECT {empty_select} WHERE FALSE'
+        ),
+        step = 'predict_lazy.create_empty',
+        profile = profile
+      )
       return(new_il_compared_lazy(
         con = con,
         predicted_tbl = predicted_tbl,
@@ -338,7 +381,9 @@ predict_lazy <- function(model, threshold, threshold_match_weight = NULL,
     }
     scored_sql <- prepared$scored_sql
   } else {
-    scored_sql <- build_scored_query(model, threshold,
+    scored_sql <- build_scored_query(
+      model,
+      threshold,
       threshold_match_weight = threshold_match_weight,
       blocked_pairs_tbl = model$data$blocked_pairs[['predict']] %||% NULL
     )
@@ -350,12 +395,20 @@ predict_lazy <- function(model, threshold, threshold_match_weight = NULL,
     scored_sql <- build_fields_join_query(model, scored_sql)
   }
 
-  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {predicted_tbl}'),
-    step = 'predict_lazy.drop', profile = profile
+  il_db_execute(
+    con,
+    glue::glue('DROP TABLE IF EXISTS {predicted_tbl}'),
+    step = 'predict_lazy.drop',
+    profile = profile
   )
-  il_db_execute(con, glue::glue(
-    'CREATE TABLE {predicted_tbl} AS {scored_sql}'
-  ), step = 'predict_lazy.create', profile = profile)
+  il_db_execute(
+    con,
+    glue::glue(
+      'CREATE TABLE {predicted_tbl} AS {scored_sql}'
+    ),
+    step = 'predict_lazy.create',
+    profile = profile
+  )
   new_il_compared_lazy(
     con = con,
     predicted_tbl = predicted_tbl,
@@ -377,9 +430,12 @@ predict_lazy <- function(model, threshold, threshold_match_weight = NULL,
 #' @param row_index_r Optional integer vector of right row indices.
 #' @return A tibble of one-to-one greedy matches.
 #' @noRd
-greedy_match_pairs <- function(pairs, model = NULL,
-                               row_index_l = NULL,
-                               row_index_r = NULL) {
+greedy_match_pairs <- function(
+  pairs,
+  model = NULL,
+  row_index_l = NULL,
+  row_index_r = NULL
+) {
   if (nrow(pairs) == 0L) {
     return(pairs)
   }
@@ -390,7 +446,9 @@ greedy_match_pairs <- function(pairs, model = NULL,
     row_index_r <- row_index$row_index_r
   }
 
-  if (length(row_index_l) != nrow(pairs) || length(row_index_r) != nrow(pairs)) {
+  if (
+    length(row_index_l) != nrow(pairs) || length(row_index_r) != nrow(pairs)
+  ) {
     cli::cli_abort('Greedy matching row indices must have one entry per pair.')
   }
 
@@ -411,8 +469,10 @@ greedy_match_pairs <- function(pairs, model = NULL,
     key_l <- as.character(ordered_pairs$unique_id_l[i])
     key_r <- as.character(ordered_pairs$unique_id_r[i])
 
-    if (!exists(key_l, envir = used_l, inherits = FALSE) &&
-      !exists(key_r, envir = used_r, inherits = FALSE)) {
+    if (
+      !exists(key_l, envir = used_l, inherits = FALSE) &&
+        !exists(key_r, envir = used_r, inherits = FALSE)
+    ) {
       keep[i] <- TRUE
       assign(key_l, TRUE, envir = used_l)
       assign(key_r, TRUE, envir = used_r)
@@ -505,21 +565,35 @@ join_original_fields <- function(result, model) {
       return(result)
     }
 
-    l_select <- paste(vapply(field_cols, function(col) {
-      glue::glue(
-        'sl.{sql_quote_identifier(col)} AS {sql_quote_identifier(paste0(col, "_l"))}'
-      )
-    }, character(1)), collapse = ', ')
+    l_select <- paste(
+      vapply(
+        field_cols,
+        function(col) {
+          glue::glue(
+            'sl.{sql_quote_identifier(col)} AS {sql_quote_identifier(paste0(col, "_l"))}'
+          )
+        },
+        character(1)
+      ),
+      collapse = ', '
+    )
     if (tbl_r == tbl_l) {
       r_field_cols <- field_cols
     } else {
       r_field_cols <- setdiff(DBI::dbListFields(con, tbl_r), 'unique_id')
     }
-    r_select <- paste(vapply(r_field_cols, function(col) {
-      glue::glue(
-        'sr.{sql_quote_identifier(col)} AS {sql_quote_identifier(paste0(col, "_r"))}'
-      )
-    }, character(1)), collapse = ', ')
+    r_select <- paste(
+      vapply(
+        r_field_cols,
+        function(col) {
+          glue::glue(
+            'sr.{sql_quote_identifier(col)} AS {sql_quote_identifier(paste0(col, "_r"))}'
+          )
+        },
+        character(1)
+      ),
+      collapse = ', '
+    )
     qtmp_tbl <- sql_quote_identifier(tmp_tbl)
     qtbl_l <- sql_quote_identifier(tbl_l)
     qtbl_r <- sql_quote_identifier(tbl_r)
@@ -552,7 +626,9 @@ join_original_fields <- function(result, model) {
 
   col_select <- sql_identifier_csv(c('unique_id', field_cols))
   qtbl_l <- sql_quote_identifier(tbl_l)
-  sql_l <- glue::glue('SELECT {col_select} FROM {qtbl_l} WHERE unique_id IN ({id_list})')
+  sql_l <- glue::glue(
+    'SELECT {col_select} FROM {qtbl_l} WHERE unique_id IN ({id_list})'
+  )
   src_l <- DBI::dbGetQuery(con, sql_l)
   rownames(src_l) <- as.character(src_l$unique_id)
 
@@ -563,7 +639,9 @@ join_original_fields <- function(result, model) {
     field_cols_r <- setdiff(all_cols_r, 'unique_id')
     col_select_r <- sql_identifier_csv(c('unique_id', field_cols_r))
     qtbl_r <- sql_quote_identifier(tbl_r)
-    sql_r <- glue::glue('SELECT {col_select_r} FROM {qtbl_r} WHERE unique_id IN ({id_list})')
+    sql_r <- glue::glue(
+      'SELECT {col_select_r} FROM {qtbl_r} WHERE unique_id IN ({id_list})'
+    )
     src_r <- DBI::dbGetQuery(con, sql_r)
     rownames(src_r) <- as.character(src_r$unique_id)
   }
@@ -573,7 +651,11 @@ join_original_fields <- function(result, model) {
   for (col in field_cols) {
     result[[paste0(col, '_l')]] <- src_l[id_l, col]
   }
-  r_cols <- if (tbl_r == tbl_l) field_cols else setdiff(DBI::dbListFields(con, tbl_r), 'unique_id')
+  r_cols <- if (tbl_r == tbl_l) {
+    field_cols
+  } else {
+    setdiff(DBI::dbListFields(con, tbl_r), 'unique_id')
+  }
   for (col in r_cols) {
     result[[paste0(col, '_r')]] <- src_r[id_r, col]
   }

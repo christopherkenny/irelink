@@ -59,8 +59,12 @@
 #'
 #' il_confusion_matrix(model, labels = labels, threshold = 0.85)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_confusion_matrix <- function(model, labels = NULL, threshold = 0.85,
-                                labels_col = NULL) {
+il_confusion_matrix <- function(
+  model,
+  labels = NULL,
+  threshold = 0.85,
+  labels_col = NULL
+) {
   labels <- resolve_labels(model, labels, labels_col)
   scored <- score_labeled_pairs(model, labels)
   counts <- compute_confusion_counts(

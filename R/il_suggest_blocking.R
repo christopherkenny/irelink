@@ -38,15 +38,21 @@
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' il_suggest_blocking(df, con = con)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_suggest_blocking <- function(.data, columns = NULL, con = NULL,
-                                link_type = c('dedupe', 'link'),
-                                max_depth = 1L) {
+il_suggest_blocking <- function(
+  .data,
+  columns = NULL,
+  con = NULL,
+  link_type = c('dedupe', 'link'),
+  max_depth = 1L
+) {
   link_type <- match.arg(link_type)
   max_depth <- as.integer(max_depth)
 
   tbl_name <- il_scratch_table_name('suggest')
-  reg <- register_data(.data,
-    con = con, tbl_name = tbl_name,
+  reg <- register_data(
+    .data,
+    con = con,
+    tbl_name = tbl_name,
     add_unique_id = TRUE
   )
   con <- reg$con
@@ -67,14 +73,24 @@ il_suggest_blocking <- function(.data, columns = NULL, con = NULL,
 
   # Evaluate single-column rules
   candidates <- evaluate_column_combos(
-    con, tbl_name, columns, n, cartesian, link_type,
+    con,
+    tbl_name,
+    columns,
+    n,
+    cartesian,
+    link_type,
     depth = 1L
   )
 
   # Optionally evaluate two-column combos
   if (max_depth >= 2L && length(columns) >= 2L) {
     combos_2 <- evaluate_column_combos(
-      con, tbl_name, columns, n, cartesian, link_type,
+      con,
+      tbl_name,
+      columns,
+      n,
+      cartesian,
+      link_type,
       depth = 2L
     )
     candidates <- rbind(candidates, combos_2)
@@ -87,8 +103,15 @@ il_suggest_blocking <- function(.data, columns = NULL, con = NULL,
 
 #' Evaluate column combinations for blocking
 #' @noRd
-evaluate_column_combos <- function(con, tbl_name, columns, n, cartesian,
-                                   link_type, depth = 1L) {
+evaluate_column_combos <- function(
+  con,
+  tbl_name,
+  columns,
+  n,
+  cartesian,
+  link_type,
+  depth = 1L
+) {
   dialect <- detect_dialect(con)
   qtbl <- sql_quote_identifier(tbl_name)
   if (depth == 1L) {
@@ -100,7 +123,11 @@ evaluate_column_combos <- function(con, tbl_name, columns, n, cartesian,
   results <- lapply(col_sets, function(cols) {
     qcols <- sql_quote_identifier(cols)
     null_filters <- paste(
-      vapply(qcols, function(qcol) glue::glue('{qcol} IS NOT NULL'), character(1)),
+      vapply(
+        qcols,
+        function(qcol) glue::glue('{qcol} IS NOT NULL'),
+        character(1)
+      ),
       collapse = ' AND '
     )
     select_cols <- paste(qcols, collapse = ', ')
@@ -122,7 +149,11 @@ evaluate_column_combos <- function(con, tbl_name, columns, n, cartesian,
 
     # pair count
     where <- build_blocking_condition(cols, where = NULL, dialect = dialect)
-    n_pairs <- count_blocked_pairs(con, tbl_name, tbl_name, where,
+    n_pairs <- count_blocked_pairs(
+      con,
+      tbl_name,
+      tbl_name,
+      where,
       dedupe = (link_type == 'dedupe')
     )
     pct <- if (cartesian > 0) n_pairs / cartesian * 100 else 0
@@ -164,14 +195,20 @@ evaluate_column_combos <- function(con, tbl_name, columns, n, cartesian,
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' il_find_blocking_below(fake_1000, max_pairs = 100000, con = con)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_find_blocking_below <- function(.data, max_pairs, columns = NULL,
-                                   con = NULL,
-                                   link_type = c('dedupe', 'link'),
-                                   max_depth = 2L) {
+il_find_blocking_below <- function(
+  .data,
+  max_pairs,
+  columns = NULL,
+  con = NULL,
+  link_type = c('dedupe', 'link'),
+  max_depth = 2L
+) {
   candidates <- il_suggest_blocking(
     .data,
-    columns = columns, con = con,
-    link_type = link_type, max_depth = max_depth
+    columns = columns,
+    con = con,
+    link_type = link_type,
+    max_depth = max_depth
   )
   below <- candidates[candidates$n_pairs <= max_pairs, , drop = FALSE]
   below[order(below$n_pairs), ]
@@ -200,8 +237,10 @@ il_find_blocking_below <- function(.data, max_pairs, columns = NULL,
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 block_from_labels <- function(.data, labels, columns = NULL, con = NULL) {
   tbl_name <- il_scratch_table_name('bfl')
-  reg <- register_data(.data,
-    con = con, tbl_name = tbl_name,
+  reg <- register_data(
+    .data,
+    con = con,
+    tbl_name = tbl_name,
     add_unique_id = TRUE
   )
   con <- reg$con

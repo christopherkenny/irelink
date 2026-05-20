@@ -32,7 +32,10 @@ test_that('compute_tf_tables() creates TF lookup table in the database', {
   # And be registered in the model
 
   expect_true('city' %in% names(model$data$tf_tables))
-  expect_true(startsWith(model$data$tf_tables[['city']], model$data$table_prefix))
+  expect_true(startsWith(
+    model$data$tf_tables[['city']],
+    model$data$table_prefix
+  ))
 })
 
 test_that('TF table has correct frequencies', {
@@ -73,7 +76,8 @@ test_that('compute_tf_adjustment() handles one-sided NA like splink COALESCE', {
     list(columns = 'city', method = cl_exact(term_frequency = TRUE))
   )
 
-  gamma_mat <- matrix(c(1L, 1L, 1L, 0L),
+  gamma_mat <- matrix(
+    c(1L, 1L, 1L, 0L),
     ncol = 1,
     dimnames = list(NULL, 'city')
   )
@@ -120,10 +124,7 @@ test_that('compute_tf_adjustment() produces correct adjustments', {
     list(columns = 'city', method = cl_exact(term_frequency = TRUE))
   )
 
-  gamma_mat <- matrix(c(1L, 1L, 0L),
-    ncol = 1,
-    dimnames = list(NULL, 'city')
-  )
+  gamma_mat <- matrix(c(1L, 1L, 0L), ncol = 1, dimnames = list(NULL, 'city'))
 
   tf_data <- data.frame(
     tf_city_l = c(0.80, 0.04, 0.80),
@@ -153,12 +154,12 @@ test_that('TF adjustment is zero when term_frequency is FALSE', {
   comparisons <- list(
     list(columns = 'city', method = cl_exact()) # No TF
   )
-  gamma_mat <- matrix(c(1L, 1L),
-    ncol = 1,
-    dimnames = list(NULL, 'city')
-  )
+  gamma_mat <- matrix(c(1L, 1L), ncol = 1, dimnames = list(NULL, 'city'))
   tf_data <- data.frame(tf_city_l = c(0.5, 0.5), tf_city_r = c(0.5, 0.5))
-  mu <- list(m_levels = list(city = c(0.1, 0.9)), u_levels = list(city = c(0.9, 0.1)))
+  mu <- list(
+    m_levels = list(city = c(0.1, 0.9)),
+    u_levels = list(city = c(0.9, 0.1))
+  )
 
   adj <- compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
   expect_equal(adj, c(0, 0))

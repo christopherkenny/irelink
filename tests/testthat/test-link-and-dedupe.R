@@ -54,8 +54,11 @@ test_that('link_and_dedupe model creates successfully with two datasets', {
   d <- make_lad_data()
   spec <- make_lad_spec()
 
-  model <- il_model(d$a, d$b,
-    spec = spec, con = con,
+  model <- il_model(
+    d$a,
+    d$b,
+    spec = spec,
+    con = con,
     link_type = 'link_and_dedupe'
   )
   expect_s3_class(model, 'il_model')
@@ -108,8 +111,11 @@ test_that('link_and_dedupe get_all_pairs returns within-table pairs', {
   d <- make_lad_data()
   spec <- make_lad_spec()
 
-  model <- il_model(d$a, d$b,
-    spec = spec, con = con,
+  model <- il_model(
+    d$a,
+    d$b,
+    spec = spec,
+    con = con,
     link_type = 'link_and_dedupe'
   )
 
@@ -137,8 +143,11 @@ test_that('link_and_dedupe get_blocked_pairs returns within-table pairs', {
   d <- make_lad_data()
   spec <- make_lad_spec()
 
-  model <- il_model(d$a, d$b,
-    spec = spec, con = con,
+  model <- il_model(
+    d$a,
+    d$b,
+    spec = spec,
+    con = con,
     link_type = 'link_and_dedupe'
   )
 
@@ -165,8 +174,11 @@ test_that('link_and_dedupe end-to-end: train and predict', {
   d <- make_lad_data()
   spec <- make_lad_spec()
 
-  model <- il_model(d$a, d$b,
-    spec = spec, con = con,
+  model <- il_model(
+    d$a,
+    d$b,
+    spec = spec,
+    con = con,
     link_type = 'link_and_dedupe'
   ) |>
     il_estimate_u(max_pairs = 1e5) |>
@@ -196,10 +208,7 @@ test_that('link mode only produces cross-table pairs', {
   d <- make_lad_data()
   spec <- make_lad_spec()
 
-  model <- il_model(d$a, d$b,
-    spec = spec, con = con,
-    link_type = 'link'
-  )
+  model <- il_model(d$a, d$b, spec = spec, con = con, link_type = 'link')
 
   pairs <- get_all_pairs(model)
 
@@ -219,16 +228,40 @@ test_that('il_find_matches handles new_records with fewer columns', {
   df <- data.frame(
     unique_id = 1:10,
     first_name = c(
-      'John', 'Jon', 'Jane', 'Jane', 'Bob',
-      'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas'
+      'John',
+      'Jon',
+      'Jane',
+      'Jane',
+      'Bob',
+      'Bobby',
+      'Alice',
+      'Alicia',
+      'Tom',
+      'Thomas'
     ),
     surname = c(
-      'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
-      'Jones', 'Brown', 'Brown', 'White', 'White'
+      'Smith',
+      'Smith',
+      'Doe',
+      'Doe',
+      'Jones',
+      'Jones',
+      'Brown',
+      'Brown',
+      'White',
+      'White'
     ),
     city = c(
-      'London', 'London', 'Paris', 'Paris', 'Berlin',
-      'Berlin', 'Rome', 'Rome', 'Madrid', 'Madrid'
+      'London',
+      'London',
+      'Paris',
+      'Paris',
+      'Berlin',
+      'Berlin',
+      'Rome',
+      'Rome',
+      'Madrid',
+      'Madrid'
     ),
     stringsAsFactors = FALSE
   )

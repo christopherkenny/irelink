@@ -22,7 +22,18 @@ test_that('il_roc() returns a tibble with fpr and tpr in [0, 1]', {
   labels <- data.frame(
     unique_id_l = 1:10,
     unique_id_r = 2:11,
-    is_match = c(TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE)
+    is_match = c(
+      TRUE,
+      FALSE,
+      FALSE,
+      TRUE,
+      FALSE,
+      FALSE,
+      TRUE,
+      FALSE,
+      FALSE,
+      TRUE
+    )
   )
 
   roc <- il_roc(model, labels)
@@ -76,7 +87,18 @@ test_that('il_precision_recall() returns tibble with precision and recall in [0,
   labels <- data.frame(
     unique_id_l = 1:10,
     unique_id_r = 2:11,
-    is_match = c(TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE, FALSE, FALSE, TRUE)
+    is_match = c(
+      TRUE,
+      FALSE,
+      FALSE,
+      TRUE,
+      FALSE,
+      FALSE,
+      TRUE,
+      FALSE,
+      FALSE,
+      TRUE
+    )
   )
 
   pr <- il_precision_recall(model, labels)

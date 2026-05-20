@@ -58,10 +58,14 @@ il_transform <- function(...) {
 #' @export
 print.il_transform_chain <- function(x, ...) {
   fns <- attr(x, 'transforms')
-  names <- vapply(fns, function(f) {
-    n <- transform_to_name(f)
-    if (is.null(n)) '<custom>' else n
-  }, character(1))
+  names <- vapply(
+    fns,
+    function(f) {
+      n <- transform_to_name(f)
+      if (is.null(n)) '<custom>' else n
+    },
+    character(1)
+  )
   cat('<il_transform_chain>', paste(names, collapse = ' -> '), '\n')
   invisible(x)
 }

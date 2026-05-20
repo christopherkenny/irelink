@@ -114,7 +114,9 @@ il_model <- function(
     columns = reg_l$columns,
     table_prefix = table_prefix,
     tables = data.frame(
-      table = c(reg_l$tbl_name, tbl_name_r)[!is.na(c(reg_l$tbl_name, tbl_name_r))],
+      table = c(reg_l$tbl_name, tbl_name_r)[
+        !is.na(c(reg_l$tbl_name, tbl_name_r))
+      ],
       owner = 'model',
       stringsAsFactors = FALSE
     )
@@ -197,7 +199,9 @@ il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
   )
   con <- reg_l$con
   model$spec <- resolve_spec_selectors(
-    model$spec, reg_l$columns, reg_l$column_classes
+    model$spec,
+    reg_l$columns,
+    reg_l$column_classes
   )
 
   # Register phonetic SQL macros if needed
@@ -247,7 +251,9 @@ il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
     columns = reg_l$columns,
     table_prefix = table_prefix,
     tables = data.frame(
-      table = c(reg_l$tbl_name, tbl_name_r)[!is.na(c(reg_l$tbl_name, tbl_name_r))],
+      table = c(reg_l$tbl_name, tbl_name_r)[
+        !is.na(c(reg_l$tbl_name, tbl_name_r))
+      ],
       owner = 'model',
       stringsAsFactors = FALSE
     )

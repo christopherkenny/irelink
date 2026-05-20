@@ -96,15 +96,31 @@ il_accuracy <- function(model, labels = NULL, labels_col = NULL) {
 
     precision <- if (tp + fp > 0) tp / (tp + fp) else 1
     recall <- if (tp + fn > 0) tp / (tp + fn) else 1
-    f1 <- if (precision + recall > 0) 2 * precision * recall / (precision + recall) else 0
+    f1 <- if (precision + recall > 0) {
+      2 * precision * recall / (precision + recall)
+    } else {
+      0
+    }
 
     # Weighted F-scores: F_beta = (1+beta^2) * P * R / (beta^2 * P + R)
-    f2 <- if (precision + recall > 0) 5 * precision * recall / (4 * precision + recall) else 0
-    f0_5 <- if (precision + recall > 0) 1.25 * precision * recall / (0.25 * precision + recall) else 0
+    f2 <- if (precision + recall > 0) {
+      5 * precision * recall / (4 * precision + recall)
+    } else {
+      0
+    }
+    f0_5 <- if (precision + recall > 0) {
+      1.25 * precision * recall / (0.25 * precision + recall)
+    } else {
+      0
+    }
 
     specificity <- if (tn + fp > 0) tn / (tn + fp) else 1
     npv <- if (tn + fn > 0) tn / (tn + fn) else 1
-    accuracy <- if (tp + tn + fp + fn > 0) (tp + tn) / (tp + tn + fp + fn) else 1
+    accuracy <- if (tp + tn + fp + fn > 0) {
+      (tp + tn) / (tp + tn + fp + fn)
+    } else {
+      1
+    }
 
     # P4: 4*TP*TN / ((4*TP*TN) + (TP+TN)*(FP+FN))
     p4_num <- 4 * as.numeric(tp) * tn
@@ -114,18 +130,30 @@ il_accuracy <- function(model, labels = NULL, labels_col = NULL) {
     # Phi / MCC: (TP*TN - FP*FN) / sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))
     phi_num <- as.numeric(tp) * tn - as.numeric(fp) * fn
     phi_denom <- sqrt(
-      as.numeric(tp + fp) * as.numeric(tp + fn) *
-        as.numeric(tn + fp) * as.numeric(tn + fn)
+      as.numeric(tp + fp) *
+        as.numeric(tp + fn) *
+        as.numeric(tn + fp) *
+        as.numeric(tn + fn)
     )
     phi <- if (phi_denom > 0) phi_num / phi_denom else 0
 
     tibble::tibble(
-      threshold = t, tp = tp, fp = fp, fn = fn, tn = tn,
+      threshold = t,
+      tp = tp,
+      fp = fp,
+      fn = fn,
+      tn = tn,
       fn_blocking_miss = fn_blocking_miss,
-      precision = precision, recall = recall, f1 = f1,
-      f2 = f2, f0_5 = f0_5,
-      specificity = specificity, npv = npv, accuracy = accuracy,
-      p4 = p4, phi = phi
+      precision = precision,
+      recall = recall,
+      f1 = f1,
+      f2 = f2,
+      f0_5 = f0_5,
+      specificity = specificity,
+      npv = npv,
+      accuracy = accuracy,
+      p4 = p4,
+      phi = phi
     )
   })
 

@@ -23,7 +23,8 @@ il_comparator_score <- function(.data, col_1, col_2, con = NULL) {
   col_1 <- as.character(rlang::ensym(col_1))
   col_2 <- as.character(rlang::ensym(col_2))
 
-  use_sql <- !is.null(con) && DBI::dbIsValid(con) &&
+  use_sql <- !is.null(con) &&
+    DBI::dbIsValid(con) &&
     detect_dialect(con) %in% c('duckdb', 'postgres')
 
   if (use_sql) {
@@ -42,7 +43,8 @@ comparator_score_sql <- function(.data, col_1, col_2, con) {
   if (is.data.frame(.data)) {
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl_name}'))
     DBI::dbWriteTable(con, tbl_name, .data)
-    on.exit(DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl_name}')),
+    on.exit(
+      DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl_name}')),
       add = TRUE
     )
   } else {
@@ -135,10 +137,16 @@ autoplot.il_comparator_score <- function(object, ...) {
 
   long |>
     ggplot2::ggplot() +
-    ggplot2::geom_histogram(ggplot2::aes(x = .data$score), bins = 30, fill = '#2171b5', colour = 'white') +
+    ggplot2::geom_histogram(
+      ggplot2::aes(x = .data$score),
+      bins = 30,
+      fill = '#2171b5',
+      colour = 'white'
+    ) +
     ggplot2::facet_wrap(~metric, scales = 'free_y') +
     ggplot2::labs(
-      x = 'Similarity Score', y = 'Count',
+      x = 'Similarity Score',
+      y = 'Count',
       title = 'Comparator Score Distribution'
     ) +
     ggplot2::theme_minimal()
@@ -159,12 +167,18 @@ autoplot.il_comparator_score <- function(object, ...) {
 #'
 #' @return A `ggplot2` object.
 #' @export
-il_comparator_threshold_chart <- function(.data, col_1, col_2,
-                                          similarity_threshold = NULL,
-                                          distance_threshold = NULL,
-                                          con = NULL) {
-  scores <- il_comparator_score(.data,
-    !!rlang::ensym(col_1), !!rlang::ensym(col_2),
+il_comparator_threshold_chart <- function(
+  .data,
+  col_1,
+  col_2,
+  similarity_threshold = NULL,
+  distance_threshold = NULL,
+  con = NULL
+) {
+  scores <- il_comparator_score(
+    .data,
+    !!rlang::ensym(col_1),
+    !!rlang::ensym(col_2),
     con = con
   )
   class(scores) <- setdiff(class(scores), 'il_comparator_score')
@@ -191,12 +205,18 @@ il_comparator_threshold_chart <- function(.data, col_1, col_2,
 
   long <- rbind(long_sim, long_dist)
   if (is.null(long) || nrow(long) == 0L) {
-    cli::cli_abort('Provide at least one of {.arg similarity_threshold} or {.arg distance_threshold}.')
+    cli::cli_abort(
+      'Provide at least one of {.arg similarity_threshold} or {.arg distance_threshold}.'
+    )
   }
 
   long |>
     ggplot2::ggplot() +
-    ggplot2::geom_histogram(ggplot2::aes(x = .data$score, fill = .data$above), bins = 30, colour = 'white') +
+    ggplot2::geom_histogram(
+      ggplot2::aes(x = .data$score, fill = .data$above),
+      bins = 30,
+      colour = 'white'
+    ) +
     ggplot2::facet_wrap(~metric, scales = 'free') +
     ggplot2::scale_fill_manual(
       values = c('TRUE' = '#2171b5', 'FALSE' = '#bdbdbd'),
@@ -204,7 +224,8 @@ il_comparator_threshold_chart <- function(.data, col_1, col_2,
       name = 'Threshold'
     ) +
     ggplot2::labs(
-      x = 'Score', y = 'Count',
+      x = 'Score',
+      y = 'Count',
       title = 'Comparator Score Threshold Analysis'
     ) +
     ggplot2::theme_minimal()
@@ -226,7 +247,8 @@ il_phonetic_chart <- function(.data, col_1, col_2, con = NULL) {
   col_1 <- as.character(rlang::ensym(col_1))
   col_2 <- as.character(rlang::ensym(col_2))
 
-  use_sql <- !is.null(con) && DBI::dbIsValid(con) &&
+  use_sql <- !is.null(con) &&
+    DBI::dbIsValid(con) &&
     detect_dialect(con) %in% c('duckdb', 'postgres')
 
   if (use_sql) {
@@ -235,7 +257,8 @@ il_phonetic_chart <- function(.data, col_1, col_2, con = NULL) {
       qtbl <- sql_quote_identifier(tbl_name)
       DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {qtbl}'))
       DBI::dbWriteTable(con, tbl_name, .data)
-      on.exit(DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {qtbl}')),
+      on.exit(
+        DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {qtbl}')),
         add = TRUE
       )
     } else {
@@ -243,7 +266,9 @@ il_phonetic_chart <- function(.data, col_1, col_2, con = NULL) {
     }
 
     dialect <- detect_dialect(con)
-    if (dialect == 'duckdb') register_phonetic_macros(con)
+    if (dialect == 'duckdb') {
+      register_phonetic_macros(con)
+    }
     sx_fn <- if (dialect == 'duckdb') 'il_soundex' else 'soundex'
     qtbl <- sql_quote_identifier(tbl_name)
     qcol_1 <- sql_quote_identifier(col_1)
@@ -278,10 +303,14 @@ il_phonetic_chart <- function(.data, col_1, col_2, con = NULL) {
 
   df |>
     ggplot2::ggplot() +
-    ggplot2::geom_tile(ggplot2::aes(
-      x = .data$soundex_1, y = .data$soundex_2,
-      fill = .data$soundex_match
-    ), colour = 'white') +
+    ggplot2::geom_tile(
+      ggplot2::aes(
+        x = .data$soundex_1,
+        y = .data$soundex_2,
+        fill = .data$soundex_match
+      ),
+      colour = 'white'
+    ) +
     ggplot2::scale_fill_manual(
       values = c('TRUE' = '#2171b5', 'FALSE' = '#fee0d2'),
       name = 'Match'

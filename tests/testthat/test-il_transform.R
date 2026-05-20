@@ -64,7 +64,9 @@ test_that('transform chain works end-to-end with DuckDB', {
   on.exit(test_discon(con), add = TRUE)
 
   spec <- il_spec() |>
-    il_compare(first_name, cl_exact(),
+    il_compare(
+      first_name,
+      cl_exact(),
       transform = il_transform(tolower, trimws)
     )
 

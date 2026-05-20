@@ -195,7 +195,11 @@ test_that('cl_distance_km() uses a two-column comparison and computes R gamma', 
 
 test_that('cl_distance_km() has active SQL gamma support', {
   sql <- sql_gamma_case(
-    list(columns = c('lat', 'lon'), method = cl_distance_km(km(1)), transform = NULL),
+    list(
+      columns = c('lat', 'lon'),
+      method = cl_distance_km(km(1)),
+      transform = NULL
+    ),
     dialect = 'duckdb'
   )
   expect_match(sql, '6371', fixed = TRUE)
@@ -288,7 +292,11 @@ test_that('cl_custom() stores a raw SQL expression', {
 
 test_that('cl_custom() has active SQL gamma support and no silent R fallback', {
   sql <- sql_gamma_case(
-    list(columns = 'score', method = cl_custom('l.score + r.score > 10'), transform = NULL),
+    list(
+      columns = 'score',
+      method = cl_custom('l.score + r.score > 10'),
+      transform = NULL
+    ),
     dialect = 'duckdb'
   )
   expect_match(sql, 'l.score + r.score > 10', fixed = TRUE)

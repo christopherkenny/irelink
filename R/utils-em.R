@@ -42,7 +42,8 @@ get_pairs_with_gamma_counts <- function(model, blocking_rules, limit = NULL) {
   if (length(all_pairs) == 0L) {
     empty <- as.data.frame(matrix(
       integer(0),
-      nrow = 0, ncol = length(gamma_cols) + 1L,
+      nrow = 0,
+      ncol = length(gamma_cols) + 1L,
       dimnames = list(NULL, c(gamma_cols, 'n'))
     ))
     return(list(counts = empty, n_pairs = 0L))
@@ -57,7 +58,11 @@ get_pairs_with_gamma_counts <- function(model, blocking_rules, limit = NULL) {
   n_pairs <- nrow(gamma_mat)
   counts_df <- as.data.frame(gamma_mat)
   names(counts_df) <- gamma_cols
-  counts <- stats::aggregate(list(n = rep(1L, n_pairs)), by = counts_df, FUN = sum)
+  counts <- stats::aggregate(
+    list(n = rep(1L, n_pairs)),
+    by = counts_df,
+    FUN = sum
+  )
   list(counts = counts, n_pairs = n_pairs)
 }
 
@@ -80,7 +85,9 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
   tf_cols <- tf_columns(comparisons)
 
   if (dialect_has_fuzzy_sql(dialect)) {
-    sql <- build_gamma_query(model, blocking_rules,
+    sql <- build_gamma_query(
+      model,
+      blocking_rules,
       limit = limit,
       deduplicate = TRUE
     )
@@ -88,10 +95,13 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
     if (nrow(result) == 0L) {
       return(list(
         ids = data.frame(
-          l_unique_id = integer(0), r_unique_id = integer(0)
+          l_unique_id = integer(0),
+          r_unique_id = integer(0)
         ),
-        gamma_mat = matrix(0L,
-          nrow = 0, ncol = length(comp_names),
+        gamma_mat = matrix(
+          0L,
+          nrow = 0,
+          ncol = length(comp_names),
           dimnames = list(NULL, comp_names)
         ),
         tf_data = NULL
@@ -128,10 +138,13 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
   if (length(all_pairs) == 0L) {
     return(list(
       ids = data.frame(
-        l_unique_id = integer(0), r_unique_id = integer(0)
+        l_unique_id = integer(0),
+        r_unique_id = integer(0)
       ),
-      gamma_mat = matrix(0L,
-        nrow = 0, ncol = length(comp_names),
+      gamma_mat = matrix(
+        0L,
+        nrow = 0,
+        ncol = length(comp_names),
         dimnames = list(NULL, comp_names)
       ),
       tf_data = NULL
@@ -168,8 +181,11 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
 #' @return A list with `counts` (data frame of gamma columns + `n`) and
 #'   `n_pairs` (total sampled pairs).
 #' @noRd
-get_random_pairs_with_gammas <- function(model, max_pairs = 1e6,
-                                         profile = NULL) {
+get_random_pairs_with_gammas <- function(
+  model,
+  max_pairs = 1e6,
+  profile = NULL
+) {
   con <- model$con
   dialect <- detect_dialect(con)
   comparisons <- model$spec$comparisons
@@ -183,23 +199,31 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6,
     has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
     max_pairs <- as.integer(max_pairs)
 
-    gamma_exprs <- vapply(comparisons, function(comp) {
-      expr <- sql_gamma_case(comp, dialect)
-      glue::glue(
-        '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
-      )
-    }, character(1))
+    gamma_exprs <- vapply(
+      comparisons,
+      function(comp) {
+        expr <- sql_gamma_case(comp, dialect)
+        glue::glue(
+          '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+        )
+      },
+      character(1)
+    )
     gamma_select <- paste(gamma_exprs, collapse = ', ')
     group_by_clause <- sql_identifier_csv(gamma_cols)
 
     table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
-    parts <- vapply(table_pairs, function(tp) {
-      glue::glue(
-        'SELECT {gamma_select} ',
-        'FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
-        'WHERE {tp$join_cond}'
-      )
-    }, character(1))
+    parts <- vapply(
+      table_pairs,
+      function(tp) {
+        glue::glue(
+          'SELECT {gamma_select} ',
+          'FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
+          'WHERE {tp$join_cond}'
+        )
+      },
+      character(1)
+    )
     inner <- paste(parts, collapse = ' UNION ALL ')
 
     sql <- glue::glue(
@@ -207,7 +231,9 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6,
       'SELECT * FROM ({inner}) AS pairs LIMIT {max_pairs}',
       ') AS sampled GROUP BY {group_by_clause}'
     )
-    result <- il_db_get_query(con, sql,
+    result <- il_db_get_query(
+      con,
+      sql,
       step = 'estimate_u.random_pair_gamma_counts',
       profile = profile
     )
@@ -222,7 +248,8 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6,
   if (nrow(pairs) == 0L) {
     empty <- as.data.frame(matrix(
       integer(0),
-      nrow = 0, ncol = length(gamma_cols) + 1L,
+      nrow = 0,
+      ncol = length(gamma_cols) + 1L,
       dimnames = list(NULL, c(gamma_cols, 'n'))
     ))
     return(list(counts = empty, n_pairs = 0L))
@@ -231,7 +258,11 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6,
   n_pairs <- nrow(gamma_mat)
   counts_df <- as.data.frame(gamma_mat)
   names(counts_df) <- gamma_cols
-  counts <- stats::aggregate(list(n = rep(1L, n_pairs)), by = counts_df, FUN = sum)
+  counts <- stats::aggregate(
+    list(n = rep(1L, n_pairs)),
+    by = counts_df,
+    FUN = sum
+  )
   list(counts = counts, n_pairs = n_pairs)
 }
 
@@ -248,10 +279,13 @@ get_random_pairs_with_gammas <- function(model, max_pairs = 1e6,
 #' @param min_count_per_level Optional early-stop support target.
 #' @return A list with `counts`, `n_pairs`, `stopped_early`, and `n_chunks`.
 #' @noRd
-get_random_pair_gamma_counts_chunked <- function(model, max_pairs,
-                                                 chunk_size,
-                                                 min_count_per_level = NULL,
-                                                 profile = NULL) {
+get_random_pair_gamma_counts_chunked <- function(
+  model,
+  max_pairs,
+  chunk_size,
+  min_count_per_level = NULL,
+  profile = NULL
+) {
   con <- model$con
   dialect <- detect_dialect(con)
   comparisons <- model$spec$comparisons
@@ -269,23 +303,31 @@ get_random_pair_gamma_counts_chunked <- function(model, max_pairs,
     link_type <- model$link_type %||% 'dedupe'
     has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
 
-    gamma_exprs <- vapply(comparisons, function(comp) {
-      expr <- sql_gamma_case(comp, dialect)
-      glue::glue(
-        '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
-      )
-    }, character(1))
+    gamma_exprs <- vapply(
+      comparisons,
+      function(comp) {
+        expr <- sql_gamma_case(comp, dialect)
+        glue::glue(
+          '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+        )
+      },
+      character(1)
+    )
     gamma_select <- paste(gamma_exprs, collapse = ', ')
     group_by_clause <- sql_identifier_csv(gamma_cols)
 
     table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
-    parts <- vapply(table_pairs, function(tp) {
-      glue::glue(
-        'SELECT {gamma_select} ',
-        'FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
-        'WHERE {tp$join_cond}'
-      )
-    }, character(1))
+    parts <- vapply(
+      table_pairs,
+      function(tp) {
+        glue::glue(
+          'SELECT {gamma_select} ',
+          'FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
+          'WHERE {tp$join_cond}'
+        )
+      },
+      character(1)
+    )
     inner <- paste(parts, collapse = ' UNION ALL ')
 
     offset <- 0L
@@ -297,19 +339,28 @@ get_random_pair_gamma_counts_chunked <- function(model, max_pairs,
         'LIMIT {this_limit} OFFSET {offset}',
         ') AS sampled GROUP BY {group_by_clause}'
       )
-      chunk_counts <- il_db_get_query(con, sql,
+      chunk_counts <- il_db_get_query(
+        con,
+        sql,
         step = 'estimate_u.random_pair_gamma_counts_chunk',
         profile = profile
       )
       chunk_n <- if (nrow(chunk_counts) == 0L) 0L else sum(chunk_counts$n)
-      if (chunk_n == 0L) break
+      if (chunk_n == 0L) {
+        break
+      }
       counts <- combine_gamma_counts(counts, chunk_counts, gamma_cols)
       n_pairs <- n_pairs + chunk_n
       n_chunks <- n_chunks + 1L
       offset <- offset + chunk_n
-      if (gamma_support_met(
-        counts, comparisons, comp_names, min_count_per_level
-      )) {
+      if (
+        gamma_support_met(
+          counts,
+          comparisons,
+          comp_names,
+          min_count_per_level
+        )
+      ) {
         stopped_early <- TRUE
         break
       }
@@ -341,9 +392,14 @@ get_random_pair_gamma_counts_chunked <- function(model, max_pairs,
     chunk_n <- nrow(gamma_mat)
     n_pairs <- n_pairs + chunk_n
     n_chunks <- n_chunks + 1L
-    if (gamma_support_met(
-      counts, comparisons, comp_names, min_count_per_level
-    )) {
+    if (
+      gamma_support_met(
+        counts,
+        comparisons,
+        comp_names,
+        min_count_per_level
+      )
+    ) {
       stopped_early <- TRUE
       break
     }
@@ -370,18 +426,31 @@ get_random_pair_gamma_counts_chunked <- function(model, max_pairs,
 #'   and replace the purpose-specific table.
 #' @return The updated model.
 #' @noRd
-register_blocked_pairs <- function(model, blocking_rules = model$spec$blocking_rules,
-                                   purpose = 'predict', overwrite = FALSE) {
+register_blocked_pairs <- function(
+  model,
+  blocking_rules = model$spec$blocking_rules,
+  purpose = 'predict',
+  overwrite = FALSE
+) {
   validate_il_model(model)
   if (!is.list(blocking_rules)) {
     cli::cli_abort('{.arg blocking_rules} must be a list of blocking rules.')
   }
   if (length(blocking_rules) == 0L) {
-    cli::cli_abort('At least one blocking rule is required to register blocked pairs.')
+    cli::cli_abort(
+      'At least one blocking rule is required to register blocked pairs.'
+    )
   }
-  bad <- !vapply(blocking_rules, inherits, logical(1), what = 'il_blocking_rule')
+  bad <- !vapply(
+    blocking_rules,
+    inherits,
+    logical(1),
+    what = 'il_blocking_rule'
+  )
   if (any(bad)) {
-    cli::cli_abort('{.arg blocking_rules} must contain only {.cls il_blocking_rule} objects.')
+    cli::cli_abort(
+      '{.arg blocking_rules} must contain only {.cls il_blocking_rule} objects.'
+    )
   }
 
   con <- model$con
@@ -393,9 +462,20 @@ register_blocked_pairs <- function(model, blocking_rules = model$spec$blocking_r
   suffix <- if (isTRUE(overwrite)) NULL else il_table_suffix()
   tbl <- il_table_name(model, paste0('blocked_pairs_', purpose), suffix)
 
-  parts <- vapply(blocking_rules, function(rule) {
-    blocked_pair_rows_sql(tbl_l, tbl_r, rule, link_type, has_two_tables, dialect)
-  }, character(1))
+  parts <- vapply(
+    blocking_rules,
+    function(rule) {
+      blocked_pair_rows_sql(
+        tbl_l,
+        tbl_r,
+        rule,
+        link_type,
+        has_two_tables,
+        dialect
+      )
+    },
+    character(1)
+  )
   union_sql <- paste(parts, collapse = ' UNION ALL ')
   sql <- glue::glue(
     'CREATE TABLE {tbl} AS ',
@@ -419,7 +499,8 @@ register_blocked_pairs <- function(model, blocking_rules = model$spec$blocking_r
 empty_gamma_counts <- function(gamma_cols) {
   as.data.frame(matrix(
     integer(0),
-    nrow = 0, ncol = length(gamma_cols) + 1L,
+    nrow = 0,
+    ncol = length(gamma_cols) + 1L,
     dimnames = list(NULL, c(gamma_cols, 'n'))
   ))
 }
@@ -432,7 +513,11 @@ gamma_matrix_counts <- function(gamma_mat, gamma_cols) {
   }
   counts_df <- as.data.frame(gamma_mat)
   names(counts_df) <- gamma_cols
-  stats::aggregate(list(n = rep(1L, nrow(gamma_mat))), by = counts_df, FUN = sum)
+  stats::aggregate(
+    list(n = rep(1L, nrow(gamma_mat))),
+    by = counts_df,
+    FUN = sum
+  )
 }
 
 #' Combine gamma-pattern count tables
@@ -449,7 +534,8 @@ combine_gamma_counts <- function(current, chunk, gamma_cols) {
     current[, c(gamma_cols, 'n'), drop = FALSE],
     chunk[, c(gamma_cols, 'n'), drop = FALSE]
   )
-  stats::aggregate(list(n = combined$n),
+  stats::aggregate(
+    list(n = combined$n),
     by = combined[, gamma_cols, drop = FALSE],
     FUN = sum
   )
@@ -457,14 +543,20 @@ combine_gamma_counts <- function(current, chunk, gamma_cols) {
 
 #' Test whether all comparison levels have enough sampled support
 #' @noRd
-gamma_support_met <- function(counts, comparisons, comp_names,
-                              min_count_per_level) {
+gamma_support_met <- function(
+  counts,
+  comparisons,
+  comp_names,
+  min_count_per_level
+) {
   if (is.null(min_count_per_level) || nrow(counts) == 0L) {
     return(FALSE)
   }
   for (j in seq_along(comp_names)) {
     gcol <- paste0('gamma_', comp_names[j])
-    if (gcol %in% names(counts)) counts[[gcol]][is.na(counts[[gcol]])] <- 0L
+    if (gcol %in% names(counts)) {
+      counts[[gcol]][is.na(counts[[gcol]])] <- 0L
+    }
     n_levels <- n_gamma_levels(comparisons[[j]]$method)
     for (k in seq(0L, n_levels - 1L)) {
       count_k <- sum(counts$n[counts[[gcol]] == k], na.rm = TRUE)
@@ -514,11 +606,13 @@ compute_gamma <- function(val_l, val_r, comp_level) {
   if (method %in% c('jaro_winkler', 'jaro')) {
     p <- if (method == 'jaro_winkler') 0.1 else 0
     score <- rep(NA_real_, n)
-    score[both_present] <- 1 - stringdist::stringdist(
-      as.character(val_l[both_present]),
-      as.character(val_r[both_present]),
-      method = 'jw', p = p
-    )
+    score[both_present] <- 1 -
+      stringdist::stringdist(
+        as.character(val_l[both_present]),
+        as.character(val_r[both_present]),
+        method = 'jw',
+        p = p
+      )
     gamma <- rep(0L, n)
     nt <- length(thresholds)
     for (i in rev(seq_along(thresholds))) {
@@ -531,11 +625,13 @@ compute_gamma <- function(val_l, val_r, comp_level) {
   if (method %in% c('jaccard', 'cosine')) {
     sd_method <- if (method == 'jaccard') 'jaccard' else 'cosine'
     score <- rep(NA_real_, n)
-    score[both_present] <- 1 - stringdist::stringdist(
-      as.character(val_l[both_present]),
-      as.character(val_r[both_present]),
-      method = sd_method, q = 2
-    )
+    score[both_present] <- 1 -
+      stringdist::stringdist(
+        as.character(val_l[both_present]),
+        as.character(val_r[both_present]),
+        method = sd_method,
+        q = 2
+      )
     gamma <- rep(0L, n)
     nt <- length(thresholds)
     for (i in rev(seq_along(thresholds))) {
@@ -598,12 +694,7 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     nt <- length(thresholds)
     for (i in rev(seq_along(thresholds))) {
       unit <- comp_level$units[i]
-      mult <- switch(unit,
-        'days' = 1,
-        'months' = 30,
-        'years' = 365,
-        1
-      )
+      mult <- switch(unit, 'days' = 1, 'months' = 30, 'years' = 365, 1)
       days_thresh <- thresholds[i] * mult
       level_code <- nt - i + 1L
       gamma[bp & !is.na(diff) & diff <= days_thresh] <- level_code
@@ -629,7 +720,11 @@ compute_gamma <- function(val_l, val_r, comp_level) {
   if (method == 'soundex') {
     sx_l <- il_soundex(as.character(val_l))
     sx_r <- il_soundex(as.character(val_r))
-    return(ifelse(both_present & !is.na(sx_l) & !is.na(sx_r) & sx_l == sx_r, 1L, 0L))
+    return(ifelse(
+      both_present & !is.na(sx_l) & !is.na(sx_r) & sx_l == sx_r,
+      1L,
+      0L
+    ))
   }
 
   if (method == 'array_min_distance') {
@@ -641,12 +736,27 @@ compute_gamma <- function(val_l, val_r, comp_level) {
 
     gamma <- rep(0L, length(val_l))
     for (k in seq_len(length(val_l))) {
-      if (is.na(val_l[k]) || is.na(val_r[k])) next
-      a <- unique(trimws(unlist(strsplit(as.character(val_l[k]), ',', fixed = TRUE))))
-      b <- unique(trimws(unlist(strsplit(as.character(val_r[k]), ',', fixed = TRUE))))
+      if (is.na(val_l[k]) || is.na(val_r[k])) {
+        next
+      }
+      a <- unique(trimws(unlist(strsplit(
+        as.character(val_l[k]),
+        ',',
+        fixed = TRUE
+      ))))
+      b <- unique(trimws(unlist(strsplit(
+        as.character(val_r[k]),
+        ',',
+        fixed = TRUE
+      ))))
       pairs_a <- rep(a, each = length(b))
       pairs_b <- rep(b, times = length(a))
-      dists <- stringdist::stringdist(pairs_a, pairs_b, method = sd_method, p = sd_p)
+      dists <- stringdist::stringdist(
+        pairs_a,
+        pairs_b,
+        method = sd_method,
+        p = sd_p
+      )
       best <- if (fn == 'jaro_winkler') max(1 - dists) else min(dists)
       # Iterate most-lenient to strictest; overwrite with higher gamma each time
       # a stricter threshold is also satisfied. Matches the pattern in jaro_winkler
@@ -667,46 +777,61 @@ compute_gamma <- function(val_l, val_r, comp_level) {
   }
 
   if (method == 'array_subset') {
-    result <- mapply(function(a, b) {
-      if (is.na(a) || is.na(b)) {
-        return(0L)
-      }
-      a_set <- unique(unlist(strsplit(as.character(a), ',\\s*')))
-      b_set <- unique(unlist(strsplit(as.character(b), ',\\s*')))
-      if (all(a_set %in% b_set) || all(b_set %in% a_set)) 1L else 0L
-    }, val_l, val_r)
+    result <- mapply(
+      function(a, b) {
+        if (is.na(a) || is.na(b)) {
+          return(0L)
+        }
+        a_set <- unique(unlist(strsplit(as.character(a), ',\\s*')))
+        b_set <- unique(unlist(strsplit(as.character(b), ',\\s*')))
+        if (all(a_set %in% b_set) || all(b_set %in% a_set)) 1L else 0L
+      },
+      val_l,
+      val_r
+    )
     return(as.integer(result))
   }
 
   if (method == 'array_intersect') {
-    result <- mapply(function(a, b) {
-      if (is.na(a) || is.na(b)) {
-        return(0L)
-      }
-      a_set <- unique(unlist(strsplit(as.character(a), ',\\s*')))
-      b_set <- unique(unlist(strsplit(as.character(b), ',\\s*')))
-      shared <- length(intersect(a_set, b_set))
-      gamma <- 0L
-      nt <- length(thresholds)
-      for (i in rev(seq_along(thresholds))) {
-        if (shared >= thresholds[i]) {
-          gamma <- nt - i + 1L
+    result <- mapply(
+      function(a, b) {
+        if (is.na(a) || is.na(b)) {
+          return(0L)
         }
-      }
-      gamma
-    }, val_l, val_r)
+        a_set <- unique(unlist(strsplit(as.character(a), ',\\s*')))
+        b_set <- unique(unlist(strsplit(as.character(b), ',\\s*')))
+        shared <- length(intersect(a_set, b_set))
+        gamma <- 0L
+        nt <- length(thresholds)
+        for (i in rev(seq_along(thresholds))) {
+          if (shared >= thresholds[i]) {
+            gamma <- nt - i + 1L
+          }
+        }
+        gamma
+      },
+      val_l,
+      val_r
+    )
     return(as.integer(result))
   }
 
   if (method == 'levels') {
-    has_null_level <- any(vapply(comp_level$levels, function(l) {
-      isTRUE(l$is_null_level)
-    }, logical(1)))
+    has_null_level <- any(vapply(
+      comp_level$levels,
+      function(l) {
+        isTRUE(l$is_null_level)
+      },
+      logical(1)
+    ))
 
     # Check sublevels from best to worst (skip null/else)
-    sublevels <- Filter(function(l) {
-      !isTRUE(l$is_null_level) && !isTRUE(l$is_else_level)
-    }, comp_level$levels)
+    sublevels <- Filter(
+      function(l) {
+        !isTRUE(l$is_null_level) && !isTRUE(l$is_else_level)
+      },
+      comp_level$levels
+    )
     nsub <- length(sublevels)
     if (nsub == 0L) {
       gamma <- ifelse(both_present & val_l == val_r, 1L, 0L)
@@ -728,21 +853,31 @@ compute_gamma <- function(val_l, val_r, comp_level) {
   }
 
   if (method == 'and') {
-    child_mat <- vapply(comp_level$children, function(child) {
-      compute_gamma(val_l, val_r, child) > 0L
-    }, logical(n))
+    child_mat <- vapply(
+      comp_level$children,
+      function(child) {
+        compute_gamma(val_l, val_r, child) > 0L
+      },
+      logical(n)
+    )
     return(as.integer(rowSums(child_mat) == length(comp_level$children)))
   }
 
   if (method == 'or') {
-    child_mat <- vapply(comp_level$children, function(child) {
-      compute_gamma(val_l, val_r, child) > 0L
-    }, logical(n))
+    child_mat <- vapply(
+      comp_level$children,
+      function(child) {
+        compute_gamma(val_l, val_r, child) > 0L
+      },
+      logical(n)
+    )
     return(as.integer(rowSums(child_mat) > 0L))
   }
 
   if (method == 'not') {
-    return(as.integer(compute_gamma(val_l, val_r, comp_level$child) <= 0L & both_present))
+    return(as.integer(
+      compute_gamma(val_l, val_r, comp_level$child) <= 0L & both_present
+    ))
   }
 
   if (method == 'custom') {
@@ -769,23 +904,29 @@ get_blocked_pairs <- function(model, blocking) {
 
   cols <- model$data$columns
   sel <- build_select_aliases(cols)
-  block_where <- build_blocking_condition(blocking$columns, blocking$where,
+  block_where <- build_blocking_condition(
+    blocking$columns,
+    blocking$where,
     transform = blocking$transform,
     dialect = detect_dialect(con)
   )
 
   table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
-  parts <- vapply(table_pairs, function(tp) {
-    where_clause <- if (nzchar(block_where)) {
-      glue::glue('{tp$join_cond} AND {block_where}')
-    } else {
-      tp$join_cond
-    }
-    glue::glue(
-      'SELECT {sel$left}, {sel$right} FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
-      'WHERE {where_clause}'
-    )
-  }, character(1))
+  parts <- vapply(
+    table_pairs,
+    function(tp) {
+      where_clause <- if (nzchar(block_where)) {
+        glue::glue('{tp$join_cond} AND {block_where}')
+      } else {
+        tp$join_cond
+      }
+      glue::glue(
+        'SELECT {sel$left}, {sel$right} FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
+        'WHERE {where_clause}'
+      )
+    },
+    character(1)
+  )
   sql <- paste(parts, collapse = ' UNION ALL ')
 
   DBI::dbGetQuery(con, sql)
@@ -805,12 +946,16 @@ get_all_pairs <- function(model, max_pairs = 1e6) {
 
   max_pairs <- as.integer(max_pairs)
   table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
-  parts <- vapply(table_pairs, function(tp) {
-    glue::glue(
-      'SELECT {sel$left}, {sel$right} FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
-      'WHERE {tp$join_cond}'
-    )
-  }, character(1))
+  parts <- vapply(
+    table_pairs,
+    function(tp) {
+      glue::glue(
+        'SELECT {sel$left}, {sel$right} FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
+        'WHERE {tp$join_cond}'
+      )
+    },
+    character(1)
+  )
   sql <- paste(parts, collapse = ' UNION ALL ')
   sql <- glue::glue('{sql} LIMIT {max_pairs}')
 

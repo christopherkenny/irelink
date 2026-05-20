@@ -124,11 +124,20 @@ test_that('il_find_matches() validates trained model, threshold, and required co
     il_estimate_u(max_pairs = 100) |>
     il_estimate_em(block_on(surname))
   expect_error(
-    il_find_matches(trained, data.frame(first_name = 'A', surname = 'B'), threshold = NA_real_),
+    il_find_matches(
+      trained,
+      data.frame(first_name = 'A', surname = 'B'),
+      threshold = NA_real_
+    ),
     'threshold'
   )
 
-  DBI::dbWriteTable(con, 'new_missing_surname', data.frame(first_name = 'A'), overwrite = TRUE)
+  DBI::dbWriteTable(
+    con,
+    'new_missing_surname',
+    data.frame(first_name = 'A'),
+    overwrite = TRUE
+  )
   expect_error(
     il_find_matches(trained, 'new_missing_surname'),
     'missing'

@@ -85,8 +85,10 @@ il_estimate_m_from_labels <- function(model, labels) {
   }
   if (is.logical(labels$is_match)) {
     labels$is_match <- as.logical(labels$is_match)
-  } else if (is.numeric(labels$is_match) &&
-    all(labels$is_match %in% c(0, 1))) {
+  } else if (
+    is.numeric(labels$is_match) &&
+      all(labels$is_match %in% c(0, 1))
+  ) {
     labels$is_match <- labels$is_match == 1
   } else {
     cli::cli_abort('{.field is_match} must be logical or numeric 0/1.')
@@ -117,12 +119,16 @@ il_estimate_m_from_labels <- function(model, labels) {
     DBI::dbWriteTable(con, lbl_tbl, as.data.frame(lbl_df), overwrite = TRUE)
     on.exit(drop_registered(con, lbl_tbl), add = TRUE)
 
-    gamma_exprs <- vapply(comparisons, function(comp) {
-      expr <- sql_gamma_case(comp, dialect)
-      glue::glue(
-        '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
-      )
-    }, character(1))
+    gamma_exprs <- vapply(
+      comparisons,
+      function(comp) {
+        expr <- sql_gamma_case(comp, dialect)
+        glue::glue(
+          '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+        )
+      },
+      character(1)
+    )
     gamma_select <- paste(gamma_exprs, collapse = ', ')
     gamma_cols <- paste0('gamma_', comp_names)
     group_by_clause <- sql_identifier_csv(gamma_cols)
@@ -180,13 +186,21 @@ il_estimate_m_from_labels <- function(model, labels) {
     gamma_cols <- paste0('gamma_', comp_names)
     counts_df <- as.data.frame(gamma_mat)
     names(counts_df) <- gamma_cols
-    counts <- stats::aggregate(list(n = rep(1L, nrow(gamma_mat))), by = counts_df, FUN = sum)
+    counts <- stats::aggregate(
+      list(n = rep(1L, nrow(gamma_mat))),
+      by = counts_df,
+      FUN = sum
+    )
     n_pairs <- nrow(gamma_mat)
     comp_names <- colnames(gamma_mat)
   }
 
   # Compute per-level m frequencies from aggregated pattern counts
-  levels_per_comp <- vapply(comparisons, function(c) n_gamma_levels(c$method), integer(1))
+  levels_per_comp <- vapply(
+    comparisons,
+    function(c) n_gamma_levels(c$method),
+    integer(1)
+  )
   gamma_cols <- paste0('gamma_', comp_names)
 
   # Merge with existing parameters
@@ -224,11 +238,16 @@ il_estimate_m_from_labels <- function(model, labels) {
       for (k in seq(0L, nl - 1L)) {
         count_k <- sum(counts$n[counts[[gcol]] == k], na.rm = TRUE)
         m_k <- max(count_k / n_pairs, 0.001)
-        rows <- c(rows, list(data.frame(
-          comparison = cn, gamma_level = k,
-          m = m_k, u = NA_real_,
-          stringsAsFactors = FALSE
-        )))
+        rows <- c(
+          rows,
+          list(data.frame(
+            comparison = cn,
+            gamma_level = k,
+            m = m_k,
+            u = NA_real_,
+            stringsAsFactors = FALSE
+          ))
+        )
       }
     }
     params_tbl <- tibble::as_tibble(do.call(rbind, rows))

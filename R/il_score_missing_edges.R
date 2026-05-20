@@ -22,8 +22,7 @@
 #' clusters <- il_cluster(pairs)
 #' missing <- il_score_missing_edges(model, pairs, clusters)
 #' }
-il_score_missing_edges <- function(model, pairs, clusters,
-                                   threshold = 0) {
+il_score_missing_edges <- function(model, pairs, clusters, threshold = 0) {
   validate_trained_model(model)
   threshold <- validate_probability_threshold(threshold, 'threshold')
   pairs <- ensure_collected(pairs)
@@ -45,7 +44,10 @@ il_score_missing_edges <- function(model, pairs, clusters,
   con <- model$con
 
   # Build set of existing scored pairs (normalised: smaller id first)
-  existing_set <- unique(canonical_pair_key(pairs$unique_id_l, pairs$unique_id_r))
+  existing_set <- unique(canonical_pair_key(
+    pairs$unique_id_l,
+    pairs$unique_id_r
+  ))
 
   # Enumerate all within-cluster pairs
   cluster_list <- split(as.character(clusters$unique_id), clusters$cluster_id)
@@ -53,7 +55,9 @@ il_score_missing_edges <- function(model, pairs, clusters,
   missing_r <- character(0)
 
   for (members in cluster_list) {
-    if (length(members) < 2L) next
+    if (length(members) < 2L) {
+      next
+    }
     combos <- utils::combn(sort(members), 2)
     keys <- canonical_pair_key(combos[1, ], combos[2, ])
     new_mask <- !(keys %in% existing_set)
@@ -65,8 +69,10 @@ il_score_missing_edges <- function(model, pairs, clusters,
 
   if (length(missing_l) == 0L) {
     empty <- tibble::tibble(
-      unique_id_l = character(0), unique_id_r = character(0),
-      match_weight = numeric(0), total_match_weight = numeric(0),
+      unique_id_l = character(0),
+      unique_id_r = character(0),
+      match_weight = numeric(0),
+      total_match_weight = numeric(0),
       match_probability = numeric(0)
     )
     return(new_il_compared(empty, model = model))
@@ -110,7 +116,9 @@ score_specific_pairs <- function(model, id_l, id_r, threshold = 0) {
 
   n_pairs <- length(id_l)
   pair_data <- data.frame(row_idx = seq_len(n_pairs))
-  needed_cols <- unique(unlist(lapply(comparisons, function(comp) comp$columns)))
+  needed_cols <- unique(unlist(lapply(comparisons, function(comp) {
+    comp$columns
+  })))
   for (col in needed_cols) {
     pair_data[[paste0('l_', col)]] <- src_l[id_l, col]
     pair_data[[paste0('r_', col)]] <- src_r[id_r, col]
@@ -125,14 +133,19 @@ score_specific_pairs <- function(model, id_l, id_r, threshold = 0) {
       tf_data <- lookup_tf_r(model, pair_data, tf_cols)
       tf_adj <- compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
       tf_adj_list <- compute_tf_adjustment_matrix(
-        gamma_mat, tf_data, comparisons, mu
+        gamma_mat,
+        tf_data,
+        comparisons,
+        mu
       )
     }
   }
 
   if (dependency_aware) {
     scored_patterns <- dependency_pattern_score(
-      gamma_mat, comp_names, model$params$dependency_aware
+      gamma_mat,
+      comp_names,
+      model$params$dependency_aware
     )
     match_weight <- scored_patterns$match_weight
     total_mw <- scored_patterns$total_match_weight

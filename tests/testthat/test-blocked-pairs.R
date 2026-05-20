@@ -44,16 +44,18 @@ test_that('register_blocked_pairs() handles dedupe, link, and link_and_dedupe', 
 
   df_l <- data.frame(unique_id = 1:2, key = 'a')
   df_r <- data.frame(unique_id = 10:12, key = 'a')
-  link <- il_model(df_l, df_r,
-    spec = spec, con = con, link_type = 'link'
-  ) |>
+  link <- il_model(df_l, df_r, spec = spec, con = con, link_type = 'link') |>
     register_blocked_pairs(list(block_on(key)))
   expect_equal(blocked_pair_count(link), 6)
 
   both_l <- data.frame(unique_id = 1:2, key = 'a')
   both_r <- data.frame(unique_id = 10:11, key = 'a')
-  link_dedupe <- il_model(both_l, both_r,
-    spec = spec, con = con, link_type = 'link_and_dedupe'
+  link_dedupe <- il_model(
+    both_l,
+    both_r,
+    spec = spec,
+    con = con,
+    link_type = 'link_and_dedupe'
   ) |>
     register_blocked_pairs(list(block_on(key)))
   expect_equal(blocked_pair_count(link_dedupe), 6)
@@ -83,19 +85,25 @@ test_that('register_blocked_pairs() and prior counting respect exploded blocking
   con <- DBI::dbConnect(duckdb::duckdb())
   withr::defer(DBI::dbDisconnect(con, shutdown = TRUE))
 
-  DBI::dbExecute(con, '
+  DBI::dbExecute(
+    con,
+    '
     CREATE TABLE arr_test (
       unique_id INTEGER,
       name VARCHAR,
       emails VARCHAR[]
     )
-  ')
-  DBI::dbExecute(con, "
+  '
+  )
+  DBI::dbExecute(
+    con,
+    "
     INSERT INTO arr_test VALUES
       (1, 'Alice', ['alice@a.com', 'alice@b.com']),
       (2, 'Bob',   ['bob@a.com']),
       (3, 'Carol', ['alice@b.com', 'carol@c.com'])
-  ")
+  "
+  )
 
   spec <- il_spec() |>
     il_compare(name, cl_exact())

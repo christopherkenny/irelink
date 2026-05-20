@@ -29,27 +29,35 @@ cl_time_diff <- function(...) {
     cli::cli_abort('{.fn cl_time_diff} requires at least one threshold.')
   }
   valid_units <- c('seconds', 'minutes', 'hours', 'days', 'months', 'years')
-  thresholds <- vapply(args, function(a) {
-    if (is.numeric(a) && length(a) == 1L) {
-      check_unit_input(a, 'cl_time_diff')
-      return(a)
-    }
-    if (is.list(a) && !is.null(a$unit)) {
-      if (!a$unit %in% valid_units) {
-        cli::cli_abort(
-          '{.fn cl_time_diff} accepts {.or {.val {valid_units}}} units, not {.val {a$unit}}.'
-        )
+  thresholds <- vapply(
+    args,
+    function(a) {
+      if (is.numeric(a) && length(a) == 1L) {
+        check_unit_input(a, 'cl_time_diff')
+        return(a)
       }
-      return(a$value)
-    }
-    cli::cli_abort('Invalid threshold for {.fn cl_time_diff}.')
-  }, numeric(1))
-  units <- vapply(args, function(a) {
-    if (is.numeric(a) && length(a) == 1L) {
-      return('seconds')
-    }
-    a$unit
-  }, character(1))
+      if (is.list(a) && !is.null(a$unit)) {
+        if (!a$unit %in% valid_units) {
+          cli::cli_abort(
+            '{.fn cl_time_diff} accepts {.or {.val {valid_units}}} units, not {.val {a$unit}}.'
+          )
+        }
+        return(a$value)
+      }
+      cli::cli_abort('Invalid threshold for {.fn cl_time_diff}.')
+    },
+    numeric(1)
+  )
+  units <- vapply(
+    args,
+    function(a) {
+      if (is.numeric(a) && length(a) == 1L) {
+        return('seconds')
+      }
+      a$unit
+    },
+    character(1)
+  )
   seconds_values <- mapply(time_diff_to_seconds, thresholds, units)
   if (length(seconds_values) > 1L && is.unsorted(seconds_values)) {
     cli::cli_warn(

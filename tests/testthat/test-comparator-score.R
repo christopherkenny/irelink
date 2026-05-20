@@ -69,7 +69,10 @@ test_that('il_comparator_threshold_chart returns ggplot', {
     name_r = c('Jon', 'Janet', 'Bobby', 'Alison'),
     stringsAsFactors = FALSE
   )
-  p <- il_comparator_threshold_chart(df, name_l, name_r,
+  p <- il_comparator_threshold_chart(
+    df,
+    name_l,
+    name_r,
     similarity_threshold = 0.8
   )
   expect_s3_class(p, 'ggplot')

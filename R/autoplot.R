@@ -52,7 +52,9 @@ autoplot.il_model <- function(object, type = c('weights', 'parameters'), ...) {
           fill = 'Parameter'
         ) +
         ggplot2::theme_minimal() +
-        ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))
+        ggplot2::theme(
+          axis.text.x = ggplot2::element_text(angle = 45, hjust = 1)
+        )
     )
   }
 
@@ -126,7 +128,10 @@ autoplot.il_compared <- function(object, which = NULL, ...) {
   }
   object |>
     ggplot2::ggplot() +
-    ggplot2::geom_histogram(ggplot2::aes(x = .data[['match_weight']]), binwidth = 1) +
+    ggplot2::geom_histogram(
+      ggplot2::aes(x = .data[['match_weight']]),
+      binwidth = 1
+    ) +
     ggplot2::labs(
       title = 'Match Weight Distribution',
       x = 'Match Weight (log2)',
@@ -288,8 +293,11 @@ autoplot.il_unlinkables <- function(object, ...) {
 #'
 #' @return A `ggplot` object.
 #' @exportS3Method ggplot2::autoplot
-autoplot.il_count_pairs <- function(object, type = c('additional', 'raw'),
-                                    ...) {
+autoplot.il_count_pairs <- function(
+  object,
+  type = c('additional', 'raw'),
+  ...
+) {
   type <- match.arg(type)
   object$rule_wrapped <- vapply(
     object$rule,
@@ -326,7 +334,9 @@ autoplot.il_count_pairs <- function(object, type = c('additional', 'raw'),
         x = 'Pairs',
         y = NULL
       ) +
-      ggplot2::scale_x_continuous(labels = \(x) formatC(x, format = 'f', big.mark = ',', digits = 0)) +
+      ggplot2::scale_x_continuous(labels = \(x) {
+        formatC(x, format = 'f', big.mark = ',', digits = 0)
+      }) +
       ggplot2::theme_minimal()
   } else {
     object$rule_wrapped <- stats::reorder(object$rule_wrapped, object$n_pairs)
@@ -342,7 +352,9 @@ autoplot.il_count_pairs <- function(object, type = c('additional', 'raw'),
         x = NULL,
         y = 'Pairs Generated'
       ) +
-      ggplot2::scale_y_continuous(labels = \(x) formatC(x, format = 'f', big.mark = ',', digits = 0)) +
+      ggplot2::scale_y_continuous(labels = \(x) {
+        formatC(x, format = 'f', big.mark = ',', digits = 0)
+      }) +
       ggplot2::theme_minimal()
   }
   p

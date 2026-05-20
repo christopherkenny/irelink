@@ -17,7 +17,8 @@ test_that('cl_exact() generates correct equality SQL for a column', {
 
 test_that('cl_jaro_winkler() generates a CASE expression with similarity function', {
   sql <- sql_for_comparison_level(
-    cl_jaro_winkler(0.9), 'first_name',
+    cl_jaro_winkler(0.9),
+    'first_name',
     dialect = 'duckdb'
   )
   expect_match(sql, 'jaro_winkler', fixed = TRUE)
@@ -26,7 +27,8 @@ test_that('cl_jaro_winkler() generates a CASE expression with similarity functio
 
 test_that('cl_levenshtein() generates distance-based SQL', {
   sql <- sql_for_comparison_level(
-    cl_levenshtein(1, 2), 'name',
+    cl_levenshtein(1, 2),
+    'name',
     dialect = 'duckdb'
   )
   expect_match(sql, 'levenshtein', fixed = TRUE)
@@ -34,7 +36,8 @@ test_that('cl_levenshtein() generates distance-based SQL', {
 
 test_that('cl_date_diff(days(30)) generates date arithmetic SQL', {
   sql <- sql_for_comparison_level(
-    cl_date_diff(days(30)), 'dob',
+    cl_date_diff(days(30)),
+    'dob',
     dialect = 'duckdb'
   )
   expect_match(sql, '30', fixed = TRUE)
@@ -42,7 +45,8 @@ test_that('cl_date_diff(days(30)) generates date arithmetic SQL', {
 
 test_that('date-diff SQL uses PostgreSQL date arithmetic for postgres', {
   sql <- sql_for_comparison_level(
-    cl_date_diff(days(30)), 'dob',
+    cl_date_diff(days(30)),
+    'dob',
     dialect = 'postgres'
   )
   expect_match(sql, 'CAST\\(l\\."dob" AS DATE\\) - CAST\\(r\\."dob" AS DATE\\)')

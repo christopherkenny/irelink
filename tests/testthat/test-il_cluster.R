@@ -135,7 +135,10 @@ test_that("ties_method = 'drop' removes tied best-link edges", {
     unique_id_r = c('B', 'C', 'C'),
     match_probability = c(0.9, 0.9, 0.5)
   )
-  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+  pairs <- structure(
+    pairs,
+    class = c('il_compared', 'tbl_df', 'tbl', 'data.frame')
+  )
   clusters <- il_cluster(pairs, method = 'best_link', ties_method = 'drop')
   # A-B and A-C dropped; B-C kept; all three get separate or B-C cluster
   expect_equal(nrow(clusters), 3L)
@@ -147,9 +150,20 @@ test_that("ties_method = 'lowest_id' breaks ties deterministically", {
     unique_id_r = c('B', 'C'),
     match_probability = c(0.9, 0.9)
   )
-  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
-  clusters1 <- il_cluster(pairs, method = 'best_link', ties_method = 'lowest_id')
-  clusters2 <- il_cluster(pairs, method = 'best_link', ties_method = 'lowest_id')
+  pairs <- structure(
+    pairs,
+    class = c('il_compared', 'tbl_df', 'tbl', 'data.frame')
+  )
+  clusters1 <- il_cluster(
+    pairs,
+    method = 'best_link',
+    ties_method = 'lowest_id'
+  )
+  clusters2 <- il_cluster(
+    pairs,
+    method = 'best_link',
+    ties_method = 'lowest_id'
+  )
   # Deterministic: same result both times
   expect_equal(clusters1, clusters2)
 })
@@ -160,7 +174,10 @@ test_that('ties_method defaults to lowest_id', {
     unique_id_r = c('B', 'C'),
     match_probability = c(0.9, 0.8)
   )
-  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+  pairs <- structure(
+    pairs,
+    class = c('il_compared', 'tbl_df', 'tbl', 'data.frame')
+  )
   expect_no_error(il_cluster(pairs, method = 'best_link'))
 })
 
@@ -173,7 +190,10 @@ test_that('source_dataset filters same-source edges in best_link', {
     unique_id_r = c('B', 'C'),
     match_probability = c(0.9, 0.95)
   )
-  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+  pairs <- structure(
+    pairs,
+    class = c('il_compared', 'tbl_df', 'tbl', 'data.frame')
+  )
 
   sd <- c(A = 'ds1', B = 'ds2', C = 'ds1')
   clusters <- il_cluster(pairs, method = 'best_link', source_dataset = sd)
@@ -194,7 +214,10 @@ test_that('source_dataset accepts data frame input', {
     unique_id_r = c('B'),
     match_probability = c(0.9)
   )
-  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+  pairs <- structure(
+    pairs,
+    class = c('il_compared', 'tbl_df', 'tbl', 'data.frame')
+  )
 
   sd_df <- data.frame(
     unique_id = c('A', 'B'),
@@ -212,7 +235,10 @@ test_that('source_dataset warns when used with connected method', {
     unique_id_r = c('B'),
     match_probability = c(0.9)
   )
-  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+  pairs <- structure(
+    pairs,
+    class = c('il_compared', 'tbl_df', 'tbl', 'data.frame')
+  )
 
   sd <- c(A = 'ds1', B = 'ds2')
   expect_warning(
@@ -227,7 +253,10 @@ test_that('il_cluster() validates threshold and required pair columns', {
     unique_id_r = c('B'),
     match_probability = 0.9
   )
-  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+  pairs <- structure(
+    pairs,
+    class = c('il_compared', 'tbl_df', 'tbl', 'data.frame')
+  )
 
   expect_error(
     il_cluster(pairs, threshold = 'x'),
@@ -252,7 +281,10 @@ test_that('il_cluster() requires complete and unique source_dataset mappings', {
     unique_id_r = c('B'),
     match_probability = 0.9
   )
-  pairs <- structure(pairs, class = c('il_compared', 'tbl_df', 'tbl', 'data.frame'))
+  pairs <- structure(
+    pairs,
+    class = c('il_compared', 'tbl_df', 'tbl', 'data.frame')
+  )
 
   expect_error(
     il_cluster(pairs, method = 'best_link', source_dataset = c(A = 'ds1')),

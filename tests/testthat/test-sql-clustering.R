@@ -2,7 +2,9 @@
 
 # Helper: make a fake il_compared tibble with a model attribute pointing to a con
 make_sql_pairs <- function(con, id_l, id_r, prob = NULL) {
-  if (is.null(prob)) prob <- rep(0.95, length(id_l))
+  if (is.null(prob)) {
+    prob <- rep(0.95, length(id_l))
+  }
   pairs <- tibble::tibble(
     unique_id_l = as.character(id_l),
     unique_id_r = as.character(id_r),
@@ -19,10 +21,7 @@ test_that('SQL CC: simple connected components', {
   on.exit(test_discon(con))
 
   # Two clusters: {A,B,C} and {D,E}
-  pairs <- make_sql_pairs(con,
-    id_l = c('A', 'B', 'D'),
-    id_r = c('B', 'C', 'E')
-  )
+  pairs <- make_sql_pairs(con, id_l = c('A', 'B', 'D'), id_r = c('B', 'C', 'E'))
 
   clusters <- il_cluster(pairs)
 
@@ -48,7 +47,8 @@ test_that('SQL CC: threshold filtering works', {
   on.exit(test_discon(con))
 
   # A-B has high prob, B-C has low prob
-  pairs <- make_sql_pairs(con,
+  pairs <- make_sql_pairs(
+    con,
     id_l = c('A', 'B'),
     id_r = c('B', 'C'),
     prob = c(0.95, 0.40)
@@ -66,7 +66,8 @@ test_that('SQL CC: best_link method filters correctly', {
   # Triangle: A-B(0.9), A-C(0.5), B-C(0.8)
   # A's best = B; B's best = A; C's best = B
   # Only A-B is mutual best → clusters are {A,B} and {C}
-  pairs <- make_sql_pairs(con,
+  pairs <- make_sql_pairs(
+    con,
     id_l = c('A', 'A', 'B'),
     id_r = c('B', 'C', 'C'),
     prob = c(0.9, 0.5, 0.8)
@@ -85,7 +86,8 @@ test_that('SQL CC: matches igraph on chain graph', {
   on.exit(test_discon(con))
 
   # Chain: 1-2-3-4-5 → single cluster of 5
-  pairs <- make_sql_pairs(con,
+  pairs <- make_sql_pairs(
+    con,
     id_l = c('1', '2', '3', '4'),
     id_r = c('2', '3', '4', '5')
   )
@@ -102,7 +104,8 @@ test_that('SQL CC: handles star graph', {
   on.exit(test_discon(con))
 
   # Star: hub connected to 4 spokes
-  pairs <- make_sql_pairs(con,
+  pairs <- make_sql_pairs(
+    con,
     id_l = c('hub', 'hub', 'hub', 'hub'),
     id_r = c('s1', 's2', 's3', 's4')
   )
@@ -117,7 +120,8 @@ test_that('SQL CC: many disconnected components', {
   on.exit(test_discon(con))
 
   # 10 disconnected pairs → 10 clusters of 2
-  pairs <- make_sql_pairs(con,
+  pairs <- make_sql_pairs(
+    con,
     id_l = paste0('L', 1:10),
     id_r = paste0('R', 1:10)
   )
@@ -142,7 +146,8 @@ test_that('SQL graph metrics match R path', {
   on.exit(test_discon(con))
 
   # Triangle cluster + pair cluster
-  pairs <- make_sql_pairs(con,
+  pairs <- make_sql_pairs(
+    con,
     id_l = c('A', 'B', 'A', 'D'),
     id_r = c('B', 'C', 'C', 'E'),
     prob = c(0.9, 0.8, 0.7, 0.95)
@@ -178,7 +183,10 @@ test_that('SQL CC: results agree with igraph fallback', {
   )
 
   # SQL path
-  sql_pairs <- structure(pairs_data, class = c('il_compared', class(pairs_data)))
+  sql_pairs <- structure(
+    pairs_data,
+    class = c('il_compared', class(pairs_data))
+  )
   attr(sql_pairs, 'model') <- list(con = con)
   sql_cl <- il_cluster(sql_pairs)
 
@@ -187,13 +195,24 @@ test_that('SQL CC: results agree with igraph fallback', {
   r_cl <- cluster_igraph(r_pairs, threshold = NULL, method = 'connected')
 
   # Both should have same number of clusters
-  expect_equal(length(unique(sql_cl$cluster_id)), length(unique(r_cl$cluster_id)))
+  expect_equal(
+    length(unique(sql_cl$cluster_id)),
+    length(unique(r_cl$cluster_id))
+  )
 
   # Build cluster sets for comparison (ignoring naming)
   sql_sets <- split(sql_cl$unique_id, sql_cl$cluster_id)
   r_sets <- split(r_cl$unique_id, r_cl$cluster_id)
-  sql_sets <- sort(vapply(sql_sets, function(x) paste(sort(x), collapse = ','), character(1)))
-  r_sets <- sort(vapply(r_sets, function(x) paste(sort(x), collapse = ','), character(1)))
+  sql_sets <- sort(vapply(
+    sql_sets,
+    function(x) paste(sort(x), collapse = ','),
+    character(1)
+  ))
+  r_sets <- sort(vapply(
+    r_sets,
+    function(x) paste(sort(x), collapse = ','),
+    character(1)
+  ))
   expect_equal(unname(sql_sets), unname(r_sets))
 })
 
@@ -201,10 +220,7 @@ test_that('SQL CC: cleanup removes temp tables', {
   con <- test_con()
   on.exit(test_discon(con))
 
-  pairs <- make_sql_pairs(con,
-    id_l = c('A', 'B'),
-    id_r = c('B', 'C')
-  )
+  pairs <- make_sql_pairs(con, id_l = c('A', 'B'), id_r = c('B', 'C'))
 
   clusters <- il_cluster(pairs)
 
@@ -231,7 +247,8 @@ test_that('SQL CC: isolated nodes receive a single cluster_ prefix', {
   con <- test_con()
   on.exit(test_discon(con))
 
-  pairs <- make_sql_pairs(con,
+  pairs <- make_sql_pairs(
+    con,
     id_l = c('A', 'B'),
     id_r = c('B', 'C'),
     prob = c(0.95, 0.40)
@@ -249,11 +266,7 @@ test_that('SQL best_link: isolated nodes receive a single cluster_ prefix', {
   con <- test_con()
   on.exit(test_discon(con))
 
-  pairs <- make_sql_pairs(con,
-    id_l = c('A'),
-    id_r = c('B'),
-    prob = 0.40
-  )
+  pairs <- make_sql_pairs(con, id_l = c('A'), id_r = c('B'), prob = 0.40)
 
   clusters <- il_cluster(
     pairs,
@@ -275,7 +288,10 @@ test_that('SQL best_link with source_dataset matches R tie handling', {
     match_weight = c(4, 4),
     match_probability = c(0.9, 0.9)
   )
-  sql_pairs <- structure(pairs_data, class = c('il_compared', class(pairs_data)))
+  sql_pairs <- structure(
+    pairs_data,
+    class = c('il_compared', class(pairs_data))
+  )
   attr(sql_pairs, 'model') <- list(con = con)
 
   r_pairs <- structure(pairs_data, class = c('il_compared', class(pairs_data)))

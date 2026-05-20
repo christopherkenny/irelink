@@ -133,7 +133,11 @@ test_that('il_find_matches() returns zero rows when no blocking match', {
   model <- il_model(df, spec = spec, con = con) |>
     il_estimate_u(max_pairs = 1e6) |>
     il_estimate_em(block_on(surname))
-  new_rec <- data.frame(first_name = 'Q', surname = 'NONE', stringsAsFactors = FALSE)
+  new_rec <- data.frame(
+    first_name = 'Q',
+    surname = 'NONE',
+    stringsAsFactors = FALSE
+  )
   matches <- il_find_matches(model, new_rec, threshold = 0.01)
   expect_s3_class(matches, 'tbl_df')
   expect_equal(nrow(matches), 0)

@@ -106,9 +106,7 @@ test_that('chunked il_estimate_u() supports link mode with two tables', {
   spec <- il_spec() |>
     il_compare(key, cl_exact())
 
-  model <- il_model(df_l, df_r,
-    spec = spec, con = con, link_type = 'link'
-  ) |>
+  model <- il_model(df_l, df_r, spec = spec, con = con, link_type = 'link') |>
     il_estimate_u(max_pairs = 6, chunk_size = 2)
 
   expect_equal(model$params$u_estimation$n_pairs_sampled, 6)
@@ -279,8 +277,11 @@ test_that('il_estimate_prior() uses link_and_dedupe denominator', {
     il_block_on(name)
 
   model <- il_model(
-    df_l, df_r,
-    spec = spec, con = con, link_type = 'link_and_dedupe'
+    df_l,
+    df_r,
+    spec = spec,
+    con = con,
+    link_type = 'link_and_dedupe'
   ) |>
     il_estimate_prior(block_on(name), recall = 1.0)
 
@@ -345,19 +346,25 @@ test_that('il_estimate_m_from_labels() validates label table shape', {
     'unique_id_r'
   )
   expect_error(
-    il_estimate_m_from_labels(model, data.frame(
-      unique_id_l = 1L,
-      unique_id_r = 2L,
-      is_match = NA
-    )),
+    il_estimate_m_from_labels(
+      model,
+      data.frame(
+        unique_id_l = 1L,
+        unique_id_r = 2L,
+        is_match = NA
+      )
+    ),
     'is_match'
   )
   expect_error(
-    il_estimate_m_from_labels(model, data.frame(
-      unique_id_l = 1L,
-      unique_id_r = 2L,
-      is_match = 2
-    )),
+    il_estimate_m_from_labels(
+      model,
+      data.frame(
+        unique_id_l = 1L,
+        unique_id_r = 2L,
+        is_match = 2
+      )
+    ),
     '0/1'
   )
 })

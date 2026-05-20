@@ -18,7 +18,11 @@ test_that('il_cluster_confusion_matrix() matches manual record-level counts', {
     il_estimate_u(max_pairs = 1e6) |>
     il_estimate_em(block_on(surname))
 
-  cm <- il_cluster_confusion_matrix(model, labels_col = 'cluster', threshold = 0.85)
+  cm <- il_cluster_confusion_matrix(
+    model,
+    labels_col = 'cluster',
+    threshold = 0.85
+  )
   expect_s3_class(cm, 'il_cluster_confusion_matrix')
 
   pairs <- predict(model, threshold = 0.85)
@@ -28,7 +32,10 @@ test_that('il_cluster_confusion_matrix() matches manual record-level counts', {
   cluster_map <- stats::setNames(clusters$cluster_id, clusters$unique_id)
   records$cluster_id <- unname(cluster_map[records$unique_id])
   missing_cluster <- is.na(records$cluster_id)
-  records$cluster_id[missing_cluster] <- paste0('singleton_', records$unique_id[missing_cluster])
+  records$cluster_id[missing_cluster] <- paste0(
+    'singleton_',
+    records$unique_id[missing_cluster]
+  )
   records$dup_true <- duplicated(records$cluster)
   records$dup_pred <- duplicated(records$cluster_id)
 
@@ -42,8 +49,16 @@ test_that('il_cluster_confusion_matrix() errors for non-dedupe models', {
   con <- test_con()
   on.exit(test_discon(con))
 
-  df_a <- data.frame(unique_id = 1:2, name = c('John', 'Mary'), cluster = c(1, 2))
-  df_b <- data.frame(unique_id = 3:4, name = c('John', 'Bob'), cluster = c(1, 3))
+  df_a <- data.frame(
+    unique_id = 1:2,
+    name = c('John', 'Mary'),
+    cluster = c(1, 2)
+  )
+  df_b <- data.frame(
+    unique_id = 3:4,
+    name = c('John', 'Bob'),
+    cluster = c(1, 3)
+  )
 
   spec <- il_spec() |>
     il_compare(name, cl_exact()) |>
@@ -78,7 +93,11 @@ test_that('il_cluster_confusion_matrix() quotes non-syntactic labels columns on 
     il_estimate_u(max_pairs = 1e6) |>
     il_estimate_em(block_on(surname))
 
-  cm <- il_cluster_confusion_matrix(model, labels_col = 'true cluster', threshold = 0.85)
+  cm <- il_cluster_confusion_matrix(
+    model,
+    labels_col = 'true cluster',
+    threshold = 0.85
+  )
 
   expect_s3_class(cm, 'il_cluster_confusion_matrix')
   expect_equal(nrow(cm), 1L)

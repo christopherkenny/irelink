@@ -52,8 +52,13 @@
 #' # Explode array columns before blocking
 #' spec <- il_spec() |>
 #'   il_block_on(email, .explode = 'email')
-il_block_on <- function(spec, ..., .where = NULL, .transform = NULL,
-                        .explode = NULL) {
+il_block_on <- function(
+  spec,
+  ...,
+  .where = NULL,
+  .transform = NULL,
+  .explode = NULL
+) {
   if (!inherits(spec, 'il_spec')) {
     cli::cli_abort(
       '{.arg spec} must be an {.cls il_spec} object, not {.obj_type_friendly {spec}}.',
@@ -74,10 +79,16 @@ il_block_on <- function(spec, ..., .where = NULL, .transform = NULL,
     )
   }
   parsed <- parse_blocking_cols(col_exprs)
-  transform <- merge_blocking_transforms(parsed$per_col_tfs, .transform, parsed$columns)
+  transform <- merge_blocking_transforms(
+    parsed$per_col_tfs,
+    .transform,
+    parsed$columns
+  )
   rule <- structure(
     list(
-      columns = parsed$columns, where = .where, transform = transform,
+      columns = parsed$columns,
+      where = .where,
+      transform = transform,
       explode = .explode
     ),
     class = 'il_blocking_rule'
@@ -123,7 +134,9 @@ il_block_on <- function(spec, ..., .where = NULL, .transform = NULL,
 block_on <- function(..., .where = NULL, .transform = NULL, .explode = NULL) {
   col_exprs <- rlang::enquos(...)
   if (length(col_exprs) == 0L && is.null(.where)) {
-    cli::cli_abort('{.fn block_on} requires at least one column or a {.arg .where} condition.')
+    cli::cli_abort(
+      '{.fn block_on} requires at least one column or a {.arg .where} condition.'
+    )
   }
   validate_transform_arg(.transform)
   if (!is.null(.explode) && !is.character(.explode)) {
@@ -133,10 +146,16 @@ block_on <- function(..., .where = NULL, .transform = NULL, .explode = NULL) {
     )
   }
   parsed <- parse_blocking_cols(col_exprs)
-  transform <- merge_blocking_transforms(parsed$per_col_tfs, .transform, parsed$columns)
+  transform <- merge_blocking_transforms(
+    parsed$per_col_tfs,
+    .transform,
+    parsed$columns
+  )
   structure(
     list(
-      columns = parsed$columns, where = .where, transform = transform,
+      columns = parsed$columns,
+      where = .where,
+      transform = transform,
       explode = .explode
     ),
     class = 'il_blocking_rule'
@@ -224,7 +243,10 @@ validate_blocking_transform_names <- function(transform, columns) {
       bullets <- c(bullets, 'x' = 'Unknown transform name{?s}: {.val {extra}}.')
     }
     if (length(missing) > 0L) {
-      bullets <- c(bullets, 'x' = 'Missing transform name{?s}: {.val {missing}}.')
+      bullets <- c(
+        bullets,
+        'x' = 'Missing transform name{?s}: {.val {missing}}.'
+      )
     }
     cli::cli_abort(bullets, class = 'il_error_type')
   }

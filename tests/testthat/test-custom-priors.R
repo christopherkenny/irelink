@@ -5,7 +5,8 @@ custom_prior_data <- function() {
   data.frame(
     unique_id = seq_along(entity),
     block = block,
-    address = ifelse(entity %% 4L == 0L,
+    address = ifelse(
+      entity %% 4L == 0L,
       paste0('addr_', entity, '_', rep(c('a', 'b'), n_entities)),
       paste0('addr_', entity)
     ),
@@ -25,7 +26,9 @@ custom_prior_model <- function(con) {
 
 param_value <- function(model, comparison, level, field = 'm') {
   params <- il_parameters(model)
-  params[params$comparison == comparison & params$gamma_level == level, field][[1]]
+  params[params$comparison == comparison & params$gamma_level == level, field][[
+    1
+  ]]
 }
 
 test_that('prevalence priors set the start value and pull EM estimates', {
@@ -76,7 +79,10 @@ test_that('fixed m constraints hold requested parameters fixed', {
     il_estimate_em(block_on(block), max_iterations = 10L)
 
   expect_equal(param_value(model, 'sex', 1L), 0.99, tolerance = 1e-10)
-  expect_equal(sum(il_parameters(model)$m[il_parameters(model)$comparison == 'sex']), 1)
+  expect_equal(
+    sum(il_parameters(model)$m[il_parameters(model)$comparison == 'sex']),
+    1
+  )
 })
 
 test_that('custom prior validation catches malformed inputs', {
@@ -88,7 +94,10 @@ test_that('custom prior validation catches malformed inputs', {
   expect_error(il_prior_prevalence(model, 0), 'strictly')
   expect_error(il_prior_prevalence(model, 1), 'strictly')
   expect_error(il_prior_prevalence(model, 0.1, strength = -1), 'strength')
-  expect_error(il_prior_m(model, missing_col, exact = 0.5, strength = 1), 'not present')
+  expect_error(
+    il_prior_m(model, missing_col, exact = 0.5, strength = 1),
+    'not present'
+  )
   expect_error(il_prior_m(model, address, exact = 1.2, strength = 1), 'exact')
   expect_error(
     il_prior_m(model, address, levels = c('0' = 0.2, '1' = 0.7), strength = 1),
@@ -111,7 +120,10 @@ test_that('updating one prior preserves unrelated prior rows', {
 
   priors <- il_priors(model)
   expect_equal(nrow(priors), 5L)
-  expect_equal(unique(priors$strength[which(priors$comparison == 'address')]), 25)
+  expect_equal(
+    unique(priors$strength[which(priors$comparison == 'address')]),
+    25
+  )
   expect_equal(unique(priors$strength[which(priors$comparison == 'sex')]), 30)
   expect_equal(nrow(priors[priors$family == 'prevalence', ]), 1L)
 })

@@ -41,8 +41,11 @@ cl_columns_reversed <- function(col_name_2, symmetrical = FALSE) {
 
   if (symmetrical) {
     sql <- paste0(
-      'l.{col} = r.', col_name_2,
-      ' AND l.', col_name_2, ' = r.{col}'
+      'l.{col} = r.',
+      col_name_2,
+      ' AND l.',
+      col_name_2,
+      ' = r.{col}'
     )
   } else {
     sql <- paste0('l.{col} = r.', col_name_2)

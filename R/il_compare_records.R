@@ -77,7 +77,9 @@ il_compare_records <- function(record_a, record_b, spec, con = NULL) {
       '{.fn il_compare_records} requires each record input to contain exactly one row.'
     )
   }
-  needed_cols <- unique(unlist(lapply(comparisons, function(comp) comp$columns)))
+  needed_cols <- unique(unlist(lapply(comparisons, function(comp) {
+    comp$columns
+  })))
   missing_a <- setdiff(needed_cols, names(a))
   missing_b <- setdiff(needed_cols, names(b))
   if (length(missing_a) > 0L || length(missing_b) > 0L) {
@@ -107,12 +109,16 @@ il_compare_records <- function(record_a, record_b, spec, con = NULL) {
     DBI::dbWriteTable(con, tbl_tmp, as.data.frame(tmp_df), overwrite = TRUE)
     on.exit(drop_registered(con, tbl_tmp), add = TRUE)
 
-    gamma_exprs <- vapply(comparisons, function(comp) {
-      expr <- sql_gamma_case(comp, dialect)
-      glue::glue(
-        '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
-      )
-    }, character(1))
+    gamma_exprs <- vapply(
+      comparisons,
+      function(comp) {
+        expr <- sql_gamma_case(comp, dialect)
+        glue::glue(
+          '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+        )
+      },
+      character(1)
+    )
     gamma_select <- paste(gamma_exprs, collapse = ', ')
     qtbl_tmp <- sql_quote_identifier(tbl_tmp)
 
@@ -125,7 +131,10 @@ il_compare_records <- function(record_a, record_b, spec, con = NULL) {
 
     result <- tibble::tibble(.rows = 1L)
     for (j in seq_along(comp_names)) {
-      result[[paste0('gamma_', comp_names[j])]] <- as.integer(row[[paste0('gamma_', comp_names[j])]])
+      result[[paste0('gamma_', comp_names[j])]] <- as.integer(row[[paste0(
+        'gamma_',
+        comp_names[j]
+      )]])
     }
     return(result)
   }

@@ -6,16 +6,48 @@ make_attach_model <- function(con) {
   df <- data.frame(
     unique_id = 1:20,
     first_name = c(
-      'John', 'Jon', 'Jane', 'Jane', 'Bob',
-      'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas',
-      'John', 'Jon', 'Jane', 'Janet', 'Bob',
-      'Robert', 'Alice', 'Alison', 'Tom', 'Tomas'
+      'John',
+      'Jon',
+      'Jane',
+      'Jane',
+      'Bob',
+      'Bobby',
+      'Alice',
+      'Alicia',
+      'Tom',
+      'Thomas',
+      'John',
+      'Jon',
+      'Jane',
+      'Janet',
+      'Bob',
+      'Robert',
+      'Alice',
+      'Alison',
+      'Tom',
+      'Tomas'
     ),
     surname = c(
-      'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
-      'Jones', 'Brown', 'Brown', 'White', 'White',
-      'Smith', 'Smyth', 'Doe', 'Doe', 'Jones',
-      'Jones', 'Brown', 'Browne', 'White', 'White'
+      'Smith',
+      'Smith',
+      'Doe',
+      'Doe',
+      'Jones',
+      'Jones',
+      'Brown',
+      'Brown',
+      'White',
+      'White',
+      'Smith',
+      'Smyth',
+      'Doe',
+      'Doe',
+      'Jones',
+      'Jones',
+      'Brown',
+      'Browne',
+      'White',
+      'White'
     ),
     stringsAsFactors = FALSE
   )
@@ -54,16 +86,48 @@ test_that('il_attach() returns a valid il_model', {
   new_df <- data.frame(
     unique_id = 101:120,
     first_name = c(
-      'John', 'Jon', 'Jane', 'Janet', 'Bob',
-      'Bobby', 'Alice', 'Alicia', 'Tom', 'Thomas',
-      'John', 'Jon', 'Jane', 'Janet', 'Bob',
-      'Robert', 'Alice', 'Alison', 'Tom', 'Tomas'
+      'John',
+      'Jon',
+      'Jane',
+      'Janet',
+      'Bob',
+      'Bobby',
+      'Alice',
+      'Alicia',
+      'Tom',
+      'Thomas',
+      'John',
+      'Jon',
+      'Jane',
+      'Janet',
+      'Bob',
+      'Robert',
+      'Alice',
+      'Alison',
+      'Tom',
+      'Tomas'
     ),
     surname = c(
-      'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
-      'Jones', 'Brown', 'Brown', 'White', 'White',
-      'Smith', 'Smyth', 'Doe', 'Doe', 'Jones',
-      'Jones', 'Brown', 'Browne', 'White', 'White'
+      'Smith',
+      'Smith',
+      'Doe',
+      'Doe',
+      'Jones',
+      'Jones',
+      'Brown',
+      'Brown',
+      'White',
+      'White',
+      'Smith',
+      'Smyth',
+      'Doe',
+      'Doe',
+      'Jones',
+      'Jones',
+      'Brown',
+      'Browne',
+      'White',
+      'White'
     ),
     stringsAsFactors = FALSE
   )
@@ -96,12 +160,28 @@ test_that('il_attach() preserves trained parameters', {
   new_df <- data.frame(
     unique_id = 1:10,
     first_name = c(
-      'John', 'Jon', 'Jane', 'Bob', 'Alice',
-      'Tom', 'Eve', 'Sam', 'Pat', 'Kim'
+      'John',
+      'Jon',
+      'Jane',
+      'Bob',
+      'Alice',
+      'Tom',
+      'Eve',
+      'Sam',
+      'Pat',
+      'Kim'
     ),
     surname = c(
-      'Smith', 'Smith', 'Doe', 'Jones', 'Brown',
-      'White', 'Adams', 'Clark', 'Davis', 'Evans'
+      'Smith',
+      'Smith',
+      'Doe',
+      'Jones',
+      'Brown',
+      'White',
+      'Adams',
+      'Clark',
+      'Davis',
+      'Evans'
     ),
     stringsAsFactors = FALSE
   )
@@ -133,12 +213,28 @@ test_that('predict() works on attached model', {
   new_df <- data.frame(
     unique_id = 1:10,
     first_name = c(
-      'John', 'John', 'Jane', 'Jane', 'Bob',
-      'Bob', 'Alice', 'Alice', 'Tom', 'Tom'
+      'John',
+      'John',
+      'Jane',
+      'Jane',
+      'Bob',
+      'Bob',
+      'Alice',
+      'Alice',
+      'Tom',
+      'Tom'
     ),
     surname = c(
-      'Smith', 'Smith', 'Doe', 'Doe', 'Jones',
-      'Jones', 'Brown', 'Brown', 'White', 'White'
+      'Smith',
+      'Smith',
+      'Doe',
+      'Doe',
+      'Jones',
+      'Jones',
+      'Brown',
+      'Brown',
+      'White',
+      'White'
     ),
     stringsAsFactors = FALSE
   )
@@ -173,16 +269,48 @@ test_that('il_estimate_em() works on attached model (warm start)', {
   new_df <- data.frame(
     unique_id = 1:20,
     first_name = c(
-      'Liam', 'Liam', 'Emma', 'Emma', 'Noah',
-      'Olivia', 'Olivia', 'Elijah', 'Ava', 'Ava',
-      'James', 'James', 'Sophia', 'Sophia', 'Lucas',
-      'Mia', 'Mia', 'Mason', 'Harper', 'Harper'
+      'Liam',
+      'Liam',
+      'Emma',
+      'Emma',
+      'Noah',
+      'Olivia',
+      'Olivia',
+      'Elijah',
+      'Ava',
+      'Ava',
+      'James',
+      'James',
+      'Sophia',
+      'Sophia',
+      'Lucas',
+      'Mia',
+      'Mia',
+      'Mason',
+      'Harper',
+      'Harper'
     ),
     surname = c(
-      'Wilson', 'Wilson', 'Moore', 'Moore', 'Taylor',
-      'Anderson', 'Anderson', 'Thomas', 'Jackson', 'Jackson',
-      'Wilson', 'Wilson', 'Moore', 'Moore', 'Taylor',
-      'Anderson', 'Anderson', 'Thomas', 'Jackson', 'Jackson'
+      'Wilson',
+      'Wilson',
+      'Moore',
+      'Moore',
+      'Taylor',
+      'Anderson',
+      'Anderson',
+      'Thomas',
+      'Jackson',
+      'Jackson',
+      'Wilson',
+      'Wilson',
+      'Moore',
+      'Moore',
+      'Taylor',
+      'Anderson',
+      'Anderson',
+      'Thomas',
+      'Jackson',
+      'Jackson'
     ),
     stringsAsFactors = FALSE
   )
@@ -220,12 +348,28 @@ test_that('il_find_matches() works on attached model', {
   existing_df <- data.frame(
     unique_id = 1:10,
     first_name = c(
-      'John', 'Jon', 'Jane', 'Bob', 'Alice',
-      'Tom', 'Eve', 'Sam', 'Pat', 'Kim'
+      'John',
+      'Jon',
+      'Jane',
+      'Bob',
+      'Alice',
+      'Tom',
+      'Eve',
+      'Sam',
+      'Pat',
+      'Kim'
     ),
     surname = c(
-      'Smith', 'Smith', 'Doe', 'Jones', 'Brown',
-      'White', 'Adams', 'Clark', 'Davis', 'Evans'
+      'Smith',
+      'Smith',
+      'Doe',
+      'Jones',
+      'Brown',
+      'White',
+      'Adams',
+      'Clark',
+      'Davis',
+      'Evans'
     ),
     stringsAsFactors = FALSE
   )
@@ -309,12 +453,16 @@ test_that('il_attach() validates right data columns in link mode', {
   withr::defer(test_discon(con))
 
   df_a <- data.frame(
-    unique_id = 1:3, first_name = c('A', 'B', 'C'),
-    surname = c('X', 'Y', 'Z'), stringsAsFactors = FALSE
+    unique_id = 1:3,
+    first_name = c('A', 'B', 'C'),
+    surname = c('X', 'Y', 'Z'),
+    stringsAsFactors = FALSE
   )
   df_b <- data.frame(
-    unique_id = 4:6, first_name = c('D', 'E', 'F'),
-    surname = c('X', 'Y', 'Z'), stringsAsFactors = FALSE
+    unique_id = 4:6,
+    first_name = c('D', 'E', 'F'),
+    surname = c('X', 'Y', 'Z'),
+    stringsAsFactors = FALSE
   )
 
   spec <- il_spec() |>
@@ -382,8 +530,10 @@ test_that('il_attach() errors on zero-row data', {
   withr::defer(test_discon(con2))
 
   empty <- data.frame(
-    unique_id = integer(0), first_name = character(0),
-    surname = character(0), stringsAsFactors = FALSE
+    unique_id = integer(0),
+    first_name = character(0),
+    surname = character(0),
+    stringsAsFactors = FALSE
   )
 
   expect_error(il_attach(model, empty, con = con2), 'zero-row')
@@ -416,12 +566,16 @@ test_that('il_attach() errors when link model gets one table', {
   withr::defer(test_discon(con))
 
   df_a <- data.frame(
-    unique_id = 1:3, first_name = c('A', 'B', 'C'),
-    surname = c('X', 'Y', 'Z'), stringsAsFactors = FALSE
+    unique_id = 1:3,
+    first_name = c('A', 'B', 'C'),
+    surname = c('X', 'Y', 'Z'),
+    stringsAsFactors = FALSE
   )
   df_b <- data.frame(
-    unique_id = 4:6, first_name = c('D', 'E', 'F'),
-    surname = c('X', 'Y', 'Z'), stringsAsFactors = FALSE
+    unique_id = 4:6,
+    first_name = c('D', 'E', 'F'),
+    surname = c('X', 'Y', 'Z'),
+    stringsAsFactors = FALSE
   )
 
   spec <- il_spec() |>

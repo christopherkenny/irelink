@@ -59,15 +59,22 @@ cl_soundex <- function() {
 cl_name <- function(term_frequency = FALSE, phonetic = FALSE) {
   if (phonetic) {
     cl_levels(
-      cl_null(), cl_exact(),
-      cl_jaro_winkler(0.92), cl_jaro_winkler(0.88), cl_jaro_winkler(0.7),
-      cl_soundex(), cl_else(),
+      cl_null(),
+      cl_exact(),
+      cl_jaro_winkler(0.92),
+      cl_jaro_winkler(0.88),
+      cl_jaro_winkler(0.7),
+      cl_soundex(),
+      cl_else(),
       term_frequency = term_frequency
     )
   } else {
     cl_levels(
-      cl_null(), cl_exact(),
-      cl_jaro_winkler(0.92), cl_jaro_winkler(0.88), cl_jaro_winkler(0.7),
+      cl_null(),
+      cl_exact(),
+      cl_jaro_winkler(0.92),
+      cl_jaro_winkler(0.88),
+      cl_jaro_winkler(0.7),
       cl_else(),
       term_frequency = term_frequency
     )
@@ -97,8 +104,10 @@ cl_name <- function(term_frequency = FALSE, phonetic = FALSE) {
 #' # Custom thresholds: within 7 days, 6 months, 2 years
 #' il_spec() |>
 #'   il_compare(dob, cl_dob(thresholds = list(days(7), months(6), years(2))))
-cl_dob <- function(thresholds = list(months(1), years(1), years(10)),
-                   term_frequency = FALSE) {
+cl_dob <- function(
+  thresholds = list(months(1), years(1), years(10)),
+  term_frequency = FALSE
+) {
   if (!is.list(thresholds) || length(thresholds) == 0L) {
     cli::cli_abort(
       '{.arg thresholds} must be a non-empty list of unit-tagged values, ',
@@ -132,9 +141,13 @@ cl_email <- function(term_frequency = FALSE) {
   cl_levels(
     cl_null(),
     cl_exact(),
-    cl_custom("LOWER(SUBSTR(l.{col}, 1, INSTR(l.{col}, '@') - 1)) = LOWER(SUBSTR(r.{col}, 1, INSTR(r.{col}, '@') - 1))"),
+    cl_custom(
+      "LOWER(SUBSTR(l.{col}, 1, INSTR(l.{col}, '@') - 1)) = LOWER(SUBSTR(r.{col}, 1, INSTR(r.{col}, '@') - 1))"
+    ),
     cl_jaro_winkler(0.88),
-    cl_custom("LOWER(SUBSTR(l.{col}, INSTR(l.{col}, '@'), LENGTH(l.{col}))) = LOWER(SUBSTR(r.{col}, INSTR(r.{col}, '@'), LENGTH(r.{col})))"),
+    cl_custom(
+      "LOWER(SUBSTR(l.{col}, INSTR(l.{col}, '@'), LENGTH(l.{col}))) = LOWER(SUBSTR(r.{col}, INSTR(r.{col}, '@'), LENGTH(r.{col})))"
+    ),
     cl_else(),
     term_frequency = term_frequency
   )
@@ -191,7 +204,10 @@ cl_forename_surname <- function(surname = 'surname', term_frequency = FALSE) {
 #' @examples
 #' il_spec() |>
 #'   il_compare(first_name, cl_first_last_name())
-cl_first_last_name <- function(last_name = 'last_name', term_frequency = FALSE) {
+cl_first_last_name <- function(
+  last_name = 'last_name',
+  term_frequency = FALSE
+) {
   cl_forename_surname(surname = last_name, term_frequency = term_frequency)
 }
 
@@ -222,26 +238,47 @@ cl_first_last_name <- function(last_name = 'last_name', term_frequency = FALSE) 
 #' # With geographic fallback (requires lat/lon columns in the data)
 #' il_spec() |>
 #'   il_compare(postcode, cl_postcode(lat_col = 'lat', long_col = 'lon'))
-cl_postcode <- function(term_frequency = FALSE, lat_col = NULL,
-                        long_col = NULL, km_thresholds = c(1, 10, 100)) {
+cl_postcode <- function(
+  term_frequency = FALSE,
+  lat_col = NULL,
+  long_col = NULL,
+  km_thresholds = c(1, 10, 100)
+) {
   if (!is.null(lat_col) && !is.null(long_col)) {
     geo_levels <- geo_distance_levels(lat_col, long_col, sort(km_thresholds))
-    do.call(cl_levels, c(
-      list(
-        cl_null(), cl_exact(),
-        cl_custom('SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 1) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 1)'),
-        cl_custom('SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 2) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 2)'),
-        cl_custom('SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 3) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 3)')
-      ),
-      geo_levels,
-      list(cl_else(), term_frequency = term_frequency)
-    ))
+    do.call(
+      cl_levels,
+      c(
+        list(
+          cl_null(),
+          cl_exact(),
+          cl_custom(
+            'SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 1) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 1)'
+          ),
+          cl_custom(
+            'SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 2) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 2)'
+          ),
+          cl_custom(
+            'SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 3) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 3)'
+          )
+        ),
+        geo_levels,
+        list(cl_else(), term_frequency = term_frequency)
+      )
+    )
   } else {
     cl_levels(
-      cl_null(), cl_exact(),
-      cl_custom('SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 1) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 1)'),
-      cl_custom('SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 2) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 2)'),
-      cl_custom('SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 3) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 3)'),
+      cl_null(),
+      cl_exact(),
+      cl_custom(
+        'SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 1) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 1)'
+      ),
+      cl_custom(
+        'SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 2) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 2)'
+      ),
+      cl_custom(
+        'SUBSTR(l.{col}, 1, LENGTH(l.{col}) - 3) = SUBSTR(r.{col}, 1, LENGTH(r.{col}) - 3)'
+      ),
       cl_else(),
       term_frequency = term_frequency
     )
@@ -277,22 +314,31 @@ cl_postcode <- function(term_frequency = FALSE, lat_col = NULL,
 #' # With geographic fallback (requires lat/lon columns in the data)
 #' il_spec() |>
 #'   il_compare(zip, cl_zip_code(lat_col = 'lat', long_col = 'lon'))
-cl_zip_code <- function(term_frequency = FALSE, lat_col = NULL,
-                        long_col = NULL, km_thresholds = c(1, 10, 100)) {
+cl_zip_code <- function(
+  term_frequency = FALSE,
+  lat_col = NULL,
+  long_col = NULL,
+  km_thresholds = c(1, 10, 100)
+) {
   if (!is.null(lat_col) && !is.null(long_col)) {
     geo_levels <- geo_distance_levels(lat_col, long_col, sort(km_thresholds))
-    do.call(cl_levels, c(
-      list(
-        cl_null(), cl_exact(),
-        cl_custom('SUBSTR(l.{col}, 1, 5) = SUBSTR(r.{col}, 1, 5)'),
-        cl_custom('SUBSTR(l.{col}, 1, 3) = SUBSTR(r.{col}, 1, 3)')
-      ),
-      geo_levels,
-      list(cl_else(), term_frequency = term_frequency)
-    ))
+    do.call(
+      cl_levels,
+      c(
+        list(
+          cl_null(),
+          cl_exact(),
+          cl_custom('SUBSTR(l.{col}, 1, 5) = SUBSTR(r.{col}, 1, 5)'),
+          cl_custom('SUBSTR(l.{col}, 1, 3) = SUBSTR(r.{col}, 1, 3)')
+        ),
+        geo_levels,
+        list(cl_else(), term_frequency = term_frequency)
+      )
+    )
   } else {
     cl_levels(
-      cl_null(), cl_exact(),
+      cl_null(),
+      cl_exact(),
       cl_custom('SUBSTR(l.{col}, 1, 5) = SUBSTR(r.{col}, 1, 5)'),
       cl_custom('SUBSTR(l.{col}, 1, 3) = SUBSTR(r.{col}, 1, 3)'),
       cl_else(),
@@ -307,13 +353,34 @@ cl_zip_code <- function(term_frequency = FALSE, lat_col = NULL,
 geo_distance_levels <- function(lat_col, long_col, km_thresholds) {
   lapply(km_thresholds, function(d) {
     sql <- paste0(
-      'l.', lat_col, ' IS NOT NULL AND r.', lat_col, ' IS NOT NULL AND ',
-      'l.', long_col, ' IS NOT NULL AND r.', long_col, ' IS NOT NULL AND ',
+      'l.',
+      lat_col,
+      ' IS NOT NULL AND r.',
+      lat_col,
+      ' IS NOT NULL AND ',
+      'l.',
+      long_col,
+      ' IS NOT NULL AND r.',
+      long_col,
+      ' IS NOT NULL AND ',
       '2 * 6371 * ASIN(SQRT(',
-      'POWER(SIN(RADIANS((r.', lat_col, ' - l.', lat_col, ') / 2)), 2) + ',
-      'COS(RADIANS(l.', lat_col, ')) * COS(RADIANS(r.', lat_col, ')) * ',
-      'POWER(SIN(RADIANS((r.', long_col, ' - l.', long_col, ') / 2)), 2)',
-      ')) <= ', d
+      'POWER(SIN(RADIANS((r.',
+      lat_col,
+      ' - l.',
+      lat_col,
+      ') / 2)), 2) + ',
+      'COS(RADIANS(l.',
+      lat_col,
+      ')) * COS(RADIANS(r.',
+      lat_col,
+      ')) * ',
+      'POWER(SIN(RADIANS((r.',
+      long_col,
+      ' - l.',
+      long_col,
+      ') / 2)), 2)',
+      ')) <= ',
+      d
     )
     cl_custom(sql)
   })

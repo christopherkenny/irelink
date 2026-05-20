@@ -6,10 +6,18 @@ test_that('blocking prior helpers reverse one another', {
   levels_per_comp <- c(2L, 2L)
 
   adjusted <- adjust_prior_for_blocking(
-    prior, deactivated, m_list, u_list, levels_per_comp
+    prior,
+    deactivated,
+    m_list,
+    u_list,
+    levels_per_comp
   )
   reversed <- reverse_blocking_adjusted_prior(
-    adjusted, deactivated, m_list, u_list, levels_per_comp
+    adjusted,
+    deactivated,
+    m_list,
+    u_list,
+    levels_per_comp
   )
 
   expect_equal(reversed, clamp_probability(prior))

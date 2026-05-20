@@ -6,10 +6,30 @@ devtools::load_all()
 set.seed(42)
 
 make_fake_data <- function(n) {
-  first_names <- c("John", "Jane", "Alice", "Bob", "Carol",
-                    "David", "Eve", "Frank", "Grace", "Hank")
-  surnames <- c("Smith", "Johnson", "Williams", "Brown", "Jones",
-                "Garcia", "Miller", "Davis", "Wilson", "Moore")
+  first_names <- c(
+    "John",
+    "Jane",
+    "Alice",
+    "Bob",
+    "Carol",
+    "David",
+    "Eve",
+    "Frank",
+    "Grace",
+    "Hank"
+  )
+  surnames <- c(
+    "Smith",
+    "Johnson",
+    "Williams",
+    "Brown",
+    "Jones",
+    "Garcia",
+    "Miller",
+    "Davis",
+    "Wilson",
+    "Moore"
+  )
 
   data.frame(
     unique_id = seq_len(n),
@@ -18,8 +38,11 @@ make_fake_data <- function(n) {
     dob = as.character(
       as.Date("1960-01-01") + sample(0:20000, n, replace = TRUE)
     ),
-    city = sample(c("Portland", "Seattle", "Denver", "Austin", "Boston"),
-                  n, replace = TRUE),
+    city = sample(
+      c("Portland", "Seattle", "Denver", "Austin", "Boston"),
+      n,
+      replace = TRUE
+    ),
     stringsAsFactors = FALSE
   )
 }
@@ -40,24 +63,34 @@ run_benchmark <- function(n) {
     DBI::dbDisconnect(con)
   })
 
-  t_model   <- system.time(model <- il_model(df, spec = spec, con = con))["elapsed"]
-  t_u       <- system.time(model <- il_estimate_u(
-    model,
-    max_pairs = min(n * (n - 1) / 2, 1e6),
-    chunk_size = 250000
-  ))["elapsed"]
-  t_em      <- system.time(model <- il_estimate_em(model, block_on(surname)))["elapsed"]
+  t_model <- system.time(model <- il_model(df, spec = spec, con = con))[
+    "elapsed"
+  ]
+  t_u <- system.time(
+    model <- il_estimate_u(
+      model,
+      max_pairs = min(n * (n - 1) / 2, 1e6),
+      chunk_size = 250000
+    )
+  )["elapsed"]
+  t_em <- system.time(model <- il_estimate_em(model, block_on(surname)))[
+    "elapsed"
+  ]
   t_predict <- system.time(pairs <- predict(model, threshold = 0.5))["elapsed"]
-  t_cluster <- if (nrow(pairs) > 0) system.time(il_cluster(pairs))["elapsed"] else 0
+  t_cluster <- if (nrow(pairs) > 0) {
+    system.time(il_cluster(pairs))["elapsed"]
+  } else {
+    0
+  }
 
   tibble::tibble(
-    n       = n,
-    model   = t_model,
-    u_est   = t_u,
-    em      = t_em,
+    n = n,
+    model = t_model,
+    u_est = t_u,
+    em = t_em,
     predict = t_predict,
     cluster = t_cluster,
-    total   = t_model + t_u + t_em + t_predict + t_cluster
+    total = t_model + t_u + t_em + t_predict + t_cluster
   )
 }
 

@@ -42,8 +42,13 @@
 #' con <- DBI::dbConnect(duckdb::duckdb())
 #' il_largest_blocks(df, block_on(city), n = 3, con = con)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_largest_blocks <- function(.data, rule, n = 5L, con = NULL,
-                              link_type = c('dedupe', 'link')) {
+il_largest_blocks <- function(
+  .data,
+  rule,
+  n = 5L,
+  con = NULL,
+  link_type = c('dedupe', 'link')
+) {
   link_type <- match.arg(link_type)
   n <- as.integer(n)
 
@@ -57,8 +62,10 @@ il_largest_blocks <- function(.data, rule, n = 5L, con = NULL,
   }
 
   tbl_name <- il_scratch_table_name('largest')
-  reg <- register_data(.data,
-    con = con, tbl_name = tbl_name,
+  reg <- register_data(
+    .data,
+    con = con,
+    tbl_name = tbl_name,
     add_unique_id = FALSE
   )
   con <- reg$con
@@ -69,19 +76,33 @@ il_largest_blocks <- function(.data, rule, n = 5L, con = NULL,
   group_cols <- sql_identifier_csv(cols)
   qtbl <- sql_quote_identifier(tbl_name)
   transformed_cols <- lapply(cols, function(col) {
-    col_tf <- if (is.list(rule$transform)) rule$transform[[col]] else rule$transform
+    col_tf <- if (is.list(rule$transform)) {
+      rule$transform[[col]]
+    } else {
+      rule$transform
+    }
     sql_transform_col(sql_quote_identifier(col), col_tf, dialect)
   })
   select_cols <- paste(
-    vapply(seq_along(cols), function(i) {
-      glue::glue('{transformed_cols[[i]]} AS {sql_quote_identifier(cols[[i]])}')
-    }, character(1)),
+    vapply(
+      seq_along(cols),
+      function(i) {
+        glue::glue(
+          '{transformed_cols[[i]]} AS {sql_quote_identifier(cols[[i]])}'
+        )
+      },
+      character(1)
+    ),
     collapse = ', '
   )
   null_filters <- paste(
-    vapply(transformed_cols, function(expr) {
-      glue::glue('{expr} IS NOT NULL')
-    }, character(1)),
+    vapply(
+      transformed_cols,
+      function(expr) {
+        glue::glue('{expr} IS NOT NULL')
+      },
+      character(1)
+    ),
     collapse = ' AND '
   )
 
@@ -97,7 +118,9 @@ il_largest_blocks <- function(.data, rule, n = 5L, con = NULL,
   res <- DBI::dbGetQuery(con, sql)
 
   if (link_type == 'dedupe') {
-    res$n_pairs <- as.numeric(res$n_records) * (as.numeric(res$n_records) - 1) / 2
+    res$n_pairs <- as.numeric(res$n_records) *
+      (as.numeric(res$n_records) - 1) /
+      2
   } else {
     res$n_pairs <- as.numeric(res$n_records)^2
   }

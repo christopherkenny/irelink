@@ -57,7 +57,9 @@ il_comparison_vectors <- function(model, blocking = NULL, limit = NULL) {
     gamma_mat <- result$gamma_mat
 
     if (nrow(gamma_mat) == 0L) {
-      cli::cli_abort('No pairs generated. Use a less restrictive blocking rule.')
+      cli::cli_abort(
+        'No pairs generated. Use a less restrictive blocking rule.'
+      )
     }
 
     gamma_df <- as.data.frame(gamma_mat)
@@ -101,9 +103,13 @@ autoplot.il_comparison_vectors <- function(object, ...) {
 
   top |>
     ggplot2::ggplot() +
-    ggplot2::geom_col(ggplot2::aes(x = .data$count, y = .data$pattern), fill = '#2171b5') +
+    ggplot2::geom_col(
+      ggplot2::aes(x = .data$count, y = .data$pattern),
+      fill = '#2171b5'
+    ) +
     ggplot2::labs(
-      x = 'Count', y = 'Comparison Vector (gamma pattern)',
+      x = 'Count',
+      y = 'Comparison Vector (gamma pattern)',
       title = 'Comparison Vector Distribution (Top 20)'
     ) +
     ggplot2::theme_minimal()

@@ -34,11 +34,7 @@ make_tied_link_model <- function(con) {
     il_compare(key, cl_exact()) |>
     il_block_on(key)
 
-  il_model(df_l, df_r,
-    spec = spec,
-    con = con,
-    link_type = 'link'
-  ) |>
+  il_model(df_l, df_r, spec = spec, con = con, link_type = 'link') |>
     il_estimate_u(max_pairs = 1e4) |>
     il_estimate_em(block_on(key))
 }
@@ -66,8 +62,11 @@ test_that('predict() output has required columns', {
   pairs <- predict(model)
 
   required_cols <- c(
-    'unique_id_l', 'unique_id_r', 'match_weight',
-    'total_match_weight', 'match_probability'
+    'unique_id_l',
+    'unique_id_r',
+    'match_weight',
+    'total_match_weight',
+    'match_probability'
   )
   expect_true(all(required_cols %in% names(pairs)))
 })
@@ -80,7 +79,10 @@ test_that('predict() validates public scoring controls', {
 
   expect_error(predict(model, threshold = NA_real_), 'threshold')
   expect_error(predict(model, threshold = 1.5), 'threshold')
-  expect_error(predict(model, threshold_match_weight = Inf), 'threshold_match_weight')
+  expect_error(
+    predict(model, threshold_match_weight = Inf),
+    'threshold_match_weight'
+  )
   expect_error(predict(model, collect = NA), 'collect')
   expect_error(predict(model, include_fields = NA), 'include_fields')
   expect_error(predict(model, profile_sql = NA), 'profile_sql')
@@ -94,7 +96,10 @@ test_that('predict(type = "weights") returns model weight summaries', {
   weights <- predict(model, type = 'weights')
 
   expect_s3_class(weights, 'tbl_df')
-  expect_true(all(c('comparison', 'gamma_level', 'm_prob', 'u_prob', 'weight') %in% names(weights)))
+  expect_true(all(
+    c('comparison', 'gamma_level', 'm_prob', 'u_prob', 'weight') %in%
+      names(weights)
+  ))
   expect_equal(weights, il_weights(model))
 })
 
@@ -204,7 +209,11 @@ test_that('il_compared supports dplyr verbs', {
   expect_true('is_match' %in% names(with_flag))
 
   # summarise
-  summary <- dplyr::summarise(pairs, n = dplyr::n(), mean_prob = mean(match_probability))
+  summary <- dplyr::summarise(
+    pairs,
+    n = dplyr::n(),
+    mean_prob = mean(match_probability)
+  )
   expect_true('mean_prob' %in% names(summary))
 })
 

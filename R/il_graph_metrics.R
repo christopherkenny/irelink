@@ -80,7 +80,8 @@ il_graph_metrics <- function(pairs, clusters) {
   # Try SQL path first
   model <- attr(pairs, 'model')
   con <- if (!is.null(model)) model$con else NULL
-  use_sql <- !is.null(con) && DBI::dbIsValid(con) &&
+  use_sql <- !is.null(con) &&
+    DBI::dbIsValid(con) &&
     detect_dialect(con) %in% c('duckdb', 'postgres')
 
   if (use_sql) {
@@ -222,16 +223,20 @@ graph_metrics_r <- function(pairs, clusters) {
     n_nodes = n_nodes_vec,
     n_edges = n_edges_vec,
     density = density_vec,
-    cluster_centralisation = vapply(seq_along(cluster_ids), function(i) {
-      n <- n_nodes_vec[i]
-      if (n <= 2L) {
-        return(NA_real_)
-      }
-      cid <- cluster_ids[i]
-      member_degrees <- nodes$degree[nodes$cluster_id == cid]
-      max_deg <- max(member_degrees)
-      (n * max_deg - sum(member_degrees)) / ((n - 1) * (n - 2))
-    }, numeric(1))
+    cluster_centralisation = vapply(
+      seq_along(cluster_ids),
+      function(i) {
+        n <- n_nodes_vec[i]
+        if (n <= 2L) {
+          return(NA_real_)
+        }
+        cid <- cluster_ids[i]
+        member_degrees <- nodes$degree[nodes$cluster_id == cid]
+        max_deg <- max(member_degrees)
+        (n * max_deg - sum(member_degrees)) / ((n - 1) * (n - 2))
+      },
+      numeric(1)
+    )
   )
 
   list(nodes = nodes, edges = edges, clusters = cluster_tbl)

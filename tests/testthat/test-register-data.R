@@ -7,7 +7,6 @@ test_that('register_data handles data.frame input', {
   reg <- register_data(fake_20, con = con, tbl_name = '__test_df')
   on.exit(drop_registered(con, '__test_df'), add = TRUE, after = FALSE)
 
-
   expect_equal(reg$tbl_name, '__test_df')
   expect_identical(reg$con, con)
   expect_equal(reg$n_records, 20L)

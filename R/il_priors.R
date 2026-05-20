@@ -13,7 +13,8 @@
 il_prior_prevalence <- function(model, probability, strength = NULL) {
   validate_il_model(model)
   probability <- validate_probability_scalar(
-    probability, 'probability',
+    probability,
+    'probability',
     allow_boundary = FALSE
   )
   strength <- validate_strength(strength)
@@ -48,16 +49,25 @@ il_prior_prevalence <- function(model, probability, strength = NULL) {
 #'
 #' @return The model with prior metadata stored in `model$params$priors`.
 #' @export
-il_prior_m <- function(model, col, exact = NULL, levels = NULL,
-                       strength, remainder = c('current')) {
+il_prior_m <- function(
+  model,
+  col,
+  exact = NULL,
+  levels = NULL,
+  strength,
+  remainder = c('current')
+) {
   validate_il_model(model)
   col <- as.character(rlang::ensym(col))
   strength <- validate_strength(strength, allow_null = FALSE)
   remainder <- match.arg(remainder)
 
   dist <- prior_distribution(
-    model, col,
-    exact = exact, levels = levels, remainder = remainder,
+    model,
+    col,
+    exact = exact,
+    levels = levels,
+    remainder = remainder,
     full_for_exact = TRUE
   )
   row <- tibble::tibble(
@@ -92,8 +102,11 @@ il_constrain_m <- function(model, col, exact = NULL, levels = NULL) {
   col <- as.character(rlang::ensym(col))
 
   dist <- prior_distribution(
-    model, col,
-    exact = exact, levels = levels, remainder = 'current',
+    model,
+    col,
+    exact = exact,
+    levels = levels,
+    remainder = 'current',
     full_for_exact = FALSE
   )
   row <- tibble::tibble(
@@ -105,7 +118,10 @@ il_constrain_m <- function(model, col, exact = NULL, levels = NULL) {
   if (is.null(model$params[['prior']])) {
     model$params$prior <- safe_prior(model)
   }
-  model$params$constraints <- upsert_constraint_rows(model$params$constraints, row)
+  model$params$constraints <- upsert_constraint_rows(
+    model$params$constraints,
+    row
+  )
   model
 }
 
@@ -129,10 +145,19 @@ il_constraints <- function(model) {
   model$params$constraints %||% empty_constraints_tbl()
 }
 
-validate_probability_scalar <- function(x, arg = 'probability',
-                                        allow_boundary = TRUE) {
-  if (!is.numeric(x) || length(x) != 1L || !is.finite(x) ||
-    is.na(x) || x < 0 || x > 1) {
+validate_probability_scalar <- function(
+  x,
+  arg = 'probability',
+  allow_boundary = TRUE
+) {
+  if (
+    !is.numeric(x) ||
+      length(x) != 1L ||
+      !is.finite(x) ||
+      is.na(x) ||
+      x < 0 ||
+      x > 1
+  ) {
     cli::cli_abort('{.arg {arg}} must be a finite probability between 0 and 1.')
   }
   if (!allow_boundary && (x <= 0 || x >= 1)) {
@@ -145,16 +170,20 @@ validate_strength <- function(x, allow_null = TRUE) {
   if (is.null(x) && allow_null) {
     return(NULL)
   }
-  if (!is.numeric(x) || length(x) != 1L || !is.finite(x) ||
-    is.na(x) || x < 0) {
+  if (!is.numeric(x) || length(x) != 1L || !is.finite(x) || is.na(x) || x < 0) {
     cli::cli_abort('{.arg strength} must be a finite non-negative number.')
   }
   as.numeric(x)
 }
 
-prior_distribution <- function(model, col, exact = NULL, levels = NULL,
-                               remainder = 'current',
-                               full_for_exact = TRUE) {
+prior_distribution <- function(
+  model,
+  col,
+  exact = NULL,
+  levels = NULL,
+  remainder = 'current',
+  full_for_exact = TRUE
+) {
   if (!xor(is.null(exact), is.null(levels))) {
     cli::cli_abort('Supply exactly one of {.arg exact} or {.arg levels}.')
   }
@@ -190,14 +219,21 @@ prior_distribution <- function(model, col, exact = NULL, levels = NULL,
 }
 
 validate_level_distribution <- function(levels, expected_names) {
-  if (!is.numeric(levels) || is.null(names(levels)) ||
-    anyNA(levels) || !all(is.finite(levels)) || any(levels < 0)) {
+  if (
+    !is.numeric(levels) ||
+      is.null(names(levels)) ||
+      anyNA(levels) ||
+      !all(is.finite(levels)) ||
+      any(levels < 0)
+  ) {
     cli::cli_abort(
       '{.arg levels} must be a named numeric vector of finite non-negative probabilities.'
     )
   }
   if (any(names(levels) == '') || anyDuplicated(names(levels))) {
-    cli::cli_abort('{.arg levels} must have unique non-empty gamma-level names.')
+    cli::cli_abort(
+      '{.arg levels} must have unique non-empty gamma-level names.'
+    )
   }
   if (!setequal(names(levels), expected_names)) {
     cli::cli_abort(
@@ -218,15 +254,25 @@ remainder_weights <- function(model, col, level_names) {
       params <- migrate_params_to_gamma_level(params)
     }
     rows <- params[params$comparison == col, , drop = FALSE]
-    rows <- rows[match(as.integer(level_names), rows$gamma_level), , drop = FALSE]
-    if (nrow(rows) == length(level_names) && all(is.finite(rows$m)) &&
-      sum(rows$m, na.rm = TRUE) > 0) {
+    rows <- rows[
+      match(as.integer(level_names), rows$gamma_level),
+      ,
+      drop = FALSE
+    ]
+    if (
+      nrow(rows) == length(level_names) &&
+        all(is.finite(rows$m)) &&
+        sum(rows$m, na.rm = TRUE) > 0
+    ) {
       w <- rows$m / sum(rows$m)
       names(w) <- level_names
       return(w)
     }
   }
-  stats::setNames(rep(1 / length(level_names), length(level_names)), level_names)
+  stats::setNames(
+    rep(1 / length(level_names), length(level_names)),
+    level_names
+  )
 }
 
 empty_priors_tbl <- function() {
@@ -275,20 +321,35 @@ upsert_constraint_rows <- function(existing, rows) {
   tibble::as_tibble(rbind(existing[keep, , drop = FALSE], rows))
 }
 
-em_prior_metadata <- function(model, deactivated, comp_names, levels_per_comp,
-                              m_list, u_list) {
+em_prior_metadata <- function(
+  model,
+  deactivated,
+  comp_names,
+  levels_per_comp,
+  m_list,
+  u_list
+) {
   priors <- model$params$priors
   constraints <- model$params$constraints
   validate_em_prior_targets(priors, constraints, deactivated, comp_names)
 
   prevalence <- NULL
   if (!is.null(priors) && nrow(priors) > 0L) {
-    prevalence_rows <- priors[priors$family == 'prevalence' &
-      is.finite(priors$strength) & priors$strength > 0, , drop = FALSE]
+    prevalence_rows <- priors[
+      priors$family == 'prevalence' &
+        is.finite(priors$strength) &
+        priors$strength > 0,
+      ,
+      drop = FALSE
+    ]
     if (nrow(prevalence_rows) > 0L) {
       row <- prevalence_rows[nrow(prevalence_rows), ]
       target <- adjust_prior_for_blocking(
-        row$probability, deactivated, m_list, u_list, levels_per_comp
+        row$probability,
+        deactivated,
+        m_list,
+        u_list,
+        levels_per_comp
       )
       prevalence <- list(
         probability = target,
@@ -306,10 +367,17 @@ em_prior_metadata <- function(model, deactivated, comp_names, levels_per_comp,
   )
 }
 
-validate_em_prior_targets <- function(priors, constraints, deactivated, comp_names) {
+validate_em_prior_targets <- function(
+  priors,
+  constraints,
+  deactivated,
+  comp_names
+) {
   bad <- character(0)
   for (tbl in list(priors, constraints)) {
-    if (is.null(tbl) || nrow(tbl) == 0L) next
+    if (is.null(tbl) || nrow(tbl) == 0L) {
+      next
+    }
     field_rows <- tbl[tbl$family == 'm', , drop = FALSE]
     bad <- c(bad, intersect(field_rows$comparison, comp_names[deactivated]))
   }
@@ -341,7 +409,9 @@ model_prior_strength <- function(priors, comparison) {
   if (is.null(priors) || nrow(priors) == 0L) {
     return(0)
   }
-  rows <- priors[priors$family == 'm' & priors$comparison == comparison, ,
+  rows <- priors[
+    priors$family == 'm' & priors$comparison == comparison,
+    ,
     drop = FALSE
   ]
   if (nrow(rows) == 0L) {

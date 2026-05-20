@@ -57,11 +57,16 @@ test_that('lazy prediction tables are model-prefixed and cleaned by il_cleanup()
 
   lazy <- predict(model, threshold = 0, collect = FALSE)
 
-  expect_true(startsWith(lazy$predicted_tbl, paste0(model$data$table_prefix, '_')))
+  expect_true(startsWith(
+    lazy$predicted_tbl,
+    paste0(model$data$table_prefix, '_')
+  ))
   expect_true(DBI::dbExistsTable(con, lazy$predicted_tbl))
   expect_true(lazy$predicted_tbl %in% lazy$model$data$tables$table)
   expect_equal(
-    lazy$model$data$tables$owner[lazy$model$data$tables$table == lazy$predicted_tbl],
+    lazy$model$data$tables$owner[
+      lazy$model$data$tables$table == lazy$predicted_tbl
+    ],
     'lazy'
   )
 

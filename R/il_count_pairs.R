@@ -63,8 +63,12 @@
 #'   con = con
 #' )
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_count_pairs <- function(.data, ..., con = NULL,
-                           link_type = c('dedupe', 'link')) {
+il_count_pairs <- function(
+  .data,
+  ...,
+  con = NULL,
+  link_type = c('dedupe', 'link')
+) {
   link_type <- match.arg(link_type)
   dots <- list(...)
 
@@ -80,8 +84,10 @@ il_count_pairs <- function(.data, ..., con = NULL,
   }
 
   tbl_l <- il_scratch_table_name('pairs_l')
-  reg_l <- register_data(.data,
-    con = con, tbl_name = tbl_l,
+  reg_l <- register_data(
+    .data,
+    con = con,
+    tbl_name = tbl_l,
     add_unique_id = TRUE
   )
   con <- reg_l$con
@@ -92,8 +98,10 @@ il_count_pairs <- function(.data, ..., con = NULL,
 
   if (link_type == 'link' && length(extra_inputs) > 0L) {
     tbl_r <- il_scratch_table_name('pairs_r')
-    reg_r <- register_data(extra_inputs[[1]],
-      con = con, tbl_name = tbl_r,
+    reg_r <- register_data(
+      extra_inputs[[1]],
+      con = con,
+      tbl_name = tbl_r,
       add_unique_id = TRUE
     )
     on.exit(drop_registered(con, tbl_r), add = TRUE)
@@ -126,11 +134,17 @@ il_count_pairs <- function(.data, ..., con = NULL,
   dialect <- detect_dialect(con)
 
   results <- lapply(blocking_rules, function(rule) {
-    where <- build_blocking_condition(rule$columns, rule$where,
+    where <- build_blocking_condition(
+      rule$columns,
+      rule$where,
       transform = rule$transform,
       dialect = dialect
     )
-    n <- count_blocked_pairs(con, tbl_l, tbl_r, where,
+    n <- count_blocked_pairs(
+      con,
+      tbl_l,
+      tbl_r,
+      where,
       dedupe = (link_type == 'dedupe')
     )
     label <- if (length(rule$columns) > 0L) {
@@ -152,16 +166,25 @@ il_count_pairs <- function(.data, ..., con = NULL,
   cum_pairs <- numeric(length(blocking_rules))
   for (i in seq_along(blocking_rules)) {
     rule <- blocking_rules[[i]]
-    where <- build_blocking_condition(rule$columns, rule$where,
+    where <- build_blocking_condition(
+      rule$columns,
+      rule$where,
       transform = rule$transform,
       dialect = dialect
     )
-    dedup_cond <- if (link_type == 'dedupe') 'l.unique_id < r.unique_id AND ' else ''
-    cum_parts <- c(cum_parts, glue::glue(
-      'SELECT l.unique_id AS lid, r.unique_id AS rid ',
-      'FROM {tbl_l} l, {tbl_r} r ',
-      'WHERE {dedup_cond}{where}'
-    ))
+    dedup_cond <- if (link_type == 'dedupe') {
+      'l.unique_id < r.unique_id AND '
+    } else {
+      ''
+    }
+    cum_parts <- c(
+      cum_parts,
+      glue::glue(
+        'SELECT l.unique_id AS lid, r.unique_id AS rid ',
+        'FROM {tbl_l} l, {tbl_r} r ',
+        'WHERE {dedup_cond}{where}'
+      )
+    )
     union_sql <- paste(cum_parts, collapse = ' UNION ')
     count_sql <- glue::glue('SELECT COUNT(*) AS n FROM ({union_sql}) AS __cum')
     cum_pairs[i] <- as.numeric(DBI::dbGetQuery(con, count_sql)$n[1])

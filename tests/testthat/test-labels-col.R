@@ -16,7 +16,9 @@ test_that('labels_from_column derives pairwise labels from cluster column', {
 
   labels <- labels_from_column(model, 'cluster')
   expect_true(is.data.frame(labels))
-  expect_true(all(c('unique_id_l', 'unique_id_r', 'is_match') %in% names(labels)))
+  expect_true(all(
+    c('unique_id_l', 'unique_id_r', 'is_match') %in% names(labels)
+  ))
   expect_true(all(labels$is_match %in% c(0L, 1L)))
   expect_true(nrow(labels) > 0)
 })

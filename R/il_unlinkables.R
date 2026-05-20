@@ -63,7 +63,8 @@
 il_unlinkables <- function(model) {
   validate_il_model(model)
   link_type <- model$link_type %||% 'dedupe'
-  has_right_table <- !is.null(model$data$n_records_r) && !identical(link_type, 'dedupe')
+  has_right_table <- !is.null(model$data$n_records_r) &&
+    !identical(link_type, 'dedupe')
   n_records <- if (has_right_table) {
     as.numeric(model$data$n_records_l) + as.numeric(model$data$n_records_r)
   } else {
@@ -98,9 +99,13 @@ il_unlinkables <- function(model) {
     }
     max_probs <- DBI::dbGetQuery(con, max_prob_sql)$max_prob
 
-    pcts <- vapply(thresholds, function(t) {
-      1 - sum(max_probs >= t) / n_records
-    }, numeric(1))
+    pcts <- vapply(
+      thresholds,
+      function(t) {
+        1 - sum(max_probs >= t) / n_records
+      },
+      numeric(1)
+    )
 
     return(
       tibble::tibble(threshold = thresholds, pct_unlinkable = pcts) |>

@@ -46,31 +46,47 @@ test_that('il_register_tf validates value and probability columns', {
   model <- il_model(fake_1000, spec = spec, con = con)
 
   expect_error(
-    il_register_tf(model, 'missing_col', data.frame(
-      missing_col = 'John',
-      tf_missing_col = 0.1
-    )),
+    il_register_tf(
+      model,
+      'missing_col',
+      data.frame(
+        missing_col = 'John',
+        tf_missing_col = 0.1
+      )
+    ),
     'not found'
   )
   expect_error(
-    il_register_tf(model, 'first_name', data.frame(
-      first_name = c('John', 'John'),
-      tf_first_name = c(0.1, 0.2)
-    )),
+    il_register_tf(
+      model,
+      'first_name',
+      data.frame(
+        first_name = c('John', 'John'),
+        tf_first_name = c(0.1, 0.2)
+      )
+    ),
     'unique'
   )
   expect_error(
-    il_register_tf(model, 'first_name', data.frame(
-      first_name = 'John',
-      tf_first_name = 0
-    )),
+    il_register_tf(
+      model,
+      'first_name',
+      data.frame(
+        first_name = 'John',
+        tf_first_name = 0
+      )
+    ),
     'probabilities'
   )
   expect_error(
-    il_register_tf(model, 'first_name', data.frame(
-      first_name = 'John',
-      tf_first_name = NA_real_
-    )),
+    il_register_tf(
+      model,
+      'first_name',
+      data.frame(
+        first_name = 'John',
+        tf_first_name = NA_real_
+      )
+    ),
     'probabilities'
   )
 })

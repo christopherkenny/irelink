@@ -16,7 +16,9 @@ test_that('training functions can record SQL profile entries', {
 
   expect_s3_class(model$params$sql_profile, 'tbl_df')
   expect_true(nrow(model$params$sql_profile) > 0)
-  expect_true('estimate_u.random_pair_gamma_counts' %in% model$params$sql_profile$step)
+  expect_true(
+    'estimate_u.random_pair_gamma_counts' %in% model$params$sql_profile$step
+  )
 
   model <- il_estimate_prior(
     model,
@@ -24,7 +26,10 @@ test_that('training functions can record SQL profile entries', {
     recall = 1,
     profile_sql = TRUE
   )
-  expect_true('estimate_prior.count_unique_blocked_pairs' %in% model$params$sql_profile$step)
+  expect_true(
+    'estimate_prior.count_unique_blocked_pairs' %in%
+      model$params$sql_profile$step
+  )
 })
 
 test_that('prediction can record SQL profile entries', {

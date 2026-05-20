@@ -147,15 +147,21 @@ compute_tf_adjustment <- function(gamma_mat, tf_data, comparisons, mu) {
     comp <- comparisons[[j]]
     col <- comp$columns
 
-    if (!isTRUE(comp$method$term_frequency)) next
+    if (!isTRUE(comp$method$term_frequency)) {
+      next
+    }
 
     tf_w <- comp$tf_adjustment_weight %||% 1.0
-    if (tf_w == 0) next
+    if (tf_w == 0) {
+      next
+    }
 
     tf_l <- tf_data[[paste0('tf_', col, '_l')]]
     tf_r <- tf_data[[paste0('tf_', col, '_r')]]
 
-    if (is.null(tf_l) || is.null(tf_r)) next
+    if (is.null(tf_l) || is.null(tf_r)) {
+      next
+    }
 
     # Use maximum of left/right TF values (following splink)
     tf_max <- pmax(tf_l, tf_r, na.rm = TRUE)
@@ -204,10 +210,14 @@ compute_tf_adjustment_matrix <- function(gamma_mat, tf_data, comparisons, mu) {
     comp <- comparisons[[j]]
     col <- comp$columns
 
-    if (!isTRUE(comp$method$term_frequency)) next
+    if (!isTRUE(comp$method$term_frequency)) {
+      next
+    }
 
     tf_w <- comp$tf_adjustment_weight %||% 1.0
-    if (tf_w == 0) next
+    if (tf_w == 0) {
+      next
+    }
 
     adj <- numeric(n_pairs)
     tf_l <- tf_data[[paste0('tf_', col, '_l')]]

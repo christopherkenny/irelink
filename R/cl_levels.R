@@ -32,26 +32,44 @@ cl_levels <- function(..., term_frequency = FALSE) {
   }
   for (i in seq_along(levels)) {
     if (!inherits(levels[[i]], 'il_comparison_level')) {
-      cli::cli_abort('All arguments to {.fn cl_levels} must be comparison level objects.')
+      cli::cli_abort(
+        'All arguments to {.fn cl_levels} must be comparison level objects.'
+      )
     }
   }
   # Validate cl_null() is first if present
-  null_positions <- which(vapply(levels, function(l) isTRUE(l$is_null_level), logical(1)))
+  null_positions <- which(vapply(
+    levels,
+    function(l) isTRUE(l$is_null_level),
+    logical(1)
+  ))
   if (length(null_positions) > 0L && null_positions[1] != 1L) {
     cli::cli_abort(
       '{.fn cl_null} must be the first level in {.fn cl_levels}.',
       class = 'il_error_validation'
     )
+  } else {
+    # Validate cl_else() is last if present
+    _positions <- which(vapply(
+      levels,
+      function(l) isTRUE(l$is_else_level),
+      logical(1)
+    ))
   }
-  # Validate cl_else() is last if present
-  else_positions <- which(vapply(levels, function(l) isTRUE(l$is_else_level), logical(1)))
-  if (length(else_positions) > 0L && else_positions[length(else_positions)] != length(levels)) {
+  if (
+    length(else_positions) > 0L &&
+      else_positions[length(else_positions)] != length(levels)
+  ) {
     cli::cli_abort(
       '{.fn cl_else} must be the last level in {.fn cl_levels}.',
       class = 'il_error_validation'
     )
   }
-  new_comparison_level('levels', levels = levels, term_frequency = term_frequency)
+  new_comparison_level(
+    'levels',
+    levels = levels,
+    term_frequency = term_frequency
+  )
 }
 
 #' Null / Missing Value Level
@@ -99,7 +117,11 @@ cl_and <- function(...) {
   if (length(children) == 0L) {
     cli::cli_abort('{.fn cl_and} requires at least one argument.')
   }
-  all_null <- all(vapply(children, function(l) isTRUE(l$is_null_level), logical(1)))
+  all_null <- all(vapply(
+    children,
+    function(l) isTRUE(l$is_null_level),
+    logical(1)
+  ))
   new_comparison_level('and', children = children, is_null_level = all_null)
 }
 
@@ -120,7 +142,11 @@ cl_or <- function(...) {
   if (length(children) == 0L) {
     cli::cli_abort('{.fn cl_or} requires at least one argument.')
   }
-  all_null <- all(vapply(children, function(l) isTRUE(l$is_null_level), logical(1)))
+  all_null <- all(vapply(
+    children,
+    function(l) isTRUE(l$is_null_level),
+    logical(1)
+  ))
   new_comparison_level('or', children = children, is_null_level = all_null)
 }
 

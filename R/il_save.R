@@ -207,9 +207,11 @@ write_model_json <- function(model, path) {
 model_to_json_settings <- function(model) {
   dialect <- model_json_dialect(model)
   params <- model$params
-  if (!is.null(params$comparisons) &&
-    'level' %in% names(params$comparisons) &&
-    !'gamma_level' %in% names(params$comparisons)) {
+  if (
+    !is.null(params$comparisons) &&
+      'level' %in% names(params$comparisons) &&
+      !'gamma_level' %in% names(params$comparisons)
+  ) {
     params$comparisons <- migrate_params_to_gamma_level(params$comparisons)
   }
 
@@ -248,7 +250,8 @@ model_json_dialect <- function(model) {
 }
 
 irelink_to_splink_link_type <- function(link_type) {
-  switch(link_type,
+  switch(
+    link_type,
     'dedupe' = 'dedupe_only',
     'link' = 'link_only',
     'link_and_dedupe' = 'link_and_dedupe',
@@ -257,7 +260,8 @@ irelink_to_splink_link_type <- function(link_type) {
 }
 
 splink_to_irelink_link_type <- function(link_type) {
-  switch(link_type %||% 'dedupe_only',
+  switch(
+    link_type %||% 'dedupe_only',
     'dedupe_only' = 'dedupe',
     'link_only' = 'link',
     'link_and_dedupe' = 'link_and_dedupe',
@@ -281,21 +285,33 @@ blocking_rule_to_json_settings <- function(rule, dialect) {
 comparison_to_json_settings <- function(comp, params, dialect) {
   list(
     output_column_name = comp$columns,
-    comparison_levels = comparison_levels_to_json_settings(comp, params, dialect)
+    comparison_levels = comparison_levels_to_json_settings(
+      comp,
+      params,
+      dialect
+    )
   )
 }
 
 comparison_levels_to_json_settings <- function(comp, params, dialect) {
   levels <- levels_for_json_export(comp$method)
-  explicit_levels <- Filter(function(level) {
-    !isTRUE(level$is_null_level) && !isTRUE(level$is_else_level)
-  }, levels)
+  explicit_levels <- Filter(
+    function(level) {
+      !isTRUE(level$is_null_level) && !isTRUE(level$is_else_level)
+    },
+    levels
+  )
   n_explicit <- length(explicit_levels)
   explicit_index <- 0L
 
   lapply(levels, function(level) {
     out <- list(
-      sql_condition = splink_sql_condition(level, comp$columns, dialect, comp$transform),
+      sql_condition = splink_sql_condition(
+        level,
+        comp$columns,
+        dialect,
+        comp$transform
+      ),
       fix_m_probability = FALSE,
       fix_u_probability = FALSE
     )
@@ -316,16 +332,22 @@ comparison_levels_to_json_settings <- function(comp, params, dialect) {
       out$u_probability <- as.numeric(param_row$u[[1]])
     }
 
-    if (!is.null(gamma_level) &&
-      gamma_level == n_explicit &&
-      isTRUE(comp$method$term_frequency)) {
+    if (
+      !is.null(gamma_level) &&
+        gamma_level == n_explicit &&
+        isTRUE(comp$method$term_frequency)
+    ) {
       out$tf_adjustment_column <- comp$columns
-      if (!is.null(comp$tf_minimum_u_value) &&
-        !identical(comp$tf_minimum_u_value, 0)) {
+      if (
+        !is.null(comp$tf_minimum_u_value) &&
+          !identical(comp$tf_minimum_u_value, 0)
+      ) {
         out$tf_minimum_u_value <- comp$tf_minimum_u_value
       }
-      if (!is.null(comp$tf_adjustment_weight) &&
-        !identical(comp$tf_adjustment_weight, 1)) {
+      if (
+        !is.null(comp$tf_adjustment_weight) &&
+          !identical(comp$tf_adjustment_weight, 1)
+      ) {
         out$tf_adjustment_weight <- comp$tf_adjustment_weight
       }
     }
@@ -338,9 +360,13 @@ levels_for_json_export <- function(method) {
   method_name <- method$method
   if (identical(method_name, 'levels')) {
     levels <- method$levels
-    has_else <- any(vapply(levels, function(level) {
-      isTRUE(level$is_else_level)
-    }, logical(1)))
+    has_else <- any(vapply(
+      levels,
+      function(level) {
+        isTRUE(level$is_else_level)
+      },
+      logical(1)
+    ))
     if (!has_else) {
       levels <- c(levels, list(cl_else()))
     }
@@ -393,7 +419,8 @@ matching_param_row <- function(params, comparison, gamma_level) {
   }
   rows <- params[
     params$comparison == comparison &
-      params$gamma_level == gamma_level, ,
+      params$gamma_level == gamma_level,
+    ,
     drop = FALSE
   ]
   if (nrow(rows) == 0L) {
@@ -418,7 +445,10 @@ load_json_model <- function(raw) {
     raw$blocking_rules_to_generate_predictions %||% list(),
     splink_json_to_blocking_rule
   )
-  spec <- new_il_spec(comparisons = comparisons, blocking_rules = blocking_rules)
+  spec <- new_il_spec(
+    comparisons = comparisons,
+    blocking_rules = blocking_rules
+  )
   params <- splink_json_to_params(
     raw$comparisons %||% list(),
     raw$probability_two_random_records_match
@@ -471,24 +501,33 @@ splink_json_levels_to_irelink <- function(levels, col) {
     }
 
     cond_sql <- splink_sql_to_table_alias_sql(cond)
-    if (grepl(
-      paste0(
-        '^', col, '_l\\s+IS\\s+NULL\\s+OR\\s+',
-        col, '_r\\s+IS\\s+NULL$'
-      ),
-      cond,
-      ignore.case = TRUE,
-      perl = TRUE
-    )) {
+    if (
+      grepl(
+        paste0(
+          '^',
+          col,
+          '_l\\s+IS\\s+NULL\\s+OR\\s+',
+          col,
+          '_r\\s+IS\\s+NULL$'
+        ),
+        cond,
+        ignore.case = TRUE,
+        perl = TRUE
+      )
+    ) {
       return(cl_null())
     }
 
     cl_custom(cond_sql)
   })
 
-  has_else <- any(vapply(irelink_levels, function(level) {
-    isTRUE(level$is_else_level)
-  }, logical(1)))
+  has_else <- any(vapply(
+    irelink_levels,
+    function(level) {
+      isTRUE(level$is_else_level)
+    },
+    logical(1)
+  ))
   if (!has_else) {
     irelink_levels <- c(irelink_levels, list(cl_else()))
   }
@@ -497,9 +536,12 @@ splink_json_levels_to_irelink <- function(levels, col) {
 }
 
 highest_tf_level <- function(levels) {
-  tf_levels <- Filter(function(level) {
-    !is.null(level$tf_adjustment_column)
-  }, levels)
+  tf_levels <- Filter(
+    function(level) {
+      !is.null(level$tf_adjustment_column)
+    },
+    levels
+  )
   if (length(tf_levels) == 0L) {
     return(NULL)
   }
@@ -517,7 +559,12 @@ splink_json_to_blocking_rule <- function(br_data) {
 
 parse_blocking_sql <- function(sql) {
   if (!nzchar(sql)) {
-    return(list(columns = character(0), where = NULL, transform = NULL, explode = NULL))
+    return(list(
+      columns = character(0),
+      where = NULL,
+      transform = NULL,
+      explode = NULL
+    ))
   }
 
   parts <- strsplit(sql, '\\s+AND\\s+', perl = TRUE)[[1]]
@@ -526,7 +573,11 @@ parse_blocking_sql <- function(sql) {
 
   for (part in parts) {
     part <- trimws(part)
-    match <- regexec('^l\\.([A-Za-z][A-Za-z0-9_]*)\\s*=\\s*r\\.\\1$', part, perl = TRUE)
+    match <- regexec(
+      '^l\\.([A-Za-z][A-Za-z0-9_]*)\\s*=\\s*r\\.\\1$',
+      part,
+      perl = TRUE
+    )
     captures <- regmatches(part, match)[[1]]
     if (length(captures) > 1L) {
       columns <- c(columns, captures[2])
@@ -537,7 +588,11 @@ parse_blocking_sql <- function(sql) {
 
   list(
     columns = columns,
-    where = if (length(where_parts) > 0L) paste(where_parts, collapse = ' AND ') else NULL,
+    where = if (length(where_parts) > 0L) {
+      paste(where_parts, collapse = ' AND ')
+    } else {
+      NULL
+    },
     transform = NULL,
     explode = NULL
   )
@@ -548,12 +603,15 @@ splink_json_to_params <- function(comparisons, prior = NULL) {
 
   for (cmp_data in comparisons) {
     levels <- cmp_data$comparison_levels %||% list()
-    explicit_levels <- Filter(function(level) {
-      cond <- trimws(level$sql_condition %||% '')
-      !isTRUE(level$is_null_level) &&
-        !isTRUE(level$null_level) &&
-        !identical(toupper(cond), 'ELSE')
-    }, levels)
+    explicit_levels <- Filter(
+      function(level) {
+        cond <- trimws(level$sql_condition %||% '')
+        !isTRUE(level$is_null_level) &&
+          !isTRUE(level$null_level) &&
+          !identical(toupper(cond), 'ELSE')
+      },
+      levels
+    )
     n_explicit <- length(explicit_levels)
     explicit_index <- 0L
 
@@ -587,7 +645,8 @@ splink_json_to_params <- function(comparisons, prior = NULL) {
   if (length(rows) > 0L) {
     out$comparisons <- do.call(rbind, rows)
     out$comparisons <- out$comparisons[
-      order(out$comparisons$comparison, out$comparisons$gamma_level), ,
+      order(out$comparisons$comparison, out$comparisons$gamma_level),
+      ,
       drop = FALSE
     ]
   }

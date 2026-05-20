@@ -68,8 +68,14 @@
 il_waterfall <- function(pairs, which = 1L) {
   pairs <- ensure_collected(pairs)
   validate_il_compared(pairs)
-  if (!is.numeric(which) || length(which) != 1L || is.na(which) ||
-    !is.finite(which) || which < 1 || which != as.integer(which)) {
+  if (
+    !is.numeric(which) ||
+      length(which) != 1L ||
+      is.na(which) ||
+      !is.finite(which) ||
+      which < 1 ||
+      which != as.integer(which)
+  ) {
     cli::cli_abort('{.arg which} must be a positive row index.')
   }
   which <- as.integer(which)
@@ -92,20 +98,31 @@ il_waterfall <- function(pairs, which = 1L) {
   comp_names <- comparison_names(comparisons)
 
   mu <- extract_mu_vectors(params, comp_names)
-  gamma <- vapply(comp_names, function(cn) {
-    as.integer(row[[paste0('gamma_', cn)]])
-  }, integer(1))
+  gamma <- vapply(
+    comp_names,
+    function(cn) {
+      as.integer(row[[paste0('gamma_', cn)]])
+    },
+    integer(1)
+  )
 
   # Collect per-comparison TF adjustments from stored columns
-  tf_adjs <- vapply(comp_names, function(cn) {
-    col_name <- paste0('tf_adj_', cn)
-    val <- if (col_name %in% names(row)) as.numeric(row[[col_name]]) else 0
-    if (is.na(val)) 0 else val
-  }, numeric(1))
+  tf_adjs <- vapply(
+    comp_names,
+    function(cn) {
+      col_name <- paste0('tf_adj_', cn)
+      val <- if (col_name %in% names(row)) as.numeric(row[[col_name]]) else 0
+      if (is.na(val)) 0 else val
+    },
+    numeric(1)
+  )
 
   has_tf <- any(tf_adjs != 0)
   contributions <- per_comparison_contribution(
-    gamma, mu, comp_names, if (has_tf) tf_adjs else NULL
+    gamma,
+    mu,
+    comp_names,
+    if (has_tf) tf_adjs else NULL
   )
   prior <- safe_prior(model)
   prior_weight <- log2(prior / (1 - prior))

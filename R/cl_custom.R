@@ -65,9 +65,19 @@ cl_literal <- function(value, side = c('both', 'left', 'right')) {
     }
     op <- '='
   }
-  sql_expr <- switch(side,
-    'both'  = paste0('l.{col} ', op, ' ', val_sql, ' AND r.{col} ', op, ' ', val_sql),
-    'left'  = paste0('l.{col} ', op, ' ', val_sql),
+  sql_expr <- switch(
+    side,
+    'both' = paste0(
+      'l.{col} ',
+      op,
+      ' ',
+      val_sql,
+      ' AND r.{col} ',
+      op,
+      ' ',
+      val_sql
+    ),
+    'left' = paste0('l.{col} ', op, ' ', val_sql),
     'right' = paste0('r.{col} ', op, ' ', val_sql)
   )
   cl_custom(sql_expr)

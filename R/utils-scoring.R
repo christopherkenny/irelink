@@ -32,8 +32,13 @@ bayes_factor_to_probability <- function(bf) {
 
 #' Adjust the global prior for exact agreements implied by blocking
 #' @noRd
-adjust_prior_for_blocking <- function(prior, deactivated,
-                                      m_list, u_list, levels_per_comp) {
+adjust_prior_for_blocking <- function(
+  prior,
+  deactivated,
+  m_list,
+  u_list,
+  levels_per_comp
+) {
   if (!any(deactivated)) {
     return(clamp_probability(prior))
   }
@@ -50,8 +55,13 @@ adjust_prior_for_blocking <- function(prior, deactivated,
 
 #' Reverse a blocking adjustment back to the global prior
 #' @noRd
-reverse_blocking_adjusted_prior <- function(prior, deactivated,
-                                            m_list, u_list, levels_per_comp) {
+reverse_blocking_adjusted_prior <- function(
+  prior,
+  deactivated,
+  m_list,
+  u_list,
+  levels_per_comp
+) {
   if (!any(deactivated)) {
     return(clamp_probability(prior))
   }
@@ -204,9 +214,14 @@ validate_logical_scalar <- function(x, arg) {
 validate_trained_model <- function(model) {
   validate_il_model(model)
   has_independent_params <- !is.null(model$params$comparisons)
-  has_dependency_state <- identical(model$params$estimator_mode, 'dependency-aware') &&
+  has_dependency_state <- identical(
+    model$params$estimator_mode,
+    'dependency-aware'
+  ) &&
     !is.null(model$params$dependency_aware)
-  if (!isTRUE(model$trained) || (!has_independent_params && !has_dependency_state)) {
+  if (
+    !isTRUE(model$trained) || (!has_independent_params && !has_dependency_state)
+  ) {
     cli::cli_abort(
       'Model must be trained before scoring. Use {.fn il_estimate_em} first.'
     )
@@ -216,8 +231,12 @@ validate_trained_model <- function(model) {
 
 #' Empty scored-pair tibble with the usual prediction columns
 #' @noRd
-empty_scored_pairs <- function(model = NULL, id_ptype = integer(),
-                               include_gamma = TRUE, include_tf = TRUE) {
+empty_scored_pairs <- function(
+  model = NULL,
+  id_ptype = integer(),
+  include_gamma = TRUE,
+  include_tf = TRUE
+) {
   out <- tibble::tibble(
     unique_id_l = id_ptype[0],
     unique_id_r = id_ptype[0],
@@ -255,10 +274,16 @@ empty_scored_pairs <- function(model = NULL, id_ptype = integer(),
 #'   with term-frequency weighting.
 #' @return Numeric vector of contributions (one per comparison).
 #' @noRd
-per_comparison_contribution <- function(gamma, mu, comp_names = NULL,
-                                        tf_adjs = NULL) {
+per_comparison_contribution <- function(
+  gamma,
+  mu,
+  comp_names = NULL,
+  tf_adjs = NULL
+) {
   n <- length(gamma)
-  if (is.null(comp_names)) comp_names <- names(mu$m_levels)
+  if (is.null(comp_names)) {
+    comp_names <- names(mu$m_levels)
+  }
   contrib <- numeric(n)
   for (j in seq_len(n)) {
     cn <- comp_names[j]
