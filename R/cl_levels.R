@@ -50,7 +50,7 @@ cl_levels <- function(..., term_frequency = FALSE) {
     )
   } else {
     # Validate cl_else() is last if present
-    _positions <- which(vapply(
+    else_positions <- which(vapply(
       levels,
       function(l) isTRUE(l$is_else_level),
       logical(1)
