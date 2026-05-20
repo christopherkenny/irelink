@@ -14,4 +14,5 @@
 - [x] Remove fake legacy updater `migrate_params_to_gamma_level()`.
 - [x] There are inconsistent cross-package references. When referencing an object or function from another package, we should do our best to use the proper references so pkgdown can generate links on the website.
 - [x] I spy some uses of `<<-` and `->` within package code, which is absolutely not ever allowed. Please rewrite those to be properly scoped and avoid hacks.
-- [ ] Classes are somewhat inconsistently defined, with many of them being thrown into `utils-classes.R`. Let's correct this and move all of the class creators into the correct files. For example, move new_il_spec to il_spec.R.
+- [x] Classes are somewhat inconsistently defined, with many of them being thrown into `utils-classes.R`. Let's correct this and move all of the class creators into the correct files. For example, move new_il_spec to il_spec.R.
+- [x] Some functions have hard coded colors in (searching `'#` returns a number of them). Remove every case of this and allow colors and fills to be ggplot defaults

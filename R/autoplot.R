@@ -110,8 +110,7 @@ autoplot.il_compared <- function(object, which = NULL, ...) {
         )) +
         ggplot2::geom_vline(
           xintercept = 0,
-          linewidth = 0.3,
-          colour = 'grey70'
+          linewidth = 0.3
         ) +
         ggplot2::scale_y_continuous(
           breaks = wf$order,
@@ -210,8 +209,7 @@ autoplot.il_roc <- function(object, ...) {
     ggplot2::geom_abline(
       intercept = 0,
       slope = 1,
-      linetype = 'dashed',
-      colour = 'grey50'
+      linetype = 'dashed'
     ) +
     ggplot2::labs(
       title = 'ROC Curve',
@@ -479,9 +477,7 @@ autoplot.il_comparator_score <- function(object, ...) {
     ggplot2::ggplot() +
     ggplot2::geom_histogram(
       ggplot2::aes(x = .data$score),
-      bins = 30,
-      fill = '#2171b5',
-      colour = 'white'
+      bins = 30
     ) +
     ggplot2::facet_wrap(~metric, scales = 'free_y') +
     ggplot2::labs(
@@ -513,8 +509,7 @@ autoplot.il_comparison_vectors <- function(object, ...) {
   top |>
     ggplot2::ggplot() +
     ggplot2::geom_col(
-      ggplot2::aes(x = .data$count, y = .data$pattern),
-      fill = '#2171b5'
+      ggplot2::aes(x = .data$count, y = .data$pattern)
     ) +
     ggplot2::labs(
       x = 'Count',
@@ -573,7 +568,6 @@ autoplot.il_string_similarity <- function(object, ...) {
       hjust = -0.1,
       size = 3.5
     ) +
-    ggplot2::scale_fill_gradient(low = '#B22222', high = '#228B22') +
     ggplot2::scale_x_continuous(limits = c(0, 1.15)) +
     ggplot2::labs(
       title = 'String Similarity Scores',

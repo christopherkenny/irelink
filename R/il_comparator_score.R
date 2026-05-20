@@ -190,19 +190,14 @@ il_comparator_threshold_chart <- function(
     ggplot2::ggplot() +
     ggplot2::geom_histogram(
       ggplot2::aes(x = .data$score, fill = .data$above),
-      bins = 30,
-      colour = 'white'
+      bins = 30
     ) +
     ggplot2::facet_wrap(~metric, scales = 'free') +
-    ggplot2::scale_fill_manual(
-      values = c('TRUE' = '#2171b5', 'FALSE' = '#bdbdbd'),
-      labels = c('TRUE' = 'Above', 'FALSE' = 'Below'),
-      name = 'Threshold'
-    ) +
     ggplot2::labs(
       x = 'Score',
       y = 'Count',
-      title = 'Comparator Score Threshold Analysis'
+      title = 'Comparator Score Threshold Analysis',
+      fill = 'Threshold'
     ) +
     ggplot2::theme_minimal()
 }
@@ -287,17 +282,13 @@ il_phonetic_chart <- function(.data, col_1, col_2, con = NULL) {
         x = .data$soundex_1,
         y = .data$soundex_2,
         fill = .data$soundex_match
-      ),
-      colour = 'white'
-    ) +
-    ggplot2::scale_fill_manual(
-      values = c('TRUE' = '#2171b5', 'FALSE' = '#fee0d2'),
-      name = 'Match'
+      )
     ) +
     ggplot2::labs(
       x = paste('Soundex of', col_1),
       y = paste('Soundex of', col_2),
-      title = 'Phonetic Match Chart'
+      title = 'Phonetic Match Chart',
+      fill = 'Match'
     ) +
     ggplot2::theme_minimal() +
     ggplot2::theme(axis.text.x = ggplot2::element_text(angle = 45, hjust = 1))

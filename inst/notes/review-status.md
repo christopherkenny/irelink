@@ -48,8 +48,8 @@
 - [x] R/il_save.R
 - [x] R/il_score_missing_edges.R
 - [x] R/il_spec.R
-- [ ] R/il_string_similarity.R
-- [ ] R/il_suggest_blocking.R
+- [x] R/il_string_similarity.R
+- [x] R/il_suggest_blocking.R
 - [ ] R/il_tf_chart.R
 - [ ] R/il_training_history.R
 - [ ] R/il_transform.R
@@ -59,7 +59,7 @@
 - [ ] R/irelink-package.R
 - [ ] R/predict.R
 - [ ] R/utils-cc.R
-- [ ] R/utils-classes.R
+- [x] R/utils-classes.R
 - [ ] R/utils-comparison-helpers.R
 - [ ] R/utils-data.R
 - [ ] R/utils-db.R

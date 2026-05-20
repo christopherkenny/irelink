@@ -85,8 +85,7 @@ il_tf_chart <- function(model, col, n_most_freq = 10L, n_least_freq = 5L) {
   tf_data |>
     ggplot2::ggplot() +
     ggplot2::geom_col(
-      ggplot2::aes(x = .data[['rank']], y = .data[['tf']]),
-      fill = '#4682B4'
+      ggplot2::aes(x = .data[['rank']], y = .data[['tf']])
     ) +
     ggplot2::geom_text(
       data = tf_data[tf_data$label != '', ],
@@ -110,4 +109,3 @@ il_tf_chart <- function(model, col, n_most_freq = 10L, n_least_freq = 5L) {
     ) +
     ggplot2::theme_minimal()
 }
-
