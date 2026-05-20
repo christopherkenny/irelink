@@ -1,3 +1,54 @@
+#' Construct an il_model Object
+#'
+#' Low-level constructor for the `il_model` S3 class. Users should call
+#' [il_model()] instead.
+#'
+#' @param spec An `il_spec` object.
+#' @param data A list of data frames.
+#' @param con A DBI connection from [DBI::dbConnect()] or `NULL`.
+#' @param link_type A character string.
+#' @param params A list of trained parameters.
+#' @param trained Logical indicating whether the model has been trained.
+#'
+#' @return An `il_model` object.
+#' @noRd
+new_il_model <- function(
+  spec = new_il_spec(),
+  data = list(),
+  con = NULL,
+  link_type = 'dedupe',
+  params = list(),
+  trained = FALSE
+) {
+  structure(
+    list(
+      spec = spec,
+      data = data,
+      con = con,
+      link_type = link_type,
+      params = params,
+      trained = trained
+    ),
+    class = 'il_model'
+  )
+}
+
+#' Validate an il_model Object
+#'
+#' Checks that `x` inherits from `il_model` and aborts with an
+#' informative error if not.
+#'
+#' @param x An object to validate.
+#'
+#' @return `x`, invisibly.
+#' @noRd
+validate_il_model <- function(x) {
+  if (!inherits(x, 'il_model')) {
+    cli::cli_abort('{.arg model} must be an {.cls il_model} object.')
+  }
+  invisible(x)
+}
+
 #' Create a Linkage Model
 #'
 #' Binds one or more datasets to a specification and a database

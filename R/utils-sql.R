@@ -951,47 +951,44 @@ build_gamma_query <- function(
   all_parts <- character(0)
   for (tp in table_pairs) {
     if (length(blocking_rules) > 0L) {
+      parts <- character(length(blocking_rules))
       prior_conds <- character(0)
-      parts <- vapply(
-        seq_along(blocking_rules),
-        function(i) {
-          br <- blocking_rules[[i]]
-          cond <- build_blocking_condition(
-            br$columns,
-            br$where,
-            transform = br$transform,
-            dialect = dialect
+      for (i in seq_along(blocking_rules)) {
+        br <- blocking_rules[[i]]
+        cond <- build_blocking_condition(
+          br$columns,
+          br$where,
+          transform = br$transform,
+          dialect = dialect
+        )
+        from_l <- sql_explode_from(tp$from_l, br$explode, dialect)
+        from_r <- sql_explode_from(tp$from_r, br$explode, dialect)
+        # Exclude pairs already matched by earlier blocking rules.
+        if (length(prior_conds) > 0L) {
+          exclude <- paste(
+            'COALESCE(',
+            prior_conds,
+            ', FALSE)',
+            collapse = ' OR '
           )
-          from_l <- sql_explode_from(tp$from_l, br$explode, dialect)
-          from_r <- sql_explode_from(tp$from_r, br$explode, dialect)
-          # Exclude pairs already matched by earlier blocking rules
-          if (length(prior_conds) > 0L) {
-            exclude <- paste(
-              'COALESCE(',
-              prior_conds,
-              ', FALSE)',
-              collapse = ' OR '
-            )
-            full_cond <- paste0(
-              tp$join_cond,
-              ' AND ',
-              cond,
-              ' AND NOT (',
-              exclude,
-              ')'
-            )
-          } else {
-            full_cond <- paste0(tp$join_cond, ' AND ', cond)
-          }
-          prior_conds <<- c(prior_conds, cond)
-          glue::glue(
-            '{select_prefix}',
-            'FROM {from_l} l, {from_r} r ',
-            'WHERE {full_cond}'
+          full_cond <- paste0(
+            tp$join_cond,
+            ' AND ',
+            cond,
+            ' AND NOT (',
+            exclude,
+            ')'
           )
-        },
-        character(1)
-      )
+        } else {
+          full_cond <- paste0(tp$join_cond, ' AND ', cond)
+        }
+        prior_conds <- c(prior_conds, cond)
+        parts[[i]] <- glue::glue(
+          '{select_prefix}',
+          'FROM {from_l} l, {from_r} r ',
+          'WHERE {full_cond}'
+        )
+      }
       all_parts <- c(all_parts, parts)
     } else {
       all_parts <- c(

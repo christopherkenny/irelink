@@ -1,3 +1,129 @@
+#' Construct an il_compared Object
+#'
+#' Low-level constructor for the `il_compared` S3 class (a tibble
+#' subclass). Users receive these from [predict.il_model()].
+#'
+#' @param x A tibble of scored record pairs.
+#' @param model The `il_model` that produced the comparisons, or `NULL`.
+#'
+#' @return An `il_compared` tibble.
+#' @noRd
+new_il_compared <- function(x = tibble::tibble(), model = NULL) {
+  if (!inherits(x, 'tbl_df')) {
+    cli::cli_abort('{.arg x} must be a tibble.')
+  }
+  structure(x, class = c('il_compared', class(x)), model = model)
+}
+
+#' Validate an il_compared Object
+#'
+#' Checks that `x` inherits from `il_compared` and aborts with an
+#' informative error if not.
+#'
+#' @param x An object to validate.
+#'
+#' @return `x`, invisibly.
+#' @noRd
+validate_il_compared <- function(x) {
+  if (!inherits(x, 'il_compared')) {
+    cli::cli_abort('{.arg pairs} must be an {.cls il_compared} object.')
+  }
+  invisible(x)
+}
+
+#' Construct an il_compared_lazy Object
+#'
+#' A lightweight reference to a scored-pairs table in the database.
+#' Avoids collecting millions of rows into R when the downstream consumer
+#' (e.g., [il_cluster()]) can operate directly in SQL.
+#'
+#' @param con A valid DBI connection from [DBI::dbConnect()].
+#' @param predicted_tbl Character table name in the database.
+#' @param model The `il_model` that produced the predictions.
+#' @param threshold Numeric threshold used during prediction.
+#' @param n_pairs Integer count of pairs in the table.
+#'
+#' @return An `il_compared_lazy` S3 object.
+#' @noRd
+new_il_compared_lazy <- function(
+  con,
+  predicted_tbl,
+  model,
+  threshold = 0.85,
+  n_pairs = NULL,
+  sql_profile = NULL
+) {
+  if (is.null(n_pairs)) {
+    n_pairs <- DBI::dbGetQuery(
+      con,
+      glue::glue('SELECT COUNT(*) AS n FROM {predicted_tbl}')
+    )$n
+  }
+  structure(
+    list(
+      con = con,
+      predicted_tbl = predicted_tbl,
+      model = model,
+      threshold = threshold,
+      n_pairs = as.integer(n_pairs),
+      sql_profile = sql_profile
+    ),
+    class = 'il_compared_lazy'
+  )
+}
+
+#' @export
+print.il_compared_lazy <- function(x, ...) {
+  cat(
+    sprintf(
+      '<il_compared_lazy> %s pairs in table %s (threshold = %s)\n',
+      format(x$n_pairs, big.mark = ','),
+      x$predicted_tbl,
+      x$threshold
+    )
+  )
+  invisible(x)
+}
+
+#' @export
+format.il_compared_lazy <- function(x, ...) {
+  sprintf(
+    '<il_compared_lazy> [%s pairs, tbl=%s]',
+    format(x$n_pairs, big.mark = ','),
+    x$predicted_tbl
+  )
+}
+
+#' Collect a lazy compared object into an il_compared tibble
+#' @param x An `il_compared_lazy` object.
+#' @param ... Ignored.
+#' @return An `il_compared` tibble.
+#' @noRd
+collect_il_compared_lazy <- function(x, ...) {
+  result <- DBI::dbGetQuery(
+    x$con,
+    glue::glue('SELECT * FROM {x$predicted_tbl}')
+  )
+  result <- tibble::as_tibble(result)
+  new_il_compared(result, model = x$model)
+}
+
+#' Materialise lazy or collected pairs into an il_compared tibble
+#'
+#' Internal helper.  If `pairs` is already an `il_compared` tibble,
+#' returns it unchanged.  If it is an `il_compared_lazy` reference,
+#' collects from the database.
+#'
+#' @param pairs An `il_compared` or `il_compared_lazy` object.
+#' @return An `il_compared` tibble.
+#' @noRd
+ensure_collected <- function(pairs) {
+  if (inherits(pairs, 'il_compared_lazy')) {
+    return(collect_il_compared_lazy(pairs))
+  }
+  pairs
+}
+
 #' Score Record Pairs from a Trained Model
 #'
 #' Generates and scores all candidate record pairs that pass the blocking

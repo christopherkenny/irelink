@@ -42,12 +42,12 @@
 - [x] R/il_phonetic.R
 - [x] R/il_precision_recall.R
 - [x] R/il_priors.R
-- [ ] R/il_profile.R
-- [ ] R/il_register_tf.R
-- [ ] R/il_roc.R
-- [ ] R/il_save.R
-- [ ] R/il_score_missing_edges.R
-- [ ] R/il_spec.R
+- [x] R/il_profile.R
+- [x] R/il_register_tf.R
+- [x] R/il_roc.R
+- [x] R/il_save.R
+- [x] R/il_score_missing_edges.R
+- [x] R/il_spec.R
 - [ ] R/il_string_similarity.R
 - [ ] R/il_suggest_blocking.R
 - [ ] R/il_tf_chart.R

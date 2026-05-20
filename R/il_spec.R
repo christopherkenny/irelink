@@ -1,3 +1,41 @@
+#' Construct an il_spec Object
+#'
+#' Low-level constructor for the `il_spec` S3 class. Users should call
+#' [il_spec()] instead.
+#'
+#' @param comparisons A list of comparison layers.
+#' @param blocking_rules A list of blocking-rule objects.
+#'
+#' @return An `il_spec` object.
+#' @noRd
+new_il_spec <- function(comparisons = list(), blocking_rules = list()) {
+  structure(
+    list(comparisons = comparisons, blocking_rules = blocking_rules),
+    class = 'il_spec'
+  )
+}
+
+#' Validate an il_spec Object
+#'
+#' Checks that `x` inherits from `il_spec` and aborts with an
+#' informative error if not.
+#'
+#' @param x An object to validate.
+#'
+#' @return `x`, invisibly.
+#' @noRd
+validate_il_spec <- function(x) {
+  if (!inherits(x, 'il_spec')) {
+    cli::cli_abort('{.arg spec} must be an {.cls il_spec} object.')
+  }
+  if (!is.list(x) || is.null(x$comparisons) || is.null(x$blocking_rules)) {
+    cli::cli_abort(
+      '{.cls il_spec} must contain {.field comparisons} and {.field blocking_rules}.'
+    )
+  }
+  invisible(x)
+}
+
 #' Create an Empty Linkage Specification
 #'
 #' Initializes a blank `il_spec` object onto which comparison layers and

@@ -3,7 +3,7 @@
 #' Serializes a trained `il_model` object to `.json` or `.rds`, chosen from
 #' `path`.
 #'
-#' `.json` writes Splink settings JSON. Other extensions write RDS. The
+#' `.json` writes Splink-style settings JSON. Other extensions write RDS. The
 #' database connection and any in-database tables are not stored. Supply a
 #' fresh connection with [il_attach()] after loading.
 #'
@@ -295,9 +295,16 @@ comparison_levels_to_json_settings <- function(comp, params, dialect) {
     levels
   )
   n_explicit <- length(explicit_levels)
-  explicit_index <- 0L
+  explicit_indices <- cumsum(vapply(
+    levels,
+    function(level) {
+      !isTRUE(level$is_null_level) && !isTRUE(level$is_else_level)
+    },
+    integer(1)
+  ))
 
-  lapply(levels, function(level) {
+  lapply(seq_along(levels), function(i) {
+    level <- levels[[i]]
     out <- list(
       sql_condition = splink_sql_condition(
         level,
@@ -315,8 +322,7 @@ comparison_levels_to_json_settings <- function(comp, params, dialect) {
     } else if (isTRUE(level$is_else_level)) {
       gamma_level <- 0L
     } else {
-      explicit_index <<- explicit_index + 1L
-      gamma_level <- n_explicit - explicit_index + 1L
+      gamma_level <- n_explicit - explicit_indices[[i]] + 1L
     }
 
     param_row <- matching_param_row(params, comp$columns, gamma_level)
