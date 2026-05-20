@@ -94,7 +94,6 @@ register_data <- function(
   tbl_name = '__il_data',
   add_unique_id = TRUE
 ) {
-  # ---- tbl_lazy ([dbplyr::tbl_lazy] table reference) ----
   if (inherits(data, 'tbl_lazy')) {
     rlang::check_installed(
       'dbplyr',
@@ -115,7 +114,9 @@ register_data <- function(
     remote_nm <- dbplyr::remote_name(data)
     source_sql <- dbplyr::remote_query(data)
     if (!is.null(remote_nm)) {
-      source_sql <- glue::glue('SELECT * FROM {sql_quote_identifier(remote_nm)}')
+      source_sql <- glue::glue(
+        'SELECT * FROM {sql_quote_identifier(remote_nm)}'
+      )
     }
 
     # Create a registered object, adding unique_id if needed.
@@ -157,7 +158,6 @@ register_data <- function(
     ))
   }
 
-  # ---- character string (existing table name) ----
   if (is.character(data) && length(data) == 1L) {
     if (is.null(con)) {
       cli::cli_abort(
@@ -212,7 +212,6 @@ register_data <- function(
     ))
   }
 
-  # ---- data.frame / tibble (in-memory) ----
   if (is.data.frame(data)) {
     if (is.null(con)) {
       cli::cli_abort(

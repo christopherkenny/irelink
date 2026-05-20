@@ -60,12 +60,12 @@
 - [x] R/predict.R
 - [x] R/utils-cc.R
 - [x] R/utils-classes.R
-- [ ] R/utils-comparison-helpers.R
-- [ ] R/utils-data.R
-- [ ] R/utils-db.R
-- [ ] R/utils-dependency-aware.R
-- [ ] R/utils-em.R
-- [ ] R/utils-evaluation.R
+- [x] R/utils-comparison-helpers.R
+- [x] R/utils-data.R
+- [x] R/utils-db.R
+- [x] R/utils-dependency-aware.R
+- [x] R/utils-em.R
+- [x] R/utils-evaluation.R
 - [ ] R/utils-register.R
 - [ ] R/utils-scoring.R
 - [ ] R/utils-sql.R

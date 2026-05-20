@@ -126,8 +126,6 @@ soundex_one <- function(s) {
 }
 
 
-# ---- DuckDB macro registration ----
-
 #' Register phonetic SQL macros on a DuckDB connection
 #'
 #' Creates `il_soundex` as a DuckDB MACRO so that phonetic blocking

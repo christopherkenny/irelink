@@ -266,8 +266,6 @@ il_array_element <- function(position = c('first', 'last')) {
   new_column_transform(fn, 'il_array_element', list(position = position))
 }
 
-# ---- Internal constructor ----
-
 #' Build a column transform closure
 #' @noRd
 new_column_transform <- function(fn, type, params) {
