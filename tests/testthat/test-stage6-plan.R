@@ -15,7 +15,7 @@ test_that('il_cluster() tolerates NA in match_probability by using threshold', {
   )
 
   # threshold filters before clustering; NA probabilities should be
-  # dropped by the >= comparison (NA >= 0.5 is NA → FALSE → dropped)
+  # dropped by the >= comparison (NA >= 0.5 is NA -> FALSE -> dropped)
   clusters <- il_cluster(pairs, threshold = 0.5)
   expect_s3_class(clusters, 'tbl_df')
   # A-B linked, C isolated because B-C has NA probability

@@ -184,7 +184,7 @@ test_that('ties_method defaults to lowest_id', {
 # --- source_dataset (duplicate_free_datasets constraint) ----------------
 
 test_that('source_dataset filters same-source edges in best_link', {
-  # A→B (cross-dataset, keep), A→C (same dataset, drop)
+  # A->B (cross-dataset, keep), A->C (same dataset, drop)
   pairs <- tibble::tibble(
     unique_id_l = c('A', 'A'),
     unique_id_r = c('B', 'C'),

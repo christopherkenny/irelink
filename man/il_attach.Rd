@@ -32,7 +32,7 @@ references, or character table names.
 }
 \details{
 This is the key function for the production workflow:
-train once with \code{\link[=il_model]{il_model()}} → save with \code{\link[=il_save]{il_save()}} → later, load
+train once with \code{\link[=il_model]{il_model()}} -> save with \code{\link[=il_save]{il_save()}} -> later, load
 with \code{\link[=il_load]{il_load()}} and attach to new data with \code{il_attach()}.
 
 The loaded model's trained parameters (m, u, prior) are preserved.

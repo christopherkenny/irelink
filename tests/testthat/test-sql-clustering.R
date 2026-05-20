@@ -65,7 +65,7 @@ test_that('SQL CC: best_link method filters correctly', {
 
   # Triangle: A-B(0.9), A-C(0.5), B-C(0.8)
   # A's best = B; B's best = A; C's best = B
-  # Only A-B is mutual best → clusters are {A,B} and {C}
+  # Only A-B is mutual best -> clusters are {A,B} and {C}
   pairs <- make_sql_pairs(
     con,
     id_l = c('A', 'A', 'B'),
@@ -85,7 +85,7 @@ test_that('SQL CC: matches igraph on chain graph', {
   con <- test_con()
   on.exit(test_discon(con))
 
-  # Chain: 1-2-3-4-5 → single cluster of 5
+  # Chain: 1-2-3-4-5 -> single cluster of 5
   pairs <- make_sql_pairs(
     con,
     id_l = c('1', '2', '3', '4'),
@@ -119,7 +119,7 @@ test_that('SQL CC: many disconnected components', {
   con <- test_con()
   on.exit(test_discon(con))
 
-  # 10 disconnected pairs → 10 clusters of 2
+  # 10 disconnected pairs -> 10 clusters of 2
   pairs <- make_sql_pairs(
     con,
     id_l = paste0('L', 1:10),

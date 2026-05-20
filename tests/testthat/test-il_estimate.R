@@ -46,7 +46,7 @@ test_that('il_estimate_u() produces reasonable u values', {
   withr::defer(test_discon(con))
 
   # From: test_u_train.py — 6 records, 15 pairs
-  # Exact match on first_name: Amanda-Amanda = 1 pair → u ≈ 1/15
+  # Exact match on first_name: Amanda-Amanda = 1 pair -> u ≈ 1/15
   model <- make_test_model(con) |>
     il_estimate_u(max_pairs = 1e6)
 

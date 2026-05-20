@@ -37,7 +37,7 @@ test_that('il_count_pairs() with blocking reduces pair count', {
   result <- il_count_pairs(df, block_on(first_name), con = con)
   first_name_pairs <- result$n_pairs[1]
 
-  # Only 2 Johns → C(2,2) = 1 pair
+  # Only 2 Johns -> C(2,2) = 1 pair
   expect_equal(first_name_pairs, 1)
 })
 
@@ -48,7 +48,7 @@ test_that('il_count_pairs() cartesian dedupe is n*(n-1)/2', {
   withr::defer(test_discon(con))
 
   # From: test_total_comparison_count.py
-  # 5 records → 5*4/2 = 10 pairs
+  # 5 records -> 5*4/2 = 10 pairs
   df <- data.frame(
     unique_id = 1:5,
     name = paste0('person_', 1:5)

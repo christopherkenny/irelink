@@ -32,7 +32,7 @@ test_that('il_soundex vectorises over character input', {
 })
 
 test_that('il_soundex pads short codes to 4 characters', {
-  # "Lee" → L000
+  # "Lee" -> L000
   expect_equal(nchar(il_soundex('Lee')), 4)
   expect_equal(il_soundex('Lee'), 'L000')
 })

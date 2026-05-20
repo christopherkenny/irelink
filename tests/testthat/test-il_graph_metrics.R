@@ -70,11 +70,11 @@ test_that('il_graph_metrics() computes node degree', {
 
   metrics <- il_graph_metrics(pairs, clusters)
 
-  # Node 1 connects to 2 and 3 → degree 2
+  # Node 1 connects to 2 and 3 -> degree 2
   node_1 <- metrics$nodes[metrics$nodes$unique_id == '1', ]
   expect_equal(node_1$degree, 2)
 
-  # Node 2 connects to 1 and 3 → degree 2
+  # Node 2 connects to 1 and 3 -> degree 2
   node_2 <- metrics$nodes[metrics$nodes$unique_id == '2', ]
   expect_equal(node_2$degree, 2)
 })
@@ -94,13 +94,13 @@ test_that('il_graph_metrics() identifies isolated nodes', {
 
   metrics <- il_graph_metrics(pairs, clusters)
 
-  # Node 3 is isolated → degree 0
+  # Node 3 is isolated -> degree 0
   node_3 <- metrics$nodes[metrics$nodes$unique_id == '3', ]
   expect_equal(node_3$degree, 0)
 })
 
 test_that('il_graph_metrics() computes cluster density', {
-  # From: test_size_density_dedupe — 2 nodes, 1 edge → density = 1.0
+  # From: test_size_density_dedupe — 2 nodes, 1 edge -> density = 1.0
   pairs <- tibble::tibble(
     unique_id_l = c('1'),
     unique_id_r = c('2'),
@@ -115,7 +115,7 @@ test_that('il_graph_metrics() computes cluster density', {
 
   metrics <- il_graph_metrics(pairs, clusters)
 
-  # 2 nodes, 1 edge, max edges = C(2,2) = 1 → density = 1.0
+  # 2 nodes, 1 edge, max edges = C(2,2) = 1 -> density = 1.0
   cluster_a <- metrics$clusters[metrics$clusters$cluster_id == 'A', ]
   expect_equal(cluster_a$density, 1.0, tolerance = 0.01)
 })
@@ -214,7 +214,7 @@ test_that('il_graph_metrics() includes cluster_centralisation', {
 
   metrics <- il_graph_metrics(pairs, clusters)
   expect_true('cluster_centralisation' %in% names(metrics$clusters))
-  # 3 nodes, all degree 2 → (3*2 - 6) / (2*1) = 0
+  # 3 nodes, all degree 2 -> (3*2 - 6) / (2*1) = 0
   expect_equal(metrics$clusters$cluster_centralisation, 0, tolerance = 0.01)
 })
 

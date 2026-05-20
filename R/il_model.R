@@ -141,7 +141,7 @@ il_model <- function(
 #' references, or character table names.
 #'
 #' This is the key function for the production workflow:
-#' train once with [il_model()] → save with [il_save()] → later, load
+#' train once with [il_model()] -> save with [il_save()] -> later, load
 #' with [il_load()] and attach to new data with `il_attach()`.
 #'
 #' The loaded model's trained parameters (m, u, prior) are preserved.

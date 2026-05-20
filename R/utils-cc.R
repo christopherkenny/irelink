@@ -92,7 +92,7 @@ cc_initialise <- function(con, edges_tbl, prefix = NULL) {
 #' Run one iteration of representative propagation
 #'
 #' For each current representative, compute the minimum representative
-#' across all its neighbours. Then update the node→representative mapping.
+#' across all its neighbours. Then update the node->representative mapping.
 #' Split into stable (no outgoing cross-cluster edges) and unstable.
 #'
 #' @param con DBI connection.
@@ -412,7 +412,7 @@ sql_best_link_filter <- function(
 #' @param con DBI connection.
 #' @param edges_tbl Name of edges table (unique_id_l, unique_id_r,
 #'   match_probability).
-#' @param source_dataset Named character vector mapping unique_id →
+#' @param source_dataset Named character vector mapping unique_id ->
 #'   source_dataset.
 #' @param ties_method How to break ties: `"lowest_id"` or `"drop"`.
 #' @param max_iterations Safety valve (default 100).
@@ -458,7 +458,7 @@ solve_one_to_one_sql <- function(
   )
 
   for (iter in seq_len(max_iterations)) {
-    # Step 1: Build cluster→datasets mapping
+    # Step 1: Build cluster->datasets mapping
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_cluster_ds}'))
     DBI::dbExecute(
       con,
@@ -608,7 +608,7 @@ solve_one_to_one_sql <- function(
 #' constraints. Used when no DuckDB/PostgreSQL connection is available.
 #'
 #' @param pairs An il_compared tibble (already threshold-filtered).
-#' @param source_dataset Named character vector mapping unique_id →
+#' @param source_dataset Named character vector mapping unique_id ->
 #'   source_dataset.
 #' @param ties_method How to break ties: `"lowest_id"` or `"drop"`.
 #' @param max_iterations Safety valve (default 100).
@@ -650,7 +650,7 @@ solve_one_to_one_r <- function(
     cr_l <- repr_l[cross]
     cr_r <- repr_r[cross]
 
-    # Build cluster→datasets mapping
+    # Build cluster->datasets mapping
     cluster_datasets <- split(
       source_dataset[all_ids[all_ids %in% names(source_dataset)]],
       repr[all_ids[all_ids %in% names(source_dataset)]]

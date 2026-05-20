@@ -94,16 +94,16 @@ test_that('compute_tf_adjustment() handles one-sided NA like splink COALESCE', {
 
   adj <- compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
 
-  # Pair 1: gamma=1, tf_l=0.05, tf_r=NA → use 0.05
+  # Pair 1: gamma=1, tf_l=0.05, tf_r=NA -> use 0.05
   expect_equal(adj[1], log2(0.10 / 0.05), tolerance = 1e-10)
 
-  # Pair 2: gamma=1, tf_l=NA, tf_r=0.10 → use 0.10
+  # Pair 2: gamma=1, tf_l=NA, tf_r=0.10 -> use 0.10
   expect_equal(adj[2], log2(0.10 / 0.10), tolerance = 1e-10)
 
-  # Pair 3: gamma=1, both NA → no adjustment
+  # Pair 3: gamma=1, both NA -> no adjustment
   expect_equal(adj[3], 0)
 
-  # Pair 4: gamma=0 → no adjustment regardless
+  # Pair 4: gamma=0 -> no adjustment regardless
   expect_equal(adj[4], 0)
 })
 

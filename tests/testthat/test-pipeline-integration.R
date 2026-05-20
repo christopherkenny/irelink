@@ -4,7 +4,7 @@
 
 # --- Full pipe chain (Sprint 8 MVP) --------------------------------------
 
-test_that('full pipe chain: spec → model → predict works end-to-end', {
+test_that('full pipe chain: spec -> model -> predict works end-to-end', {
   skip_if_not_installed('RSQLite')
 
   con <- test_con()
