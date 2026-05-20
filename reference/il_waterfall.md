@@ -89,8 +89,8 @@ il_waterfall(pairs, which = 1)
 #>   <chr>      <int>        <dbl> <chr>       <dbl>   <dbl>
 #> 1 Prior          1      -0.0510 prior      0      -0.0510
 #> 2 first_name     2       2.91   positive  -0.0510  2.86  
-#> 3 surname        3       0.441  positive   2.86    3.30  
-#> 4 dob            4      -1.72   negative   3.30    1.59  
-#> 5 Final          5       1.59   final      0       1.59  
+#> 3 surname        3       2.66   positive   2.86    5.52  
+#> 4 dob            4       3.19   positive   5.52    8.71  
+#> 5 Final          5       8.71   final      0       8.71  
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

@@ -30,8 +30,5 @@ A `ggplot` object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-library(ggplot2)
-autoplot(il_string_similarity('John', 'Jon'))
-} # }
+ggplot2::autoplot(il_string_similarity('John', 'Jon'))
 ```

@@ -41,9 +41,26 @@ An `il_compared` tibble of newly scored pairs (those not already in
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-pairs <- predict(model, threshold = 0.5)
-clusters <- il_cluster(pairs)
+df <- data.frame(
+  unique_id = c(1, 2, 3),
+  first_name = c('John', 'John', 'Jon'),
+  surname = c('Smith', 'Smyth', 'Smith')
+)
+con <- DBI::dbConnect(duckdb::duckdb())
+spec <- il_spec() |>
+  il_compare(first_name, cl_exact()) |>
+  il_compare(surname, cl_exact()) |>
+  il_block_on(surname)
+model <- il_model(df, spec = spec, con = con)
+model <- il_estimate_u(model)
+model <- il_estimate_em(model, block_on(surname))
+#> EM trained: first_name | skipped (blocked on): surname
+pairs <- predict(model, threshold = 0.01)
+clusters <- tibble::tibble(
+  unique_id = c('1', '2', '3'),
+  cluster_id = 'cluster_1'
+)
 missing <- il_score_missing_edges(model, pairs, clusters)
-} # }
+il_cleanup(model)
+DBI::dbDisconnect(con, shutdown = TRUE)
 ```

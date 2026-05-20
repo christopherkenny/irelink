@@ -37,8 +37,12 @@ A `ggplot` object.
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-model <- il_model(fake_1000, spec = spec, con = con)
+con <- DBI::dbConnect(duckdb::duckdb())
+spec <- il_spec() |>
+  il_compare(first_name, cl_exact(term_frequency = TRUE))
+model <- il_model(fake_20, spec = spec, con = con)
 il_tf_chart(model, 'first_name')
-} # }
+
+il_cleanup(model)
+DBI::dbDisconnect(con, shutdown = TRUE)
 ```

@@ -43,12 +43,16 @@ the same as the comparison column) and the frequency column (named
 ## Examples
 
 ``` r
-if (FALSE) { # \dontrun{
-# Suppose you have pre-computed TF for first_name
+con <- DBI::dbConnect(duckdb::duckdb())
+spec <- il_spec() |>
+  il_compare(first_name, cl_exact()) |>
+  il_block_on(surname)
+model <- il_model(fake_20, spec = spec, con = con)
 tf <- data.frame(
-  first_name = c('John', 'Jane', 'Bob'),
-  tf_first_name = c(0.15, 0.10, 0.05)
+  first_name = c('John', 'Jane', 'Bob', 'Alice', 'Tom'),
+  tf_first_name = rep(0.2, 5)
 )
 model <- il_register_tf(model, 'first_name', tf)
-} # }
+il_cleanup(model)
+DBI::dbDisconnect(con, shutdown = TRUE)
 ```
