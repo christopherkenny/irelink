@@ -66,16 +66,16 @@
 - [x] R/utils-dependency-aware.R
 - [x] R/utils-em.R
 - [x] R/utils-evaluation.R
-- [ ] R/utils-register.R
-- [ ] R/utils-scoring.R
-- [ ] R/utils-sql.R
-- [ ] R/utils-tf.R
-- [ ] R/utils-unit-helpers.R
+- [x] R/utils-register.R
+- [x] R/utils-scoring.R
+- [x] R/utils-sql.R
+- [x] R/utils-tf.R
+- [x] R/utils-unit-helpers.R
 - [ ] vignettes/advanced.Rmd
-- [ ] vignettes/deduplicate-50k.Rmd
-- [ ] vignettes/deduplication.Rmd
-- [ ] vignettes/from_splink.Rmd
-- [ ] vignettes/irelink.Rmd
-- [ ] vignettes/record-linkage.Rmd
-- [ ] vignettes/transactions.Rmd
+- [x] vignettes/deduplicate-50k.Rmd
+- [x] vignettes/deduplication.Rmd
+- [x] vignettes/from_splink.Rmd
+- [x] vignettes/irelink.Rmd
+- [x] vignettes/record-linkage.Rmd
+- [x] vignettes/transactions.Rmd
 

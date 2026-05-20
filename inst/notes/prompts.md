@@ -1225,10 +1225,21 @@ This should be an executive summary with key references back to the other files.
 
 ## Polish (GPT-5.4 high)
 
-Go through each of the .Rmd files in this repo. Fix the line breaks so that
-sentences start on a new line and line breaks only occur at the end of a sentence.
+Go through each of the .Rmd files in this repo.
+Fix the line breaks so that sentences start on a new line and line breaks only occur at the end of a sentence.
 An IDE will handle wrapping and so these files should never be manually wrapped.
 
 ## Translation vignette (Claude Code Sonnet 4.6)
 
 We need to create a from_fastLink.Rmd vignette, similar to the from_splink.Rmd one. Please use the inst/benchmarks/fastLink/ for starting examples that should help with massaging the information together
+
+## Polish (GPT-5.4 high)
+
+Go through each of the vignettes and do a writing clarity pass.
+The goal should be to have concise and clear writing above all else.
+
+Remove lazy features of writing including the use of em dashes or semicolons.
+These are often used to create long sentences unnecessarily.
+They should never be used in academic or tehcnical writing.
+Split long sentences into clear sentences.
+Ensure that the prose flows so that a reader is guided towards the knowledge instead of seeing disconnected sentences.

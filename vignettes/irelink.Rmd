@@ -16,30 +16,31 @@ knitr::opts_chunk$set(
 
 ## What is record linkage?
 
-Record linkage (also called entity resolution or deduplication) is the task of identifying records in one or more datasets that refer to the same real-world entity.
-When datasets lack a shared unique identifier, you must rely on imperfect fields like names, dates of birth, and addresses to decide which rows belong together.
-Probabilistic record linkage formalises this by estimating the likelihood that two records are a match given how similar they are across multiple fields.
+Record linkage, also called entity resolution or deduplication, identifies records in one or more datasets that refer to the same real-world entity.
+When datasets do not share a unique identifier, you must rely on imperfect fields such as names, dates of birth, and addresses.
+Probabilistic record linkage estimates the chance that two records are a match based on how similar they are across several fields.
 
 `irelink` implements the Fellegi-Sunter model of probabilistic record linkage.
-Parameters are estimated via unsupervised Expectation-Maximization, so no labeled training data is required to get started.
+It estimates parameters with unsupervised expectation maximization, so you can get started without labeled training data.
 
 ## A typical workflow
 
 Every linkage task follows the same general pattern:
 
-1. **Define a specification** — choose which columns to compare and how.
-2. **Build a model** — load data into a SQL backend and attach the specification.
-3. **Train parameters** — estimate u-probabilities, then run EM to learn m-probabilities.
-4. **Predict** — score every candidate pair and threshold to get likely matches.
-5. **Cluster** — resolve pairwise links into groups of records that represent the same entity.
+1. **Define a specification.** Choose which columns to compare and how.
+2. **Build a model.** Load data into a SQL backend and attach the specification.
+3. **Train parameters.** Estimate u-probabilities, then run EM to learn m-probabilities.
+4. **Predict.** Score candidate pairs and keep the likely matches.
+5. **Cluster.** Resolve pairwise links into groups that represent the same entity.
 
 The example below walks through each step using a small built-in dataset.
 
 ## Step 1: Define a specification
 
-A specification describes the comparisons and blocking rules that drive the model.
+A specification defines the comparisons and blocking rules that drive the model.
 Comparisons tell `irelink` how to score similarity on each field.
-Blocking rules limit which record pairs are compared, making linkage tractable on large data.
+Blocking rules limit which record pairs are compared.
+That keeps linkage tractable on large datasets.
 
 ```{r spec}
 library(irelink)
@@ -54,12 +55,15 @@ spec <- il_spec() |>
 spec
 ```
 
-Each call to `il_compare()` adds a comparison dimension.
-`cl_jaro_winkler(0.9, 0.7)` means: score a pair as level 2 if Jaro-Winkler similarity is at least 0.9, level 1 if at least 0.7, and level 0 otherwise.
+Each call to `il_compare()` adds one comparison dimension.
+Here, `cl_jaro_winkler(0.9, 0.7)` creates three levels.
+Similarity of at least 0.9 is level 2.
+Similarity of at least 0.7 is level 1.
+Anything lower is level 0.
 `cl_exact()` is a simple binary match.
 
 Blocking rules defined with `il_block_on()` restrict candidate pairs to records that share the same value in the blocking column.
-Multiple blocking rules are combined with OR logic, so a pair is compared if it satisfies any rule.
+Multiple blocking rules use OR logic, so a pair is compared if it satisfies any one of them.
 
 ## Step 2: Build a model
 
@@ -77,15 +81,17 @@ model
 
 ## Step 3: Train parameters
 
-Training is a two-step process.
-First, estimate u-probabilities (the chance two random non-matching records agree on each comparison level) from a random sample of pairs:
+Training has two main steps.
+First, estimate u-probabilities.
+These are the chances that two random non-matching records agree at each comparison level:
 
 ```{r train-u}
 model <- il_estimate_u(model)
 ```
 
-Then run Expectation-Maximization to learn m-probabilities (the chance true matches agree on each level).
-You supply a blocking rule to generate the training pairs:
+Next, run expectation maximization to learn m-probabilities.
+These are the chances that true matches agree at each level.
+You provide a blocking rule to generate the training pairs:
 
 ```{r train-em}
 model <- il_estimate_em(model, block_on(surname))
@@ -99,17 +105,18 @@ il_weights(model)
 
 ## Step 4: Predict
 
-`predict()` scores every candidate pair and returns those above a match-probability threshold:
+`predict()` scores candidate pairs and returns those above a match-probability threshold:
 ```{r predict}
 pairs <- predict(model, threshold = 0.5)
 head(pairs)
 ```
 
-Each row is a candidate pair with columns for the left and right record identifiers, the per-comparison gamma values, the evidence-only `match_weight`, the prior-inclusive `total_match_weight`, and the posterior `match_probability`.
+Each row is a candidate pair.
+The output includes the left and right record identifiers, the per-comparison gamma values, the evidence-only `match_weight`, the prior-inclusive `total_match_weight`, and the posterior `match_probability`.
 
 ## Step 5: Cluster
 
-`il_cluster()` resolves pairwise predictions into entity clusters using connected-components analysis:
+`il_cluster()` resolves pairwise predictions into entity clusters with connected-components analysis:
 
 ```{r cluster}
 clusters <- il_cluster(pairs)
@@ -117,11 +124,11 @@ head(clusters)
 ```
 
 Each record is assigned a `cluster_id`.
-Records sharing the same cluster are considered to be the same entity.
+Records in the same cluster are treated as the same entity.
 
 ## Comparison levels
 
-`irelink` ships with a rich library of comparison levels for common field types:
+`irelink` includes a large set of comparison levels for common field types:
 
 | Level | Use case |
 |-------|----------|
@@ -139,7 +146,7 @@ Records sharing the same cluster are considered to be the same entity.
 | `cl_geo_distance()` | Geographic coordinates |
 | `cl_array_intersect()` | Array or set overlap |
 
-For common field types, domain-specific helpers compose multiple levels into a single call:
+For common field types, domain-specific helpers combine multiple levels into a single call:
 
 | Helper | Fields |
 |--------|--------|
@@ -153,17 +160,18 @@ For common field types, domain-specific helpers compose multiple levels into a s
 
 ## Evaluation
 
-If you have labeled data (pairs known to be matches or non-matches), `irelink` provides tools to assess model quality:
+If you have labeled data, meaning pairs that are known matches or non-matches, `irelink` provides tools to assess model quality:
 
-- `il_accuracy()` — overall accuracy at a threshold
-- `il_precision_recall()` — precision and recall across thresholds
-- `il_roc()` — ROC curve data
-- `il_errors()` — inspect false positives and false negatives
+- `il_accuracy()`: overall accuracy at a threshold
+- `il_precision_recall()`: precision and recall across thresholds
+- `il_roc()`: ROC curve data
+- `il_errors()`: inspect false positives and false negatives
 
 ## Cleaning up
 
-When you are done, release the model-owned database resources.
-In an interactive session with abandoned models, use `il_cleanup_all(con)` before disconnecting to drop every `irelink` table on the connection.
+When you are done, release the database resources owned by the model.
+In an interactive session with abandoned models, use `il_cleanup_all(con)` before disconnecting.
+That drops every `irelink` table on the connection.
 
 ```{r cleanup}
 il_cleanup(model)
