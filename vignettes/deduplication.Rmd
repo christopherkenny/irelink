@@ -14,10 +14,8 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette walks through a full deduplication workflow on `fake_1000`.
-It covers model training, prediction, clustering, and evaluation against ground-truth labels.
-The dataset comes from the Python [splink](https://github.com/moj-analytical-services/splink) library.
-It contains 1,000 records for 181 unique people.
+This vignette walks through a full deduplication workflow on `fake_1000`, covering model training, prediction, clustering, and evaluation against ground-truth labels.
+The dataset comes from the Python [splink](https://github.com/moj-analytical-services/splink) library and contains 1,000 records for 181 unique people.
 Many records include typos, missing values, and other realistic data-quality issues.
 
 ## Setup
@@ -34,13 +32,11 @@ df <- fake_1000
 head(df)
 ```
 
-The `cluster` column is the ground truth.
-Records that share the same cluster value refer to the same person.
+The `cluster` column is the ground truth, so records that share the same cluster value refer to the same person.
 There are `r length(unique(df$cluster))` unique entities across `r nrow(df)` records.
 Missing values appear as `NA`, which reflects a common real-world problem.
 
-Before building a model, profile the data.
-This shows completeness and the distribution of key values:
+Before building a model, profile the data to understand its completeness and value distributions:
 
 ```{r completeness}
 con <- DBI::dbConnect(duckdb::duckdb())
@@ -52,8 +48,7 @@ comp
 autoplot(comp)
 ```
 
-Check column value distributions next.
-This helps you choose blocking rules and comparisons:
+Check column value distributions to help choose blocking rules and comparisons:
 
 ```{r profile}
 il_profile(df[, c('first_name', 'surname', 'city')], con = con, top_n = 5)
@@ -62,8 +57,7 @@ il_profile(df[, c('first_name', 'surname', 'city')], con = con, top_n = 5)
 ## Choose blocking rules
 
 `il_suggest_blocking()` lists candidate blocking columns and ranks them.
-A good blocking key has high `n_distinct`, which creates narrow blocks and fewer pairs.
-It also has high `coverage`, which means fewer missing values:
+A good blocking key has high `n_distinct`, which creates narrow blocks and fewer pairs, and high `coverage`, which means fewer missing values:
 
 ```{r suggest-blocking}
 il_suggest_blocking(df, con = con)
@@ -74,9 +68,7 @@ The spec below uses `first_name`, `surname`, and `city`, which rank among the to
 ## Define the specification
 
 Choose the comparisons and blocking rules.
-Names use Jaro-Winkler similarity.
-Dates of birth use the `cl_dob()` helper.
-City uses exact matching with term-frequency adjustment:
+Names use Jaro-Winkler similarity, dates of birth use the `cl_dob()` helper, and city uses exact matching with term-frequency adjustment:
 
 ```{r spec}
 spec <- il_spec() |>
@@ -121,8 +113,7 @@ model <- il_estimate_prior(
 )
 ```
 
-Estimate u-probabilities from random pairs.
-Then estimate m-probabilities with EM:
+Estimate u-probabilities from random pairs and then estimate m-probabilities with EM:
 
 ```{r train}
 model <- il_estimate_u(model, max_pairs = 1e5)
@@ -151,16 +142,14 @@ autoplot(model, type = 'parameters')
 ## Save and reuse the model
 
 Once you are satisfied with the parameters, save the model to disk.
-The saved file stores the spec and the trained parameters.
-That lets you reuse the model without retraining:
+The saved file stores the spec and trained parameters so you can reuse the model without retraining:
 
 ```{r save}
 path <- tempfile(fileext = '.rds')
 il_save(model, path)
 ```
 
-Load the saved model with `il_load()`.
-Attach it to the same data or to new data with `il_attach()`:
+Load the saved model with `il_load()` and attach it to the same data or to new data with `il_attach()`:
 
 ```{r attach}
 con2 <- DBI::dbConnect(duckdb::duckdb())
@@ -170,7 +159,7 @@ head(predict(model2, threshold = 0.85))
 DBI::dbDisconnect(con2, shutdown = TRUE)
 ```
 
-This is a common production workflow.
+This pattern is common in production workflows.
 Train once on a representative sample, save the model, and reuse it as new data arrives.
 
 ## Predict and cluster

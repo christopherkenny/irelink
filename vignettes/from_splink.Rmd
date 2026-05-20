@@ -123,11 +123,8 @@ In `irelink`, these are helper functions that return preconfigured sets of level
 
 ## Blocking rules
 
-In Splink, you create blocking rules with `block_on()`.
-`irelink` uses the same function name.
-The difference is where the rules are used.
-Splink passes them into `SettingsCreator`.
-`irelink` adds them to a spec with `il_block_on()` or passes them directly to training functions.
+In Splink, you create blocking rules with `block_on()`, and `irelink` uses the same function name.
+The main difference is where the rules are used: Splink passes them into `SettingsCreator`, while `irelink` adds them to a spec with `il_block_on()` or passes them directly to training functions.
 
 ```r
 # blocking in the spec

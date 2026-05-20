@@ -1243,3 +1243,10 @@ These are often used to create long sentences unnecessarily.
 They should never be used in academic or tehcnical writing.
 Split long sentences into clear sentences.
 Ensure that the prose flows so that a reader is guided towards the knowledge instead of seeing disconnected sentences.
+
+
+## Polish (GPT-5.4 high)
+
+You murdered the transaction vignette.
+It used to be clear now it has jumpy short sentences everywhere.
+Check for other places in the vignettes where your edits removed the flow, rather than improving the prose.

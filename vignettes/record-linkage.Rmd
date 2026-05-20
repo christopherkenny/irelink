@@ -15,11 +15,9 @@ knitr::opts_chunk$set(
 ```
 
 This vignette shows how to link records across two datasets using the FEBRL (Freely Extensible Biomedical Record Linkage) benchmark data.
-Dataset 4a contains 5,000 original records.
-Dataset 4b contains 5,000 duplicates, one for each original.
+Dataset 4a contains 5,000 original records, and dataset 4b contains 5,000 duplicates, one for each original.
 The duplicate records include typographical errors, missing values, and transpositions.
-Ground truth is stored in the `rec_id` column.
-Records that share the same base number, such as `rec-1070-org` and `rec-1070-dup-0`, refer to the same entity.
+Ground truth is stored in the `rec_id` column, so records that share the same base number, such as `rec-1070-org` and `rec-1070-dup-0`, refer to the same entity.
 
 ## Setup
 
@@ -82,8 +80,7 @@ model <- il_model(
 model
 ```
 
-Next, estimate the prior match probability and the u-probabilities.
-Then run EM:
+Next, estimate the prior match probability and the u-probabilities, then run EM:
 
 ```{r train}
 model <- il_estimate_prior(
@@ -168,8 +165,7 @@ nrow(labels)
 sum(labels$is_match)
 ```
 
-`labels` includes all true cross-table matches.
-If the blocking rules miss a true match, the evaluation curves below count it as a false negative.
+`labels` includes all true cross-table matches, so any true match missed by the blocking rules is counted as a false negative in the evaluation curves below.
 
 ### Accuracy metrics
 

@@ -14,8 +14,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-This vignette shows advanced `irelink` workflows.
-It assumes you have already worked through the Getting Started or Deduplication vignette.
+This vignette covers advanced `irelink` workflows for readers who have already worked through the Getting Started or Deduplication vignette.
 All examples use `fake_1000` and a shared in-memory DuckDB connection.
 
 ## Setup
@@ -91,10 +90,8 @@ autoplot(pairs, which = 1)
 ## Lazy prediction for large data
 
 `predict(collect = FALSE)` keeps scored pairs in the database instead of collecting them into R.
-This path requires DuckDB or PostgreSQL.
-The examples here use DuckDB.
-`il_cluster()` detects the lazy reference and runs connected-components analysis in SQL.
-That avoids pulling millions of rows back into R when memory is limited.
+This path requires DuckDB or PostgreSQL and is especially useful when materializing millions of rows would exhaust memory.
+The examples here use DuckDB, and `il_cluster()` detects the lazy reference so it can run connected-components analysis in SQL.
 
 ```{r lazy}
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
@@ -110,13 +107,11 @@ nrow(clusters_lazy)
 
 `autoplot()` and `il_waterfall()` collect automatically when needed, so downstream analysis code stays the same.
 Use the lazy path on DuckDB or PostgreSQL when candidate-pair counts exceed available memory.
-The lazy prediction table belongs to the model.
-`il_cleanup(model)` removes it along with the model's source and term-frequency tables.
+The lazy prediction table is model-scoped, and `il_cleanup(model)` removes it along with the model's source and term-frequency tables.
 
 ## Chunked u estimation and SQL profiling
 
-For larger datasets, `il_estimate_u()` can accumulate random-pair gamma counts in chunks.
-It can stop once every comparison level has enough support:
+For larger datasets, `il_estimate_u()` can accumulate random-pair gamma counts in chunks and stop once every comparison level has enough support:
 
 ```{r chunked-u, eval = FALSE}
 model <- il_estimate_u(
@@ -128,8 +123,7 @@ model <- il_estimate_u(
 model$params$u_estimation
 ```
 
-When you need to inspect database performance, set `profile_sql = TRUE` on `il_estimate_u()`, `il_estimate_prior()`, or `predict()`.
-This records lightweight SQL timing metadata:
+When you need to inspect database performance, set `profile_sql = TRUE` on `il_estimate_u()`, `il_estimate_prior()`, or `predict()` to collect lightweight SQL timing metadata:
 
 ```{r sql-profile, eval = FALSE}
 pairs <- predict(model, threshold = 0.5, profile_sql = TRUE)
@@ -211,14 +205,12 @@ model_tr <- il_estimate_em(model_tr, block_on(surname))
 
 `tolower`, `toupper`, and `trimws` are translated to SQL on DuckDB and PostgreSQL, so they run in the database.
 Custom R functions only work on the R-side path.
-When you save a model with `il_save()`, `.rds` stores the R object as is.
-`.json` writes Splink settings SQL, so loaded comparisons come back as SQL-backed levels.
+When you save a model with `il_save()`, `.rds` stores the R object as is, while `.json` writes Splink settings SQL so loaded comparisons come back as SQL-backed levels.
 Anonymous functions still produce a warning on save.
 
 ## Incremental matching
 
-`il_find_matches()` scores new records against data that is already loaded into a trained model.
-It uses the same blocking rules and comparison spec.
+`il_find_matches()` scores new records against data that is already loaded into a trained model, using the same blocking rules and comparison spec.
 
 ```{r find-matches}
 new_df <- data.frame(
@@ -242,8 +234,7 @@ Load a saved model, attach it to the current database, and call `il_find_matches
 ## Cleanup
 
 `il_cleanup(model)` only removes tables owned by that model, so it is safe when several models share the same connection.
-`il_cleanup_all(con)` is broader.
-Use it for failed runs or exploratory sessions where you want to clear every `irelink` table before disconnecting.
+`il_cleanup_all(con)` is broader and is best reserved for failed runs or exploratory sessions where you want to clear every `irelink` table before disconnecting.
 
 ```{r cleanup}
 il_cleanup(model)

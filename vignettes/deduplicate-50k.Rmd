@@ -35,12 +35,10 @@ knitr::opts_chunk$set(
 ```
 
 This vignette reproduces the [Splink "Deduplicate 50k synthetic" demo](https://moj-analytical-services.github.io/splink/demos/examples/duckdb/deduplicate_50k_synthetic.html) in `irelink`.
-The data is based on historical people scraped from Wikidata.
-It includes duplicate records with realistic errors such as typos, missing values, and swapped fields.
+The data is based on historical people scraped from Wikidata and includes duplicate records with realistic errors such as typos, missing values, and swapped fields.
 The `cluster` column provides the ground-truth entity labels used in evaluation.
 
-This vignette requires [nanoparquet](https://cran.r-project.org/package=nanoparquet) to read the remote Parquet file.
-It only compiles when the package and the data URL are both available.
+This vignette requires [nanoparquet](https://cran.r-project.org/package=nanoparquet) to read the remote Parquet file and only compiles when the package and the data URL are both available.
 
 ## Load the data
 
@@ -90,8 +88,7 @@ il_count_pairs(
 
 ## Define the specification
 
-Apply term-frequency adjustment to `birth_place` and `occupation`.
-This gives common values such as "London" less weight than rare ones:
+Apply term-frequency adjustment to `birth_place` and `occupation` so common values such as "London" receive less weight than rare ones:
 
 ```{r spec}
 spec <- il_spec() |>

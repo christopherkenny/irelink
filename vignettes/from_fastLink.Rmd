@@ -14,23 +14,19 @@ knitr::opts_chunk$set(
 )
 ```
 
-`irelink` implements the same Fellegi-Sunter probabilistic record linkage framework as [fastLink](https://github.com/kosukeimai/fastLink).
-It uses a different API and a SQL backend.
+`irelink` implements the same Fellegi-Sunter probabilistic record linkage framework as [fastLink](https://github.com/kosukeimai/fastLink), but it uses a different API and a SQL backend.
 This vignette maps common fastLink patterns to `irelink` so you can get started quickly.
 
 ## Design differences
 
 fastLink bundles data preparation, EM estimation, and matching into a single `fastLink()` call.
-`irelink` breaks that work into a pipeline of composable functions.
-You define a spec, build a model, estimate parameters, and then predict.
+`irelink` breaks that work into a pipeline of composable functions where you define a spec, build a model, estimate parameters, and then predict.
 
-fastLink's Jaro-Winkler comparisons produce three agreement levels: agree, partial agree, and disagree.
-The `cut.a` and `cut.p` arguments control those levels.
+fastLink's Jaro-Winkler comparisons produce three agreement levels, and `cut.a` and `cut.p` control the thresholds.
 `irelink` uses `cl_jaro_winkler(high, low)` to express the same thresholds.
 
 fastLink's `getMatches()` assigns a `dedupe.ids` column to flag duplicates.
-`irelink` uses `il_cluster()` instead.
-That assigns a `cluster_id` to each record.
+`irelink` uses `il_cluster()` instead, which assigns a `cluster_id` to each record.
 
 ## Core workflow
 
@@ -128,15 +124,12 @@ DBI::dbDisconnect(con, shutdown = TRUE)
 ```
 
 `il_prior_prevalence()` replaces the training-driven prior with a population-level baseline.
-This is similar to resetting the prior after EM in fastLink workflows that use a heavily blocked training sample.
-If your training data is large and representative, you can skip this step.
+This is similar to resetting the prior after EM in fastLink workflows that use a heavily blocked training sample, and you can skip it if your training data is large and representative.
 
 ## Blocking
 
-fastLink's `blockData()` partitions records into groups.
-You then run `fastLink()` separately inside each block and combine the results afterward.
-In `irelink`, you declare blocking in the spec with `il_block_on()`.
-The package applies those rules automatically, so you do not need a manual loop.
+fastLink's `blockData()` partitions records into groups and requires running `fastLink()` separately within each block before combining the results.
+In `irelink`, you declare blocking in the spec with `il_block_on()`, and the package applies those rules automatically so you do not need a manual loop.
 
 **fastLink:**
 
@@ -170,8 +163,7 @@ For numeric fields, the closest equivalent is `il_block_on()` with pre-bucketed 
 
 ## Model inspection
 
-fastLink exposes learned parameters through `out$EM$patterns.w`.
-That table shows agreement patterns and Fellegi-Sunter weights.
+fastLink exposes learned parameters through `out$EM$patterns.w`, a table of agreement patterns and Fellegi-Sunter weights.
 `irelink` provides the same information visually.
 
 ```r
