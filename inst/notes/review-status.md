@@ -4,16 +4,16 @@
  - [x] R/cl_cosine.R
  - [x] R/cl_custom.R
  - [x] R/cl_date_diff.R
- - [ ] R/cl_geo_distance.R
- - [ ] R/cl_domain.R
- - [ ] R/cl_exact.R
- - [ ] R/cl_jaccard.R
- - [ ] R/cl_jaro_winkler.R
- - [ ] R/cl_levels.R
- - [ ] R/cl_levenshtein.R
- - [ ] R/cl_numeric_diff.R
- - [ ] R/cl_time_diff.R
- - [ ] R/data.R
+ - [x] R/cl_geo_distance.R
+ - [x] R/cl_domain.R
+ - [x] R/cl_exact.R
+ - [x] R/cl_jaccard.R
+ - [x] R/cl_jaro_winkler.R
+ - [x] R/cl_levels.R
+ - [x] R/cl_levenshtein.R
+ - [x] R/cl_numeric_diff.R
+ - [x] R/cl_time_diff.R
+ - [x] R/data.R
  - [ ] R/il_accuracy.R
  - [ ] R/il_block_on.R
  - [ ] R/il_cleanup.R

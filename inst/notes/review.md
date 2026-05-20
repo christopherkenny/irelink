@@ -1,2 +1,3 @@
-- [ ] autoplot: should formatC be used here or is this excessive?
+- [x] autoplot: should formatC be used here or is this excessive?
 - [x] Rename the geographic distance constructor to cl_geo_distance().
+- [x] data.R: Clean up the old style latex to use modern roxygen2 markdown.

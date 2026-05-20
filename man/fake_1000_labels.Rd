@@ -32,8 +32,4 @@ match (\code{clerical_match_score = 1}) or a non-match
 These labels enable evaluation of model accuracy, ROC curves, and
 precision-recall metrics.
 }
-\seealso{
-\link{fake_1000}, \code{\link[=il_accuracy]{il_accuracy()}}, \code{\link[=il_roc]{il_roc()}},
-\code{\link[=il_precision_recall]{il_precision_recall()}}.
-}
 \keyword{datasets}
