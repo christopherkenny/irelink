@@ -16,6 +16,7 @@ knitr::opts_chunk$set(
 # irelink <a href="http://christophertkenny.com/irelink/"><img src="man/figures/logo.png" align="right" height="130" alt="irelink website" /></a>
 
 <!-- badges: start -->
+[![R-CMD-check](https://github.com/christopherkenny/irelink/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/christopherkenny/irelink/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 `irelink` brings fast, scalable probabilistic record linkage to R.
