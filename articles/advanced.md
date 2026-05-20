@@ -114,7 +114,7 @@ in SQL.
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,783 pairs in table __il_8662_1_predicted_4 (threshold = 0.5)
+#> <il_compared_lazy> 2,783 pairs in table __il_8684_1_predicted_4 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -198,7 +198,7 @@ metrics$clusters
 #>  7 cluster_301      10      41   0.911                  0.111
 #>  8 cluster_362      19      74   0.430                  0.824
 #>  9 cluster_495       4       4   0.667                  0.667
-#> 10 cluster_394       9      32   0.889                  0.143
+#> 10 cluster_814       7      23   1.10                   0.1  
 #> # ℹ 132 more rows
 ```
 

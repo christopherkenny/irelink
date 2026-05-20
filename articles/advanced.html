@@ -177,7 +177,7 @@ connected-components analysis in SQL.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pairs_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span>, collect <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">pairs_lazy</span></span>
-<span><span class="co">#&gt; &lt;il_compared_lazy&gt; 2,783 pairs in table __il_8662_1_predicted_4 (threshold = 0.5)</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;il_compared_lazy&gt; 2,783 pairs in table __il_8684_1_predicted_4 (threshold = 0.5)</span></span></code></pre></div>
 <p>Pass the lazy reference directly to <code><a href="../reference/il_cluster.html">il_cluster()</a></code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">clusters_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">pairs_lazy</span>, threshold <span class="op">=</span> <span class="fl">0.85</span><span class="op">)</span></span>
@@ -238,7 +238,7 @@ of that size:</p>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_301      10      41   0.911                  0.111</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_362      19      74   0.430                  0.824</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_495       4       4   0.667                  0.667</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_394       9      32   0.889                  0.143</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_814       7      23   1.10                   0.1  </span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 132 more rows</span></span></span></code></pre></div>
 <p>A large maximum cluster size with low density often means a
 transitive link is pulling unrelated entities together. Consider raising

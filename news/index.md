@@ -15,7 +15,10 @@ probabilistic record linkage engine into idiomatic R.
   define the linkage model declaratively: which fields to compare, how
   to compare them, and which blocking rules to apply.
 - [`il_model()`](http://christophertkenny.com/irelink/reference/il_model.md)
-  binds a spec to data and a DBI connection.
+  binds a spec to one or two datasets and a DBI connection for `dedupe`,
+  `link`, or `link_and_dedupe`, and accepts in-memory data frames,
+  [`dbplyr::tbl_lazy`](https://dbplyr.tidyverse.org/reference/tbl_lazy.html)
+  references, or existing table-name strings.
 - [`predict()`](https://rdrr.io/r/stats/predict.html) scores all
   candidate pairs above a match-probability threshold (or an
   evidence-only match-weight threshold via `threshold_match_weight`).
@@ -43,12 +46,14 @@ probabilistic record linkage engine into idiomatic R.
   for date proximity with
   [`days()`](http://christophertkenny.com/irelink/reference/days.md),
   [`months()`](http://christophertkenny.com/irelink/reference/months.md),
+  and
   [`years()`](http://christophertkenny.com/irelink/reference/years.md)
-  helpers;
+  helpers, and
   [`cl_time_diff()`](http://christophertkenny.com/irelink/reference/cl_time_diff.md)
   for sub-day precision with
   [`seconds()`](http://christophertkenny.com/irelink/reference/seconds.md),
   [`minutes()`](http://christophertkenny.com/irelink/reference/minutes.md),
+  and
   [`hours()`](http://christophertkenny.com/irelink/reference/hours.md)
   helpers.
 - Collections:
@@ -65,6 +70,7 @@ probabilistic record linkage engine into idiomatic R.
   [`cl_dob()`](http://christophertkenny.com/irelink/reference/cl_dob.md),
   [`cl_email()`](http://christophertkenny.com/irelink/reference/cl_email.md),
   `cl_domain()`,
+  [`cl_soundex()`](http://christophertkenny.com/irelink/reference/cl_soundex.md),
   [`cl_zip_code()`](http://christophertkenny.com/irelink/reference/cl_zip_code.md)
   (exact, 5-digit ZIP+4, and 3-digit Sectional Center Facility prefix
   levels),
@@ -113,6 +119,9 @@ probabilistic record linkage engine into idiomatic R.
   programmatic construction.
 - `.explode` parameter for array-valued blocking columns (generates
   `UNNEST` subqueries for DuckDB/PostgreSQL).
+- [`il_count_pairs()`](http://christophertkenny.com/irelink/reference/il_count_pairs.md)
+  estimates candidate-pair counts, including cumulative totals and
+  percent-of-cartesian summaries across rule combinations.
 - [`il_suggest_blocking()`](http://christophertkenny.com/irelink/reference/il_suggest_blocking.md)
   ranks candidate blocking rules by pair-reduction, coverage, and
   balanced score.
@@ -120,6 +129,9 @@ probabilistic record linkage engine into idiomatic R.
   finds blocking rule combinations below a pair count ceiling.
 - [`block_from_labels()`](http://christophertkenny.com/irelink/reference/block_from_labels.md)
   measures per-column recall from labeled pairs.
+- [`il_largest_blocks()`](http://christophertkenny.com/irelink/reference/il_largest_blocks.md)
+  identifies the blocking keys that generate the most records and pairs,
+  respecting blocking transforms.
 
 ### Training
 
@@ -142,9 +154,13 @@ probabilistic record linkage engine into idiomatic R.
 - [`il_prior_prevalence()`](http://christophertkenny.com/irelink/reference/il_prior_prevalence.md)
   and
   [`il_prior_m()`](http://christophertkenny.com/irelink/reference/il_prior_m.md)
-  add regularizing custom priors for EM;
+  add regularizing custom priors for EM,
   [`il_constrain_m()`](http://christophertkenny.com/irelink/reference/il_constrain_m.md)
-  adds explicit fixed matched-class constraints.
+  adds explicit fixed matched-class constraints, and
+  [`il_priors()`](http://christophertkenny.com/irelink/reference/il_priors.md)
+  /
+  [`il_constraints()`](http://christophertkenny.com/irelink/reference/il_constraints.md)
+  expose the stored metadata.
 - [`il_estimate_m_from_labels()`](http://christophertkenny.com/irelink/reference/il_estimate_m_from_labels.md)
   and
   [`il_estimate_m_from_column()`](http://christophertkenny.com/irelink/reference/il_estimate_m_from_column.md)
@@ -158,6 +174,9 @@ probabilistic record linkage engine into idiomatic R.
 - Prediction output includes evidence-only `match_weight`,
   prior-inclusive `total_match_weight`, and posterior
   `match_probability`.
+- `predict(type = "weights")` returns match weights on the log2
+  Bayes-factor scale, and `greedy = TRUE` adds deterministic one-to-one
+  post-processing for `link` models.
 - `include_fields = TRUE` joins all source columns into the scored
   output.
 - `collect = FALSE` returns an `il_compared_lazy` object backed by a
@@ -169,7 +188,7 @@ probabilistic record linkage engine into idiomatic R.
   dependency-aware pattern tables larger than the table used for
   fitting.
 - [`il_deterministic_link()`](http://christophertkenny.com/irelink/reference/il_deterministic_link.md)
-  performs exact-match linking without training.
+  performs single-table exact-match deduplication without training.
 - [`il_find_matches()`](http://christophertkenny.com/irelink/reference/il_find_matches.md)
   scores a set of probe records against existing data.
 - `profile_sql = TRUE` on
@@ -190,7 +209,7 @@ probabilistic record linkage engine into idiomatic R.
 - [`il_completeness()`](http://christophertkenny.com/irelink/reference/il_completeness.md)
   and
   [`il_profile()`](http://christophertkenny.com/irelink/reference/il_profile.md)
-  summarize data quality;
+  summarize data quality, and
   [`il_profile()`](http://christophertkenny.com/irelink/reference/il_profile.md)
   accepts raw SQL expressions as column definitions (e.g.,
   `"city || left(first_name, 1)"`).
@@ -211,7 +230,10 @@ probabilistic record linkage engine into idiomatic R.
 
 ### Data exploration
 
-- [`il_string_similarity()`](http://christophertkenny.com/irelink/reference/il_string_similarity.md)
+- [`il_compare_records()`](http://christophertkenny.com/irelink/reference/il_compare_records.md)
+  scores one explicit record pair against a spec without fitting a full
+  model, and
+  [`il_string_similarity()`](http://christophertkenny.com/irelink/reference/il_string_similarity.md)
   computes 5 string similarity metrics for a single pair.
 - [`il_comparator_score()`](http://christophertkenny.com/irelink/reference/il_comparator_score.md)
   computes batch string similarity across a DataFrame with SQL-side
@@ -249,6 +271,10 @@ probabilistic record linkage engine into idiomatic R.
 
 - All computation runs inside a DBI-compatible database: DuckDB
   (recommended), SQLite, or PostgreSQL.
+- Database-backed workflows support zero-copy registration from
+  [`dbplyr::tbl_lazy`](https://dbplyr.tidyverse.org/reference/tbl_lazy.html)
+  references and existing table names, in addition to in-memory data
+  frames.
 - [`il_save()`](http://christophertkenny.com/irelink/reference/il_save.md)
   and
   [`il_load()`](http://christophertkenny.com/irelink/reference/il_load.md)
@@ -268,8 +294,8 @@ probabilistic record linkage engine into idiomatic R.
   similarity functions.
 - SQLite is retained as a fallback with R-side gamma computation via
   `stringdist`.
-- SQL-native connected components for DuckDB/PostgreSQL; igraph fallback
-  for SQLite.
+- DuckDB and PostgreSQL use SQL-native connected components, with an
+  igraph fallback for SQLite.
 - Term-frequency, lazy prediction, and scratch tables use generated
   model-scoped names to avoid collisions on shared connections.
 - `profile_sql = TRUE` on

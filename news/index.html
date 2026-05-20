@@ -51,7 +51,7 @@
 <ul><li>
 <code><a href="../reference/il_spec.html">il_spec()</a></code>, <code><a href="../reference/il_compare.html">il_compare()</a></code>, and <code><a href="../reference/il_block_on.html">il_block_on()</a></code> define the linkage model declaratively: which fields to compare, how to compare them, and which blocking rules to apply.</li>
 <li>
-<code><a href="../reference/il_model.html">il_model()</a></code> binds a spec to data and a DBI connection.</li>
+<code><a href="../reference/il_model.html">il_model()</a></code> binds a spec to one or two datasets and a DBI connection for <code>dedupe</code>, <code>link</code>, or <code>link_and_dedupe</code>, and accepts in-memory data frames, <code><a href="https://dbplyr.tidyverse.org/reference/tbl_lazy.html" class="external-link">dbplyr::tbl_lazy</a></code> references, or existing table-name strings.</li>
 <li>
 <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> scores all candidate pairs above a match-probability threshold (or an evidence-only match-weight threshold via <code>threshold_match_weight</code>).</li>
 <li>
@@ -61,9 +61,9 @@
 <h3 id="comparison-library-0-0-0-9000">Comparison library<a class="anchor" aria-label="anchor" href="#comparison-library-0-0-0-9000"></a></h3>
 <ul><li>String similarity: <code><a href="../reference/cl_exact.html">cl_exact()</a></code>, <code><a href="../reference/cl_levenshtein.html">cl_levenshtein()</a></code>, <code><a href="../reference/cl_damerau_levenshtein.html">cl_damerau_levenshtein()</a></code>, <code><a href="../reference/cl_jaro.html">cl_jaro()</a></code>, <code><a href="../reference/cl_jaro_winkler.html">cl_jaro_winkler()</a></code>, <code><a href="../reference/cl_jaccard.html">cl_jaccard()</a></code>, <code><a href="../reference/cl_cosine.html">cl_cosine()</a></code>.</li>
 <li>Numeric and distance: <code><a href="../reference/cl_numeric_diff.html">cl_numeric_diff()</a></code>, <code><a href="../reference/cl_pct_diff.html">cl_pct_diff()</a></code>, <code><a href="../reference/cl_geo_distance.html">cl_geo_distance()</a></code>.</li>
-<li>Temporal: <code><a href="../reference/cl_date_diff.html">cl_date_diff()</a></code> for date proximity with <code><a href="../reference/days.html">days()</a></code>, <code><a href="../reference/months.html">months()</a></code>, <code><a href="../reference/years.html">years()</a></code> helpers; <code><a href="../reference/cl_time_diff.html">cl_time_diff()</a></code> for sub-day precision with <code><a href="../reference/seconds.html">seconds()</a></code>, <code><a href="../reference/minutes.html">minutes()</a></code>, <code><a href="../reference/hours.html">hours()</a></code> helpers.</li>
+<li>Temporal: <code><a href="../reference/cl_date_diff.html">cl_date_diff()</a></code> for date proximity with <code><a href="../reference/days.html">days()</a></code>, <code><a href="../reference/months.html">months()</a></code>, and <code><a href="../reference/years.html">years()</a></code> helpers, and <code><a href="../reference/cl_time_diff.html">cl_time_diff()</a></code> for sub-day precision with <code><a href="../reference/seconds.html">seconds()</a></code>, <code><a href="../reference/minutes.html">minutes()</a></code>, and <code><a href="../reference/hours.html">hours()</a></code> helpers.</li>
 <li>Collections: <code><a href="../reference/cl_array_intersect.html">cl_array_intersect()</a></code>, <code><a href="../reference/cl_array_subset.html">cl_array_subset()</a></code>, <code><a href="../reference/cl_array_min_distance.html">cl_array_min_distance()</a></code>.</li>
-<li>Domain-specific: <code><a href="../reference/cl_name.html">cl_name()</a></code>, <code><a href="../reference/cl_first_last_name.html">cl_first_last_name()</a></code> / <code><a href="../reference/cl_forename_surname.html">cl_forename_surname()</a></code> (both accept a companion column for the surname and handle first/last swap detection), <code><a href="../reference/cl_dob.html">cl_dob()</a></code>, <code><a href="../reference/cl_email.html">cl_email()</a></code>, <code>cl_domain()</code>, <code><a href="../reference/cl_zip_code.html">cl_zip_code()</a></code> (exact, 5-digit ZIP+4, and 3-digit Sectional Center Facility prefix levels), <code><a href="../reference/cl_postcode.html">cl_postcode()</a></code>.</li>
+<li>Domain-specific: <code><a href="../reference/cl_name.html">cl_name()</a></code>, <code><a href="../reference/cl_first_last_name.html">cl_first_last_name()</a></code> / <code><a href="../reference/cl_forename_surname.html">cl_forename_surname()</a></code> (both accept a companion column for the surname and handle first/last swap detection), <code><a href="../reference/cl_dob.html">cl_dob()</a></code>, <code><a href="../reference/cl_email.html">cl_email()</a></code>, <code>cl_domain()</code>, <code><a href="../reference/cl_soundex.html">cl_soundex()</a></code>, <code><a href="../reference/cl_zip_code.html">cl_zip_code()</a></code> (exact, 5-digit ZIP+4, and 3-digit Sectional Center Facility prefix levels), <code><a href="../reference/cl_postcode.html">cl_postcode()</a></code>.</li>
 <li>Composition: <code><a href="../reference/cl_levels.html">cl_levels()</a></code>, <code><a href="../reference/cl_and.html">cl_and()</a></code>, <code><a href="../reference/cl_or.html">cl_or()</a></code>, <code><a href="../reference/cl_not.html">cl_not()</a></code>, <code><a href="../reference/cl_null.html">cl_null()</a></code>, <code><a href="../reference/cl_else.html">cl_else()</a></code>, <code><a href="../reference/cl_literal.html">cl_literal()</a></code>, <code><a href="../reference/cl_custom.html">cl_custom()</a></code>, <code><a href="../reference/cl_columns_reversed.html">cl_columns_reversed()</a></code>.</li>
 <li>All applicable comparators accept <code>term_frequency = TRUE</code> for Fellegi-Sunter term-frequency adjustments.</li>
 </ul></div>
@@ -82,11 +82,15 @@
 <li>
 <code>.explode</code> parameter for array-valued blocking columns (generates <code>UNNEST</code> subqueries for DuckDB/PostgreSQL).</li>
 <li>
+<code><a href="../reference/il_count_pairs.html">il_count_pairs()</a></code> estimates candidate-pair counts, including cumulative totals and percent-of-cartesian summaries across rule combinations.</li>
+<li>
 <code><a href="../reference/il_suggest_blocking.html">il_suggest_blocking()</a></code> ranks candidate blocking rules by pair-reduction, coverage, and balanced score.</li>
 <li>
 <code><a href="../reference/il_find_blocking_below.html">il_find_blocking_below()</a></code> finds blocking rule combinations below a pair count ceiling.</li>
 <li>
 <code><a href="../reference/block_from_labels.html">block_from_labels()</a></code> measures per-column recall from labeled pairs.</li>
+<li>
+<code><a href="../reference/il_largest_blocks.html">il_largest_blocks()</a></code> identifies the blocking keys that generate the most records and pairs, respecting blocking transforms.</li>
 </ul></div>
 <div class="section level3">
 <h3 id="training-0-0-0-9000">Training<a class="anchor" aria-label="anchor" href="#training-0-0-0-9000"></a></h3>
@@ -99,7 +103,7 @@
 <li>
 <code><a href="../reference/il_estimate_prior.html">il_estimate_prior()</a></code> sets the prior match probability from deterministic matching rules, counting unique blocked pairs across overlapping rules.</li>
 <li>
-<code><a href="../reference/il_prior_prevalence.html">il_prior_prevalence()</a></code> and <code><a href="../reference/il_prior_m.html">il_prior_m()</a></code> add regularizing custom priors for EM; <code><a href="../reference/il_constrain_m.html">il_constrain_m()</a></code> adds explicit fixed matched-class constraints.</li>
+<code><a href="../reference/il_prior_prevalence.html">il_prior_prevalence()</a></code> and <code><a href="../reference/il_prior_m.html">il_prior_m()</a></code> add regularizing custom priors for EM, <code><a href="../reference/il_constrain_m.html">il_constrain_m()</a></code> adds explicit fixed matched-class constraints, and <code><a href="../reference/il_priors.html">il_priors()</a></code> / <code><a href="../reference/il_constraints.html">il_constraints()</a></code> expose the stored metadata.</li>
 <li>
 <code><a href="../reference/il_estimate_m_from_labels.html">il_estimate_m_from_labels()</a></code> and <code><a href="../reference/il_estimate_m_from_column.html">il_estimate_m_from_column()</a></code> initialize parameters from ground-truth labels.</li>
 </ul></div>
@@ -109,6 +113,8 @@
 <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> supports both <code>threshold</code> (match probability) and <code>threshold_match_weight</code> (evidence-only log2 Bayes factor) filtering.</li>
 <li>Prediction output includes evidence-only <code>match_weight</code>, prior-inclusive <code>total_match_weight</code>, and posterior <code>match_probability</code>.</li>
 <li>
+<code>predict(type = "weights")</code> returns match weights on the log2 Bayes-factor scale, and <code>greedy = TRUE</code> adds deterministic one-to-one post-processing for <code>link</code> models.</li>
+<li>
 <code>include_fields = TRUE</code> joins all source columns into the scored output.</li>
 <li>
 <code>collect = FALSE</code> returns an <code>il_compared_lazy</code> object backed by a model-scoped in-database table.</li>
@@ -117,7 +123,7 @@
 <li>
 <code><a href="../reference/il_score_patterns.html">il_score_patterns()</a></code> scores compatible comparison-pattern tables, including dependency-aware pattern tables larger than the table used for fitting.</li>
 <li>
-<code><a href="../reference/il_deterministic_link.html">il_deterministic_link()</a></code> performs exact-match linking without training.</li>
+<code><a href="../reference/il_deterministic_link.html">il_deterministic_link()</a></code> performs single-table exact-match deduplication without training.</li>
 <li>
 <code><a href="../reference/il_find_matches.html">il_find_matches()</a></code> scores a set of probe records against existing data.</li>
 <li>
@@ -132,7 +138,7 @@
 <li>
 <code><a href="../reference/il_training_history.html">il_training_history()</a></code> tracks parameter convergence across EM iterations.</li>
 <li>
-<code><a href="../reference/il_completeness.html">il_completeness()</a></code> and <code><a href="../reference/il_profile.html">il_profile()</a></code> summarize data quality; <code><a href="../reference/il_profile.html">il_profile()</a></code> accepts raw SQL expressions as column definitions (e.g., <code>"city || left(first_name, 1)"</code>).</li>
+<code><a href="../reference/il_completeness.html">il_completeness()</a></code> and <code><a href="../reference/il_profile.html">il_profile()</a></code> summarize data quality, and <code><a href="../reference/il_profile.html">il_profile()</a></code> accepts raw SQL expressions as column definitions (e.g., <code>"city || left(first_name, 1)"</code>).</li>
 <li>
 <code><a href="../reference/il_unlinkables.html">il_unlinkables()</a></code> identifies records that cannot be linked under any blocking rule.</li>
 <li>
@@ -147,7 +153,7 @@
 <div class="section level3">
 <h3 id="data-exploration-0-0-0-9000">Data exploration<a class="anchor" aria-label="anchor" href="#data-exploration-0-0-0-9000"></a></h3>
 <ul><li>
-<code><a href="../reference/il_string_similarity.html">il_string_similarity()</a></code> computes 5 string similarity metrics for a single pair.</li>
+<code><a href="../reference/il_compare_records.html">il_compare_records()</a></code> scores one explicit record pair against a spec without fitting a full model, and <code><a href="../reference/il_string_similarity.html">il_string_similarity()</a></code> computes 5 string similarity metrics for a single pair.</li>
 <li>
 <code><a href="../reference/il_comparator_score.html">il_comparator_score()</a></code> computes batch string similarity across a DataFrame with SQL-side scoring on DuckDB/PostgreSQL.</li>
 <li>
@@ -179,6 +185,7 @@
 <div class="section level3">
 <h3 id="sql-backends-and-persistence-0-0-0-9000">SQL backends and persistence<a class="anchor" aria-label="anchor" href="#sql-backends-and-persistence-0-0-0-9000"></a></h3>
 <ul><li>All computation runs inside a DBI-compatible database: DuckDB (recommended), SQLite, or PostgreSQL.</li>
+<li>Database-backed workflows support zero-copy registration from <code><a href="https://dbplyr.tidyverse.org/reference/tbl_lazy.html" class="external-link">dbplyr::tbl_lazy</a></code> references and existing table names, in addition to in-memory data frames.</li>
 <li>
 <code><a href="../reference/il_save.html">il_save()</a></code> and <code><a href="../reference/il_load.html">il_load()</a></code> support both RDS files and Splink settings JSON.</li>
 <li>
@@ -192,7 +199,7 @@
 <h3 id="performance-0-0-0-9000">Performance<a class="anchor" aria-label="anchor" href="#performance-0-0-0-9000"></a></h3>
 <ul><li>Gamma computation is pushed into DuckDB using native C++ string similarity functions.</li>
 <li>SQLite is retained as a fallback with R-side gamma computation via <code>stringdist</code>.</li>
-<li>SQL-native connected components for DuckDB/PostgreSQL; igraph fallback for SQLite.</li>
+<li>DuckDB and PostgreSQL use SQL-native connected components, with an igraph fallback for SQLite.</li>
 <li>Term-frequency, lazy prediction, and scratch tables use generated model-scoped names to avoid collisions on shared connections.</li>
 <li>
 <code>profile_sql = TRUE</code> on <code><a href="../reference/il_estimate_u.html">il_estimate_u()</a></code>, <code><a href="../reference/il_estimate_prior.html">il_estimate_prior()</a></code>, and <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> records lightweight SQL timing metadata for performance investigation.</li>
