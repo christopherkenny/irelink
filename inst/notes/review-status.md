@@ -71,7 +71,7 @@
 - [x] R/utils-sql.R
 - [x] R/utils-tf.R
 - [x] R/utils-unit-helpers.R
-- [ ] vignettes/advanced.Rmd
+- [x] vignettes/advanced.Rmd
 - [x] vignettes/deduplicate-50k.Rmd
 - [x] vignettes/deduplication.Rmd
 - [x] vignettes/from_splink.Rmd

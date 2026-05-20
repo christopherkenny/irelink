@@ -1159,7 +1159,6 @@ Note that we have already diverged a bit:
   - using DBI instead of custom database backends
   - additional statistical features, like custom priors and EM with dependence
 
-
 # Interactives (Claude Code Sonnet 4.6 medium; Codex GPT-5.5 medium)
 
 You are working on a record linkage package in R.
@@ -1202,7 +1201,6 @@ Scan for things that should not be included in roxygen. These include, but are n
 There are substantial docs that help explain the design in `inst/`.
 These are not user facing and should not leak into the user-facing docs.
 
-
 ## Code (Codex GPT-5.5 medium)
 
 We are starting a manual review of this package.
@@ -1210,7 +1208,6 @@ Look at `inst/refs/47-review-plan.md`.
 Perform a first review of Chunk X and give me an action plan so that I can review efficiently
 
 Write notes to `inst/refs/[48-57]-review-chunk-X.md`.
-
 
 ### Follow-up (Codex GPT-5.5 medium)
 
@@ -1244,9 +1241,15 @@ They should never be used in academic or tehcnical writing.
 Split long sentences into clear sentences.
 Ensure that the prose flows so that a reader is guided towards the knowledge instead of seeing disconnected sentences.
 
-
 ## Polish (GPT-5.4 high)
 
 You murdered the transaction vignette.
 It used to be clear now it has jumpy short sentences everywhere.
 Check for other places in the vignettes where your edits removed the flow, rather than improving the prose.
+
+## Polish (GPT-5.4 high)
+
+Review the stage documents in inst/refs/.
+Then review the NEWS.
+The stages are sequential and so things may have been updated.
+Make sure that the NEWS covers major features of the package sufficiently, including making sure all comments are up-to-date in the sense that they have not been superceded by a later stage and that anything introduced in later stages are also covered in the NEWS.

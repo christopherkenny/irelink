@@ -32,8 +32,8 @@ fastLink's `getMatches()` assigns a `dedupe.ids` column to flag duplicates.
 
 | Step | fastLink | irelink |
 |------|-------------|-------------|
-| Define comparisons | `varnames`, `stringdist.match`, `partial.match` in `fastLink()` | `il_spec() \|>`<br>`il_compare(...) \|>`<br>`il_block_on(...)` |
-| Estimate and match | `fastLink(dfA, dfB, ...)` | `il_model(df, spec, con) \|>`<br>`il_estimate_u() \|>`<br>`il_estimate_em(block_on(...))` |
+| Define comparisons | `varnames`, `stringdist.match`, `partial.match` in `fastLink()` | `il_spec() &#124;>`<br>`il_compare(...) &#124;>`<br>`il_block_on(...)` |
+| Estimate and match | `fastLink(dfA, dfB, ...)` | `il_model(df, spec, con) &#124;>`<br>`il_estimate_u() &#124;>`<br>`il_estimate_em(block_on(...))` |
 | Set match threshold | `threshold.match` in `fastLink()` | `threshold` in `predict()` |
 | Get matched records | `getMatches(dfA, dfB, fl.out)` | `il_cluster(pairs)` |
 | Evaluate | manual confusion table | `il_cluster_confusion_matrix(model, labels_col, threshold)` |
