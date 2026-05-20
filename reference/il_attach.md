@@ -49,9 +49,9 @@ or further training.
 
 This is the key function for the production workflow: train once with
 [`il_model()`](http://christophertkenny.com/irelink/reference/il_model.md)
-→ save with
+-\> save with
 [`il_save()`](http://christophertkenny.com/irelink/reference/il_save.md)
-→ later, load with
+-\> later, load with
 [`il_load()`](http://christophertkenny.com/irelink/reference/il_load.md)
 and attach to new data with `il_attach()`.
 
