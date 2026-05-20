@@ -109,7 +109,10 @@ il_cluster <- function(
 
   # Try SQL path first (DuckDB / PostgreSQL)
   model <- attr(pairs, 'model')
-  con <- if (!is.null(model)) model$con else NULL
+  con <- NULL
+  if (!is.null(model)) {
+    con <- model$con
+  }
   use_sql <- !is.null(con) &&
     DBI::dbIsValid(con) &&
     detect_dialect(con) %in% c('duckdb', 'postgres')
@@ -333,13 +336,19 @@ best_link_filter <- function(pairs, ties_method = 'lowest_id') {
 
   for (i in seq_len(nrow(pairs))) {
     for (nd in c(id_l[i], id_r[i])) {
-      partner <- if (nd == id_l[i]) id_r[i] else id_l[i]
+      partner <- id_l[i]
+      if (nd == id_l[i]) {
+        partner <- id_r[i]
+      }
       prev <- best_idx[nd]
       if (is.na(prev)) {
         best_idx[nd] <- i
       } else {
         prev_prob <- prob[prev]
-        prev_partner <- if (nd == id_l[prev]) id_r[prev] else id_l[prev]
+        prev_partner <- id_l[prev]
+        if (nd == id_l[prev]) {
+          prev_partner <- id_r[prev]
+        }
         if (
           prob[i] > prev_prob ||
             (prob[i] == prev_prob && partner < prev_partner)
@@ -601,7 +610,10 @@ prepare_cluster_source_dataset <- function(source_dataset, pairs, method) {
   if (length(missing_ids) > 0L) {
     preview <- missing_ids[seq_len(min(5L, length(missing_ids)))]
     extra <- length(missing_ids) - length(preview)
-    extra_text <- if (extra > 0L) paste0(' and ', extra, ' more') else ''
+    extra_text <- ''
+    if (extra > 0L) {
+      extra_text <- paste0(' and ', extra, ' more')
+    }
     cli::cli_abort(
       '{.arg source_dataset} must provide a source dataset for every {.field unique_id} in {.arg pairs}. Missing source-dataset entries for {.val {preview}}{extra_text}.'
     )

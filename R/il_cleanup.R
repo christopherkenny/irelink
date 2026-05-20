@@ -80,10 +80,9 @@ il_cleanup <- function(model) {
     tracked
   )
   prefix <- model$data$table_prefix
-  prefixed <- if (!is.null(prefix)) {
-    tables[startsWith(tables, paste0(prefix, '_'))]
-  } else {
-    character(0)
+  prefixed <- character(0)
+  if (!is.null(prefix)) {
+    prefixed <- tables[startsWith(tables, paste0(prefix, '_'))]
   }
   il_tables <- unique(c(known[!is.na(known)], prefixed))
   for (tbl in il_tables) {

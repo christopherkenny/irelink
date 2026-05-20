@@ -56,8 +56,9 @@ print.il_spec <- function(x, ...) {
         !is.na(rule$where) &&
         nzchar(rule$where)
       has_tf <- !is.null(rule$transform)
-      col_labels <- if (has_tf && is.list(rule$transform)) {
-        vapply(
+      col_labels <- rule$columns
+      if (has_tf && is.list(rule$transform)) {
+        col_labels <- vapply(
           rule$columns,
           function(col) {
             tf <- rule$transform[[col]]
@@ -70,28 +71,26 @@ print.il_spec <- function(x, ...) {
           },
           character(1)
         )
-      } else {
-        rule$columns
       }
-      tf_label <- if (has_tf && !is.list(rule$transform)) {
+      tf_label <- ''
+      if (has_tf && !is.list(rule$transform)) {
         nm <- transform_to_name(rule$transform)
-        if (!is.null(nm)) paste0(' [', nm, ']') else ''
-      } else {
-        ''
+        if (!is.null(nm)) {
+          tf_label <- paste0(' [', nm, ']')
+        }
       }
-      rule_label <- if (has_cols && has_where) {
-        paste0(
+      rule_label <- '(empty rule)'
+      if (has_cols && has_where) {
+        rule_label <- paste0(
           paste(col_labels, collapse = ', '),
           tf_label,
           ' + WHERE ',
           rule$where
         )
       } else if (has_cols) {
-        paste0(paste(col_labels, collapse = ', '), tf_label)
+        rule_label <- paste0(paste(col_labels, collapse = ', '), tf_label)
       } else if (has_where) {
-        paste0('WHERE ', rule$where)
-      } else {
-        '(empty rule)'
+        rule_label <- paste0('WHERE ', rule$where)
       }
       cat(sprintf('    %d. %s\n', i, rule_label))
     }

@@ -431,10 +431,9 @@ fit_dependency_loglinear <- function(
 ) {
   data <- pattern_factors
   data$count <- as.numeric(weighted_counts) + offset
-  form <- if (interactions && ncol(pattern_factors) > 1L) {
-    stats::as.formula('count ~ (.)^2')
-  } else {
-    stats::as.formula('count ~ .')
+  form <- stats::as.formula('count ~ .')
+  if (interactions && ncol(pattern_factors) > 1L) {
+    form <- stats::as.formula('count ~ (.)^2')
   }
   tryCatch(
     stats::glm(form, data = data, family = stats::quasipoisson()),
@@ -587,10 +586,11 @@ build_dependency_scored_query <- function(
     ),
     collapse = ' AND '
   )
-  where_clause <- if (!is.null(threshold_match_weight)) {
-    glue::glue('WHERE scores.match_weight >= {threshold_match_weight}')
-  } else {
-    glue::glue('WHERE scores.match_probability >= {threshold}')
+  where_clause <- glue::glue('WHERE scores.match_probability >= {threshold}')
+  if (!is.null(threshold_match_weight)) {
+    where_clause <- glue::glue(
+      'WHERE scores.match_weight >= {threshold_match_weight}'
+    )
   }
   glue::glue(
     'SELECT DISTINCT gamma_pairs.l_unique_id AS unique_id_l, ',

@@ -13,10 +13,9 @@ clean_strings <- function(df) {
 base_url <- 'https://raw.githubusercontent.com/moj-analytical-services/splink_datasets/master/data'
 
 local_path <- '../splink/tests/datasets/fake_1000_from_splink_demos.csv'
-fake_1000_path <- if (file.exists(local_path)) {
-  local_path
-} else {
-  paste0(base_url, '/fake_1000.csv')
+fake_1000_path <- paste0(base_url, '/fake_1000.csv')
+if (file.exists(local_path)) {
+  fake_1000_path <- local_path
 }
 
 fake_1000 <- read_csv(fake_1000_path, show_col_types = FALSE) |>

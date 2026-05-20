@@ -40,10 +40,9 @@ labels_from_column <- function(model, labels_col, threshold = 0) {
   qtbl_r <- sql_quote_identifier(tbl_r)
   qlabels_col <- sql_quote_identifier(labels_col)
   link_type <- model$link_type %||% 'dedupe'
-  dedup_cond <- if (link_type == 'dedupe') {
-    'AND gl.unique_id < gr.unique_id '
-  } else {
-    ''
+  dedup_cond <- ''
+  if (link_type == 'dedupe') {
+    dedup_cond <- 'AND gl.unique_id < gr.unique_id '
   }
 
   if (dialect_has_fuzzy_sql(dialect)) {
@@ -444,12 +443,17 @@ summarise_confusion_counts <- function(counts, threshold = NULL) {
   fn <- counts$fn
   tn <- counts$tn
 
-  precision <- if (tp + fp > 0) tp / (tp + fp) else 1
-  recall <- if (tp + fn > 0) tp / (tp + fn) else 1
-  f1 <- if (precision + recall > 0) {
-    2 * precision * recall / (precision + recall)
-  } else {
-    0
+  precision <- 1
+  if (tp + fp > 0) {
+    precision <- tp / (tp + fp)
+  }
+  recall <- 1
+  if (tp + fn > 0) {
+    recall <- tp / (tp + fn)
+  }
+  f1 <- 0
+  if (precision + recall > 0) {
+    f1 <- 2 * precision * recall / (precision + recall)
   }
 
   result <- tibble::tibble(

@@ -77,10 +77,9 @@ run_benchmark <- function(n) {
     "elapsed"
   ]
   t_predict <- system.time(pairs <- predict(model, threshold = 0.5))["elapsed"]
-  t_cluster <- if (nrow(pairs) > 0) {
-    system.time(il_cluster(pairs))["elapsed"]
-  } else {
-    0
+  t_cluster <- 0
+  if (nrow(pairs) > 0) {
+    t_cluster <- system.time(il_cluster(pairs))["elapsed"]
   }
 
   tibble::tibble(

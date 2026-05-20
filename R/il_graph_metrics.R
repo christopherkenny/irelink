@@ -79,7 +79,10 @@ il_graph_metrics <- function(pairs, clusters) {
   validate_cluster_assignments(clusters)
   # Try SQL path first
   model <- attr(pairs, 'model')
-  con <- if (!is.null(model)) model$con else NULL
+  con <- NULL
+  if (!is.null(model)) {
+    con <- model$con
+  }
   use_sql <- !is.null(con) &&
     DBI::dbIsValid(con) &&
     detect_dialect(con) %in% c('duckdb', 'postgres')
@@ -214,8 +217,14 @@ graph_metrics_r <- function(pairs, clusters) {
     n_e <- sum(edge_ids_l %in% member_set & edge_ids_r %in% member_set)
     n_edges_vec[i] <- n_e
 
-    max_edges <- if (n >= 2L) n * (n - 1L) / 2L else 0L
-    density_vec[i] <- if (max_edges > 0L) n_e / max_edges else 0
+    max_edges <- 0L
+    if (n >= 2L) {
+      max_edges <- n * (n - 1L) / 2L
+    }
+    density_vec[i] <- 0
+    if (max_edges > 0L) {
+      density_vec[i] <- n_e / max_edges
+    }
   }
 
   cluster_tbl <- tibble::tibble(

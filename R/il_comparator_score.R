@@ -269,7 +269,10 @@ il_phonetic_chart <- function(.data, col_1, col_2, con = NULL) {
     if (dialect == 'duckdb') {
       register_phonetic_macros(con)
     }
-    sx_fn <- if (dialect == 'duckdb') 'il_soundex' else 'soundex'
+    sx_fn <- 'soundex'
+    if (dialect == 'duckdb') {
+      sx_fn <- 'il_soundex'
+    }
     qtbl <- sql_quote_identifier(tbl_name)
     qcol_1 <- sql_quote_identifier(col_1)
     qcol_2 <- sql_quote_identifier(col_2)

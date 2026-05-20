@@ -194,7 +194,10 @@ get_random_pairs_with_gammas <- function(
 
   if (dialect_has_fuzzy_sql(dialect)) {
     tbl_l <- model$data$tbl_l
-    tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
+    tbl_r <- tbl_l
+    if (!is.null(model$data$tbl_r)) {
+      tbl_r <- model$data$tbl_r
+    }
     link_type <- model$link_type %||% 'dedupe'
     has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
     max_pairs <- as.integer(max_pairs)
@@ -299,7 +302,10 @@ get_random_pair_gamma_counts_chunked <- function(
 
   if (dialect_has_fuzzy_sql(dialect)) {
     tbl_l <- model$data$tbl_l
-    tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
+    tbl_r <- tbl_l
+    if (!is.null(model$data$tbl_r)) {
+      tbl_r <- model$data$tbl_r
+    }
     link_type <- model$link_type %||% 'dedupe'
     has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
 
@@ -345,7 +351,10 @@ get_random_pair_gamma_counts_chunked <- function(
         step = 'estimate_u.random_pair_gamma_counts_chunk',
         profile = profile
       )
-      chunk_n <- if (nrow(chunk_counts) == 0L) 0L else sum(chunk_counts$n)
+      chunk_n <- sum(chunk_counts$n)
+      if (nrow(chunk_counts) == 0L) {
+        chunk_n <- 0L
+      }
       if (chunk_n == 0L) {
         break
       }
@@ -459,7 +468,10 @@ register_blocked_pairs <- function(
   tbl_r <- model$data$tbl_r %||% tbl_l
   link_type <- model$link_type %||% 'dedupe'
   has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
-  suffix <- if (isTRUE(overwrite)) NULL else il_table_suffix()
+  suffix <- il_table_suffix()
+  if (isTRUE(overwrite)) {
+    suffix <- NULL
+  }
   tbl <- il_table_name(model, paste0('blocked_pairs_', purpose), suffix)
 
   parts <- vapply(
@@ -604,7 +616,10 @@ compute_gamma <- function(val_l, val_r, comp_level) {
   }
 
   if (method %in% c('jaro_winkler', 'jaro')) {
-    p <- if (method == 'jaro_winkler') 0.1 else 0
+    p <- 0
+    if (method == 'jaro_winkler') {
+      p <- 0.1
+    }
     score <- rep(NA_real_, n)
     score[both_present] <- 1 -
       stringdist::stringdist(
@@ -623,7 +638,10 @@ compute_gamma <- function(val_l, val_r, comp_level) {
   }
 
   if (method %in% c('jaccard', 'cosine')) {
-    sd_method <- if (method == 'jaccard') 'jaccard' else 'cosine'
+    sd_method <- 'cosine'
+    if (method == 'jaccard') {
+      sd_method <- 'jaccard'
+    }
     score <- rep(NA_real_, n)
     score[both_present] <- 1 -
       stringdist::stringdist(
@@ -731,8 +749,12 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     fn <- comp_level$fn
     thresholds <- comp_level$thresholds
     n <- length(thresholds)
-    sd_method <- if (fn == 'jaro_winkler') 'jw' else 'lv'
-    sd_p <- if (fn == 'jaro_winkler') 0.1 else 0
+    sd_method <- 'lv'
+    sd_p <- 0
+    if (fn == 'jaro_winkler') {
+      sd_method <- 'jw'
+      sd_p <- 0.1
+    }
 
     gamma <- rep(0L, length(val_l))
     for (k in seq_len(length(val_l))) {
@@ -757,16 +779,18 @@ compute_gamma <- function(val_l, val_r, comp_level) {
         method = sd_method,
         p = sd_p
       )
-      best <- if (fn == 'jaro_winkler') max(1 - dists) else min(dists)
+      best <- min(dists)
+      if (fn == 'jaro_winkler') {
+        best <- max(1 - dists)
+      }
       # Iterate most-lenient to strictest; overwrite with higher gamma each time
       # a stricter threshold is also satisfied. Matches the pattern in jaro_winkler
       # and levenshtein handling above.
       for (i in rev(seq_along(thresholds))) {
         level_code <- n - i + 1L
-        passes <- if (fn == 'jaro_winkler') {
-          best >= thresholds[i]
-        } else {
-          best <= thresholds[i]
+        passes <- best <= thresholds[i]
+        if (fn == 'jaro_winkler') {
+          passes <- best >= thresholds[i]
         }
         if (passes) {
           gamma[k] <- level_code
@@ -898,7 +922,10 @@ compute_gamma <- function(val_l, val_r, comp_level) {
 get_blocked_pairs <- function(model, blocking) {
   con <- model$con
   tbl_l <- model$data$tbl_l
-  tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
+  tbl_r <- tbl_l
+  if (!is.null(model$data$tbl_r)) {
+    tbl_r <- model$data$tbl_r
+  }
   link_type <- model$link_type %||% 'dedupe'
   has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
 
@@ -915,10 +942,9 @@ get_blocked_pairs <- function(model, blocking) {
   parts <- vapply(
     table_pairs,
     function(tp) {
-      where_clause <- if (nzchar(block_where)) {
-        glue::glue('{tp$join_cond} AND {block_where}')
-      } else {
-        tp$join_cond
+      where_clause <- tp$join_cond
+      if (nzchar(block_where)) {
+        where_clause <- glue::glue('{tp$join_cond} AND {block_where}')
       }
       glue::glue(
         'SELECT {sel$left}, {sel$right} FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
@@ -937,7 +963,10 @@ get_blocked_pairs <- function(model, blocking) {
 get_all_pairs <- function(model, max_pairs = 1e6) {
   con <- model$con
   tbl_l <- model$data$tbl_l
-  tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
+  tbl_r <- tbl_l
+  if (!is.null(model$data$tbl_r)) {
+    tbl_r <- model$data$tbl_r
+  }
   link_type <- model$link_type %||% 'dedupe'
   has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
 

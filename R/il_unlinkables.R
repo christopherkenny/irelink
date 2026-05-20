@@ -65,10 +65,9 @@ il_unlinkables <- function(model) {
   link_type <- model$link_type %||% 'dedupe'
   has_right_table <- !is.null(model$data$n_records_r) &&
     !identical(link_type, 'dedupe')
-  n_records <- if (has_right_table) {
-    as.numeric(model$data$n_records_l) + as.numeric(model$data$n_records_r)
-  } else {
-    as.numeric(model$data$n_records_l)
+  n_records <- as.numeric(model$data$n_records_l)
+  if (has_right_table) {
+    n_records <- n_records + as.numeric(model$data$n_records_r)
   }
   thresholds <- seq(0, 1, by = 0.05)
   con <- model$con
@@ -80,8 +79,8 @@ il_unlinkables <- function(model) {
     on.exit(drop_registered(con, lazy$predicted_tbl), add = TRUE)
     qpred <- sql_quote_identifier(lazy$predicted_tbl)
 
-    max_prob_sql <- if (has_right_table) {
-      glue::glue(
+    if (has_right_table) {
+      max_prob_sql <- glue::glue(
         'SELECT MAX(match_probability) AS max_prob FROM (',
         "SELECT 'l:' || CAST(unique_id_l AS VARCHAR) AS id, match_probability FROM {qpred} ",
         'UNION ALL ',
@@ -89,7 +88,7 @@ il_unlinkables <- function(model) {
         ') sub GROUP BY id'
       )
     } else {
-      glue::glue(
+      max_prob_sql <- glue::glue(
         'SELECT MAX(match_probability) AS max_prob FROM (',
         'SELECT CAST(unique_id_l AS VARCHAR) AS id, match_probability FROM {qpred} ',
         'UNION ALL ',
@@ -118,13 +117,13 @@ il_unlinkables <- function(model) {
 
   results <- lapply(thresholds, function(t) {
     linked <- all_pairs[all_pairs$match_probability >= t, ]
-    linked_ids <- if (has_right_table) {
-      unique(c(
+    if (has_right_table) {
+      linked_ids <- unique(c(
         paste0('l:', as.character(linked$unique_id_l)),
         paste0('r:', as.character(linked$unique_id_r))
       ))
     } else {
-      unique(c(
+      linked_ids <- unique(c(
         as.character(linked$unique_id_l),
         as.character(linked$unique_id_r)
       ))

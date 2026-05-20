@@ -115,7 +115,10 @@ il_count_pairs <- function(
     if (link_type == 'dedupe') {
       n_pairs <- n_l * (n_l - 1) / 2
     } else {
-      n_r <- if (exists('reg_r')) as.numeric(reg_r$n_records) else n_l
+      n_r <- n_l
+      if (exists('reg_r')) {
+        n_r <- as.numeric(reg_r$n_records)
+      }
       n_pairs <- n_l * n_r
     }
     return(tibble::tibble(rule = 'cartesian', n_pairs = n_pairs))
@@ -125,7 +128,10 @@ il_count_pairs <- function(
   if (link_type == 'dedupe') {
     cartesian <- n_l * (n_l - 1) / 2
   } else if (length(extra_inputs) > 0L) {
-    n_r <- if (exists('reg_r')) as.numeric(reg_r$n_records) else n_l
+    n_r <- n_l
+    if (exists('reg_r')) {
+      n_r <- as.numeric(reg_r$n_records)
+    }
     cartesian <- n_l * n_r
   } else {
     cartesian <- n_l^2
@@ -147,11 +153,13 @@ il_count_pairs <- function(
       where,
       dedupe = (link_type == 'dedupe')
     )
-    label <- if (length(rule$columns) > 0L) {
+    label <- rule$where
+    if (length(rule$columns) > 0L) {
       parts <- paste(rule$columns, collapse = ' & ')
-      if (!is.null(rule$where)) paste0(parts, ' + SQL') else parts
-    } else {
-      rule$where
+      label <- parts
+      if (!is.null(rule$where)) {
+        label <- paste0(parts, ' + SQL')
+      }
     }
     tibble::tibble(
       rule = label,
@@ -172,10 +180,9 @@ il_count_pairs <- function(
       transform = rule$transform,
       dialect = dialect
     )
-    dedup_cond <- if (link_type == 'dedupe') {
-      'l.unique_id < r.unique_id AND '
-    } else {
-      ''
+    dedup_cond <- ''
+    if (link_type == 'dedupe') {
+      dedup_cond <- 'l.unique_id < r.unique_id AND '
     }
     cum_parts <- c(
       cum_parts,

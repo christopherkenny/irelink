@@ -37,7 +37,10 @@ compute_tf_tables <- function(model) {
   tbl_l <- model$data$tbl_l
   tbl_r <- model$data$tbl_r
   qtbl_l <- sql_quote_identifier(tbl_l)
-  qtbl_r <- if (!is.null(tbl_r)) sql_quote_identifier(tbl_r) else NULL
+  qtbl_r <- NULL
+  if (!is.null(tbl_r)) {
+    qtbl_r <- sql_quote_identifier(tbl_r)
+  }
 
   tf_tables <- list()
   for (col in tf_cols) {

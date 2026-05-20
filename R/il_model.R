@@ -323,7 +323,10 @@ il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
 #' print(model)
 #' DBI::dbDisconnect(con, shutdown = TRUE)
 print.il_model <- function(x, ...) {
-  status <- if (x$trained) 'Trained' else 'Untrained'
+  status <- 'Untrained'
+  if (x$trained) {
+    status <- 'Trained'
+  }
   n_records <- x$data$n_records_l
   n_comparisons <- length(x$spec$comparisons)
   n_blocking <- length(x$spec$blocking_rules)

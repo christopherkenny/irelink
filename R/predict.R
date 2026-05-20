@@ -113,10 +113,8 @@ predict.il_model <- function(
   }
 
   threshold <- validate_probability_threshold(threshold, 'threshold')
-  threshold_match_weight <- if (is.null(threshold_match_weight)) {
-    NULL
-  } else {
-    validate_finite_numeric_scalar(
+  if (!is.null(threshold_match_weight)) {
+    threshold_match_weight <- validate_finite_numeric_scalar(
       threshold_match_weight,
       'threshold_match_weight'
     )
@@ -354,7 +352,10 @@ predict_lazy <- function(
         vapply(
           names(empty),
           function(nm) {
-            type <- if (is.integer(empty[[nm]])) 'INTEGER' else 'DOUBLE'
+            type <- 'DOUBLE'
+            if (is.integer(empty[[nm]])) {
+              type <- 'INTEGER'
+            }
             glue::glue('CAST(NULL AS {type}) AS {nm}')
           },
           character(1)
@@ -501,10 +502,9 @@ pair_row_indices <- function(pairs, model) {
 
   lookup_l <- row_index_lookup(model$con, model$data$tbl_l)
   tbl_r <- model$data$tbl_r %||% model$data$tbl_l
-  lookup_r <- if (identical(tbl_r, model$data$tbl_l)) {
-    lookup_l
-  } else {
-    row_index_lookup(model$con, tbl_r)
+  lookup_r <- row_index_lookup(model$con, tbl_r)
+  if (identical(tbl_r, model$data$tbl_l)) {
+    lookup_r <- lookup_l
   }
 
   list(
@@ -651,10 +651,9 @@ join_original_fields <- function(result, model) {
   for (col in field_cols) {
     result[[paste0(col, '_l')]] <- src_l[id_l, col]
   }
-  r_cols <- if (tbl_r == tbl_l) {
-    field_cols
-  } else {
-    setdiff(DBI::dbListFields(con, tbl_r), 'unique_id')
+  r_cols <- setdiff(DBI::dbListFields(con, tbl_r), 'unique_id')
+  if (tbl_r == tbl_l) {
+    r_cols <- field_cols
   }
   for (col in r_cols) {
     result[[paste0(col, '_r')]] <- src_r[id_r, col]

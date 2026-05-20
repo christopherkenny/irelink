@@ -58,10 +58,10 @@ cl_literal <- function(value, side = c('both', 'left', 'right')) {
     val_sql <- 'NULL'
     op <- 'IS'
   } else {
-    val_sql <- if (is.character(value)) {
-      paste0("'", gsub("'", "''", value, fixed = TRUE), "'")
+    if (is.character(value)) {
+      val_sql <- paste0("'", gsub("'", "''", value, fixed = TRUE), "'")
     } else {
-      as.character(value)
+      val_sql <- as.character(value)
     }
     op <- '='
   }

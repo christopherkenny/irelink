@@ -169,11 +169,15 @@ il_estimate_u <- function(
   }
 
   model$params$comparisons <- params_tbl
+  sampled_chunk_size <- NULL
+  if (use_chunked) {
+    sampled_chunk_size <- chunk_size
+  }
   model$params$u_estimation <- list(
     n_pairs_sampled = n_pairs,
     stopped_early = isTRUE(result$stopped_early),
     min_count_per_level = min_count_per_level,
-    chunk_size = if (use_chunked) chunk_size else NULL,
+    chunk_size = sampled_chunk_size,
     max_pairs = max_pairs,
     n_chunks = result$n_chunks %||% NA_integer_
   )

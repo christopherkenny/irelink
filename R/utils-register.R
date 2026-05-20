@@ -113,10 +113,9 @@ register_data <- function(
 
     # Determine the source SQL
     remote_nm <- dbplyr::remote_name(data)
-    source_sql <- if (!is.null(remote_nm)) {
-      glue::glue('SELECT * FROM {sql_quote_identifier(remote_nm)}')
-    } else {
-      dbplyr::remote_query(data)
+    source_sql <- dbplyr::remote_query(data)
+    if (!is.null(remote_nm)) {
+      source_sql <- glue::glue('SELECT * FROM {sql_quote_identifier(remote_nm)}')
     }
 
     # Create a registered object, adding unique_id if needed.

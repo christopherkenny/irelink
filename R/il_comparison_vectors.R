@@ -27,10 +27,9 @@
 il_comparison_vectors <- function(model, blocking = NULL, limit = NULL) {
   validate_il_model(model)
 
-  blocking_rules <- if (!is.null(blocking)) {
-    list(blocking)
-  } else {
-    model$spec$blocking_rules
+  blocking_rules <- model$spec$blocking_rules
+  if (!is.null(blocking)) {
+    blocking_rules <- list(blocking)
   }
 
   comparisons <- model$spec$comparisons

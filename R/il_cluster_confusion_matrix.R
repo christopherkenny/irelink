@@ -75,7 +75,7 @@ il_cluster_confusion_matrix <- function(
   dialect <- detect_dialect(con)
   use_sql <- dialect_has_fuzzy_sql(dialect)
 
-  counts <- if (use_sql) {
+  if (use_sql) {
     pairs <- predict(model, threshold = threshold, collect = FALSE)
     clusters_tbl <- cluster_assignments_lazy_sql(
       pairs,
@@ -85,7 +85,7 @@ il_cluster_confusion_matrix <- function(
       source_dataset = source_dataset
     )
     on.exit(drop_registered(con, clusters_tbl), add = TRUE)
-    cluster_confusion_counts_sql(model, clusters_tbl, labels_col)
+    counts <- cluster_confusion_counts_sql(model, clusters_tbl, labels_col)
   } else {
     pairs <- predict(model, threshold = threshold, collect = TRUE)
     clusters <- il_cluster(
@@ -94,7 +94,7 @@ il_cluster_confusion_matrix <- function(
       ties_method = ties_method,
       source_dataset = source_dataset
     )
-    cluster_confusion_counts_r(model, clusters, labels_col)
+    counts <- cluster_confusion_counts_r(model, clusters, labels_col)
   }
 
   summarise_confusion_counts(counts, threshold = threshold) |>
@@ -183,9 +183,9 @@ cluster_assignments_lazy_sql <- function(
   )
   on.exit(drop_registered(con, edges_tbl), add = TRUE)
 
-  cc_output_tbl <- if (method == 'best_link') {
+  if (method == 'best_link') {
     if (!is.null(source_dataset)) {
-      solve_one_to_one_sql(
+      cc_output_tbl <- solve_one_to_one_sql(
         con,
         edges_tbl,
         source_dataset = source_dataset,
@@ -207,10 +207,20 @@ cluster_assignments_lazy_sql <- function(
           'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
         )
       )
-      solve_cc_sql(con, edges_tbl, collect = FALSE, prefix = cc_prefix)
+      cc_output_tbl <- solve_cc_sql(
+        con,
+        edges_tbl,
+        collect = FALSE,
+        prefix = cc_prefix
+      )
     }
   } else {
-    solve_cc_sql(con, edges_tbl, collect = FALSE, prefix = cc_prefix)
+    cc_output_tbl <- solve_cc_sql(
+      con,
+      edges_tbl,
+      collect = FALSE,
+      prefix = cc_prefix
+    )
   }
   on.exit(drop_registered(con, cc_output_tbl), add = TRUE)
 

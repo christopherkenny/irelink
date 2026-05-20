@@ -76,10 +76,9 @@ il_largest_blocks <- function(
   group_cols <- sql_identifier_csv(cols)
   qtbl <- sql_quote_identifier(tbl_name)
   transformed_cols <- lapply(cols, function(col) {
-    col_tf <- if (is.list(rule$transform)) {
-      rule$transform[[col]]
-    } else {
-      rule$transform
+    col_tf <- rule$transform
+    if (is.list(rule$transform)) {
+      col_tf <- rule$transform[[col]]
     }
     sql_transform_col(sql_quote_identifier(col), col_tf, dialect)
   })

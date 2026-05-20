@@ -94,38 +94,47 @@ il_accuracy <- function(model, labels = NULL, labels_col = NULL) {
     tn <- counts$tn
     fn_blocking_miss <- counts$fn_blocking_miss
 
-    precision <- if (tp + fp > 0) tp / (tp + fp) else 1
-    recall <- if (tp + fn > 0) tp / (tp + fn) else 1
-    f1 <- if (precision + recall > 0) {
-      2 * precision * recall / (precision + recall)
-    } else {
-      0
+    precision <- 1
+    if (tp + fp > 0) {
+      precision <- tp / (tp + fp)
+    }
+    recall <- 1
+    if (tp + fn > 0) {
+      recall <- tp / (tp + fn)
+    }
+    f1 <- 0
+    if (precision + recall > 0) {
+      f1 <- 2 * precision * recall / (precision + recall)
     }
 
     # Weighted F-scores: F_beta = (1+beta^2) * P * R / (beta^2 * P + R)
-    f2 <- if (precision + recall > 0) {
-      5 * precision * recall / (4 * precision + recall)
-    } else {
-      0
-    }
-    f0_5 <- if (precision + recall > 0) {
-      1.25 * precision * recall / (0.25 * precision + recall)
-    } else {
-      0
+    f2 <- 0
+    f0_5 <- 0
+    if (precision + recall > 0) {
+      f2 <- 5 * precision * recall / (4 * precision + recall)
+      f0_5 <- 1.25 * precision * recall / (0.25 * precision + recall)
     }
 
-    specificity <- if (tn + fp > 0) tn / (tn + fp) else 1
-    npv <- if (tn + fn > 0) tn / (tn + fn) else 1
-    accuracy <- if (tp + tn + fp + fn > 0) {
-      (tp + tn) / (tp + tn + fp + fn)
-    } else {
-      1
+    specificity <- 1
+    if (tn + fp > 0) {
+      specificity <- tn / (tn + fp)
+    }
+    npv <- 1
+    if (tn + fn > 0) {
+      npv <- tn / (tn + fn)
+    }
+    accuracy <- 1
+    if (tp + tn + fp + fn > 0) {
+      accuracy <- (tp + tn) / (tp + tn + fp + fn)
     }
 
     # P4: 4*TP*TN / ((4*TP*TN) + (TP+TN)*(FP+FN))
     p4_num <- 4 * as.numeric(tp) * tn
     p4_denom <- p4_num + as.numeric(tp + tn) * as.numeric(fp + fn)
-    p4 <- if (p4_denom > 0) p4_num / p4_denom else 0
+    p4 <- 0
+    if (p4_denom > 0) {
+      p4 <- p4_num / p4_denom
+    }
 
     # Phi / MCC: (TP*TN - FP*FN) / sqrt((TP+FP)*(TP+FN)*(TN+FP)*(TN+FN))
     phi_num <- as.numeric(tp) * tn - as.numeric(fp) * fn
@@ -135,8 +144,10 @@ il_accuracy <- function(model, labels = NULL, labels_col = NULL) {
         as.numeric(tn + fp) *
         as.numeric(tn + fn)
     )
-    phi <- if (phi_denom > 0) phi_num / phi_denom else 0
-
+    phi <- 0
+    if (phi_denom > 0) {
+      phi <- phi_num / phi_denom
+    }
     tibble::tibble(
       threshold = t,
       tp = tp,

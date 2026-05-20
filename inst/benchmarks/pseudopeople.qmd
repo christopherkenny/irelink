@@ -1016,10 +1016,9 @@ stacked_dedupe_clustering_time <- as.numeric(
 stacked_dedupe_cluster_sizes <- stacked_dedupe_clusters |>
   count(cluster_id, name = 'cluster_size', sort = TRUE)
 stacked_dedupe_n_clusters <- nrow(stacked_dedupe_cluster_sizes)
-stacked_dedupe_largest_cluster <- if (nrow(stacked_dedupe_cluster_sizes) > 0) {
-  max(stacked_dedupe_cluster_sizes$cluster_size)
-} else {
-  0L
+stacked_dedupe_largest_cluster <- 0L
+if (nrow(stacked_dedupe_cluster_sizes) > 0) {
+  stacked_dedupe_largest_cluster <- max(stacked_dedupe_cluster_sizes$cluster_size)
 }
 
 tic.clearlog()

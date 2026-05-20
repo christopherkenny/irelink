@@ -1,80 +1,81 @@
- - [x] R/autoplot.R
- - [x] R/cl_array_intersect.R
- - [x] R/cl_columns_reversed.R
- - [x] R/cl_cosine.R
- - [x] R/cl_custom.R
- - [x] R/cl_date_diff.R
- - [x] R/cl_geo_distance.R
- - [x] R/cl_domain.R
- - [x] R/cl_exact.R
- - [x] R/cl_jaccard.R
- - [x] R/cl_jaro_winkler.R
- - [x] R/cl_levels.R
- - [x] R/cl_levenshtein.R
- - [x] R/cl_numeric_diff.R
- - [x] R/cl_time_diff.R
- - [x] R/data.R
- - [ ] R/il_accuracy.R
- - [ ] R/il_block_on.R
- - [ ] R/il_cleanup.R
- - [ ] R/il_cluster.R
- - [ ] R/il_cluster_confusion_matrix.R
- - [ ] R/il_column_transforms.R
- - [ ] R/il_comparator_score.R
- - [ ] R/il_compare.R
- - [ ] R/il_compare_records.R
- - [ ] R/il_comparison_vectors.R
- - [ ] R/il_completeness.R
- - [ ] R/il_confusion_matrix.R
- - [ ] R/il_count_pairs.R
- - [ ] R/il_deterministic_link.R
- - [ ] R/il_errors.R
- - [ ] R/il_estimate_em.R
- - [ ] R/il_estimate_m_from_column.R
- - [ ] R/il_estimate_m_from_labels.R
- - [ ] R/il_estimate_prior.R
- - [ ] R/il_estimate_u.R
- - [ ] R/il_find_matches.R
- - [ ] R/il_graph_metrics.R
- - [ ] R/il_largest_blocks.R
- - [ ] R/il_model.R
- - [ ] R/il_parameters.R
- - [ ] R/il_phonetic.R
- - [ ] R/il_precision_recall.R
- - [ ] R/il_priors.R
- - [ ] R/il_profile.R
- - [ ] R/il_register_tf.R
- - [ ] R/il_roc.R
- - [ ] R/il_save.R
- - [ ] R/il_score_missing_edges.R
- - [ ] R/il_spec.R
- - [ ] R/il_string_similarity.R
- - [ ] R/il_suggest_blocking.R
- - [ ] R/il_tf_chart.R
- - [ ] R/il_training_history.R
- - [ ] R/il_transform.R
- - [ ] R/il_unlinkables.R
- - [ ] R/il_waterfall.R
- - [ ] R/il_weights.R
- - [ ] R/irelink-package.R
- - [ ] R/predict.R
- - [ ] R/utils-cc.R
- - [ ] R/utils-classes.R
- - [ ] R/utils-comparison-helpers.R
- - [ ] R/utils-data.R
- - [ ] R/utils-db.R
- - [ ] R/utils-dependency-aware.R
- - [ ] R/utils-em.R
- - [ ] R/utils-evaluation.R
- - [ ] R/utils-register.R
- - [ ] R/utils-scoring.R
- - [ ] R/utils-sql.R
- - [ ] R/utils-tf.R
- - [ ] R/utils-unit-helpers.R
- - [ ] vignettes/advanced.Rmd
- - [ ] vignettes/deduplicate-50k.Rmd
- - [ ] vignettes/deduplication.Rmd
- - [ ] vignettes/from_splink.Rmd
- - [ ] vignettes/irelink.Rmd
- - [ ] vignettes/record-linkage.Rmd
- - [ ] vignettes/transactions.Rmd
+- [x] R/autoplot.R
+- [x] R/cl_array_intersect.R
+- [x] R/cl_columns_reversed.R
+- [x] R/cl_cosine.R
+- [x] R/cl_custom.R
+- [x] R/cl_date_diff.R
+- [x] R/cl_geo_distance.R
+- [x] R/cl_domain.R
+- [x] R/cl_exact.R
+- [x] R/cl_jaccard.R
+- [x] R/cl_jaro_winkler.R
+- [x] R/cl_levels.R
+- [x] R/cl_levenshtein.R
+- [x] R/cl_numeric_diff.R
+- [x] R/cl_time_diff.R
+- [x] R/data.R
+- [ ] R/il_accuracy.R
+- [ ] R/il_block_on.R
+- [ ] R/il_cleanup.R
+- [ ] R/il_cluster.R
+- [ ] R/il_cluster_confusion_matrix.R
+- [ ] R/il_column_transforms.R
+- [ ] R/il_comparator_score.R
+- [ ] R/il_compare.R
+- [ ] R/il_compare_records.R
+- [ ] R/il_comparison_vectors.R
+- [ ] R/il_completeness.R
+- [ ] R/il_confusion_matrix.R
+- [ ] R/il_count_pairs.R
+- [ ] R/il_deterministic_link.R
+- [ ] R/il_errors.R
+- [ ] R/il_estimate_em.R
+- [ ] R/il_estimate_m_from_column.R
+- [ ] R/il_estimate_m_from_labels.R
+- [ ] R/il_estimate_prior.R
+- [ ] R/il_estimate_u.R
+- [ ] R/il_find_matches.R
+- [ ] R/il_graph_metrics.R
+- [ ] R/il_largest_blocks.R
+- [ ] R/il_model.R
+- [ ] R/il_parameters.R
+- [ ] R/il_phonetic.R
+- [ ] R/il_precision_recall.R
+- [ ] R/il_priors.R
+- [ ] R/il_profile.R
+- [ ] R/il_register_tf.R
+- [ ] R/il_roc.R
+- [ ] R/il_save.R
+- [ ] R/il_score_missing_edges.R
+- [ ] R/il_spec.R
+- [ ] R/il_string_similarity.R
+- [ ] R/il_suggest_blocking.R
+- [ ] R/il_tf_chart.R
+- [ ] R/il_training_history.R
+- [ ] R/il_transform.R
+- [ ] R/il_unlinkables.R
+- [ ] R/il_waterfall.R
+- [ ] R/il_weights.R
+- [ ] R/irelink-package.R
+- [ ] R/predict.R
+- [ ] R/utils-cc.R
+- [ ] R/utils-classes.R
+- [ ] R/utils-comparison-helpers.R
+- [ ] R/utils-data.R
+- [ ] R/utils-db.R
+- [ ] R/utils-dependency-aware.R
+- [ ] R/utils-em.R
+- [ ] R/utils-evaluation.R
+- [ ] R/utils-register.R
+- [ ] R/utils-scoring.R
+- [ ] R/utils-sql.R
+- [ ] R/utils-tf.R
+- [ ] R/utils-unit-helpers.R
+- [ ] vignettes/advanced.Rmd
+- [ ] vignettes/deduplicate-50k.Rmd
+- [ ] vignettes/deduplication.Rmd
+- [ ] vignettes/from_splink.Rmd
+- [ ] vignettes/irelink.Rmd
+- [ ] vignettes/record-linkage.Rmd
+- [ ] vignettes/transactions.Rmd
+

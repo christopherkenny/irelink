@@ -111,7 +111,10 @@ il_waterfall <- function(pairs, which = 1L) {
     comp_names,
     function(cn) {
       col_name <- paste0('tf_adj_', cn)
-      val <- if (col_name %in% names(row)) as.numeric(row[[col_name]]) else 0
+      val <- 0
+      if (col_name %in% names(row)) {
+        val <- as.numeric(row[[col_name]])
+      }
       if (is.na(val)) 0 else val
     },
     numeric(1)

@@ -518,7 +518,10 @@ sql_gamma_case <- function(comp, dialect) {
   }
 
   if (method == 'soundex') {
-    soundex_fn <- if (identical(dialect, 'duckdb')) 'il_soundex' else 'soundex'
+    soundex_fn <- 'soundex'
+    if (identical(dialect, 'duckdb')) {
+      soundex_fn <- 'il_soundex'
+    }
     return(glue::glue(
       'CASE WHEN {null_guard} AND {soundex_fn}({lcol}) = {soundex_fn}({rcol}) THEN 1 ELSE 0 END'
     ))
@@ -610,10 +613,9 @@ sql_gamma_case <- function(comp, dialect) {
       level$levels
     )
     n <- length(sublevels)
-    null_when <- if (has_null_level) {
-      glue::glue('WHEN NOT ({null_guard}) THEN -1 ')
-    } else {
-      ''
+    null_when <- ''
+    if (has_null_level) {
+      null_when <- glue::glue('WHEN NOT ({null_guard}) THEN -1 ')
     }
     if (n == 0L) {
       return(glue::glue(
@@ -728,7 +730,10 @@ sql_sublevel_condition <- function(
     return(glue::glue('{null_guard} AND {diff_expr} <= {secs_val}'))
   }
   if (method == 'soundex') {
-    soundex_fn <- if (identical(dialect, 'duckdb')) 'il_soundex' else 'soundex'
+    soundex_fn <- 'soundex'
+    if (identical(dialect, 'duckdb')) {
+      soundex_fn <- 'il_soundex'
+    }
     return(glue::glue(
       '{null_guard} AND {soundex_fn}({lcol}) = {soundex_fn}({rcol})'
     ))
@@ -748,7 +753,10 @@ sql_sublevel_condition <- function(
   if (method == 'array_min_distance') {
     t <- sub$thresholds[1]
     inner <- sql_array_min_distance_inner(sub$fn, col)
-    op <- if (sub$fn == 'jaro_winkler') '>=' else '<='
+    op <- '<='
+    if (sub$fn == 'jaro_winkler') {
+      op <- '>='
+    }
     return(glue::glue('{null_guard} AND ({inner}) {op} {t}'))
   }
   if (method == 'custom') {
@@ -806,11 +814,11 @@ sql_sublevel_condition <- function(
 # (levenshtein) across all element pairs via UNNEST cross-join.
 # Returns a SQL fragment suitable for embedding in a scalar subquery.
 sql_array_min_distance_inner <- function(fn, col) {
-  agg <- if (fn == 'jaro_winkler') 'MAX' else 'MIN'
-  dist_fn <- if (fn == 'jaro_winkler') {
-    'jaro_winkler_similarity(lv, rv)'
-  } else {
-    'levenshtein(lv, rv)'
+  agg <- 'MIN'
+  dist_fn <- 'levenshtein(lv, rv)'
+  if (fn == 'jaro_winkler') {
+    agg <- 'MAX'
+    dist_fn <- 'jaro_winkler_similarity(lv, rv)'
   }
   qcol <- sql_quote_identifier(col)
   paste0(
@@ -834,7 +842,10 @@ sql_array_min_distance_case <- function(level, col, null_guard) {
   fn <- level$fn
   thresholds <- level$thresholds
   n <- length(thresholds)
-  op <- if (fn == 'jaro_winkler') '>=' else '<='
+  op <- '<='
+  if (fn == 'jaro_winkler') {
+    op <- '>='
+  }
   inner <- sql_array_min_distance_inner(fn, col)
 
   when_clauses <- vapply(
@@ -889,7 +900,10 @@ build_gamma_query <- function(
   con <- model$con
   dialect <- detect_dialect(con)
   tbl_l <- model$data$tbl_l
-  tbl_r <- if (!is.null(model$data$tbl_r)) model$data$tbl_r else tbl_l
+  tbl_r <- tbl_l
+  if (!is.null(model$data$tbl_r)) {
+    tbl_r <- model$data$tbl_r
+  }
   comparisons <- model$spec$comparisons
   link_type <- model$link_type %||% 'dedupe'
   has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
@@ -1023,14 +1037,15 @@ build_gamma_query_from_blocked_pairs <- function(
   tbl_l <- model$data$tbl_l
   tbl_r <- model$data$tbl_r %||% tbl_l
   has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
-  combos <- if (has_two_tables) {
-    list(
+  combos <- list(
+    list(source_l = 'l', source_r = 'l', from_l = tbl_l, from_r = tbl_l)
+  )
+  if (has_two_tables) {
+    combos <- list(
       list(source_l = 'l', source_r = 'r', from_l = tbl_l, from_r = tbl_r),
       list(source_l = 'l', source_r = 'l', from_l = tbl_l, from_r = tbl_l),
       list(source_l = 'r', source_r = 'r', from_l = tbl_r, from_r = tbl_r)
     )
-  } else {
-    list(list(source_l = 'l', source_r = 'l', from_l = tbl_l, from_r = tbl_l))
   }
 
   parts <- vapply(
@@ -1170,11 +1185,7 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
 
   if (method == 'jaro_winkler') {
     thresholds <- level$thresholds
-    fn_name <- if (dialect == 'sqlite') {
-      'jaro_winkler_similarity'
-    } else {
-      'jaro_winkler_similarity'
-    }
+    fn_name <- 'jaro_winkler_similarity'
     parts <- vapply(
       thresholds,
       function(t) {
@@ -1420,7 +1431,10 @@ build_blocking_condition <- function(
     parts <- vapply(
       columns,
       function(col) {
-        col_tf <- if (is.list(transform)) transform[[col]] else transform
+        col_tf <- transform
+        if (is.list(transform)) {
+          col_tf <- transform[[col]]
+        }
         lcol <- sql_transform_col(sql_col_ref('l', col), col_tf, dialect)
         rcol <- sql_transform_col(sql_col_ref('r', col), col_tf, dialect)
         glue::glue('{lcol} = {rcol}')
@@ -1491,8 +1505,14 @@ blocked_pair_rows_sql <- function(
     seq_along(table_pairs),
     function(i) {
       tp <- table_pairs[[i]]
-      source_l <- if (identical(tp$from_l, tbl_l)) 'l' else 'r'
-      source_r <- if (identical(tp$from_r, tbl_l)) 'l' else 'r'
+      source_l <- 'r'
+      if (identical(tp$from_l, tbl_l)) {
+        source_l <- 'l'
+      }
+      source_r <- 'r'
+      if (identical(tp$from_r, tbl_l)) {
+        source_r <- 'l'
+      }
       from_l <- sql_explode_from(tp$from_l, rule$explode, dialect)
       from_r <- sql_explode_from(tp$from_r, rule$explode, dialect)
       where_parts <- c(tp$join_cond)
@@ -1910,10 +1930,9 @@ build_fields_join_query <- function(model, inner_sql) {
     return(inner_sql)
   }
 
-  field_cols_r <- if (tbl_r == tbl_l) {
-    field_cols_l
-  } else {
-    setdiff(DBI::dbListFields(con, tbl_r), 'unique_id')
+  field_cols_r <- setdiff(DBI::dbListFields(con, tbl_r), 'unique_id')
+  if (tbl_r == tbl_l) {
+    field_cols_r <- field_cols_l
   }
 
   l_cols <- paste(

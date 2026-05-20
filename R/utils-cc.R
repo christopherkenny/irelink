@@ -474,10 +474,9 @@ solve_one_to_one_sql <- function(
     # rank by probability, and keep mutual best
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_ranked}'))
 
-    tie_order <- if (ties_method == 'lowest_id') {
-      ', CASE WHEN repr < partner_repr THEN partner_repr ELSE repr END'
-    } else {
-      ''
+    tie_order <- ''
+    if (ties_method == 'lowest_id') {
+      tie_order <- ', CASE WHEN repr < partner_repr THEN partner_repr ELSE repr END'
     }
 
     DBI::dbExecute(
@@ -686,8 +685,12 @@ solve_one_to_one_r <- function(
 
     for (i in seq_len(nrow(ce))) {
       for (side in 1:2) {
-        cl <- if (side == 1) cr_l[i] else cr_r[i]
-        partner <- if (side == 1) cr_r[i] else cr_l[i]
+        cl <- cr_r[i]
+        partner <- cr_l[i]
+        if (side == 1) {
+          cl <- cr_l[i]
+          partner <- cr_r[i]
+        }
         p <- ce$prob[i]
         prev_p <- best_prob[[cl]]
 
@@ -710,7 +713,10 @@ solve_one_to_one_r <- function(
       tie_count <- list()
       for (i in seq_len(nrow(ce))) {
         for (side in 1:2) {
-          cl <- if (side == 1) cr_l[i] else cr_r[i]
+          cl <- cr_r[i]
+          if (side == 1) {
+            cl <- cr_l[i]
+          }
           if (ce$prob[i] == best_prob[[cl]]) {
             tie_count[[cl]] <- (tie_count[[cl]] %||% 0L) + 1L
           }

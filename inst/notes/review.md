@@ -1,3 +1,4 @@
 - [x] autoplot: should formatC be used here or is this excessive?
 - [x] Rename the geographic distance constructor to cl_geo_distance().
 - [x] data.R: Clean up the old style latex to use modern roxygen2 markdown.
+- [x] bad `if else` patterns. There should never be assignment EVER of the form `x <- if ()`, nor `x <- if () ... else ...`. Clean up every case of that to use a proper approach.

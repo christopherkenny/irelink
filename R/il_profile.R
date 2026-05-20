@@ -76,12 +76,12 @@ il_profile <- function(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL) {
   # Build a list of (label, sql_expr) pairs.
   # A character literal like "city || left(name,1)" is used as raw SQL;
   # a bare name like `first_name` is quoted as an identifier.
-  col_specs <- if (length(col_exprs) == 0L) {
-    lapply(reg$columns, function(nm) {
+  if (length(col_exprs) == 0L) {
+    col_specs <- lapply(reg$columns, function(nm) {
       list(label = nm, sql_expr = as.character(DBI::dbQuoteIdentifier(con, nm)))
     })
   } else {
-    lapply(col_exprs, function(q) {
+    col_specs <- lapply(col_exprs, function(q) {
       expr <- rlang::quo_get_expr(q)
       if (is.character(expr)) {
         list(label = expr, sql_expr = expr)
@@ -107,8 +107,14 @@ il_profile <- function(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL) {
     out <- tibble::as_tibble(res[, c('column', 'value', 'n')])
 
     if (!is.null(top_n) || !is.null(bottom_n)) {
-      top <- if (!is.null(top_n)) utils::head(out, top_n) else NULL
-      bot <- if (!is.null(bottom_n)) utils::tail(out, bottom_n) else NULL
+      top <- NULL
+      if (!is.null(top_n)) {
+        top <- utils::head(out, top_n)
+      }
+      bot <- NULL
+      if (!is.null(bottom_n)) {
+        bot <- utils::tail(out, bottom_n)
+      }
       out <- unique(rbind(top, bot))
     }
 

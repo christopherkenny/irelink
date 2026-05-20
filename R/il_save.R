@@ -373,8 +373,9 @@ levels_for_json_export <- function(method) {
     return(levels)
   }
 
-  explicit_levels <- if (!is.null(method$thresholds)) {
-    lapply(seq_along(method$thresholds), function(i) {
+  explicit_levels <- list(method)
+  if (!is.null(method$thresholds)) {
+    explicit_levels <- lapply(seq_along(method$thresholds), function(i) {
       fields <- list()
       if (!is.null(method$thresholds)) {
         fields$thresholds <- method$thresholds[i]
@@ -390,8 +391,6 @@ levels_for_json_export <- function(method) {
         c(list(method_name), fields)
       )
     })
-  } else {
-    list(method)
   }
 
   c(explicit_levels, list(cl_else()))
@@ -549,7 +548,10 @@ highest_tf_level <- function(levels) {
 }
 
 splink_json_to_blocking_rule <- function(br_data) {
-  sql <- if (is.character(br_data)) br_data else br_data$blocking_rule
+  sql <- br_data$blocking_rule
+  if (is.character(br_data)) {
+    sql <- br_data
+  }
   sql <- trimws(splink_sql_to_table_alias_sql(sql))
   structure(
     parse_blocking_sql(sql),
@@ -586,13 +588,14 @@ parse_blocking_sql <- function(sql) {
     }
   }
 
+  parsed_where <- NULL
+  if (length(where_parts) > 0L) {
+    parsed_where <- paste(where_parts, collapse = ' AND ')
+  }
+
   list(
     columns = columns,
-    where = if (length(where_parts) > 0L) {
-      paste(where_parts, collapse = ' AND ')
-    } else {
-      NULL
-    },
+    where = parsed_where,
     transform = NULL,
     explode = NULL
   )
@@ -621,11 +624,10 @@ splink_json_to_params <- function(comparisons, prior = NULL) {
         next
       }
 
-      gamma_level <- if (identical(toupper(cond), 'ELSE')) {
-        0L
-      } else {
+      gamma_level <- 0L
+      if (!identical(toupper(cond), 'ELSE')) {
         explicit_index <- explicit_index + 1L
-        n_explicit - explicit_index + 1L
+        gamma_level <- n_explicit - explicit_index + 1L
       }
 
       if (is.null(level$m_probability) || is.null(level$u_probability)) {

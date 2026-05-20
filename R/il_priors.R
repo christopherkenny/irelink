@@ -299,15 +299,15 @@ upsert_prior_rows <- function(existing, rows) {
   keep <- rep(TRUE, nrow(existing))
   for (i in seq_len(nrow(rows))) {
     r <- rows[i, ]
-    comparison_same <- if (is.na(r$comparison)) {
-      is.na(existing$comparison)
-    } else {
-      !is.na(existing$comparison) & existing$comparison == r$comparison
+    comparison_same <- !is.na(existing$comparison) &
+      existing$comparison == r$comparison
+    if (is.na(r$comparison)) {
+      comparison_same <- is.na(existing$comparison)
     }
-    gamma_same <- if (is.na(r$gamma_level)) {
-      is.na(existing$gamma_level)
-    } else {
-      !is.na(existing$gamma_level) & existing$gamma_level == r$gamma_level
+    gamma_same <- !is.na(existing$gamma_level) &
+      existing$gamma_level == r$gamma_level
+    if (is.na(r$gamma_level)) {
+      gamma_same <- is.na(existing$gamma_level)
     }
     same <- existing$family == r$family & comparison_same & gamma_same
     keep <- keep & !same

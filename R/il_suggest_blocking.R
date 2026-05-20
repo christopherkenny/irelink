@@ -156,7 +156,10 @@ evaluate_column_combos <- function(
       where,
       dedupe = (link_type == 'dedupe')
     )
-    pct <- if (cartesian > 0) n_pairs / cartesian * 100 else 0
+    pct <- 0
+    if (cartesian > 0) {
+      pct <- n_pairs / cartesian * 100
+    }
 
     # Score: high coverage × high reduction (low pct)
     reduction <- 1 - pct / 100
