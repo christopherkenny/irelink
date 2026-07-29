@@ -21,6 +21,14 @@ library(ggplot2)
 
 df <- fake_1000
 con <- DBI::dbConnect(duckdb::duckdb())
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/Rtmp03FGDS/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 
 spec <- il_spec() |>
   il_compare(first_name, cl_name()) |>
@@ -103,9 +111,9 @@ autoplot(pairs, which = 1)
 ## Lazy prediction for large data
 
 `predict(collect = FALSE)` keeps scored pairs in the database instead of
-collecting them into R. This path requires DuckDB or PostgreSQL and is
-especially useful when materializing millions of rows would exhaust
-memory. The examples here use DuckDB, and
+collecting them into R. This path requires DuckDB and is especially
+useful when materializing millions of rows would exhaust memory. The
+examples here use DuckDB, and
 [`il_cluster()`](http://christophertkenny.com/irelink/reference/il_cluster.md)
 detects the lazy reference so it can run connected-components analysis
 in SQL.
@@ -114,7 +122,7 @@ in SQL.
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,783 pairs in table __il_9011_1_predicted_4 (threshold = 0.5)
+#> <il_compared_lazy> 2,783 pairs in table __il_9253_1_predicted_4 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -131,10 +139,10 @@ nrow(clusters_lazy)
 and
 [`il_waterfall()`](http://christophertkenny.com/irelink/reference/il_waterfall.md)
 collect automatically when needed, so downstream analysis code stays the
-same. Use the lazy path on DuckDB or PostgreSQL when candidate-pair
-counts exceed available memory. The lazy prediction table is
-model-scoped, and `il_cleanup(model)` removes it along with the model’s
-source and term-frequency tables.
+same. Use the lazy path on DuckDB when candidate-pair counts exceed
+available memory. The lazy prediction table is model-scoped, and
+`il_cleanup(model)` removes it along with the model’s source and
+term-frequency tables.
 
 ## Chunked u estimation and SQL profiling
 
@@ -189,16 +197,16 @@ metrics$clusters
 #> # A tibble: 142 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralization
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_428       3       2   0.667                  1    
-#>  2 cluster_960       7      17   0.810                  0.267
-#>  3 cluster_736       2       1   1                     NA    
-#>  4 cluster_879       5      14   1.4                    0.167
-#>  5 cluster_911       7      21   1                      0    
-#>  6 cluster_296       5       9   0.9                    0.167
-#>  7 cluster_907       4       4   0.667                  0.667
-#>  8 cluster_149      16      61   0.508                  0.410
-#>  9 cluster_301      10      41   0.911                  0.111
-#> 10 cluster_814       7      23   1.10                   0.1  
+#>  1 cluster_674       8      18   0.643                  0.286
+#>  2 cluster_825       9      20   0.569                  0.232
+#>  3 cluster_874       2       1   1                     NA    
+#>  4 cluster_91        5       9   0.9                    0.167
+#>  5 cluster_488       6      12   0.833                  0.25 
+#>  6 cluster_767       5       8   0.8                    0.333
+#>  7 cluster_886       2       1   1                     NA    
+#>  8 cluster_642       2       6   6                     NA    
+#>  9 cluster_172       4       8   1.25                   0.167
+#> 10 cluster_244       8      22   0.786                  0.286
 #> # ℹ 132 more rows
 ```
 
@@ -216,12 +224,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 164       cluster_164      8           1.14 
-#> 2 170       cluster_164      6           0.857
-#> 3 166       cluster_164      8           1.14 
-#> 4 167       cluster_164      7           1    
-#> 5 169       cluster_164      6           0.857
-#> 6 171       cluster_164      6           0.857
+#> 1 140       cluster_133      9           1.12 
+#> 2 136       cluster_133      9           1.12 
+#> 3 138       cluster_133      9           1.12 
+#> 4 134       cluster_133     10           1.25 
+#> 5 133       cluster_133     10           1.25 
+#> 6 135       cluster_133      3           0.375
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -290,9 +298,9 @@ model_tr <- il_estimate_em(model_tr, block_on(surname))
 #> surname
 ```
 
-`tolower`, `toupper`, and `trimws` are translated to SQL on DuckDB and
-PostgreSQL, so they run in the database. Custom R functions only work on
-the R-side path. When you save a model with
+`tolower`, `toupper`, and `trimws` are translated to SQL on DuckDB, so
+they run in the database. Custom R functions only work on the R-side
+path. When you save a model with
 [`il_save()`](http://christophertkenny.com/irelink/reference/il_save.md),
 `.rds` stores the R object as is, while `.json` writes Splink settings
 SQL so loaded comparisons come back as SQL-backed levels. Anonymous
@@ -319,18 +327,18 @@ matches
 #> # A tibble: 17 × 5
 #>    unique_id_l unique_id_r match_weight total_match_weight match_probability
 #>          <int>       <int>        <dbl>              <dbl>             <dbl>
-#>  1           1         239        0.832              0.925             0.655
-#>  2           1         364        0.832              0.925             0.655
-#>  3           1         241        0.832              0.925             0.655
-#>  4           1         362        2.28               2.37              0.838
-#>  5           1         367        0.832              0.925             0.655
-#>  6           1         238        2.31               2.41              0.841
-#>  7           1         791        0.832              0.925             0.655
-#>  8           1         240        0.832              0.925             0.655
-#>  9           2         858        0.871              0.964             0.661
-#> 10           1         363        0.832              0.925             0.655
-#> 11           2         864        0.871              0.964             0.661
-#> 12           2         859        2.31               2.41              0.841
+#>  1           1         240        0.832              0.925             0.655
+#>  2           2         858        0.871              0.964             0.661
+#>  3           1         363        0.832              0.925             0.655
+#>  4           2         864        0.871              0.964             0.661
+#>  5           2         859        2.31               2.41              0.841
+#>  6           1         239        0.832              0.925             0.655
+#>  7           1         364        0.832              0.925             0.655
+#>  8           1         241        0.832              0.925             0.655
+#>  9           1         362        2.28               2.37              0.838
+#> 10           1         367        0.832              0.925             0.655
+#> 11           1         238        2.31               2.41              0.841
+#> 12           1         791        0.832              0.925             0.655
 #> 13           1         237        2.28               2.37              0.838
 #> 14           1         365        0.832              0.925             0.655
 #> 15           1         242        0.832              0.925             0.655

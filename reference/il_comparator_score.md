@@ -39,11 +39,9 @@ are present as `NA`. The result has S3 class `il_comparator_score`.
 With `con = NULL`, all metrics are computed in R with
 [`stringdist::stringdist()`](https://rdrr.io/pkg/stringdist/man/stringdist.html).
 With a [`duckdb::duckdb()`](https://r.duckdb.org/reference/duckdb.html)
-or PostgreSQL connection, computation is pushed to SQL. SQL backends
-return the same column schema but may leave unsupported metrics as `NA`:
-DuckDB currently computes `jaro_winkler`, `jaro`, `levenshtein`, and
-`jaccard`; PostgreSQL computes `levenshtein` and a `jaro_winkler`
-compatibility column backed by trigram `similarity()`.
+connection, computation is pushed to SQL. DuckDB computes
+`jaro_winkler`, `jaro`, `levenshtein`, and `jaccard`; other DBI
+connections use R-side computation.
 
 ## Examples
 

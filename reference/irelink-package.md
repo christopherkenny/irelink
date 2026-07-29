@@ -7,7 +7,9 @@ fuzzy, and distance-based comparisons, with model parameters estimated
 via unsupervised Expectation-Maximization. Multiple SQL backends are
 supported through 'DBI', enabling execution from laptop-scale ('DuckDB')
 through to distributed engines. This package is a translation of the
-Python 'splink' library by Linacre et al. into idiomatic R.
+Python 'splink' library by Linacre et al. (2022)
+[doi:10.23889/ijpds.v7i3.1794](https://doi.org/10.23889/ijpds.v7i3.1794)
+into idiomatic R.
 
 ## See also
 

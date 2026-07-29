@@ -66,8 +66,8 @@ element of the smaller array appears in the larger one.</p>
     </div>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
-    <p>On DuckDB and PostgreSQL this is computed in SQL using
-<code>ARRAY_LENGTH(ARRAY_INTERSECT(...)) = LEAST(ARRAY_LENGTH(...))</code>.
+    <p>On DuckDB this is computed in SQL by counting the
+distinct elements shared by both arrays.
 On SQLite it falls back to an R-side set check.</p>
     </div>
 
@@ -90,7 +90,7 @@ On SQLite it falls back to an R-side set check.</p>
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

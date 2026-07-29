@@ -99,6 +99,14 @@ across sections.</p>
 <span></span>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="va">fake_1000</span></span>
 <span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp03FGDS/duckdb</span></span>
+<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span></span>
 <span><span class="va">spec</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_spec.html">il_spec</a></span><span class="op">(</span><span class="op">)</span> <span class="op">|&gt;</span></span>
 <span>  <span class="fu"><a href="../reference/il_compare.html">il_compare</a></span><span class="op">(</span><span class="va">first_name</span>, <span class="fu"><a href="../reference/cl_name.html">cl_name</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="op">|&gt;</span></span>
@@ -170,15 +178,15 @@ match decision:</p>
 <h2 id="lazy-prediction-for-large-data">Lazy prediction for large data<a class="anchor" aria-label="anchor" href="#lazy-prediction-for-large-data"></a>
 </h2>
 <p><code>predict(collect = FALSE)</code> keeps scored pairs in the
-database instead of collecting them into R. This path requires DuckDB or
-PostgreSQL and is especially useful when materializing millions of rows
-would exhaust memory. The examples here use DuckDB, and
+database instead of collecting them into R. This path requires DuckDB
+and is especially useful when materializing millions of rows would
+exhaust memory. The examples here use DuckDB, and
 <code><a href="../reference/il_cluster.html">il_cluster()</a></code> detects the lazy reference so it can run
 connected-components analysis in SQL.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pairs_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span>, collect <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">pairs_lazy</span></span>
-<span><span class="co">#&gt; &lt;il_compared_lazy&gt; 2,783 pairs in table __il_9011_1_predicted_4 (threshold = 0.5)</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;il_compared_lazy&gt; 2,783 pairs in table __il_9253_1_predicted_4 (threshold = 0.5)</span></span></code></pre></div>
 <p>Pass the lazy reference directly to <code><a href="../reference/il_cluster.html">il_cluster()</a></code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">clusters_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">pairs_lazy</span>, threshold <span class="op">=</span> <span class="fl">0.85</span><span class="op">)</span></span>
@@ -186,8 +194,8 @@ connected-components analysis in SQL.</p>
 <span><span class="co">#&gt; [1] 952</span></span></code></pre></div>
 <p><code><a href="https://ggplot2.tidyverse.org/reference/autoplot.html" class="external-link">autoplot()</a></code> and <code><a href="../reference/il_waterfall.html">il_waterfall()</a></code> collect
 automatically when needed, so downstream analysis code stays the same.
-Use the lazy path on DuckDB or PostgreSQL when candidate-pair counts
-exceed available memory. The lazy prediction table is model-scoped, and
+Use the lazy path on DuckDB when candidate-pair counts exceed available
+memory. The lazy prediction table is model-scoped, and
 <code>il_cleanup(model)</code> removes it along with the model’s source
 and term-frequency tables.</p>
 </div>
@@ -230,16 +238,16 @@ of that size:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 142 × 5</span></span></span>
 <span><span class="co">#&gt;    cluster_id  n_nodes n_edges density cluster_centralization</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> cluster_428       3       2   0.667                  1    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> cluster_960       7      17   0.810                  0.267</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> cluster_736       2       1   1                     <span style="color: #BB0000;">NA</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> cluster_879       5      14   1.4                    0.167</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> cluster_911       7      21   1                      0    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> cluster_296       5       9   0.9                    0.167</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_907       4       4   0.667                  0.667</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_149      16      61   0.508                  0.410</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_301      10      41   0.911                  0.111</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_814       7      23   1.10                   0.1  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> cluster_674       8      18   0.643                  0.286</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> cluster_825       9      20   0.569                  0.232</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> cluster_874       2       1   1                     <span style="color: #BB0000;">NA</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> cluster_91        5       9   0.9                    0.167</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> cluster_488       6      12   0.833                  0.25 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> cluster_767       5       8   0.8                    0.333</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_886       2       1   1                     <span style="color: #BB0000;">NA</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_642       2       6   6                     <span style="color: #BB0000;">NA</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_172       4       8   1.25                   0.167</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_244       8      22   0.786                  0.286</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 132 more rows</span></span></span></code></pre></div>
 <p>A large maximum cluster size with low density often means a
 transitive link is pulling unrelated entities together. Consider raising
@@ -251,12 +259,12 @@ then checking the metrics again.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id  degree node_centrality</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 164       cluster_164      8           1.14 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 170       cluster_164      6           0.857</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 166       cluster_164      8           1.14 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 167       cluster_164      7           1    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 169       cluster_164      6           0.857</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 171       cluster_164      6           0.857</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 140       cluster_133      9           1.12 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 136       cluster_133      9           1.12 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 138       cluster_133      9           1.12 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 134       cluster_133     10           1.25 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 133       cluster_133     10           1.25 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 135       cluster_133      3           0.375</span></span></code></pre></div>
 <p>Records with unusually high degree relative to their cluster size may
 be acting as hubs that inflate the cluster beyond its true
 membership.</p>
@@ -311,12 +319,12 @@ case or remove whitespace before a similarity comparison:</p>
 <span><span class="co">#&gt; EM trained: <span style="color: #00BB00;">first_name</span> and <span style="color: #00BB00;">dob</span> | skipped (blocked on):</span></span>
 <span><span class="co">#&gt; <span style="color: #00BB00;">surname</span></span></span></code></pre></div>
 <p><code>tolower</code>, <code>toupper</code>, and <code>trimws</code>
-are translated to SQL on DuckDB and PostgreSQL, so they run in the
-database. Custom R functions only work on the R-side path. When you save
-a model with <code><a href="../reference/il_save.html">il_save()</a></code>, <code>.rds</code> stores the R
-object as is, while <code>.json</code> writes Splink settings SQL so
-loaded comparisons come back as SQL-backed levels. Anonymous functions
-still produce a warning on save.</p>
+are translated to SQL on DuckDB, so they run in the database. Custom R
+functions only work on the R-side path. When you save a model with
+<code><a href="../reference/il_save.html">il_save()</a></code>, <code>.rds</code> stores the R object as is,
+while <code>.json</code> writes Splink settings SQL so loaded
+comparisons come back as SQL-backed levels. Anonymous functions still
+produce a warning on save.</p>
 </div>
 <div class="section level2">
 <h2 id="incremental-matching">Incremental matching<a class="anchor" aria-label="anchor" href="#incremental-matching"></a>
@@ -338,18 +346,18 @@ and comparison spec.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 17 × 5</span></span></span>
 <span><span class="co">#&gt;    unique_id_l unique_id_r match_weight total_match_weight match_probability</span></span>
 <span><span class="co">#&gt;          <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>           1         239        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>           1         364        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>           1         241        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>           1         362        2.28               2.37              0.838</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>           1         367        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>           1         238        2.31               2.41              0.841</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>           1         791        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>           1         240        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>           2         858        0.871              0.964             0.661</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           1         363        0.832              0.925             0.655</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>           2         864        0.871              0.964             0.661</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>           2         859        2.31               2.41              0.841</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span>           1         240        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span>           2         858        0.871              0.964             0.661</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span>           1         363        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span>           2         864        0.871              0.964             0.661</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span>           2         859        2.31               2.41              0.841</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span>           1         239        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span>           1         364        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span>           1         241        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span>           1         362        2.28               2.37              0.838</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span>           1         367        0.832              0.925             0.655</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span>           1         238        2.31               2.41              0.841</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span>           1         791        0.832              0.925             0.655</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span>           1         237        2.28               2.37              0.838</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span>           1         365        0.832              0.925             0.655</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">15</span>           1         242        0.832              0.925             0.655</span></span>
@@ -389,7 +397,7 @@ failed runs or exploratory sessions where you want to clear every
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

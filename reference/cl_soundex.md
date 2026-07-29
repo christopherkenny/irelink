@@ -24,9 +24,8 @@ or
 
 ## Details
 
-On DuckDB, Soundex runs via a registered SQL MACRO. On PostgreSQL, it
-uses the native `soundex()` function. On SQLite, it falls back to an
-R-side implementation.
+On DuckDB, Soundex runs via a registered SQL MACRO. On SQLite, it falls
+back to an R-side implementation.
 
 ## Examples
 

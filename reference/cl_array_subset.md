@@ -17,9 +17,8 @@ A comparison-level object for use in
 
 ## Details
 
-On DuckDB and PostgreSQL this is computed in SQL using
-`ARRAY_LENGTH(ARRAY_INTERSECT(...)) = LEAST(ARRAY_LENGTH(...))`. On
-SQLite it falls back to an R-side set check.
+On DuckDB this is computed in SQL by counting the distinct elements
+shared by both arrays. On SQLite it falls back to an R-side set check.
 
 ## Examples
 

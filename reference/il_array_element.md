@@ -8,8 +8,7 @@ or
 [`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md),
 and composed with other transforms via
 [`il_transform()`](http://christophertkenny.com/irelink/reference/il_transform.md).
-On DuckDB and PostgreSQL, maps to SQL array indexing (`col[1]` or
-`col[-1]`).
+On DuckDB, maps to SQL array indexing (`col[1]` or `col[-1]`).
 
 ## Usage
 

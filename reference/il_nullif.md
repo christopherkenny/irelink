@@ -9,7 +9,7 @@ or
 [`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md),
 and composed with other transforms via
 [`il_transform()`](http://christophertkenny.com/irelink/reference/il_transform.md).
-On DuckDB and PostgreSQL, maps to SQL `NULLIF`.
+On DuckDB and DuckDB, maps to SQL `NULLIF`.
 
 ## Usage
 

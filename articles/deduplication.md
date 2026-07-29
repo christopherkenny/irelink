@@ -48,6 +48,14 @@ and value distributions:
 ``` r
 
 con <- DBI::dbConnect(duckdb::duckdb())
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/Rtmp25XTcz/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 comp <- il_completeness(df, con = con)
 comp
 #> # A tibble: 7 × 5
@@ -279,6 +287,14 @@ and attach it to the same data or to new data with
 ``` r
 
 con2 <- DBI::dbConnect(duckdb::duckdb())
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/Rtmp25XTcz/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 loaded <- il_load(path)
 model2 <- il_attach(loaded, fake_1000, con = con2)
 head(predict(model2, threshold = 0.85))
@@ -337,12 +353,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 628       cluster_626
-#> 2 330       cluster_326
-#> 3 793       cluster_792
-#> 4 568       cluster_566
-#> 5 599       cluster_599
-#> 6 561       cluster_558
+#> 1 143       cluster_142
+#> 2 816       cluster_814
+#> 3 519       cluster_517
+#> 4 524       cluster_517
+#> 5 559       cluster_558
+#> 6 697       cluster_694
 ```
 
 ## Evaluate against ground truth

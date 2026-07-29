@@ -56,6 +56,14 @@ tibble if no rules qualify.
 
 ``` r
 con <- DBI::dbConnect(duckdb::duckdb())
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpzB4yCz/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 il_find_blocking_below(fake_1000, max_pairs = 100000, con = con)
 #> # A tibble: 21 × 6
 #>    rule                 n_distinct coverage n_pairs pct_of_cartesian score

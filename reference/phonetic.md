@@ -36,12 +36,12 @@ the computation is pushed into SQL so data is never materialized into R.
 
 ### SQL availability
 
-|                 |           |            |                           |
-|-----------------|-----------|------------|---------------------------|
-| Function        | DuckDB    | PostgreSQL | SQLite                    |
-| `il_soundex`    | ✓ (macro) | ✓ (native) | comparisons only (R-side) |
-| `il_metaphone`  | ✗         | ✓ (native) | ✗                         |
-| `il_dmetaphone` | ✗         | ✓ (native) | ✗                         |
+|                 |             |                           |
+|-----------------|-------------|---------------------------|
+| Function        | DuckDB      | SQLite                    |
+| `il_soundex`    | yes (macro) | comparisons only (R-side) |
+| `il_metaphone`  | no          | no                        |
+| `il_dmetaphone` | no          | no                        |
 
 SQLite does not expose a way to register scalar R functions as SQL UDFs,
 so phonetic transforms cannot be used in **blocking rules** on SQLite.

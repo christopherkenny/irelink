@@ -8,7 +8,7 @@ Expectation-Maximization, so no labeled training data is required.
 Comparison functions cover exact matching, Jaro-Winkler, Levenshtein,
 date differences, and geographic distance, letting you tailor the model
 to your data. Multiple SQL backends are supported through DBI, so the
-same code runs on SQLite, DuckDB, or PostgreSQL.
+same code runs on SQLite or DuckDB.
 
 `irelink` is a translation of the Python
 [splink](https://github.com/moj-analytical-services/splink) library into

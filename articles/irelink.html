@@ -168,6 +168,14 @@ use an in-memory DuckDB database:</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="va">fake_20</span></span>
 <span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpgPbVBr/duckdb</span></span>
+<span><span class="co">#&gt; This is removed when the R session ends.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
+<span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> See ?duckdb_storage for details and alternatives.</span></span>
 <span></span>
 <span><span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_model.html">il_model</a></span><span class="op">(</span><span class="va">df</span>, spec <span class="op">=</span> <span class="va">spec</span>, con <span class="op">=</span> <span class="va">con</span><span class="op">)</span></span>
 <span><span class="va">model</span></span>
@@ -219,12 +227,12 @@ a match-probability threshold:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
 <span><span class="co">#&gt;   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob match_weight</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           8          17                1             2         1         7.49</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>          10          20                2             2         0         3.86</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           1           2                2             2         1         8.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           4          13                2             2         1         8.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>          10          19                1             2         1         7.49</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           5           6                2             2         1         8.76</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           1          11                2             2         1         8.76</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           9          20                2             2         0         3.86</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           3          13                2             2         1         8.76</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           9          19                2             2         1         8.76</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           2          12                2             1         0         1.64</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           2          11                2             2         1         8.76</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: total_match_weight &lt;dbl&gt;, match_probability &lt;dbl&gt;</span></span></span></code></pre></div>
 <p>Each row is a candidate pair. The output includes the left and right
 record identifiers, the per-comparison gamma values, the evidence-only
@@ -243,12 +251,12 @@ clusters with connected-components analysis:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 20        cluster_10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 7         cluster_17</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 13        cluster_13</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 8         cluster_17</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 10        cluster_10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 9         cluster_10</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 5         cluster_15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 17        cluster_17</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 15        cluster_15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 3         cluster_13</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 6         cluster_15</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 14        cluster_13</span></span></code></pre></div>
 <p>Each record is assigned a <code>cluster_id</code>. Records in the
 same cluster are treated as the same entity.</p>
 </div>
@@ -397,7 +405,7 @@ In an interactive session with abandoned models, use
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

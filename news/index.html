@@ -81,7 +81,7 @@
 <ul><li>
 <code><a href="../reference/il_block_on.html">il_block_on()</a></code> and <code><a href="../reference/block_on.html">block_on()</a></code> for equality-based and custom SQL blocking rules, with per-column transform support via formula syntax (<code>col ~ transform</code>, e.g. <code>first_name ~ il_substr(1, 3)</code>) or a named-list <code>.transform</code> for programmatic construction.</li>
 <li>
-<code>.explode</code> parameter for array-valued blocking columns (generates <code>UNNEST</code> subqueries for DuckDB/PostgreSQL).</li>
+<code>.explode</code> parameter for array-valued blocking columns (generates <code>UNNEST</code> subqueries for DuckDB).</li>
 <li>
 <code><a href="../reference/il_count_pairs.html">il_count_pairs()</a></code> estimates candidate-pair counts, including cumulative totals and percent-of-cartesian summaries across rule combinations.</li>
 <li>
@@ -156,7 +156,7 @@
 <ul><li>
 <code><a href="../reference/il_compare_records.html">il_compare_records()</a></code> scores one explicit record pair against a spec without fitting a full model, and <code><a href="../reference/il_string_similarity.html">il_string_similarity()</a></code> computes 5 string similarity metrics for a single pair.</li>
 <li>
-<code><a href="../reference/il_comparator_score.html">il_comparator_score()</a></code> computes batch string similarity across a DataFrame with SQL-side scoring on DuckDB/PostgreSQL.</li>
+<code><a href="../reference/il_comparator_score.html">il_comparator_score()</a></code> computes batch string similarity across a DataFrame with SQL-side scoring on DuckDB.</li>
 <li>
 <code><a href="../reference/il_comparator_threshold_chart.html">il_comparator_threshold_chart()</a></code> visualizes match rates at multiple similarity thresholds.</li>
 <li>
@@ -185,7 +185,7 @@
 </ul></div>
 <div class="section level3">
 <h3 id="sql-backends-and-persistence-0-0-1">SQL backends and persistence<a class="anchor" aria-label="anchor" href="#sql-backends-and-persistence-0-0-1"></a></h3>
-<ul><li>All computation runs inside a DBI-compatible database: DuckDB (recommended), SQLite, or PostgreSQL.</li>
+<ul><li>All computation runs inside a DBI-compatible database: DuckDB (recommended) or SQLite.</li>
 <li>Database-backed workflows support zero-copy registration from <code><a href="https://dbplyr.tidyverse.org/reference/tbl_lazy.html" class="external-link">dbplyr::tbl_lazy</a></code> references and existing table names, in addition to in-memory data frames.</li>
 <li>
 <code><a href="../reference/il_save.html">il_save()</a></code> and <code><a href="../reference/il_load.html">il_load()</a></code> support both RDS files and Splink settings JSON.</li>
@@ -200,7 +200,7 @@
 <h3 id="performance-0-0-1">Performance<a class="anchor" aria-label="anchor" href="#performance-0-0-1"></a></h3>
 <ul><li>Gamma computation is pushed into DuckDB using native C++ string similarity functions.</li>
 <li>SQLite is retained as a fallback with R-side gamma computation via <code>stringdist</code>.</li>
-<li>DuckDB and PostgreSQL use SQL-native connected components, with an igraph fallback for SQLite.</li>
+<li>DuckDB uses SQL-native connected components, with an igraph fallback for SQLite.</li>
 <li>Term-frequency, lazy prediction, and scratch tables use generated model-scoped names to avoid collisions on shared connections.</li>
 <li>
 <code>profile_sql = TRUE</code> on <code><a href="../reference/il_estimate_u.html">il_estimate_u()</a></code>, <code><a href="../reference/il_estimate_prior.html">il_estimate_prior()</a></code>, and <code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code> records lightweight SQL timing metadata for performance investigation.</li>
@@ -216,7 +216,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

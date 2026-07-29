@@ -4,8 +4,8 @@ Returns a transform that attempts to parse a string column as a
 timestamp. Unlike
 [`as.POSIXct()`](https://rdrr.io/r/base/as.POSIXlt.html), failures
 return `NA`/`NULL` rather than raising an error. On DuckDB this uses
-`try_strptime()`, and on PostgreSQL it uses `TO_TIMESTAMP()`. The result
-can be passed as the `transform` argument to
+`try_strptime()`, and on DuckDB it uses `try_strptime()`. The result can
+be passed as the `transform` argument to
 [`il_compare()`](http://christophertkenny.com/irelink/reference/il_compare.md)
 or
 [`il_block_on()`](http://christophertkenny.com/irelink/reference/il_block_on.md),

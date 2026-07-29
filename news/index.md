@@ -118,7 +118,7 @@ probabilistic record linkage engine into idiomatic R.
   e.g. `first_name ~ il_substr(1, 3)`) or a named-list `.transform` for
   programmatic construction.
 - `.explode` parameter for array-valued blocking columns (generates
-  `UNNEST` subqueries for DuckDB/PostgreSQL).
+  `UNNEST` subqueries for DuckDB).
 - [`il_count_pairs()`](http://christophertkenny.com/irelink/reference/il_count_pairs.md)
   estimates candidate-pair counts, including cumulative totals and
   percent-of-cartesian summaries across rule combinations.
@@ -237,7 +237,7 @@ probabilistic record linkage engine into idiomatic R.
   computes 5 string similarity metrics for a single pair.
 - [`il_comparator_score()`](http://christophertkenny.com/irelink/reference/il_comparator_score.md)
   computes batch string similarity across a DataFrame with SQL-side
-  scoring on DuckDB/PostgreSQL.
+  scoring on DuckDB.
 - [`il_comparator_threshold_chart()`](http://christophertkenny.com/irelink/reference/il_comparator_threshold_chart.md)
   visualizes match rates at multiple similarity thresholds.
 - [`il_phonetic_chart()`](http://christophertkenny.com/irelink/reference/il_phonetic_chart.md)
@@ -270,7 +270,7 @@ probabilistic record linkage engine into idiomatic R.
 ### SQL backends and persistence
 
 - All computation runs inside a DBI-compatible database: DuckDB
-  (recommended), SQLite, or PostgreSQL.
+  (recommended) or SQLite.
 - Database-backed workflows support zero-copy registration from
   [`dbplyr::tbl_lazy`](https://dbplyr.tidyverse.org/reference/tbl_lazy.html)
   references and existing table names, in addition to in-memory data
@@ -294,8 +294,8 @@ probabilistic record linkage engine into idiomatic R.
   similarity functions.
 - SQLite is retained as a fallback with R-side gamma computation via
   `stringdist`.
-- DuckDB and PostgreSQL use SQL-native connected components, with an
-  igraph fallback for SQLite.
+- DuckDB uses SQL-native connected components, with an igraph fallback
+  for SQLite.
 - Term-frequency, lazy prediction, and scratch tables use generated
   model-scoped names to avoid collisions on shared connections.
 - `profile_sql = TRUE` on

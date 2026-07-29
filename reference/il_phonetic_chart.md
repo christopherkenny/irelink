@@ -25,7 +25,7 @@ il_phonetic_chart(.data, col_1, col_2, con = NULL)
   [`DBI::dbConnect()`](https://dbi.r-dbi.org/reference/dbConnect.html).
   If provided and
   [`duckdb::duckdb()`](https://r.duckdb.org/reference/duckdb.html) or
-  PostgreSQL, computes Soundex in SQL.
+  DuckDB, computes Soundex in SQL.
 
 ## Value
 

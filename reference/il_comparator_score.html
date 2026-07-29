@@ -87,12 +87,9 @@ class <code>il_comparator_score</code>.</p>
     <div class="section level2">
     <h2 id="details">Details<a class="anchor" aria-label="anchor" href="#details"></a></h2>
     <p>With <code>con = NULL</code>, all metrics are computed in R with
-<code><a href="https://rdrr.io/pkg/stringdist/man/stringdist.html" class="external-link">stringdist::stringdist()</a></code>. With a <code><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb::duckdb()</a></code> or PostgreSQL connection,
-computation is pushed to SQL. SQL backends return the same column schema
-but may leave unsupported metrics as <code>NA</code>: DuckDB currently computes
-<code>jaro_winkler</code>, <code>jaro</code>, <code>levenshtein</code>, and <code>jaccard</code>; PostgreSQL computes
-<code>levenshtein</code> and a <code>jaro_winkler</code> compatibility column backed by trigram
-<code>similarity()</code>.</p>
+<code><a href="https://rdrr.io/pkg/stringdist/man/stringdist.html" class="external-link">stringdist::stringdist()</a></code>. With a <code><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb::duckdb()</a></code> connection,
+computation is pushed to SQL. DuckDB computes <code>jaro_winkler</code>, <code>jaro</code>,
+<code>levenshtein</code>, and <code>jaccard</code>; other DBI connections use R-side computation.</p>
     </div>
 
     <div class="section level2">
@@ -119,7 +116,7 @@ but may leave unsupported metrics as <code>NA</code>: DuckDB currently computes
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer></div>

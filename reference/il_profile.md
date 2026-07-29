@@ -90,6 +90,14 @@ df <- data.frame(
   )
 )
 con <- DBI::dbConnect(duckdb::duckdb())
+#> duckdb keeps downloaded extensions and secrets in a temporary directory:
+#> ℹ /tmp/RtmpzB4yCz/duckdb
+#> This is removed when the R session ends.
+#> • Extensions are re-downloaded each session.
+#> • Secrets are lost.
+#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
+#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
+#> ℹ See ?duckdb_storage for details and alternatives.
 il_profile(df, first_name, surname, con = con, top_n = 5)
 #> # A tibble: 10 × 3
 #>    column     value     n
@@ -99,10 +107,10 @@ il_profile(df, first_name, surname, con = con, top_n = 5)
 #>  3 first_name John      2
 #>  4 first_name Alice     2
 #>  5 first_name Jon       2
-#>  6 surname    Doe       4
-#>  7 surname    White     4
-#>  8 surname    Jones     4
-#>  9 surname    Smith     3
-#> 10 surname    Brown     3
+#>  6 surname    White     4
+#>  7 surname    Jones     4
+#>  8 surname    Doe       4
+#>  9 surname    Brown     3
+#> 10 surname    Smith     3
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
