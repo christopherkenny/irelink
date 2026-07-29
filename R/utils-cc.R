@@ -605,7 +605,7 @@ solve_one_to_one_sql <- function(
 #' Iterative one-to-one clustering (R/igraph fallback)
 #'
 #' R-side version of the iterative best-link algorithm with dataset
-#' constraints. Used when no DuckDB/PostgreSQL connection is available.
+#' constraints. Used when no DuckDB connection is available.
 #'
 #' @param pairs An il_compared tibble (already threshold-filtered).
 #' @param source_dataset Named character vector mapping unique_id ->
@@ -833,7 +833,7 @@ sql_cluster_metrics <- function(con, node_metrics_tbl, prefix = NULL) {
       '  CAST(SUM(node_degree) / 2 AS INTEGER) AS n_edges, ',
       '  CASE WHEN COUNT(*) > 1 ',
       '    THEN (2.0 * SUM(node_degree) / 2.0) / ',
-      '         (CAST(COUNT(*) AS DOUBLE) * (COUNT(*) - 1)) ',
+      '         ({sql_cast_double("COUNT(*)", detect_dialect(con))} * (COUNT(*) - 1)) ',
       '    ELSE 0.0 END AS density, ',
       '  CASE WHEN COUNT(*) > 2 ',
       '    THEN (1.0 * COUNT(*) * MAX(node_degree) - SUM(node_degree)) / ',

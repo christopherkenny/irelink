@@ -19,7 +19,6 @@ Smith/Smyth, Robert/Rupert).
 }
 \details{
 On DuckDB, Soundex runs via a registered SQL MACRO.
-On PostgreSQL, it uses the native \code{soundex()} function.
 On SQLite, it falls back to an R-side implementation.
 }
 \examples{

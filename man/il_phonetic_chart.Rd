@@ -12,7 +12,7 @@ il_phonetic_chart(.data, col_1, col_2, con = NULL)
 \item{col_1, col_2}{Column names (unquoted or character).}
 
 \item{con}{A DBI connection from \code{\link[DBI:dbConnect]{DBI::dbConnect()}}. If provided and \code{\link[duckdb:duckdb]{duckdb::duckdb()}} or
-PostgreSQL, computes Soundex in SQL.}
+DuckDB, computes Soundex in SQL.}
 }
 \value{
 A \code{\link[ggplot2:ggplot]{ggplot2::ggplot()}} object.

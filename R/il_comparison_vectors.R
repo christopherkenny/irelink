@@ -5,7 +5,7 @@
 #' comparisons is a "comparison vector". This function counts how often
 #' each pattern occurs.
 #'
-#' On DuckDB/PostgreSQL, the computation runs entirely in SQL.
+#' On DuckDB, the computation runs entirely in SQL.
 #'
 #' @param model A trained `il_model`.
 #' @param blocking A blocking rule created by [block_on()]. If `NULL`,

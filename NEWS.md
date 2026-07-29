@@ -29,7 +29,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 ## Blocking
 
 - `il_block_on()` and `block_on()` for equality-based and custom SQL blocking rules, with per-column transform support via formula syntax (`col ~ transform`, e.g. `first_name ~ il_substr(1, 3)`) or a named-list `.transform` for programmatic construction.
-- `.explode` parameter for array-valued blocking columns (generates `UNNEST` subqueries for DuckDB/PostgreSQL).
+- `.explode` parameter for array-valued blocking columns (generates `UNNEST` subqueries for DuckDB).
 - `il_count_pairs()` estimates candidate-pair counts, including cumulative totals and percent-of-cartesian summaries across rule combinations.
 - `il_suggest_blocking()` ranks candidate blocking rules by pair-reduction, coverage, and balanced score.
 - `il_find_blocking_below()` finds blocking rule combinations below a pair count ceiling.
@@ -73,7 +73,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 ## Data exploration
 
 - `il_compare_records()` scores one explicit record pair against a spec without fitting a full model, and `il_string_similarity()` computes 5 string similarity metrics for a single pair.
-- `il_comparator_score()` computes batch string similarity across a DataFrame with SQL-side scoring on DuckDB/PostgreSQL.
+- `il_comparator_score()` computes batch string similarity across a DataFrame with SQL-side scoring on DuckDB.
 - `il_comparator_threshold_chart()` visualizes match rates at multiple similarity thresholds.
 - `il_phonetic_chart()` produces a Soundex agreement heatmap.
 - `il_tf_chart()` visualizes model-specific term frequency distributions with labeled most/least common values.
@@ -93,7 +93,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 
 ## SQL backends and persistence
 
-- All computation runs inside a DBI-compatible database: DuckDB (recommended), SQLite, or PostgreSQL.
+- All computation runs inside a DBI-compatible database: DuckDB (recommended) or SQLite.
 - Database-backed workflows support zero-copy registration from `dbplyr::tbl_lazy` references and existing table names, in addition to in-memory data frames.
 - `il_save()` and `il_load()` support both RDS files and Splink settings JSON.
 - `il_attach()` reattaches a saved model to different data or connections.
@@ -104,7 +104,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 
 - Gamma computation is pushed into DuckDB using native C++ string similarity functions.
 - SQLite is retained as a fallback with R-side gamma computation via `stringdist`.
-- DuckDB and PostgreSQL use SQL-native connected components, with an igraph fallback for SQLite.
+- DuckDB uses SQL-native connected components, with an igraph fallback for SQLite.
 - Term-frequency, lazy prediction, and scratch tables use generated model-scoped names to avoid collisions on shared connections.
 - `profile_sql = TRUE` on `il_estimate_u()`, `il_estimate_prior()`, and `predict()` records lightweight SQL timing metadata for performance investigation.
 - End-to-end benchmarks against an R-side SQLite baseline: 1,000 records in 1.4 s (2.1× faster), 5,000 records in 19.5 s (1.6×), 10,000 records in 61.4 s (2.6×). Speedup grows with dataset size.

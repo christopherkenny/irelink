@@ -8,7 +8,7 @@
 \description{
 \if{html}{\figure{logo.png}{options: style='float: right' alt='logo' width='120'}}
 
-Performs fast, scalable probabilistic record linkage and deduplication using the Fellegi-Sunter model. Records lacking a shared unique identifier are compared across configurable dimensions using exact, fuzzy, and distance-based comparisons, with model parameters estimated via unsupervised Expectation-Maximization. Multiple SQL backends are supported through 'DBI', enabling execution from laptop-scale ('DuckDB') through to distributed engines. This package is a translation of the Python 'splink' library by Linacre et al. into idiomatic R.
+Performs fast, scalable probabilistic record linkage and deduplication using the Fellegi-Sunter model. Records lacking a shared unique identifier are compared across configurable dimensions using exact, fuzzy, and distance-based comparisons, with model parameters estimated via unsupervised Expectation-Maximization. Multiple SQL backends are supported through 'DBI', enabling execution from laptop-scale ('DuckDB') through to distributed engines. This package is a translation of the Python 'splink' library by Linacre et al. (2022) \doi{10.23889/ijpds.v7i3.1794} into idiomatic R.
 }
 \seealso{
 Useful links:

@@ -3,7 +3,7 @@
 #' Returns a transform that extracts a fixed-width substring from a string
 #' column. The result can be passed as the `transform` argument to
 #' [il_compare()] or [il_block_on()], and composed with other transforms
-#' via [il_transform()]. On DuckDB and PostgreSQL, the computation is
+#' via [il_transform()]. On DuckDB, the computation is
 #' pushed into SQL.
 #'
 #' @param start Integer start position (1-indexed).
@@ -52,7 +52,7 @@ il_substr <- function(start, length) {
 #' Returns `NA` when no match is found. The result can be passed as the
 #' `transform` argument to [il_compare()] or [il_block_on()], and
 #' composed with other transforms via [il_transform()]. On DuckDB and
-#' PostgreSQL, the computation is pushed into SQL.
+#' DuckDB, the computation is pushed into SQL.
 #'
 #' @param pattern A regular expression.
 #' @param group Integer capture group to extract. Use `0` for the whole
@@ -125,7 +125,7 @@ il_regex_extract <- function(pattern, group = 0L) {
 #' missing-data levels are triggered correctly. The result can be passed
 #' as the `transform` argument to [il_compare()] or [il_block_on()], and
 #' composed with other transforms via [il_transform()]. On DuckDB and
-#' PostgreSQL, maps to SQL `NULLIF`.
+#' DuckDB, maps to SQL `NULLIF`.
 #'
 #' @param value The value to treat as missing.
 #'
@@ -153,7 +153,7 @@ il_nullif <- function(value) {
 #' Useful when a numeric or date column needs to be compared as text. The
 #' result can be passed as the `transform` argument to [il_compare()] or
 #' [il_block_on()], and composed with other transforms via [il_transform()].
-#' On DuckDB and PostgreSQL, maps to SQL `CAST(col AS VARCHAR)`.
+#' On DuckDB, maps to SQL `CAST(col AS VARCHAR)`.
 #'
 #' @return An `il_column_transform` closure.
 #' @export
@@ -170,8 +170,7 @@ il_cast_to_string <- function() {
 #'
 #' Returns a transform that attempts to parse a string column as a date.
 #' Unlike `as.Date()`, failures return `NA`/`NULL` rather than raising an
-#' error. On DuckDB this uses `try_strptime()`, and on PostgreSQL it uses
-#' `TO_DATE()`.
+#' error. On DuckDB this uses `try_strptime()`.
 #' The result can be passed as the `transform` argument to [il_compare()]
 #' or [il_block_on()], and composed with other transforms via
 #' [il_transform()].
@@ -201,7 +200,7 @@ il_try_parse_date <- function(format = '%Y-%m-%d') {
 #' Returns a transform that attempts to parse a string column as a
 #' timestamp. Unlike `as.POSIXct()`, failures return `NA`/`NULL` rather
 #' than raising an error. On DuckDB this uses `try_strptime()`, and on
-#' PostgreSQL it uses `TO_TIMESTAMP()`. The result can be passed as the
+#' DuckDB it uses `try_strptime()`. The result can be passed as the
 #' `transform` argument to [il_compare()] or [il_block_on()], and
 #' composed with other transforms via [il_transform()].
 #'
@@ -231,7 +230,7 @@ il_try_parse_timestamp <- function(format = '%Y-%m-%d %H:%M:%S') {
 #' Returns a transform that extracts the first or last element of an
 #' array-valued column. The result can be passed as the `transform`
 #' argument to [il_compare()] or [il_block_on()], and composed with
-#' other transforms via [il_transform()]. On DuckDB and PostgreSQL,
+#' other transforms via [il_transform()]. On DuckDB,
 #' maps to SQL array indexing (`col[1]` or `col[-1]`).
 #'
 #' @param position Either `"first"` or `"last"`.
@@ -332,46 +331,28 @@ column_transform_sql <- function(transform, col_ref, dialect = NULL) {
           sql_quote_literal(p$format),
           ') AS DATE)'
         )
-      } else if (identical(dialect, 'postgres')) {
-        paste0(
-          'TO_DATE(',
-          col_ref,
-          ', ',
-          sql_quote_literal(strptime_to_postgres_format(p$format)),
-          ')'
-        )
       } else {
         cli::cli_abort(
-          '{.fn il_try_parse_date} SQL translation requires a DuckDB or PostgreSQL backend.'
+          '{.fn il_try_parse_date} SQL translation requires a DuckDB backend.'
         )
       }
     },
     'il_try_parse_timestamp' = {
       if (identical(dialect, 'duckdb')) {
         paste0('try_strptime(', col_ref, ', ', sql_quote_literal(p$format), ')')
-      } else if (identical(dialect, 'postgres')) {
-        paste0(
-          'TO_TIMESTAMP(',
-          col_ref,
-          ', ',
-          sql_quote_literal(strptime_to_postgres_format(p$format)),
-          ')'
-        )
       } else {
         cli::cli_abort(
-          '{.fn il_try_parse_timestamp} SQL translation requires a DuckDB or PostgreSQL backend.'
+          '{.fn il_try_parse_timestamp} SQL translation requires a DuckDB backend.'
         )
       }
     },
     'il_array_element' = {
-      if (!identical(dialect, 'duckdb') && !identical(dialect, 'postgres')) {
+      if (!identical(dialect, 'duckdb')) {
         cli::cli_abort(
-          '{.fn il_array_element} SQL translation requires a DuckDB or PostgreSQL backend.'
+          '{.fn il_array_element} SQL translation requires a DuckDB backend.'
         )
       }
-      if (identical(dialect, 'postgres') && p$position == 'last') {
-        paste0(col_ref, '[array_length(', col_ref, ', 1)]')
-      } else if (p$position == 'first') {
+      if (p$position == 'first') {
         paste0(col_ref, '[1]')
       } else {
         paste0(col_ref, '[-1]')
@@ -388,29 +369,6 @@ sql_quote_literal <- function(x) {
     cli::cli_abort('SQL literals must be single non-missing strings.')
   }
   paste0("'", gsub("'", "''", x, fixed = TRUE), "'")
-}
-
-#' Translate common R strptime tokens to PostgreSQL date/time templates
-#' @noRd
-strptime_to_postgres_format <- function(format) {
-  replacements <- c(
-    '%Y' = 'YYYY',
-    '%y' = 'YY',
-    '%m' = 'MM',
-    '%d' = 'DD',
-    '%H' = 'HH24',
-    '%I' = 'HH12',
-    '%M' = 'MI',
-    '%S' = 'SS',
-    '%p' = 'AM',
-    '%b' = 'Mon',
-    '%B' = 'Month'
-  )
-  out <- format
-  for (token in names(replacements)) {
-    out <- gsub(token, replacements[[token]], out, fixed = TRUE)
-  }
-  out
 }
 
 #' Serialize a column transform to a name string

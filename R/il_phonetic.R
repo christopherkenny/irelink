@@ -14,11 +14,11 @@
 #' @details
 #' ## SQL availability
 #'
-#' | Function        | DuckDB        | PostgreSQL      | SQLite                    |
-#' |-----------------|---------------|-----------------|---------------------------|
-#' | `il_soundex`    | ✓ (macro)     | ✓ (native)      | comparisons only (R-side) |
-#' | `il_metaphone`  | ✗             | ✓ (native)      | ✗                         |
-#' | `il_dmetaphone` | ✗             | ✓ (native)      | ✗                         |
+#' | Function        | DuckDB        | SQLite                    |
+#' |-----------------|---------------|---------------------------|
+#' | `il_soundex`    | yes (macro)   | comparisons only (R-side) |
+#' | `il_metaphone`  | no            | no                        |
+#' | `il_dmetaphone` | no            | no                        |
 #'
 #' SQLite does not expose a way to register scalar R functions as SQL UDFs,
 #' so phonetic transforms cannot be used in **blocking rules** on SQLite.
@@ -42,8 +42,7 @@ il_soundex <- function(x) {
 #' @export
 il_metaphone <- function(x) {
   cli::cli_abort(c(
-    '{.fn il_metaphone} is only available as a SQL transform (PostgreSQL).',
-    'i' = 'Use it as {.code transform = il_metaphone} in {.fn il_block_on} or {.fn il_compare}.'
+    '{.fn il_metaphone} is not available as a SQL transform.'
   ))
 }
 
@@ -51,8 +50,7 @@ il_metaphone <- function(x) {
 #' @export
 il_dmetaphone <- function(x) {
   cli::cli_abort(c(
-    '{.fn il_dmetaphone} is only available as a SQL transform (PostgreSQL).',
-    'i' = 'Use it as {.code transform = il_dmetaphone} in {.fn il_block_on} or {.fn il_compare}.'
+    '{.fn il_dmetaphone} is not available as a SQL transform.'
   ))
 }
 

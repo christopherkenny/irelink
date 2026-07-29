@@ -18,7 +18,7 @@ used to convert empty strings to \code{NA} before comparison so that
 missing-data levels are triggered correctly. The result can be passed
 as the \code{transform} argument to \code{\link[=il_compare]{il_compare()}} or \code{\link[=il_block_on]{il_block_on()}}, and
 composed with other transforms via \code{\link[=il_transform]{il_transform()}}. On DuckDB and
-PostgreSQL, maps to SQL \code{NULLIF}.
+DuckDB, maps to SQL \code{NULLIF}.
 }
 \examples{
 tf <- il_nullif('')

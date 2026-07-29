@@ -22,7 +22,7 @@
 #' @param .explode An optional character vector of column names containing
 #'   arrays (list columns) to unnest before blocking. Each array element
 #'   becomes a separate row for the blocking join. Requires a DuckDB or
-#'   PostgreSQL backend. Defaults to `NULL`.
+#'   DuckDB backend. Defaults to `NULL`.
 #'
 #' @return An updated copy of `spec`.
 #' @export

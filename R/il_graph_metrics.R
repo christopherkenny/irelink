@@ -85,7 +85,7 @@ il_graph_metrics <- function(pairs, clusters) {
   }
   use_sql <- !is.null(con) &&
     DBI::dbIsValid(con) &&
-    detect_dialect(con) %in% c('duckdb', 'postgres')
+    identical(detect_dialect(con), 'duckdb')
 
   if (use_sql) {
     return(graph_metrics_sql(con, pairs, clusters))

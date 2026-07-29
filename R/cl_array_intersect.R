@@ -98,8 +98,8 @@ cl_array_min_distance <- function(fn = c('jaro_winkler', 'levenshtein'), ...) {
 #' columns is a complete subset of the larger. In other words, every
 #' element of the smaller array appears in the larger one.
 #'
-#' On DuckDB and PostgreSQL this is computed in SQL using
-#' `ARRAY_LENGTH(ARRAY_INTERSECT(...)) = LEAST(ARRAY_LENGTH(...))`.
+#' On DuckDB this is computed in SQL by counting the
+#' distinct elements shared by both arrays.
 #' On SQLite it falls back to an R-side set check.
 #'
 #' @return A comparison-level object for use in [il_compare()].

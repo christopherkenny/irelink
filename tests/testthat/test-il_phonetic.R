@@ -65,21 +65,6 @@ test_that('phonetic_transform_sql generates DuckDB soundex macro call', {
   expect_equal(sql, 'il_soundex(l.name)')
 })
 
-test_that('phonetic_transform_sql generates PostgreSQL soundex call', {
-  sql <- phonetic_transform_sql(il_soundex, 'l.name', 'postgres')
-  expect_equal(sql, 'soundex(l.name)')
-})
-
-test_that('phonetic_transform_sql generates PostgreSQL metaphone call', {
-  sql <- phonetic_transform_sql(il_metaphone, 'l.name', 'postgres')
-  expect_equal(sql, 'metaphone(l.name, 10)')
-})
-
-test_that('phonetic_transform_sql generates PostgreSQL dmetaphone call', {
-  sql <- phonetic_transform_sql(il_dmetaphone, 'l.name', 'postgres')
-  expect_equal(sql, 'dmetaphone(l.name)')
-})
-
 test_that('phonetic_transform_sql returns NULL for non-phonetic transforms', {
   expect_null(phonetic_transform_sql(tolower, 'l.name', 'duckdb'))
   expect_null(phonetic_transform_sql(NULL, 'l.name', 'duckdb'))
@@ -91,10 +76,6 @@ test_that('sql_transform_col wraps column with phonetic SQL', {
   expect_equal(
     sql_transform_col('l.name', il_soundex, 'duckdb'),
     'il_soundex(l.name)'
-  )
-  expect_equal(
-    sql_transform_col('r.name', il_soundex, 'postgres'),
-    'soundex(r.name)'
   )
 })
 
@@ -117,9 +98,6 @@ test_that('validate_phonetic_dialect rejects unsupported backends', {
 
 test_that('validate_phonetic_dialect accepts supported backends', {
   expect_silent(validate_phonetic_dialect('il_soundex', 'duckdb'))
-  expect_silent(validate_phonetic_dialect('il_soundex', 'postgres'))
-  expect_silent(validate_phonetic_dialect('il_metaphone', 'postgres'))
-  expect_silent(validate_phonetic_dialect('il_dmetaphone', 'postgres'))
 })
 
 # --- Serialization (transform_to_name) ---------------------------------------
@@ -173,16 +151,6 @@ test_that('build_blocking_condition applies soundex transform (DuckDB)', {
   expect_true(grepl('il_soundex\\(l\\."surname"\\)', sql))
   expect_true(grepl('il_soundex\\(r\\."surname"\\)', sql))
   expect_true(grepl('AND', sql))
-})
-
-test_that('build_blocking_condition applies soundex transform (PostgreSQL)', {
-  sql <- build_blocking_condition(
-    columns = 'first_name',
-    transform = il_soundex,
-    dialect = 'postgres'
-  )
-  expect_true(grepl('soundex\\(l\\."first_name"\\)', sql))
-  expect_true(grepl('soundex\\(r\\."first_name"\\)', sql))
 })
 
 test_that('build_blocking_condition without transform leaves columns bare', {

@@ -5,12 +5,9 @@
 #' comparison thresholds. Rows where either column is missing are omitted.
 #'
 #' With `con = NULL`, all metrics are computed in R with
-#' [stringdist::stringdist()]. With a [duckdb::duckdb()] or PostgreSQL connection,
-#' computation is pushed to SQL. SQL backends return the same column schema
-#' but may leave unsupported metrics as `NA`: DuckDB currently computes
-#' `jaro_winkler`, `jaro`, `levenshtein`, and `jaccard`; PostgreSQL computes
-#' `levenshtein` and a `jaro_winkler` compatibility column backed by trigram
-#' `similarity()`.
+#' [stringdist::stringdist()]. With a [duckdb::duckdb()] connection,
+#' computation is pushed to SQL. DuckDB computes `jaro_winkler`, `jaro`,
+#' `levenshtein`, and `jaccard`; other DBI connections use R-side computation.
 #'
 #' @param .data A data frame or character table name. Table names require
 #'   `con`.
@@ -35,7 +32,7 @@ il_comparator_score <- function(.data, col_1, col_2, con = NULL) {
 
   use_sql <- !is.null(con) &&
     DBI::dbIsValid(con) &&
-    detect_dialect(con) %in% c('duckdb', 'postgres')
+    identical(detect_dialect(con), 'duckdb')
 
   if (use_sql) {
     result <- comparator_score_sql(.data, col_1, col_2, con)
@@ -65,8 +62,7 @@ comparator_score_sql <- function(.data, col_1, col_2, con) {
   qtbl <- sql_quote_identifier(tbl_name)
   qcol_1 <- sql_quote_identifier(col_1)
   qcol_2 <- sql_quote_identifier(col_2)
-  if (dialect == 'duckdb') {
-    sql <- glue::glue(
+  sql <- glue::glue(
       'SELECT {qcol_1}, {qcol_2}, ',
       '  jaro_winkler_similarity({qcol_1}, {qcol_2}) AS jaro_winkler, ',
       '  jaro_similarity({qcol_1}, {qcol_2}) AS jaro, ',
@@ -75,24 +71,6 @@ comparator_score_sql <- function(.data, col_1, col_2, con) {
       'FROM {qtbl} ',
       'WHERE {qcol_1} IS NOT NULL AND {qcol_2} IS NOT NULL'
     )
-  } else {
-    # PostgreSQL: pg_trgm provides similarity(); levenshtein from fuzzystrmatch
-    sql <- glue::glue(
-      'SELECT {qcol_1}, {qcol_2}, ',
-      '  similarity({qcol_1}, {qcol_2}) AS jaro_winkler, ',
-      '  levenshtein({qcol_1}, {qcol_2}) AS levenshtein ',
-      'FROM {qtbl} ',
-      'WHERE {qcol_1} IS NOT NULL AND {qcol_2} IS NOT NULL'
-    )
-    cli::cli_warn(c(
-      'PostgreSQL provides limited similarity functions.',
-      'i' = paste(
-        'Only {.val jaro_winkler} (compatibility alias for PostgreSQL trigram',
-        'similarity) and {.val levenshtein} are computed in SQL.'
-      ),
-      'i' = 'Use {.code con = NULL} for all 5 metrics via R-side {.pkg stringdist}.'
-    ))
-  }
 
   result <- tibble::as_tibble(DBI::dbGetQuery(con, sql))
 
@@ -210,7 +188,7 @@ il_comparator_threshold_chart <- function(
 #' @param .data A data frame or character table name.
 #' @param col_1,col_2 Column names (unquoted or character).
 #' @param con A DBI connection from [DBI::dbConnect()]. If provided and [duckdb::duckdb()] or
-#'   PostgreSQL, computes Soundex in SQL.
+#'   DuckDB, computes Soundex in SQL.
 #'
 #' @return A [ggplot2::ggplot()] object.
 #' @export
@@ -220,7 +198,7 @@ il_phonetic_chart <- function(.data, col_1, col_2, con = NULL) {
 
   use_sql <- !is.null(con) &&
     DBI::dbIsValid(con) &&
-    detect_dialect(con) %in% c('duckdb', 'postgres')
+    identical(detect_dialect(con), 'duckdb')
 
   if (use_sql) {
     tbl_name <- il_scratch_table_name('phonetic')
@@ -236,14 +214,8 @@ il_phonetic_chart <- function(.data, col_1, col_2, con = NULL) {
       tbl_name <- as.character(.data)
     }
 
-    dialect <- detect_dialect(con)
-    if (dialect == 'duckdb') {
-      register_phonetic_macros(con)
-    }
-    sx_fn <- 'soundex'
-    if (dialect == 'duckdb') {
-      sx_fn <- 'il_soundex'
-    }
+    register_phonetic_macros(con)
+    sx_fn <- 'il_soundex'
     qtbl <- sql_quote_identifier(tbl_name)
     qcol_1 <- sql_quote_identifier(col_1)
     qcol_2 <- sql_quote_identifier(col_2)

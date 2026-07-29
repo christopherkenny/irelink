@@ -90,7 +90,7 @@ autoplot(pairs, which = 1)
 ## Lazy prediction for large data
 
 `predict(collect = FALSE)` keeps scored pairs in the database instead of collecting them into R.
-This path requires DuckDB or PostgreSQL and is especially useful when materializing millions of rows would exhaust memory.
+This path requires DuckDB and is especially useful when materializing millions of rows would exhaust memory.
 The examples here use DuckDB, and `il_cluster()` detects the lazy reference so it can run connected-components analysis in SQL.
 
 ```{r lazy}
@@ -106,7 +106,7 @@ nrow(clusters_lazy)
 ```
 
 `autoplot()` and `il_waterfall()` collect automatically when needed, so downstream analysis code stays the same.
-Use the lazy path on DuckDB or PostgreSQL when candidate-pair counts exceed available memory.
+Use the lazy path on DuckDB when candidate-pair counts exceed available memory.
 The lazy prediction table is model-scoped, and `il_cleanup(model)` removes it along with the model's source and term-frequency tables.
 
 ## Chunked u estimation and SQL profiling
@@ -203,7 +203,7 @@ model_tr <- il_estimate_u(model_tr, max_pairs = 1e5)
 model_tr <- il_estimate_em(model_tr, block_on(surname))
 ```
 
-`tolower`, `toupper`, and `trimws` are translated to SQL on DuckDB and PostgreSQL, so they run in the database.
+`tolower`, `toupper`, and `trimws` are translated to SQL on DuckDB, so they run in the database.
 Custom R functions only work on the R-side path.
 When you save a model with `il_save()`, `.rds` stores the R object as is, while `.json` writes Splink settings SQL so loaded comparisons come back as SQL-backed levels.
 Anonymous functions still produce a warning on save.

@@ -15,8 +15,8 @@ columns is a complete subset of the larger. In other words, every
 element of the smaller array appears in the larger one.
 }
 \details{
-On DuckDB and PostgreSQL this is computed in SQL using
-\code{ARRAY_LENGTH(ARRAY_INTERSECT(...)) = LEAST(ARRAY_LENGTH(...))}.
+On DuckDB this is computed in SQL by counting the
+distinct elements shared by both arrays.
 On SQLite it falls back to an R-side set check.
 }
 \examples{

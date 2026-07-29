@@ -7,7 +7,6 @@
 #' Smith/Smyth, Robert/Rupert).
 #'
 #' On DuckDB, Soundex runs via a registered SQL MACRO.
-#' On PostgreSQL, it uses the native `soundex()` function.
 #' On SQLite, it falls back to an R-side implementation.
 #'
 #' @return A comparison-level object for use in [il_compare()] or

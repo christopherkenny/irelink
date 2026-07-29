@@ -28,7 +28,7 @@ comparisons is a "comparison vector". This function counts how often
 each pattern occurs.
 }
 \details{
-On DuckDB/PostgreSQL, the computation runs entirely in SQL.
+On DuckDB, the computation runs entirely in SQL.
 }
 \examples{
 con <- DBI::dbConnect(duckdb::duckdb())

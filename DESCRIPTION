@@ -42,7 +42,7 @@ Description: Performs fast, scalable probabilistic record linkage and
     backends are supported through 'DBI', enabling execution from
     laptop-scale ('DuckDB') through to distributed engines. This package
     is a translation of the Python 'splink' library by Linacre et al.
-    into idiomatic R.
+    (2022) <doi:10.23889/ijpds.v7i3.1794> into idiomatic R.
 License: MIT + file LICENSE
 Depends: R (>= 4.1.0)
 Encoding: UTF-8

@@ -107,7 +107,7 @@ il_cluster <- function(
     return(tibble::tibble(unique_id = character(0), cluster_id = character(0)))
   }
 
-  # Try SQL path first (DuckDB / PostgreSQL)
+  # Try SQL path first (DuckDB)
   model <- attr(pairs, 'model')
   con <- NULL
   if (!is.null(model)) {
@@ -115,7 +115,7 @@ il_cluster <- function(
   }
   use_sql <- !is.null(con) &&
     DBI::dbIsValid(con) &&
-    detect_dialect(con) %in% c('duckdb', 'postgres')
+    identical(detect_dialect(con), 'duckdb')
 
   if (use_sql) {
     return(cluster_sql(
@@ -132,7 +132,7 @@ il_cluster <- function(
   cluster_igraph(pairs, threshold, method, ties_method, source_dataset)
 }
 
-#' SQL-path clustering (DuckDB/PostgreSQL)
+#' SQL-path clustering (DuckDB)
 #' @noRd
 cluster_sql <- function(
   con,
@@ -251,7 +251,7 @@ cluster_igraph <- function(
 
   rlang::check_installed(
     'igraph',
-    reason = 'for clustering without a DuckDB or PostgreSQL connection.'
+    reason = 'for clustering without a DuckDB connection.'
   )
 
   edges <- data.frame(

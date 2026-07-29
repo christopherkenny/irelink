@@ -16,7 +16,7 @@ An \code{il_column_transform} closure.
 Returns a transform that extracts the first or last element of an
 array-valued column. The result can be passed as the \code{transform}
 argument to \code{\link[=il_compare]{il_compare()}} or \code{\link[=il_block_on]{il_block_on()}}, and composed with
-other transforms via \code{\link[=il_transform]{il_transform()}}. On DuckDB and PostgreSQL,
+other transforms via \code{\link[=il_transform]{il_transform()}}. On DuckDB,
 maps to SQL array indexing (\code{col[1]} or \code{col[-1]}).
 }
 \examples{

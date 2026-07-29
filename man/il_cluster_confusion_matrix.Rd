@@ -42,7 +42,7 @@ the first record in its predicted cluster, and likewise for the
 ground-truth \code{labels_col}.
 }
 \details{
-For DuckDB and PostgreSQL backends, pair scoring and clustering are
+For DuckDB backends, pair scoring and clustering are
 pushed into SQL where possible. The final summary still returns a
 one-row tibble in R.
 }

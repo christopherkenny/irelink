@@ -20,7 +20,7 @@ Returns a transform that extracts a regex match from a string column.
 Returns \code{NA} when no match is found. The result can be passed as the
 \code{transform} argument to \code{\link[=il_compare]{il_compare()}} or \code{\link[=il_block_on]{il_block_on()}}, and
 composed with other transforms via \code{\link[=il_transform]{il_transform()}}. On DuckDB and
-PostgreSQL, the computation is pushed into SQL.
+DuckDB, the computation is pushed into SQL.
 }
 \examples{
 # Extract a 5-digit ZIP code from a freeform address string

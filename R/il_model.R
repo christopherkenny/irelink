@@ -255,6 +255,9 @@ il_attach <- function(model, .data, ..., con = NULL, link_type = NULL) {
     reg_l$column_classes
   )
 
+  # Keep attach() consistent with il_model(): extension-backed features are
+  # diagnosed before prediction or further training issues SQL.
+
   # Register phonetic SQL macros if needed
   register_phonetic_macros(con)
 

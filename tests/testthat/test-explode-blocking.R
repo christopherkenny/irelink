@@ -45,16 +45,10 @@ test_that('sql_explode_from handles multiple explode cols in DuckDB', {
   expect_match(result, 'UNNEST\\("phones"\\) AS "phones"')
 })
 
-test_that('sql_explode_from generates PostgreSQL LATERAL UNNEST', {
-  result <- sql_explode_from('my_tbl', 'tags', 'postgres')
-  expect_match(result, 'CROSS JOIN LATERAL UNNEST')
-  expect_match(result, 'FROM "my_tbl"', fixed = TRUE)
-})
-
 test_that('sql_explode_from warns for SQLite and returns table unchanged', {
   expect_warning(
     result <- sql_explode_from('my_tbl', 'arr', 'sqlite'),
-    'not supported for SQLite'
+    'only supported for DuckDB'
   )
   expect_equal(result, '"my_tbl"')
 })

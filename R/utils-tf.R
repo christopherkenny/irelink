@@ -34,6 +34,7 @@ compute_tf_tables <- function(model) {
   }
 
   con <- model$con
+  dialect <- detect_dialect(con)
   tbl_l <- model$data$tbl_l
   tbl_r <- model$data$tbl_r
   qtbl_l <- sql_quote_identifier(tbl_l)
@@ -57,7 +58,7 @@ compute_tf_tables <- function(model) {
         'SELECT {qcol} FROM {qtbl_r} WHERE {qcol} IS NOT NULL'
       )
       select_sql <- glue::glue(
-        'SELECT {qcol}, CAST(COUNT(*) AS DOUBLE) / ',
+        'SELECT {qcol}, {sql_cast_double("COUNT(*)", dialect)} / ',
         '(SELECT COUNT(*) FROM ({union_sql}) sub) AS {qtf_col} ',
         'FROM ({union_sql}) combined ',
         'GROUP BY {qcol}'
@@ -65,7 +66,7 @@ compute_tf_tables <- function(model) {
     } else {
       # Dedupe mode: single table
       select_sql <- glue::glue(
-        'SELECT {qcol}, CAST(COUNT(*) AS DOUBLE) / ',
+        'SELECT {qcol}, {sql_cast_double("COUNT(*)", dialect)} / ',
         '(SELECT COUNT({qcol}) FROM {qtbl_l} WHERE {qcol} IS NOT NULL) AS {qtf_col} ',
         'FROM {qtbl_l} ',
         'WHERE {qcol} IS NOT NULL ',

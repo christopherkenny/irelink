@@ -23,7 +23,7 @@ knitr::opts_chunk$set(
 It implements the Fellegi-Sunter model to identify and link duplicate or related records across datasets that lack a shared unique identifier.
 Model parameters are estimated via unsupervised Expectation-Maximization, so no labeled training data is required.
 Comparison functions cover exact matching, Jaro-Winkler, Levenshtein, date differences, and geographic distance, letting you tailor the model to your data.
-Multiple SQL backends are supported through DBI, so the same code runs on SQLite, DuckDB, or PostgreSQL.
+Multiple SQL backends are supported through DBI, so the same code runs on SQLite or DuckDB.
 
 `irelink` is a translation of the Python [splink](https://github.com/moj-analytical-services/splink) library into idiomatic R.
 

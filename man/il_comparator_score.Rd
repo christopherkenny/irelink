@@ -27,12 +27,9 @@ comparison thresholds. Rows where either column is missing are omitted.
 }
 \details{
 With \code{con = NULL}, all metrics are computed in R with
-\code{\link[stringdist:stringdist]{stringdist::stringdist()}}. With a \code{\link[duckdb:duckdb]{duckdb::duckdb()}} or PostgreSQL connection,
-computation is pushed to SQL. SQL backends return the same column schema
-but may leave unsupported metrics as \code{NA}: DuckDB currently computes
-\code{jaro_winkler}, \code{jaro}, \code{levenshtein}, and \code{jaccard}; PostgreSQL computes
-\code{levenshtein} and a \code{jaro_winkler} compatibility column backed by trigram
-\code{similarity()}.
+\code{\link[stringdist:stringdist]{stringdist::stringdist()}}. With a \code{\link[duckdb:duckdb]{duckdb::duckdb()}} connection,
+computation is pushed to SQL. DuckDB computes \code{jaro_winkler}, \code{jaro},
+\code{levenshtein}, and \code{jaccard}; other DBI connections use R-side computation.
 }
 \examples{
 df <- data.frame(

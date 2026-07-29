@@ -32,16 +32,40 @@ detect_dialect <- function(con) {
   if (grepl('sqlite', cls)) {
     return('sqlite')
   }
-  if (grepl('postgres', cls)) {
-    return('postgres')
-  }
   'generic'
 }
 
 #' Can this dialect compute fuzzy string comparisons in SQL?
 #' @noRd
 dialect_has_fuzzy_sql <- function(dialect) {
-  dialect %in% c('duckdb', 'postgres')
+  identical(dialect, 'duckdb')
+}
+
+#' @noRd
+sql_cast_double <- function(expression, dialect) {
+  glue::glue('CAST({expression} AS DOUBLE)')
+}
+
+#' @noRd
+sql_similarity_expression <- function(method, lhs, rhs, dialect) {
+  function_name <- switch(method,
+    'jaro_winkler' = 'jaro_winkler_similarity', 'jaro' = 'jaro_similarity',
+    'jaccard' = 'jaccard', 'cosine' = 'cosine_similarity',
+    'levenshtein' = 'levenshtein', 'damerau_levenshtein' = 'damerau_levenshtein',
+    NULL
+  )
+  if (is.null(function_name)) cli::cli_abort('Unknown SQL string-comparison method {.val {method}}.')
+  glue::glue('{function_name}({lhs}, {rhs})')
+}
+
+#' @noRd
+sql_array_intersect_count <- function(lhs, rhs, dialect) {
+  glue::glue('ARRAY_LENGTH(ARRAY_INTERSECT({lhs}, {rhs}))')
+}
+
+#' @noRd
+sql_array_length <- function(expression, dialect) {
+  glue::glue('ARRAY_LENGTH({expression})')
 }
 
 #' Quote a SQL identifier with ANSI double quotes
@@ -80,9 +104,6 @@ sql_date_diff_expr <- function(lcol, rcol, dialect) {
       'ABS(TRY_CAST({lcol} AS DATE) - TRY_CAST({rcol} AS DATE))'
     ))
   }
-  if (identical(dialect, 'postgres')) {
-    return(glue::glue('ABS(CAST({lcol} AS DATE) - CAST({rcol} AS DATE))'))
-  }
   glue::glue('ABS(JULIANDAY({lcol}) - JULIANDAY({rcol}))')
 }
 
@@ -92,11 +113,6 @@ sql_time_diff_expr <- function(lcol, rcol, dialect) {
   if (identical(dialect, 'duckdb')) {
     return(glue::glue(
       'ABS(EPOCH(CAST({lcol} AS TIMESTAMP)) - EPOCH(CAST({rcol} AS TIMESTAMP)))'
-    ))
-  }
-  if (identical(dialect, 'postgres')) {
-    return(glue::glue(
-      'ABS(EXTRACT(EPOCH FROM (CAST({lcol} AS TIMESTAMP) - CAST({rcol} AS TIMESTAMP))))'
     ))
   }
   glue::glue(
@@ -276,11 +292,7 @@ phonetic_transform_sql <- function(transform, col_ref, dialect = NULL) {
     if (!is.null(dialect)) {
       validate_phonetic_dialect('il_soundex', dialect)
     }
-    # DuckDB uses our registered macro; PostgreSQL has native soundex()
-    if (identical(dialect, 'duckdb')) {
-      return(paste0('il_soundex(', col_ref, ')'))
-    }
-    return(paste0('soundex(', col_ref, ')'))
+    return(paste0('il_soundex(', col_ref, ')'))
   }
   if (identical(transform, il_metaphone)) {
     if (!is.null(dialect)) {
@@ -302,9 +314,9 @@ phonetic_transform_sql <- function(transform, col_ref, dialect = NULL) {
 validate_phonetic_dialect <- function(fn_name, dialect) {
   supported <- switch(
     fn_name,
-    'il_soundex' = c('duckdb', 'postgres'),
-    'il_metaphone' = 'postgres',
-    'il_dmetaphone' = 'postgres',
+    'il_soundex' = 'duckdb',
+    'il_metaphone' = character(0),
+    'il_dmetaphone' = character(0),
     character(0)
   )
   if (!dialect %in% supported) {
@@ -324,7 +336,7 @@ validate_phonetic_dialect <- function(fn_name, dialect) {
 #' Generate a multi-level gamma CASE expression for one comparison
 #'
 #' Used to push gamma computation into SQL for backends that support
-#' string similarity functions (DuckDB, PostgreSQL). Returns integer
+#' string similarity functions (DuckDB). Returns integer
 #' gamma codes: 0 (else) through K (best match), where K depends on
 #' the number of thresholds.
 #'
@@ -367,11 +379,12 @@ sql_gamma_case <- function(comp, dialect) {
 
   if (method == 'jaro_winkler') {
     n <- length(thresholds)
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
     whens <- vapply(
       seq_along(thresholds),
       function(i) {
         glue::glue(
-          'WHEN {null_guard} AND jaro_winkler_similarity({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}'
+          'WHEN {null_guard} AND {similarity} >= {thresholds[i]} THEN {n - i + 1L}'
         )
       },
       character(1)
@@ -381,11 +394,12 @@ sql_gamma_case <- function(comp, dialect) {
 
   if (method == 'jaro') {
     n <- length(thresholds)
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
     whens <- vapply(
       seq_along(thresholds),
       function(i) {
         glue::glue(
-          'WHEN {null_guard} AND jaro_similarity({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}'
+          'WHEN {null_guard} AND {similarity} >= {thresholds[i]} THEN {n - i + 1L}'
         )
       },
       character(1)
@@ -395,11 +409,12 @@ sql_gamma_case <- function(comp, dialect) {
 
   if (method == 'jaccard') {
     n <- length(thresholds)
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
     whens <- vapply(
       seq_along(thresholds),
       function(i) {
         glue::glue(
-          'WHEN {null_guard} AND jaccard({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}'
+          'WHEN {null_guard} AND {similarity} >= {thresholds[i]} THEN {n - i + 1L}'
         )
       },
       character(1)
@@ -409,11 +424,12 @@ sql_gamma_case <- function(comp, dialect) {
 
   if (method == 'cosine') {
     n <- length(thresholds)
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
     whens <- vapply(
       seq_along(thresholds),
       function(i) {
         glue::glue(
-          'WHEN {null_guard} AND cosine_similarity({lcol}, {rcol}) >= {thresholds[i]} THEN {n - i + 1L}'
+          'WHEN {null_guard} AND {similarity} >= {thresholds[i]} THEN {n - i + 1L}'
         )
       },
       character(1)
@@ -423,11 +439,12 @@ sql_gamma_case <- function(comp, dialect) {
 
   if (method == 'levenshtein') {
     n <- length(thresholds)
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
     whens <- vapply(
       seq_along(thresholds),
       function(i) {
         glue::glue(
-          'WHEN {null_guard} AND levenshtein({lcol}, {rcol}) <= {thresholds[i]} THEN {n - i + 1L}'
+          'WHEN {null_guard} AND {similarity} <= {thresholds[i]} THEN {n - i + 1L}'
         )
       },
       character(1)
@@ -437,11 +454,12 @@ sql_gamma_case <- function(comp, dialect) {
 
   if (method == 'damerau_levenshtein') {
     n <- length(thresholds)
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
     whens <- vapply(
       seq_along(thresholds),
       function(i) {
         glue::glue(
-          'WHEN {null_guard} AND damerau_levenshtein({lcol}, {rcol}) <= {thresholds[i]} THEN {n - i + 1L}'
+          'WHEN {null_guard} AND {similarity} <= {thresholds[i]} THEN {n - i + 1L}'
         )
       },
       character(1)
@@ -451,11 +469,13 @@ sql_gamma_case <- function(comp, dialect) {
 
   if (method == 'numeric_diff') {
     n <- length(thresholds)
+    ldouble <- sql_cast_double(lcol, dialect)
+    rdouble <- sql_cast_double(rcol, dialect)
     whens <- vapply(
       seq_along(thresholds),
       function(i) {
         glue::glue(
-          'WHEN {null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) <= {thresholds[i]} THEN {n - i + 1L}'
+          'WHEN {null_guard} AND ABS({ldouble} - {rdouble}) <= {thresholds[i]} THEN {n - i + 1L}'
         )
       },
       character(1)
@@ -465,12 +485,14 @@ sql_gamma_case <- function(comp, dialect) {
 
   if (method == 'pct_diff') {
     n <- length(thresholds)
+    ldouble <- sql_cast_double(lcol, dialect)
+    rdouble <- sql_cast_double(rcol, dialect)
     whens <- vapply(
       seq_along(thresholds),
       function(i) {
         glue::glue(
-          'WHEN {null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) / ',
-          'NULLIF(GREATEST(ABS(CAST({lcol} AS DOUBLE)), ABS(CAST({rcol} AS DOUBLE))), 0) < {thresholds[i]} THEN {n - i + 1L}'
+          'WHEN {null_guard} AND ABS({ldouble} - {rdouble}) / ',
+          'NULLIF(GREATEST(ABS({ldouble}), ABS({rdouble})), 0) < {thresholds[i]} THEN {n - i + 1L}'
         )
       },
       character(1)
@@ -561,11 +583,12 @@ sql_gamma_case <- function(comp, dialect) {
 
   if (method == 'array_intersect') {
     n <- length(thresholds)
+    intersection_count <- sql_array_intersect_count(lcol, rcol, dialect)
     whens <- vapply(
       seq_along(thresholds),
       function(i) {
         glue::glue(
-          'WHEN {null_guard} AND ARRAY_LENGTH(ARRAY_INTERSECT({lcol}, {rcol})) >= {thresholds[i]} THEN {n - i + 1L}'
+          'WHEN {null_guard} AND {intersection_count} >= {thresholds[i]} THEN {n - i + 1L}'
         )
       },
       character(1)
@@ -574,9 +597,10 @@ sql_gamma_case <- function(comp, dialect) {
   }
 
   if (method == 'array_subset') {
+    intersection_count <- sql_array_intersect_count(lcol, rcol, dialect)
     return(glue::glue(
-      'CASE WHEN {null_guard} AND ARRAY_LENGTH(ARRAY_INTERSECT({lcol}, {rcol})) = ',
-      'LEAST(ARRAY_LENGTH({lcol}), ARRAY_LENGTH({rcol})) THEN 1 ELSE 0 END'
+      'CASE WHEN {null_guard} AND {intersection_count} = ',
+      'LEAST({sql_array_length(lcol, dialect)}, {sql_array_length(rcol, dialect)}) THEN 1 ELSE 0 END'
     ))
   }
 
@@ -593,7 +617,7 @@ sql_gamma_case <- function(comp, dialect) {
   }
 
   if (method == 'array_min_distance') {
-    return(sql_array_min_distance_case(level, col, null_guard))
+    return(sql_array_min_distance_case(level, col, null_guard, dialect))
   }
 
   if (method == 'levels') {
@@ -673,47 +697,49 @@ sql_sublevel_condition <- function(
   }
   if (method == 'jaro_winkler') {
     t <- sub$thresholds[1]
-    return(glue::glue(
-      '{null_guard} AND jaro_winkler_similarity({lcol}, {rcol}) >= {t}'
-    ))
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
+    return(glue::glue('{null_guard} AND {similarity} >= {t}'))
   }
   if (method == 'jaro') {
     t <- sub$thresholds[1]
-    return(glue::glue(
-      '{null_guard} AND jaro_similarity({lcol}, {rcol}) >= {t}'
-    ))
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
+    return(glue::glue('{null_guard} AND {similarity} >= {t}'))
   }
   if (method == 'jaccard') {
     t <- sub$thresholds[1]
-    return(glue::glue('{null_guard} AND jaccard({lcol}, {rcol}) >= {t}'))
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
+    return(glue::glue('{null_guard} AND {similarity} >= {t}'))
   }
   if (method == 'cosine') {
     t <- sub$thresholds[1]
-    return(glue::glue(
-      '{null_guard} AND cosine_similarity({lcol}, {rcol}) >= {t}'
-    ))
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
+    return(glue::glue('{null_guard} AND {similarity} >= {t}'))
   }
   if (method == 'levenshtein') {
     t <- sub$thresholds[1]
-    return(glue::glue('{null_guard} AND levenshtein({lcol}, {rcol}) <= {t}'))
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
+    return(glue::glue('{null_guard} AND {similarity} <= {t}'))
   }
   if (method == 'damerau_levenshtein') {
     t <- sub$thresholds[1]
-    return(glue::glue(
-      '{null_guard} AND damerau_levenshtein({lcol}, {rcol}) <= {t}'
-    ))
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
+    return(glue::glue('{null_guard} AND {similarity} <= {t}'))
   }
   if (method == 'numeric_diff') {
     t <- sub$thresholds[1]
+    ldouble <- sql_cast_double(lcol, dialect)
+    rdouble <- sql_cast_double(rcol, dialect)
     return(glue::glue(
-      '{null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) <= {t}'
+      '{null_guard} AND ABS({ldouble} - {rdouble}) <= {t}'
     ))
   }
   if (method == 'pct_diff') {
     t <- sub$thresholds[1]
+    ldouble <- sql_cast_double(lcol, dialect)
+    rdouble <- sql_cast_double(rcol, dialect)
     return(glue::glue(
-      '{null_guard} AND ABS(CAST({lcol} AS DOUBLE) - CAST({rcol} AS DOUBLE)) / ',
-      'NULLIF(GREATEST(ABS(CAST({lcol} AS DOUBLE)), ABS(CAST({rcol} AS DOUBLE))), 0) < {t}'
+      '{null_guard} AND ABS({ldouble} - {rdouble}) / ',
+      'NULLIF(GREATEST(ABS({ldouble}), ABS({rdouble})), 0) < {t}'
     ))
   }
   if (method == 'date_diff') {
@@ -739,20 +765,22 @@ sql_sublevel_condition <- function(
     ))
   }
   if (method == 'array_subset') {
+    intersection_count <- sql_array_intersect_count(lcol, rcol, dialect)
     return(glue::glue(
-      '{null_guard} AND ARRAY_LENGTH(ARRAY_INTERSECT({lcol}, {rcol})) = ',
-      'LEAST(ARRAY_LENGTH({lcol}), ARRAY_LENGTH({rcol}))'
+      '{null_guard} AND {intersection_count} = ',
+      'LEAST({sql_array_length(lcol, dialect)}, {sql_array_length(rcol, dialect)})'
     ))
   }
   if (method == 'array_intersect') {
     t <- sub$thresholds[1]
+    intersection_count <- sql_array_intersect_count(lcol, rcol, dialect)
     return(glue::glue(
-      '{null_guard} AND ARRAY_LENGTH(ARRAY_INTERSECT({lcol}, {rcol})) >= {t}'
+      '{null_guard} AND {intersection_count} >= {t}'
     ))
   }
   if (method == 'array_min_distance') {
     t <- sub$thresholds[1]
-    inner <- sql_array_min_distance_inner(sub$fn, col)
+    inner <- sql_array_min_distance_inner(sub$fn, col, dialect)
     op <- '<='
     if (sub$fn == 'jaro_winkler') {
       op <- '>='
@@ -813,12 +841,12 @@ sql_sublevel_condition <- function(
 # for array_min_distance: MAX similarity (jaro_winkler) or MIN distance
 # (levenshtein) across all element pairs via UNNEST cross-join.
 # Returns a SQL fragment suitable for embedding in a scalar subquery.
-sql_array_min_distance_inner <- function(fn, col) {
+sql_array_min_distance_inner <- function(fn, col, dialect = 'duckdb') {
   agg <- 'MIN'
-  dist_fn <- 'levenshtein(lv, rv)'
+  dist_fn <- sql_similarity_expression('levenshtein', 'lv', 'rv', dialect)
   if (fn == 'jaro_winkler') {
     agg <- 'MAX'
-    dist_fn <- 'jaro_winkler_similarity(lv, rv)'
+    dist_fn <- sql_similarity_expression('jaro_winkler', 'lv', 'rv', dialect)
   }
   qcol <- sql_quote_identifier(col)
   paste0(
@@ -838,7 +866,7 @@ sql_array_min_distance_inner <- function(fn, col) {
 # Build the full multi-threshold CASE expression for array_min_distance.
 # Wraps sql_array_min_distance_inner in an outer CASE that maps the best
 # score to an integer gamma level (0 = else, K = strictest match).
-sql_array_min_distance_case <- function(level, col, null_guard) {
+sql_array_min_distance_case <- function(level, col, null_guard, dialect = 'duckdb') {
   fn <- level$fn
   thresholds <- level$thresholds
   n <- length(thresholds)
@@ -846,7 +874,7 @@ sql_array_min_distance_case <- function(level, col, null_guard) {
   if (fn == 'jaro_winkler') {
     op <- '>='
   }
-  inner <- sql_array_min_distance_inner(fn, col)
+  inner <- sql_array_min_distance_inner(fn, col, dialect)
 
   when_clauses <- vapply(
     seq_along(thresholds),
@@ -863,11 +891,7 @@ sql_array_min_distance_case <- function(level, col, null_guard) {
     'FROM (SELECT ',
     if (fn == 'jaro_winkler') 'MAX' else 'MIN',
     '(',
-    if (fn == 'jaro_winkler') {
-      'jaro_winkler_similarity(lv, rv)'
-    } else {
-      'levenshtein(lv, rv)'
-    },
+    sql_similarity_expression(fn, 'lv', 'rv', dialect),
     ') AS m FROM UNNEST(l.',
     sql_quote_identifier(col),
     ') AS t1(lv), UNNEST(r.',
@@ -1100,24 +1124,8 @@ sql_explode_from <- function(tbl, explode_cols, dialect) {
       '(SELECT * EXCLUDE ({exclude_clause}), {unnest_exprs} FROM {qtbl})'
     ))
   }
-  if (dialect == 'postgres') {
-    # PostgreSQL: CROSS JOIN LATERAL UNNEST for each array column
-    laterals <- vapply(
-      seq_along(explode_cols),
-      function(i) {
-        qcol <- sql_quote_identifier(explode_cols[[i]])
-        glue::glue(
-          'CROSS JOIN LATERAL UNNEST({qcol}) AS _unnest_{i}({qcol})'
-        )
-      },
-      character(1)
-    )
-    return(glue::glue(
-      '(SELECT * FROM {qtbl} {paste(laterals, collapse = " ")})'
-    ))
-  }
   cli::cli_warn(
-    '{.arg .explode} is not supported for SQLite; ignoring array explosion.'
+    '{.arg .explode} is only supported for DuckDB; ignoring array explosion.'
   )
   qtbl
 }
@@ -1182,11 +1190,11 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
 
   if (method == 'jaro_winkler') {
     thresholds <- level$thresholds
-    fn_name <- 'jaro_winkler_similarity'
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
     parts <- vapply(
       thresholds,
       function(t) {
-        glue::glue('WHEN {fn_name}({lcol}, {rcol}) >= {t} THEN {t}')
+        glue::glue('WHEN {similarity} >= {t} THEN {t}')
       },
       character(1)
     )
@@ -1195,10 +1203,11 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
 
   if (method == 'jaro') {
     thresholds <- level$thresholds
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
     parts <- vapply(
       thresholds,
       function(t) {
-        glue::glue('WHEN jaro_similarity({lcol}, {rcol}) >= {t} THEN {t}')
+        glue::glue('WHEN {similarity} >= {t} THEN {t}')
       },
       character(1)
     )
@@ -1207,11 +1216,11 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
 
   if (method %in% c('levenshtein', 'damerau_levenshtein')) {
     thresholds <- level$thresholds
-    fn_name <- method
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
     parts <- vapply(
       thresholds,
       function(t) {
-        glue::glue('WHEN {fn_name}({lcol}, {rcol}) <= {t} THEN {t}')
+        glue::glue('WHEN {similarity} <= {t} THEN {t}')
       },
       character(1)
     )
@@ -1220,10 +1229,11 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
 
   if (method == 'jaccard') {
     thresholds <- level$thresholds
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
     parts <- vapply(
       thresholds,
       function(t) {
-        glue::glue('WHEN jaccard({lcol}, {rcol}) >= {t} THEN {t}')
+        glue::glue('WHEN {similarity} >= {t} THEN {t}')
       },
       character(1)
     )
@@ -1232,10 +1242,11 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
 
   if (method == 'cosine') {
     thresholds <- level$thresholds
+    similarity <- sql_similarity_expression(method, lcol, rcol, dialect)
     parts <- vapply(
       thresholds,
       function(t) {
-        glue::glue('WHEN cosine_similarity({lcol}, {rcol}) >= {t} THEN {t}')
+        glue::glue('WHEN {similarity} >= {t} THEN {t}')
       },
       character(1)
     )
@@ -1244,10 +1255,12 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
 
   if (method == 'numeric_diff') {
     thresholds <- level$thresholds
+    ldouble <- sql_cast_double(lcol, dialect)
+    rdouble <- sql_cast_double(rcol, dialect)
     parts <- vapply(
       thresholds,
       function(t) {
-        glue::glue('WHEN ABS({lcol} - {rcol}) <= {t} THEN {t}')
+        glue::glue('WHEN ABS({ldouble} - {rdouble}) <= {t} THEN {t}')
       },
       character(1)
     )
@@ -1256,12 +1269,14 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
 
   if (method == 'pct_diff') {
     thresholds <- level$thresholds
+    ldouble <- sql_cast_double(lcol, dialect)
+    rdouble <- sql_cast_double(rcol, dialect)
     parts <- vapply(
       thresholds,
       function(t) {
         glue::glue(
-          'WHEN ABS({lcol} - {rcol}) / ',
-          'NULLIF(GREATEST(ABS({lcol}), ABS({rcol})), 0) <= {t} THEN {t}'
+          'WHEN ABS({ldouble} - {rdouble}) / ',
+          'NULLIF(GREATEST(ABS({ldouble}), ABS({rdouble})), 0) <= {t} THEN {t}'
         )
       },
       character(1)
@@ -1329,10 +1344,11 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
 
   if (method == 'array_intersect') {
     thresholds <- level$thresholds
+    intersection_count <- sql_array_intersect_count(lcol, rcol, dialect)
     parts <- vapply(
       thresholds,
       function(t) {
-        glue::glue('WHEN array_intersect_count({lcol}, {rcol}) >= {t} THEN {t}')
+        glue::glue('WHEN {intersection_count} >= {t} THEN {t}')
       },
       character(1)
     )
@@ -1340,9 +1356,10 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
   }
 
   if (method == 'array_subset') {
+    intersection_count <- sql_array_intersect_count(lcol, rcol, dialect)
     return(glue::glue(
-      'CASE WHEN ARRAY_LENGTH(ARRAY_INTERSECT({lcol}, {rcol})) = ',
-      'LEAST(ARRAY_LENGTH({lcol}), ARRAY_LENGTH({rcol})) THEN 1 ELSE 0 END'
+      'CASE WHEN {intersection_count} = ',
+      'LEAST({sql_array_length(lcol, dialect)}, {sql_array_length(rcol, dialect)}) THEN 1 ELSE 0 END'
     ))
   }
 
@@ -1595,7 +1612,7 @@ count_unique_blocked_pairs <- function(
 #' @param u_vec Numeric vector of u probabilities (one per gamma level).
 #' @return A SQL expression string.
 #' @noRd
-sql_weight_case <- function(comp_name, m_vec, u_vec) {
+sql_weight_case <- function(comp_name, m_vec, u_vec, dialect = 'duckdb') {
   weights <- log2(pmax(m_vec, 1e-10) / pmax(u_vec, 1e-10))
   whens <- vapply(
     seq_along(weights),
@@ -1605,8 +1622,9 @@ sql_weight_case <- function(comp_name, m_vec, u_vec) {
     character(1)
   )
   gamma_col <- sql_quote_identifier(paste0('gamma_', comp_name))
-  glue::glue(
-    'CAST(CASE {gamma_col} {paste(whens, collapse = " ")} ELSE 0.0 END AS DOUBLE)'
+  sql_cast_double(
+    glue::glue('CASE {gamma_col} {paste(whens, collapse = " ")} ELSE 0.0 END'),
+    dialect
   )
 }
 
@@ -1615,7 +1633,7 @@ sql_weight_case <- function(comp_name, m_vec, u_vec) {
 #' Returns a weighted log2 adjustment when gamma equals the highest level,
 #' 0 otherwise. Supports `tf_adjustment_weight` (power scaling, default 1)
 #' and `tf_minimum_u_value` (floor on TF denominator, default 0).
-#' Uses LN(x)/LN(2) for portability across DuckDB and PostgreSQL.
+#' Uses LN(x)/LN(2) for DuckDB.
 #'
 #' @param col Column name.
 #' @param max_level Integer: highest gamma level (exact match).
@@ -1629,10 +1647,11 @@ sql_tf_adj_expr <- function(
   max_level,
   u_exact,
   tf_adjustment_weight = 1.0,
-  tf_minimum_u_value = 0.0
+  tf_minimum_u_value = 0.0,
+  dialect = 'duckdb'
 ) {
   if (tf_adjustment_weight == 0) {
-    return('CAST(0.0 AS DOUBLE)')
+    return(sql_cast_double('0.0', dialect))
   }
   log2_u <- log2(max(u_exact, 1e-10))
   ln2 <- log(2)
@@ -1662,13 +1681,13 @@ sql_tf_adj_expr <- function(
   if (tf_adjustment_weight != 1.0) {
     adj_expr <- glue::glue('{tf_adjustment_weight} * ({adj_expr})')
   }
-  glue::glue(
-    'CAST(CASE WHEN {gamma_col} = {max_level} ',
+  sql_cast_double(glue::glue(
+    'CASE WHEN {gamma_col} = {max_level} ',
     'AND {tf_coalesce_lr} IS NOT NULL ',
     'AND {tf_divisor} > 0 ',
     'THEN {adj_expr} ',
-    'ELSE 0.0 END AS DOUBLE)'
-  )
+    'ELSE 0.0 END'
+  ), dialect)
 }
 
 #' Build a complete SQL query that scores and filters pairs
@@ -1687,6 +1706,7 @@ build_scored_query <- function(
   threshold_match_weight = NULL,
   blocked_pairs_tbl = NULL
 ) {
+  dialect <- detect_dialect(model$con)
   comparisons <- model$spec$comparisons
   params <- model$params$comparisons
   prior <- clamp_probability(safe_prior(model))
@@ -1705,7 +1725,7 @@ build_scored_query <- function(
     seq_along(comparisons),
     function(j) {
       cn <- comp_names[j]
-      sql_weight_case(cn, mu$m_levels[[cn]], mu$u_levels[[cn]])
+      sql_weight_case(cn, mu$m_levels[[cn]], mu$u_levels[[cn]], dialect)
     },
     character(1)
   )
@@ -1721,7 +1741,7 @@ build_scored_query <- function(
       u_exact <- mu$u_levels[[col]][max_level + 1L]
       tf_w <- comp$tf_adjustment_weight %||% 1.0
       tf_min <- comp$tf_minimum_u_value %||% 0.0
-      expr <- sql_tf_adj_expr(col, max_level, u_exact, tf_w, tf_min)
+      expr <- sql_tf_adj_expr(col, max_level, u_exact, tf_w, tf_min, dialect)
       tf_parts <- c(tf_parts, expr)
       tf_adj_selects <- c(
         tf_adj_selects,
@@ -1796,8 +1816,7 @@ build_scored_query <- function(
 #' Wrap scored pairs with deterministic greedy one-to-one matching
 #'
 #' Applies the same greedy resolver used by the collected path, but keeps
-#' all candidate scoring and assignment inside the database.  DuckDB and
-#' PostgreSQL use different list/array syntax in the recursive state.
+#' all candidate scoring and assignment inside DuckDB.
 #'
 #' @param model A trained `il_model`.
 #' @param inner_sql Character scalar: the scored-pairs SQL query to wrap.
@@ -1825,16 +1844,9 @@ build_greedy_query <- function(model, inner_sql) {
     used_r_next <- 'list_append(g.used_r, p.unique_id_r)'
     unused_l <- 'NOT list_contains(g.used_l, p2.unique_id_l)'
     unused_r <- 'NOT list_contains(g.used_r, p2.unique_id_r)'
-  } else if (identical(dialect, 'postgres')) {
-    used_l_init <- 'ARRAY[unique_id_l]'
-    used_r_init <- 'ARRAY[unique_id_r]'
-    used_l_next <- 'array_append(g.used_l, p.unique_id_l)'
-    used_r_next <- 'array_append(g.used_r, p.unique_id_r)'
-    unused_l <- 'NOT p2.unique_id_l = ANY(g.used_l)'
-    unused_r <- 'NOT p2.unique_id_r = ANY(g.used_r)'
   } else {
     cli::cli_abort(
-      '{.arg greedy = TRUE} with {.arg collect = FALSE} requires a DuckDB or PostgreSQL backend.'
+      '{.arg greedy = TRUE} with {.arg collect = FALSE} requires a DuckDB backend.'
     )
   }
 

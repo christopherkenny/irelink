@@ -74,20 +74,6 @@ test_that('il_try_parse_date DuckDB SQL uses try_strptime', {
   expect_match(sql, 'try_strptime')
 })
 
-test_that('il_try_parse_date PostgreSQL SQL uses TO_DATE', {
-  tf <- il_try_parse_date('%Y-%m-%d')
-  sql <- sql_transform_col('l.dob', tf, 'postgres')
-  expect_match(sql, 'TO_DATE')
-  expect_match(sql, 'YYYY-MM-DD')
-})
-
-test_that('il_try_parse_timestamp PostgreSQL SQL translates strptime tokens', {
-  tf <- il_try_parse_timestamp('%Y-%m-%d %H:%M:%S')
-  sql <- sql_transform_col('l.ts', tf, 'postgres')
-  expect_match(sql, 'TO_TIMESTAMP')
-  expect_match(sql, 'YYYY-MM-DD HH24:MI:SS')
-})
-
 test_that('il_array_element extracts first/last', {
   tf_first <- il_array_element('first')
   tf_last <- il_array_element('last')
@@ -100,10 +86,6 @@ test_that('il_array_element SQL generation', {
   tf_last <- il_array_element('last')
   expect_equal(sql_transform_col('l.arr', tf_first, 'duckdb'), 'l.arr[1]')
   expect_equal(sql_transform_col('l.arr', tf_last, 'duckdb'), 'l.arr[-1]')
-  expect_equal(
-    sql_transform_col('l.arr', tf_last, 'postgres'),
-    'l.arr[array_length(l.arr, 1)]'
-  )
 })
 
 test_that('backend-specific transforms reject unsupported SQL dialects', {

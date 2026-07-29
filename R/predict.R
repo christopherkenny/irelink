@@ -146,7 +146,7 @@ ensure_collected <- function(pairs) {
 #'   result is a lightweight `il_compared_lazy` reference that
 #'   [il_cluster()] can consume directly, avoiding the round-trip of
 #'   collecting millions of rows into R and re-uploading them.
-#'   Requires a DuckDB or PostgreSQL backend.
+#'   Requires a DuckDB backend.
 #' @param include_fields If `TRUE`, the original column values from both
 #'   records in each pair are included in the output (suffixed `_l` and
 #'   `_r`). Defaults to `FALSE` for performance. When `collect = FALSE`
@@ -264,7 +264,7 @@ predict.il_model <- function(
     dialect <- detect_dialect(object$con)
     if (!dialect_has_fuzzy_sql(dialect)) {
       cli::cli_abort(
-        '{.arg collect = FALSE} requires a DuckDB or PostgreSQL backend.'
+        '{.arg collect = FALSE} requires a DuckDB backend.'
       )
     }
     return(predict_lazy(
@@ -277,7 +277,7 @@ predict.il_model <- function(
     ))
   }
 
-  # SQL-first collect path for DuckDB/PostgreSQL:
+  # SQL-first collect path for DuckDB:
   # Score, filter, and deduplicate in SQL; only collect the final result.
   dialect <- detect_dialect(object$con)
   if (dialect_has_fuzzy_sql(dialect)) {
@@ -448,6 +448,7 @@ predict_lazy <- function(
   profile = NULL
 ) {
   con <- model$con
+  dialect <- detect_dialect(con)
   predicted_tbl <- il_table_name(model, 'predicted', il_table_suffix())
   lazy_model <- il_track_table(model, predicted_tbl, owner = 'lazy')
   dependency_aware <- identical(model$params$estimator_mode, 'dependency-aware')
@@ -478,7 +479,7 @@ predict_lazy <- function(
         vapply(
           names(empty),
           function(nm) {
-            type <- 'DOUBLE'
+            type <- sql_double_type(dialect)
             if (is.integer(empty[[nm]])) {
               type <- 'INTEGER'
             }

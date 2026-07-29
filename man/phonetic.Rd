@@ -29,11 +29,11 @@ spelling variation.
 When used as a \code{transform} argument in \code{\link[=il_block_on]{il_block_on()}}, \code{\link[=block_on]{block_on()}},
 or \code{\link[=il_compare]{il_compare()}}, the computation is pushed into SQL so data is
 never materialized into R.
-\subsection{SQL availability}{\tabular{llll}{
-   Function \tab DuckDB \tab PostgreSQL \tab SQLite \cr
-   \code{il_soundex} \tab ✓ (macro) \tab ✓ (native) \tab comparisons only (R-side) \cr
-   \code{il_metaphone} \tab ✗ \tab ✓ (native) \tab ✗ \cr
-   \code{il_dmetaphone} \tab ✗ \tab ✓ (native) \tab ✗ \cr
+\subsection{SQL availability}{\tabular{lll}{
+   Function \tab DuckDB \tab SQLite \cr
+   \code{il_soundex} \tab yes (macro) \tab comparisons only (R-side) \cr
+   \code{il_metaphone} \tab no \tab no \cr
+   \code{il_dmetaphone} \tab no \tab no \cr
 }
 
 

@@ -37,7 +37,7 @@ If \code{FALSE}, scoring is performed entirely in-database and the
 result is a lightweight \code{il_compared_lazy} reference that
 \code{\link[=il_cluster]{il_cluster()}} can consume directly, avoiding the round-trip of
 collecting millions of rows into R and re-uploading them.
-Requires a DuckDB or PostgreSQL backend.}
+Requires a DuckDB backend.}
 
 \item{include_fields}{If \code{TRUE}, the original column values from both
 records in each pair are included in the output (suffixed \verb{_l} and

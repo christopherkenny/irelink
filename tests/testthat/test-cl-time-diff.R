@@ -98,11 +98,3 @@ test_that('cl_time_diff SQL generation uses EPOCH for DuckDB', {
   expect_match(sql, 'EPOCH', fixed = TRUE)
   expect_match(sql, '300', fixed = TRUE) # 5 * 60 seconds
 })
-
-test_that('cl_time_diff SQL generation uses EXTRACT for postgres', {
-  td <- cl_time_diff(hours(1))
-  comp <- list(columns = 'ts', method = td, transform = NULL)
-  sql <- sql_gamma_case(comp, 'postgres')
-  expect_match(sql, 'EXTRACT', fixed = TRUE)
-  expect_match(sql, '3600', fixed = TRUE) # 1 * 3600 seconds
-})
