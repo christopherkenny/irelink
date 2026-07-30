@@ -89,7 +89,7 @@ database:
 df <- fake_20
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpgPbVBr/duckdb
+#> ℹ /tmp/RtmpeyJcqs/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -189,9 +189,9 @@ head(clusters)
 #> 1 5         cluster_15
 #> 2 17        cluster_17
 #> 3 15        cluster_15
-#> 4 3         cluster_13
-#> 5 6         cluster_15
-#> 6 14        cluster_13
+#> 4 7         cluster_17
+#> 5 13        cluster_13
+#> 6 20        cluster_10
 ```
 
 Each record is assigned a `cluster_id`. Records in the same cluster are

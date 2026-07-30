@@ -81,7 +81,7 @@ df <- data.frame(
 )
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpzB4yCz/duckdb
+#> ℹ /tmp/Rtmpye6umx/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -108,8 +108,8 @@ metrics$clusters
 #>   <chr>        <int>   <int>   <dbl>                  <dbl>
 #> 1 cluster_15       3       3   1                      0    
 #> 2 cluster_1        4       4   0.667                  0.667
-#> 3 cluster_17       3       3   1                      0    
-#> 4 cluster_10       4       6   1                      0    
+#> 3 cluster_10       4       6   1                      0    
+#> 4 cluster_17       3       3   1                      0    
 #> 5 cluster_13       4       6   1                      0    
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

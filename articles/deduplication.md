@@ -49,7 +49,7 @@ and value distributions:
 
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp25XTcz/duckdb
+#> ℹ /tmp/Rtmp8XdAV0/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -288,7 +288,7 @@ and attach it to the same data or to new data with
 
 con2 <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp25XTcz/duckdb
+#> ℹ /tmp/Rtmp8XdAV0/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -353,12 +353,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 143       cluster_142
-#> 2 816       cluster_814
-#> 3 519       cluster_517
-#> 4 524       cluster_517
-#> 5 559       cluster_558
-#> 6 697       cluster_694
+#> 1 525       cluster_517
+#> 2 540       cluster_535
+#> 3 143       cluster_142
+#> 4 539       cluster_535
+#> 5 784       cluster_784
+#> 6 32        cluster_32
 ```
 
 ## Evaluate against ground truth

@@ -22,7 +22,7 @@ library(ggplot2)
 df <- fake_1000
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp03FGDS/duckdb
+#> ℹ /tmp/RtmphAbqQi/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -122,7 +122,7 @@ in SQL.
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,783 pairs in table __il_9253_1_predicted_4 (threshold = 0.5)
+#> <il_compared_lazy> 2,783 pairs in table __il_9074_1_predicted_4 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -197,16 +197,16 @@ metrics$clusters
 #> # A tibble: 142 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralization
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_674       8      18   0.643                  0.286
-#>  2 cluster_825       9      20   0.569                  0.232
-#>  3 cluster_874       2       1   1                     NA    
-#>  4 cluster_91        5       9   0.9                    0.167
-#>  5 cluster_488       6      12   0.833                  0.25 
-#>  6 cluster_767       5       8   0.8                    0.333
-#>  7 cluster_886       2       1   1                     NA    
-#>  8 cluster_642       2       6   6                     NA    
-#>  9 cluster_172       4       8   1.25                   0.167
-#> 10 cluster_244       8      22   0.786                  0.286
+#>  1 cluster_133       9      40   1.10                   0.196
+#>  2 cluster_44       14      57   0.626                  0.167
+#>  3 cluster_476       2       1   1                     NA    
+#>  4 cluster_229       8      28   1                      0    
+#>  5 cluster_149      16      61   0.508                  0.410
+#>  6 cluster_301      10      41   0.911                  0.111
+#>  7 cluster_428       3       2   0.667                  1    
+#>  8 cluster_960       7      17   0.810                  0.267
+#>  9 cluster_394       9      32   0.889                  0.143
+#> 10 cluster_736       2       1   1                     NA    
 #> # ℹ 132 more rows
 ```
 
@@ -224,12 +224,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 140       cluster_133      9           1.12 
-#> 2 136       cluster_133      9           1.12 
-#> 3 138       cluster_133      9           1.12 
-#> 4 134       cluster_133     10           1.25 
-#> 5 133       cluster_133     10           1.25 
-#> 6 135       cluster_133      3           0.375
+#> 1 139       cluster_133     10            1.25
+#> 2 136       cluster_133      9            1.12
+#> 3 134       cluster_133     10            1.25
+#> 4 133       cluster_133     10            1.25
+#> 5 141       cluster_133      9            1.12
+#> 6 138       cluster_133      9            1.12
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -327,22 +327,22 @@ matches
 #> # A tibble: 17 × 5
 #>    unique_id_l unique_id_r match_weight total_match_weight match_probability
 #>          <int>       <int>        <dbl>              <dbl>             <dbl>
-#>  1           1         240        0.832              0.925             0.655
-#>  2           2         858        0.871              0.964             0.661
-#>  3           1         363        0.832              0.925             0.655
-#>  4           2         864        0.871              0.964             0.661
-#>  5           2         859        2.31               2.41              0.841
-#>  6           1         239        0.832              0.925             0.655
-#>  7           1         364        0.832              0.925             0.655
-#>  8           1         241        0.832              0.925             0.655
-#>  9           1         362        2.28               2.37              0.838
-#> 10           1         367        0.832              0.925             0.655
-#> 11           1         238        2.31               2.41              0.841
-#> 12           1         791        0.832              0.925             0.655
-#> 13           1         237        2.28               2.37              0.838
-#> 14           1         365        0.832              0.925             0.655
-#> 15           1         242        0.832              0.925             0.655
-#> 16           1         366        0.832              0.925             0.655
+#>  1           1         238        2.31               2.41              0.841
+#>  2           1         791        0.832              0.925             0.655
+#>  3           2         858        0.871              0.964             0.661
+#>  4           1         363        0.832              0.925             0.655
+#>  5           2         864        0.871              0.964             0.661
+#>  6           1         240        0.832              0.925             0.655
+#>  7           2         859        2.31               2.41              0.841
+#>  8           1         364        0.832              0.925             0.655
+#>  9           1         239        0.832              0.925             0.655
+#> 10           1         241        0.832              0.925             0.655
+#> 11           1         362        2.28               2.37              0.838
+#> 12           1         367        0.832              0.925             0.655
+#> 13           1         242        0.832              0.925             0.655
+#> 14           1         366        0.832              0.925             0.655
+#> 15           1         237        2.28               2.37              0.838
+#> 16           1         365        0.832              0.925             0.655
 #> 17           1         789        2.31               2.41              0.841
 ```
 

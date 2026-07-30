@@ -78,7 +78,7 @@ df <- data.frame(
 )
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpzB4yCz/duckdb
+#> ℹ /tmp/Rtmpye6umx/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -91,6 +91,6 @@ il_largest_blocks(df, block_on(city), n = 3, con = con)
 #>   <chr>      <dbl>   <dbl>
 #> 1 Paris          4       6
 #> 2 Rome           4       6
-#> 3 Berlin         4       6
+#> 3 London         4       6
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```
