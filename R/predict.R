@@ -448,7 +448,6 @@ predict_lazy <- function(
   profile = NULL
 ) {
   con <- model$con
-  dialect <- detect_dialect(con)
   predicted_tbl <- il_table_name(model, 'predicted', il_table_suffix())
   lazy_model <- il_track_table(model, predicted_tbl, owner = 'lazy')
   dependency_aware <- identical(model$params$estimator_mode, 'dependency-aware')
@@ -479,7 +478,7 @@ predict_lazy <- function(
         vapply(
           names(empty),
           function(nm) {
-            type <- sql_double_type(dialect)
+            type <- 'DOUBLE'
             if (is.integer(empty[[nm]])) {
               type <- 'INTEGER'
             }

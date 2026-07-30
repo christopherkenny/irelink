@@ -1,10 +1,5 @@
 ---
 title: "Linking Banking Transactions"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{Linking Banking Transactions}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
 ---
 
 ```{r, include = FALSE}

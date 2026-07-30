@@ -74,4 +74,4 @@ URL: http://christophertkenny.com/irelink/, https://github.com/christopherkenny/
 BugReports: https://github.com/christopherkenny/irelink/issues
 VignetteBuilder: knitr
 LazyData: true
-Config/Needs/website: christopherkenny/ctktemplate
+Config/Needs/website: christopherkenny/ctktemplate, rmarkdown
