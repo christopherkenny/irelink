@@ -19,8 +19,9 @@ none.}
 }
 \value{
 An \code{il_compared} tibble with one row per pair, containing
-\code{unique_id_l}, \code{unique_id_r}, \code{match_weight}, \code{total_match_weight},
-\code{match_probability}, the comparison levels, and the compared fields.
+\code{unique_id_l} and \code{unique_id_r} (ids within \code{records_l} and \code{records_r}),
+\code{match_weight}, \code{total_match_weight}, \code{match_probability}, the comparison
+levels, and the compared fields.
 }
 \description{
 Scores every pair formed by one record from \code{records_l} and one record from

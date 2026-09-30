@@ -21,8 +21,9 @@
 #'   none.
 #'
 #' @return An `il_compared` tibble with one row per pair, containing
-#'   `unique_id_l`, `unique_id_r`, `match_weight`, `total_match_weight`,
-#'   `match_probability`, the comparison levels, and the compared fields.
+#'   `unique_id_l` and `unique_id_r` (ids within `records_l` and `records_r`),
+#'   `match_weight`, `total_match_weight`, `match_probability`, the comparison
+#'   levels, and the compared fields.
 #' @export
 #'
 #' @examples
