@@ -13,10 +13,8 @@ Performs fast, scalable probabilistic record linkage and deduplication using the
 \section{Package options}{
 
 \itemize{
-\item \code{irelink.show_sql}: If \code{TRUE}, print the SQL that \code{\link[=predict]{predict()}},
-\code{\link[=il_estimate_u]{il_estimate_u()}}, and \code{\link[=il_estimate_prior]{il_estimate_prior()}} send to the database, as
-messages. This covers the same queries that \code{profile_sql = TRUE} times.
-Defaults to \code{FALSE}.
+\item \code{irelink.show_sql}: If \code{TRUE}, print every SQL statement irelink sends to
+the database as a message. Defaults to \code{FALSE}.
 }
 }
 

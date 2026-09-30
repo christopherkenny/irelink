@@ -132,7 +132,7 @@ il_deterministic_link <- function(
     'FROM {tbl_name} l, {tbl_name} r ',
     'WHERE l.unique_id < r.unique_id AND ({block_where}) AND {exact_where}'
   )
-  pairs <- DBI::dbGetQuery(con, sql)
+  pairs <- il_db_get_query(con, sql)
 
   if (nrow(pairs) == 0L) {
     return(tibble::tibble(unique_id_l = integer(0), unique_id_r = integer(0)))

@@ -114,7 +114,7 @@ il_largest_blocks <- function(
     'LIMIT {n}'
   )
 
-  res <- DBI::dbGetQuery(con, sql)
+  res <- il_db_get_query(con, sql)
 
   if (link_type == 'dedupe') {
     res$n_pairs <- as.numeric(res$n_records) *

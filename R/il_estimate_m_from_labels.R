@@ -141,7 +141,7 @@ il_estimate_m_from_labels <- function(model, labels) {
       'JOIN {qtbl} r ON r.unique_id = lbl.uid_r',
       ') AS match_pairs GROUP BY {group_by_clause}'
     )
-    counts <- DBI::dbGetQuery(con, sql)
+    counts <- il_db_get_query(con, sql)
 
     if (nrow(counts) == 0L) {
       cli::cli_abort('No matching pairs found in labels.')
@@ -158,7 +158,7 @@ il_estimate_m_from_labels <- function(model, labels) {
     sql <- glue::glue(
       'SELECT * FROM {qtbl} WHERE unique_id IN ({id_list})'
     )
-    data <- DBI::dbGetQuery(con, sql)
+    data <- il_db_get_query(con, sql)
     id_col <- 'unique_id'
 
     pair_rows <- list()

@@ -54,7 +54,7 @@ il_comparison_vectors <- function(model, blocking = NULL, limit = NULL) {
       'GROUP BY {group_cols} ',
       'ORDER BY count DESC'
     )
-    agg <- DBI::dbGetQuery(con, sql)
+    agg <- il_db_get_query(con, sql)
   } else {
     # R fallback for SQLite / no connection
     result <- get_pairs_with_gammas(model, blocking_rules, limit = limit)

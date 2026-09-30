@@ -108,4 +108,5 @@ Initial development release, translating Python's [splink](https://github.com/mo
 - DuckDB uses SQL-native connected components, with an igraph fallback for SQLite.
 - Term-frequency, lazy prediction, and scratch tables use generated model-scoped names to avoid collisions on shared connections.
 - `profile_sql = TRUE` on `il_estimate_u()`, `il_estimate_prior()`, and `predict()` records lightweight SQL timing metadata for performance investigation.
+- `options(irelink.show_sql = TRUE)` prints every SQL statement irelink sends to the database, formatted for reading.
 - End-to-end benchmarks against an R-side SQLite baseline: 1,000 records in 1.4 s (2.1× faster), 5,000 records in 19.5 s (1.6×), 10,000 records in 61.4 s (2.6×). Speedup grows with dataset size.

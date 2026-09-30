@@ -521,7 +521,7 @@ dependency_collect_patterns_sql <- function(model, gamma_sql) {
     'SELECT DISTINCT {paste(gamma_cols, collapse = ", ")} ',
     'FROM ({gamma_sql}) AS gamma_pairs'
   )
-  patterns <- DBI::dbGetQuery(model$con, pattern_sql)
+  patterns <- il_db_get_query(model$con, pattern_sql)
   if (nrow(patterns) == 0L) {
     return(as.data.frame(matrix(
       integer(0),

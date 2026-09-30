@@ -54,7 +54,7 @@ new_il_compared_lazy <- function(
   sql_profile = NULL
 ) {
   if (is.null(n_pairs)) {
-    n_pairs <- DBI::dbGetQuery(
+    n_pairs <- il_db_get_query(
       con,
       glue::glue('SELECT COUNT(*) AS n FROM {predicted_tbl}')
     )$n
@@ -100,7 +100,7 @@ format.il_compared_lazy <- function(x, ...) {
 #' @return An `il_compared` tibble.
 #' @noRd
 collect_il_compared_lazy <- function(x, ...) {
-  result <- DBI::dbGetQuery(
+  result <- il_db_get_query(
     x$con,
     glue::glue('SELECT * FROM {x$predicted_tbl}')
   )
@@ -646,7 +646,7 @@ pair_row_indices <- function(pairs, model) {
 #' @return A named integer vector.
 #' @noRd
 row_index_lookup <- function(con, tbl) {
-  ids <- DBI::dbGetQuery(
+  ids <- il_db_get_query(
     con,
     glue::glue('SELECT unique_id FROM {tbl}')
   )$unique_id
@@ -732,7 +732,7 @@ join_original_fields <- function(result, model) {
       'JOIN {qtbl_r} sr ON sr.unique_id = t.uid_r ',
       'ORDER BY t.row_idx'
     )
-    fields <- DBI::dbGetQuery(con, sql)
+    fields <- il_db_get_query(con, sql)
     fields$row_idx <- NULL
 
     return(tibble::as_tibble(cbind(result, fields)))
@@ -756,7 +756,7 @@ join_original_fields <- function(result, model) {
   sql_l <- glue::glue(
     'SELECT {col_select} FROM {qtbl_l} WHERE unique_id IN ({id_list})'
   )
-  src_l <- DBI::dbGetQuery(con, sql_l)
+  src_l <- il_db_get_query(con, sql_l)
   rownames(src_l) <- as.character(src_l$unique_id)
 
   if (tbl_r == tbl_l) {
@@ -769,7 +769,7 @@ join_original_fields <- function(result, model) {
     sql_r <- glue::glue(
       'SELECT {col_select_r} FROM {qtbl_r} WHERE unique_id IN ({id_list})'
     )
-    src_r <- DBI::dbGetQuery(con, sql_r)
+    src_r <- il_db_get_query(con, sql_r)
     rownames(src_r) <- as.character(src_r$unique_id)
   }
 

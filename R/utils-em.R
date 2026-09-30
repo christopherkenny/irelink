@@ -26,7 +26,7 @@ get_pairs_with_gamma_counts <- function(model, blocking_rules, limit = NULL) {
       'SELECT {group_by_clause}, COUNT(*) AS n FROM ({gamma_sql}) AS pairs ',
       'GROUP BY {group_by_clause}'
     )
-    result <- DBI::dbGetQuery(con, sql)
+    result <- il_db_get_query(con, sql)
     if (nrow(result) == 0L) {
       return(list(counts = result, n_pairs = 0L))
     }
@@ -91,7 +91,7 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
       limit = limit,
       deduplicate = TRUE
     )
-    result <- DBI::dbGetQuery(con, sql)
+    result <- il_db_get_query(con, sql)
     if (nrow(result) == 0L) {
       return(list(
         ids = data.frame(
@@ -433,8 +433,8 @@ register_blocked_pairs <- function(
     'source_r, unique_id_r AS r_unique_id ',
     'FROM ({union_sql}) AS blocked_pairs'
   )
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
-  DBI::dbExecute(con, sql)
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
+  il_db_execute(con, sql)
 
   if (is.null(model$data$blocked_pairs)) {
     model$data$blocked_pairs <- list()
@@ -895,7 +895,7 @@ get_blocked_pairs <- function(model, blocking) {
   )
   sql <- paste(parts, collapse = ' UNION ALL ')
 
-  DBI::dbGetQuery(con, sql)
+  il_db_get_query(con, sql)
 }
 
 #' Get all pairs (no blocking) from the database
@@ -929,7 +929,7 @@ get_all_pairs <- function(model, max_pairs = 1e6) {
     sql <- glue::glue('{sql} LIMIT {as.integer(max_pairs)}')
   }
 
-  DBI::dbGetQuery(con, sql)
+  il_db_get_query(con, sql)
 }
 
 #' Compute gamma matrix for pairs

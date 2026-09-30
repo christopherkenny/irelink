@@ -48,10 +48,10 @@ il_comparator_score <- function(.data, col_1, col_2, con = NULL) {
 comparator_score_sql <- function(.data, col_1, col_2, con) {
   tbl_name <- il_scratch_table_name('comparator')
   if (is.data.frame(.data)) {
-    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl_name}'))
+    il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {tbl_name}'))
     DBI::dbWriteTable(con, tbl_name, .data)
     on.exit(
-      DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl_name}')),
+      il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {tbl_name}')),
       add = TRUE
     )
   } else {
@@ -72,7 +72,7 @@ comparator_score_sql <- function(.data, col_1, col_2, con) {
     'WHERE {qcol_1} IS NOT NULL AND {qcol_2} IS NOT NULL'
   )
 
-  result <- tibble::as_tibble(DBI::dbGetQuery(con, sql))
+  result <- tibble::as_tibble(il_db_get_query(con, sql))
 
   # Fill missing metrics with NA for consistent column set
   for (col in c('jaro_winkler', 'jaro', 'levenshtein', 'jaccard', 'cosine')) {
@@ -204,10 +204,10 @@ il_phonetic_chart <- function(.data, col_1, col_2, con = NULL) {
     tbl_name <- il_scratch_table_name('phonetic')
     if (is.data.frame(.data)) {
       qtbl <- sql_quote_identifier(tbl_name)
-      DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {qtbl}'))
+      il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {qtbl}'))
       DBI::dbWriteTable(con, tbl_name, .data)
       on.exit(
-        DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {qtbl}')),
+        il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {qtbl}')),
         add = TRUE
       )
     } else {
@@ -228,7 +228,7 @@ il_phonetic_chart <- function(.data, col_1, col_2, con = NULL) {
       'FROM {qtbl} ',
       'WHERE {qcol_1} IS NOT NULL AND {qcol_2} IS NOT NULL'
     )
-    df <- tibble::as_tibble(DBI::dbGetQuery(con, sql))
+    df <- tibble::as_tibble(il_db_get_query(con, sql))
   } else {
     if (!is.data.frame(.data)) {
       cli::cli_abort('Provide a {.arg con} argument for table references.')

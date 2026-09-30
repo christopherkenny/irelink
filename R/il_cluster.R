@@ -186,8 +186,8 @@ cluster_sql <- function(
       ties_method,
       prefix = cc_prefix
     )
-    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
-    DBI::dbExecute(
+    il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
+    il_db_execute(
       con,
       glue::glue(
         'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
@@ -381,14 +381,14 @@ cluster_lazy <- function(
 
   # Create edges table directly from the predicted table
   edges_tbl <- cc_tbl('edges', cc_prefix)
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
 
   threshold_where <- ''
   if (!is.null(threshold)) {
     threshold_where <- glue::glue(' WHERE match_probability >= {threshold}')
   }
 
-  DBI::dbExecute(
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {edges_tbl} AS ',
@@ -408,7 +408,7 @@ cluster_lazy <- function(
         ties_method,
         prefix = cc_prefix
       )
-      all_ids <- DBI::dbGetQuery(
+      all_ids <- il_db_get_query(
         con,
         glue::glue(
           'SELECT DISTINCT id FROM (',
@@ -439,8 +439,8 @@ cluster_lazy <- function(
       ties_method,
       prefix = cc_prefix
     )
-    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
-    DBI::dbExecute(
+    il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
+    il_db_execute(
       con,
       glue::glue(
         'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
@@ -451,7 +451,7 @@ cluster_lazy <- function(
   result <- solve_cc_sql(con, edges_tbl, prefix = cc_prefix)
 
   # Collect all unique IDs from the predicted table for isolated-node detection
-  all_ids <- DBI::dbGetQuery(
+  all_ids <- il_db_get_query(
     con,
     glue::glue(
       'SELECT DISTINCT id FROM (',
@@ -623,7 +623,7 @@ prepare_cluster_source_dataset <- function(source_dataset, pairs, method) {
 cluster_input_ids <- function(pairs) {
   if (inherits(pairs, 'il_compared_lazy')) {
     return(
-      DBI::dbGetQuery(
+      il_db_get_query(
         pairs$con,
         glue::glue(
           'SELECT DISTINCT id FROM (',

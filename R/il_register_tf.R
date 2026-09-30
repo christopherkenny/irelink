@@ -85,7 +85,7 @@ il_register_tf <- function(model, col, tf_data, overwrite = FALSE) {
     )
   }
 
-  DBI::dbExecute(
+  il_db_execute(
     con,
     glue::glue(
       'DROP TABLE IF EXISTS {sql_quote_identifier(tf_tbl)}'

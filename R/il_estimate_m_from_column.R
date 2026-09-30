@@ -66,7 +66,7 @@ il_estimate_m_from_column <- function(model, label_col) {
       'AND l.unique_id < r.unique_id',
       ') AS match_pairs GROUP BY {group_by_clause}'
     )
-    counts <- DBI::dbGetQuery(con, sql)
+    counts <- il_db_get_query(con, sql)
 
     if (nrow(counts) == 0L) {
       cli::cli_abort(
@@ -90,7 +90,7 @@ il_estimate_m_from_column <- function(model, label_col) {
       'WHERE l.{qlabel_col} IS NOT NULL AND l.{qlabel_col} = r.{qlabel_col} ',
       'AND l.unique_id < r.unique_id'
     )
-    pairs <- DBI::dbGetQuery(con, sql)
+    pairs <- il_db_get_query(con, sql)
 
     if (nrow(pairs) == 0L) {
       cli::cli_abort(

@@ -126,19 +126,19 @@ register_data <- function(
       view_sql <- glue::glue(
         'CREATE VIEW {qtbl_name} AS {source_sql}'
       )
-      DBI::dbExecute(con, view_sql)
+      il_db_execute(con, view_sql)
     } else if (add_unique_id) {
       table_sql <- glue::glue(
         'CREATE TABLE {qtbl_name} AS ',
         'SELECT *, ROW_NUMBER() OVER () AS unique_id FROM ({source_sql}) AS __src'
       )
       cols <- c(cols, 'unique_id')
-      DBI::dbExecute(con, table_sql)
+      il_db_execute(con, table_sql)
     } else {
       view_sql <- glue::glue(
         'CREATE VIEW {qtbl_name} AS {source_sql}'
       )
-      DBI::dbExecute(con, view_sql)
+      il_db_execute(con, view_sql)
     }
     if ('unique_id' %in% cols) {
       validate_registered_unique_id(con, tbl_name, cols)
@@ -164,7 +164,7 @@ register_data <- function(
     cols <- DBI::dbListFields(con, data)
     qdata <- sql_quote_identifier(data)
     n_records <- as.integer(
-      DBI::dbGetQuery(con, glue::glue('SELECT COUNT(*) AS n FROM {qdata}'))$n[1]
+      il_db_get_query(con, glue::glue('SELECT COUNT(*) AS n FROM {qdata}'))$n[1]
     )
 
     if (n_records == 0L) {
@@ -179,19 +179,19 @@ register_data <- function(
       view_sql <- glue::glue(
         'CREATE VIEW {qtbl_name} AS SELECT * FROM {qdata}'
       )
-      DBI::dbExecute(con, view_sql)
+      il_db_execute(con, view_sql)
     } else if (add_unique_id) {
       table_sql <- glue::glue(
         'CREATE TABLE {qtbl_name} AS ',
         'SELECT *, ROW_NUMBER() OVER () AS unique_id FROM {qdata}'
       )
       cols <- c(cols, 'unique_id')
-      DBI::dbExecute(con, table_sql)
+      il_db_execute(con, table_sql)
     } else {
       view_sql <- glue::glue(
         'CREATE VIEW {qtbl_name} AS SELECT * FROM {qdata}'
       )
-      DBI::dbExecute(con, view_sql)
+      il_db_execute(con, view_sql)
     }
     if ('unique_id' %in% cols) {
       validate_registered_unique_id(con, tbl_name, cols)
@@ -259,7 +259,7 @@ count_tbl_lazy <- function(tbl, con) {
     inner <- dbplyr::remote_query(tbl)
     sql <- glue::glue('SELECT COUNT(*) AS n FROM ({inner}) AS __cnt')
   }
-  as.integer(DBI::dbGetQuery(con, sql)$n[1])
+  as.integer(il_db_get_query(con, sql)$n[1])
 }
 
 #' Drop a view or table created by register_data
@@ -269,7 +269,7 @@ count_tbl_lazy <- function(tbl, con) {
 drop_registered <- function(con, tbl_name) {
   qtbl_name <- sql_quote_identifier(tbl_name)
   try(
-    DBI::dbExecute(con, glue::glue('DROP VIEW IF EXISTS {qtbl_name}')),
+    il_db_execute(con, glue::glue('DROP VIEW IF EXISTS {qtbl_name}')),
     silent = TRUE
   )
   try(DBI::dbRemoveTable(con, tbl_name, fail_if_missing = FALSE), silent = TRUE)
@@ -295,7 +295,7 @@ validate_data_frame_unique_id <- function(data) {
 #' @noRd
 validate_registered_unique_id <- function(con, tbl_name, columns) {
   qtbl_name <- sql_quote_identifier(tbl_name)
-  res <- DBI::dbGetQuery(
+  res <- il_db_get_query(
     con,
     glue::glue(
       'SELECT COUNT(*) AS n, ',

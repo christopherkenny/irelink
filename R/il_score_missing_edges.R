@@ -115,10 +115,10 @@ score_specific_pairs <- function(model, id_l, id_r, threshold = 0) {
 
   id_l <- as.character(id_l)
   id_r <- as.character(id_r)
-  src_l <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {tbl_l}'))
+  src_l <- il_db_get_query(con, glue::glue('SELECT * FROM {tbl_l}'))
   src_r <- src_l
   if (tbl_r != tbl_l) {
-    src_r <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {tbl_r}'))
+    src_r <- il_db_get_query(con, glue::glue('SELECT * FROM {tbl_r}'))
   }
   rownames(src_l) <- as.character(src_l$unique_id)
   rownames(src_r) <- as.character(src_r$unique_id)

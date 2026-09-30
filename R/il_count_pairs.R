@@ -225,7 +225,7 @@ il_count_pairs <- function(
     )
     union_sql <- paste(cum_parts, collapse = ' UNION ')
     count_sql <- glue::glue('SELECT COUNT(*) AS n FROM ({union_sql}) AS __cum')
-    cum_pairs[i] <- as.numeric(DBI::dbGetQuery(con, count_sql)$n[1])
+    cum_pairs[i] <- as.numeric(il_db_get_query(con, count_sql)$n[1])
   }
 
   if (scale > 1) {

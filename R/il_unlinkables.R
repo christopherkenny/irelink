@@ -96,7 +96,7 @@ il_unlinkables <- function(model) {
         ') sub GROUP BY id'
       )
     }
-    max_probs <- DBI::dbGetQuery(con, max_prob_sql)$max_prob
+    max_probs <- il_db_get_query(con, max_prob_sql)$max_prob
 
     pcts <- vapply(
       thresholds,

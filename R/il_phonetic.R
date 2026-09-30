@@ -174,7 +174,7 @@ register_phonetic_macros <- function(con) {
     "), '0', '') || '000', 4) ",
     'END)'
   )
-  DBI::dbExecute(con, macro_sql)
+  il_db_execute(con, macro_sql)
   invisible(NULL)
 }
 

@@ -72,8 +72,8 @@ compute_tf_tables <- function(model) {
       )
     }
 
-    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {qtf_tbl}'))
-    DBI::dbExecute(con, glue::glue('CREATE TABLE {qtf_tbl} AS {select_sql}'))
+    il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {qtf_tbl}'))
+    il_db_execute(con, glue::glue('CREATE TABLE {qtf_tbl} AS {select_sql}'))
     tf_tables[[col]] <- tf_tbl
   }
 

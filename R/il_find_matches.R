@@ -185,9 +185,9 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
         'match_probability ',
         'FROM ({prepared$scored_sql}) AS scored'
       )
-      result <- tibble::as_tibble(DBI::dbGetQuery(con, scored_sql))
+      result <- tibble::as_tibble(il_db_get_query(con, scored_sql))
     } else {
-      result_raw <- DBI::dbGetQuery(con, sql)
+      result_raw <- il_db_get_query(con, sql)
 
       if (nrow(result_raw) == 0L) {
         return(empty_scored_pairs(model, id_ptype = character()))
@@ -269,14 +269,14 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
           'SELECT {sel_l}, {sel_r} FROM {qtbl_new} l, {qtbl_existing} r ',
           'WHERE {block_where}'
         )
-        bp <- DBI::dbGetQuery(con, sql)
+        bp <- il_db_get_query(con, sql)
         if (nrow(bp) > 0L) all_pair_frames <- c(all_pair_frames, list(bp))
       }
     } else {
       sql <- glue::glue(
         'SELECT {sel_l}, {sel_r} FROM {qtbl_new} l, {qtbl_existing} r'
       )
-      bp <- DBI::dbGetQuery(con, sql)
+      bp <- il_db_get_query(con, sql)
       if (nrow(bp) > 0L) all_pair_frames <- list(bp)
     }
 

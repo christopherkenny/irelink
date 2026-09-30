@@ -51,7 +51,7 @@ il_tf_chart <- function(model, col, n_most_freq = 10L, n_least_freq = 5L) {
   qcol <- sql_quote_identifier(col)
   qtf_col <- sql_quote_identifier(tf_col)
   qtf_tbl <- sql_quote_identifier(tf_tbl)
-  tf_data <- DBI::dbGetQuery(
+  tf_data <- il_db_get_query(
     con,
     glue::glue(
       'SELECT {qcol} AS "value", {qtf_col} AS "tf" ',

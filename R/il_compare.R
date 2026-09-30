@@ -208,7 +208,7 @@ infer_column_classes <- function(df) {
 
 infer_registered_column_classes <- function(con, tbl_name) {
   out <- try(
-    DBI::dbGetQuery(con, glue::glue('SELECT * FROM {tbl_name} WHERE 1 = 0')),
+    il_db_get_query(con, glue::glue('SELECT * FROM {tbl_name} WHERE 1 = 0')),
     silent = TRUE
   )
   if (inherits(out, 'try-error')) {

@@ -66,7 +66,7 @@ labels_from_column <- function(model, labels_col, threshold = 0) {
       'LEFT JOIN true_matches tm ',
       'ON tm.unique_id_l = u.unique_id_l AND tm.unique_id_r = u.unique_id_r'
     )
-    return(DBI::dbGetQuery(con, sql))
+    return(il_db_get_query(con, sql))
   }
 
   # Fallback: collect all true matches from data + candidate pairs, label both
@@ -76,7 +76,7 @@ labels_from_column <- function(model, labels_col, threshold = 0) {
     'ON gl.{qlabels_col} IS NOT NULL AND gr.{qlabels_col} IS NOT NULL ',
     'AND gl.{qlabels_col} = gr.{qlabels_col} {dedup_cond}'
   )
-  true_pairs <- DBI::dbGetQuery(con, sql_true)
+  true_pairs <- il_db_get_query(con, sql_true)
   true_pairs$is_match <- 1L
   candidates <- predict(model, threshold = threshold)
   cand_labeled <- resolve_labels_from_pairs(model, candidates, labels_col)
@@ -104,7 +104,7 @@ resolve_labels_from_pairs <- function(model, pairs, labels_col) {
   sql_l <- glue::glue(
     'SELECT unique_id, {qlabels_col} FROM {qtbl_l} WHERE unique_id IN ({id_list})'
   )
-  gt_l <- DBI::dbGetQuery(con, sql_l)
+  gt_l <- il_db_get_query(con, sql_l)
   rownames(gt_l) <- as.character(gt_l$unique_id)
 
   if (tbl_r == tbl_l) {
@@ -113,7 +113,7 @@ resolve_labels_from_pairs <- function(model, pairs, labels_col) {
     sql_r <- glue::glue(
       'SELECT unique_id, {qlabels_col} FROM {qtbl_r} WHERE unique_id IN ({id_list})'
     )
-    gt_r <- DBI::dbGetQuery(con, sql_r)
+    gt_r <- il_db_get_query(con, sql_r)
     rownames(gt_r) <- as.character(gt_r$unique_id)
   }
 
@@ -269,7 +269,7 @@ score_labeled_pairs <- function(model, labels) {
       ') AS gamma_pairs',
       ') AS weighted_pairs ORDER BY pair_idx'
     )
-    result <- DBI::dbGetQuery(con, sql)
+    result <- il_db_get_query(con, sql)
 
     return(list(
       label_probs = result$match_probability,
@@ -291,7 +291,7 @@ score_labeled_pairs <- function(model, labels) {
   sql_l <- glue::glue(
     'SELECT {col_select} FROM {qtbl_l} WHERE unique_id IN ({id_list})'
   )
-  src_l <- DBI::dbGetQuery(con, sql_l)
+  src_l <- il_db_get_query(con, sql_l)
   rownames(src_l) <- as.character(src_l$unique_id)
 
   if (tbl_r == tbl_l) {
@@ -300,7 +300,7 @@ score_labeled_pairs <- function(model, labels) {
     sql_r <- glue::glue(
       'SELECT {col_select} FROM {qtbl_r} WHERE unique_id IN ({id_list})'
     )
-    src_r <- DBI::dbGetQuery(con, sql_r)
+    src_r <- il_db_get_query(con, sql_r)
     rownames(src_r) <- as.character(src_r$unique_id)
   }
 
@@ -380,7 +380,7 @@ label_blocking_flags <- function(
     'JOIN {qtbl_r} r ON CAST(r.unique_id AS VARCHAR) = lbl.uid_r ',
     'ORDER BY lbl.pair_idx'
   )
-  result <- DBI::dbGetQuery(con, sql)
+  result <- il_db_get_query(con, sql)
   as.logical(result$found_by_blocking)
 }
 

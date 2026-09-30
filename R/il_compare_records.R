@@ -128,7 +128,7 @@ il_compare_records <- function(record_a, record_b, spec, con = NULL) {
       'FROM {qtbl_tmp} l, {qtbl_tmp} r ',
       'WHERE l.unique_id = 1 AND r.unique_id = 2'
     )
-    row <- DBI::dbGetQuery(con, sql)
+    row <- il_db_get_query(con, sql)
 
     result <- tibble::tibble(.rows = 1L)
     for (j in seq_along(comp_names)) {

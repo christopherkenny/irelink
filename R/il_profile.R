@@ -100,7 +100,7 @@ il_profile <- function(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL) {
       'SELECT {spec$sql_expr} AS value, COUNT(*) AS n FROM {quoted_tbl} ',
       'GROUP BY {spec$sql_expr} ORDER BY n DESC'
     )
-    res <- DBI::dbGetQuery(con, sql)
+    res <- il_db_get_query(con, sql)
     res$column <- spec$label
     out <- tibble::as_tibble(res[, c('column', 'value', 'n')])
 

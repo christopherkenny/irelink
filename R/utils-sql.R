@@ -1473,7 +1473,7 @@ count_blocked_pairs <- function(con, tbl_l, tbl_r, where, dedupe = TRUE) {
       'SELECT COUNT(*) AS n FROM {qtbl_l} l, {qtbl_r} r WHERE {where}'
     )
   }
-  res <- DBI::dbGetQuery(con, sql)
+  res <- il_db_get_query(con, sql)
   as.numeric(res$n[1])
 }
 

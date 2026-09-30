@@ -114,3 +114,11 @@ test_that('format_sql() only changes whitespace and leaves literals alone', {
   expect_match(formatted, "'a FROM b WHERE c'", fixed = TRUE)
   expect_match(formatted, "x = 'AND'", fixed = TRUE)
 })
+
+test_that('irelink.show_sql prints SQL from functions without a step label', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+  withr::local_options(irelink.show_sql = TRUE)
+
+  expect_message(il_completeness(fake_1000, con = con), 'SELECT')
+})

@@ -1,8 +1,6 @@
 #' @section Package options:
-#' - `irelink.show_sql`: If `TRUE`, print the SQL that [predict()],
-#'   [il_estimate_u()], and [il_estimate_prior()] send to the database, as
-#'   messages. This covers the same queries that `profile_sql = TRUE` times.
-#'   Defaults to `FALSE`.
+#' - `irelink.show_sql`: If `TRUE`, print every SQL statement irelink sends to
+#'   the database as a message. Defaults to `FALSE`.
 #'
 #' @keywords internal
 #' @aliases irelink-package

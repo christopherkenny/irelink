@@ -136,7 +136,7 @@ cluster_confusion_counts_sql <- function(model, clusters_tbl, labels_col) {
     '  CAST(SUM(CASE WHEN pred_dup = 0 AND true_dup = 0 THEN 1 ELSE 0 END) AS INTEGER) AS tn ',
     'FROM flags'
   )
-  counts <- DBI::dbGetQuery(con, sql)
+  counts <- il_db_get_query(con, sql)
   counts$fn_blocking_miss <- NA_integer_
   tibble::as_tibble(counts)
 }
@@ -166,14 +166,14 @@ cluster_assignments_lazy_sql <- function(
   predicted_tbl <- pairs$predicted_tbl
   cc_prefix <- il_scratch_table_name('cc')
   edges_tbl <- cc_tbl('edges', cc_prefix)
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
 
   threshold_where <- ''
   if (!is.null(threshold)) {
     threshold_where <- glue::glue(' WHERE match_probability >= {threshold}')
   }
 
-  DBI::dbExecute(
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {edges_tbl} AS ',
@@ -200,8 +200,8 @@ cluster_assignments_lazy_sql <- function(
         ties_method,
         prefix = cc_prefix
       )
-      DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
-      DBI::dbExecute(
+      il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
+      il_db_execute(
         con,
         glue::glue(
           'ALTER TABLE {filtered_tbl} RENAME TO {edges_tbl}'
@@ -225,7 +225,7 @@ cluster_assignments_lazy_sql <- function(
   on.exit(drop_registered(con, cc_output_tbl), add = TRUE)
 
   final_tbl <- cc_tbl('cluster_eval', cc_prefix)
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {final_tbl}'))
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {final_tbl}'))
   sql <- paste0(
     'CREATE TABLE ',
     final_tbl,
@@ -245,7 +245,7 @@ cluster_assignments_lazy_sql <- function(
     ' cc ',
     '  ON all_ids.unique_id = CAST(cc.node_id AS VARCHAR)'
   )
-  DBI::dbExecute(con, sql)
+  il_db_execute(con, sql)
 
   final_tbl
 }
@@ -260,7 +260,7 @@ cluster_confusion_counts_r <- function(model, clusters, labels_col) {
   sql <- glue::glue(
     'SELECT unique_id, {qlabels_col} FROM {qtbl} ORDER BY unique_id'
   )
-  base <- DBI::dbGetQuery(con, sql)
+  base <- il_db_get_query(con, sql)
   base$unique_id <- as.character(base$unique_id)
 
   cluster_map <- stats::setNames(

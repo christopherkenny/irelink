@@ -101,7 +101,7 @@ graph_metrics_sql <- function(con, pairs, clusters) {
 
   # Upload edges
   edges_tbl <- cc_tbl('metrics_edges', cc_prefix)
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {edges_tbl}'))
   edges_df <- data.frame(
     unique_id_l = as.character(pairs$unique_id_l),
     unique_id_r = as.character(pairs$unique_id_r),
@@ -113,7 +113,7 @@ graph_metrics_sql <- function(con, pairs, clusters) {
 
   # Upload cluster assignments
   cc_tbl_name <- cc_tbl('metrics_cc', cc_prefix)
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {cc_tbl_name}'))
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {cc_tbl_name}'))
   cc_df <- data.frame(
     node_id = as.character(clusters$unique_id),
     cluster_id = as.character(clusters$cluster_id),
@@ -123,7 +123,7 @@ graph_metrics_sql <- function(con, pairs, clusters) {
 
   # Node metrics via SQL
   nm_tbl <- sql_node_metrics(con, cc_tbl_name, edges_tbl, prefix = cc_prefix)
-  nodes_raw <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {nm_tbl}'))
+  nodes_raw <- il_db_get_query(con, glue::glue('SELECT * FROM {nm_tbl}'))
   cluster_size <- as.integer(nodes_raw$cluster_size)
   node_degree <- as.integer(nodes_raw$node_degree)
   nodes <- tibble::tibble(
@@ -139,7 +139,7 @@ graph_metrics_sql <- function(con, pairs, clusters) {
 
   # Cluster metrics via SQL
   cm_tbl <- sql_cluster_metrics(con, nm_tbl, prefix = cc_prefix)
-  clusters_raw <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {cm_tbl}'))
+  clusters_raw <- il_db_get_query(con, glue::glue('SELECT * FROM {cm_tbl}'))
   cluster_tbl <- tibble::tibble(
     cluster_id = clusters_raw$cluster_id,
     n_nodes = as.integer(clusters_raw$n_nodes),
@@ -162,7 +162,7 @@ graph_metrics_sql <- function(con, pairs, clusters) {
 
   # Clean up
   for (tbl in c(edges_tbl, cc_tbl_name, nm_tbl, cm_tbl)) {
-    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
+    il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
   }
 
   list(nodes = nodes, edges = edges, clusters = cluster_tbl)

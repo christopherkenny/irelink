@@ -77,7 +77,7 @@ il_completeness <- function(..., con = NULL) {
       sql <- glue::glue(
         'SELECT COUNT({quoted_col}) AS n_non_null FROM {quoted_tbl}'
       )
-      res <- DBI::dbGetQuery(con, sql)
+      res <- il_db_get_query(con, sql)
       tibble::tibble(
         table = paste0('table_', i),
         column = col_nm,

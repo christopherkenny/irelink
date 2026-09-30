@@ -50,7 +50,10 @@ il_sql_profile_entries <- function(profile) {
 #' @noRd
 il_show_sql <- function(sql, step = NULL) {
   if (isTRUE(getOption('irelink.show_sql', FALSE))) {
-    message('-- ', step %||% 'irelink', '\n', format_sql(sql), '\n')
+    if (!is.null(step)) {
+      cli::cli_verbatim(paste0('-- ', step))
+    }
+    cli::cli_verbatim(format_sql(sql))
   }
   invisible(NULL)
 }

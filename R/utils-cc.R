@@ -30,7 +30,7 @@ cc_upload_edges <- function(con, pairs, threshold = NULL, prefix = NULL) {
     edges$match_probability <- pairs$match_probability
   }
   tbl <- cc_tbl('edges', prefix)
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
   DBI::dbWriteTable(con, tbl, edges)
   tbl
 }
@@ -50,8 +50,8 @@ cc_initialize <- function(con, edges_tbl, prefix = NULL) {
   repr_tbl <- cc_tbl('representatives', prefix)
 
   # Bidirectional edge list
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {neighbors_tbl}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {neighbors_tbl}'))
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {neighbors_tbl} AS ',
@@ -66,8 +66,8 @@ cc_initialize <- function(con, edges_tbl, prefix = NULL) {
   )
 
   # Initial representatives: every node is its own representative
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {repr_tbl}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {repr_tbl}'))
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {repr_tbl} AS ',
@@ -104,8 +104,8 @@ cc_iterate <- function(con, iteration, prefix = NULL) {
   new_neighbors_tbl <- cc_tbl(paste0('neighbors_', iteration), prefix)
 
   # Step 1: Compute new representatives (min across neighbors + self)
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {updates_tbl}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {updates_tbl}'))
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {updates_tbl} AS ',
@@ -124,8 +124,8 @@ cc_iterate <- function(con, iteration, prefix = NULL) {
   )
 
   # Step 2: Map updates back to node_ids
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {new_repr_tbl}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {new_repr_tbl}'))
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {new_repr_tbl} AS ',
@@ -137,8 +137,8 @@ cc_iterate <- function(con, iteration, prefix = NULL) {
   )
 
   # Step 3: Split stable / unstable
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {stable_tbl}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {stable_tbl}'))
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {stable_tbl} AS ',
@@ -146,8 +146,8 @@ cc_iterate <- function(con, iteration, prefix = NULL) {
     )
   )
 
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {unstable_tbl}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {unstable_tbl}'))
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {unstable_tbl} AS ',
@@ -156,8 +156,8 @@ cc_iterate <- function(con, iteration, prefix = NULL) {
   )
 
   # Step 4: Filter neighbors to only cross-cluster edges
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {new_neighbors_tbl}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {new_neighbors_tbl}'))
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {new_neighbors_tbl} AS ',
@@ -171,22 +171,22 @@ cc_iterate <- function(con, iteration, prefix = NULL) {
   )
 
   # Count remaining cross-cluster edges
-  n_remaining <- DBI::dbGetQuery(
+  n_remaining <- il_db_get_query(
     con,
     glue::glue('SELECT COUNT(*) AS n FROM {new_neighbors_tbl}')
   )$n
 
   # Rotate: new tables become current for next iteration
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {updates_tbl}'))
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {neighbors_tbl}'))
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {repr_tbl}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {updates_tbl}'))
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {neighbors_tbl}'))
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {repr_tbl}'))
+  il_db_execute(
     con,
     glue::glue(
       'ALTER TABLE {new_neighbors_tbl} RENAME TO {neighbors_tbl}'
     )
   )
-  DBI::dbExecute(
+  il_db_execute(
     con,
     glue::glue(
       'ALTER TABLE {unstable_tbl} RENAME TO {repr_tbl}'
@@ -194,7 +194,7 @@ cc_iterate <- function(con, iteration, prefix = NULL) {
   )
 
   # Clean up iteration-specific tables (keep stable)
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {new_repr_tbl}'))
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {new_repr_tbl}'))
 
   list(stable_tbl = stable_tbl, n_remaining = n_remaining)
 }
@@ -217,7 +217,7 @@ solve_cc_sql <- function(
   prefix = NULL
 ) {
   # Check for empty edge set
-  n_edges <- DBI::dbGetQuery(
+  n_edges <- il_db_get_query(
     con,
     glue::glue('SELECT COUNT(*) AS n FROM {edges_tbl}')
   )$n
@@ -229,8 +229,8 @@ solve_cc_sql <- function(
       ))
     }
     output_tbl <- cc_tbl('output', prefix)
-    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
-    DBI::dbExecute(
+    il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
+    il_db_execute(
       con,
       glue::glue(
         'CREATE TABLE {output_tbl} AS ',
@@ -265,8 +265,8 @@ solve_cc_sql <- function(
   union_sql <- paste(union_parts, collapse = ' UNION ALL ')
 
   output_tbl <- cc_tbl('output', prefix)
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {output_tbl} AS {union_sql}'
@@ -275,10 +275,10 @@ solve_cc_sql <- function(
 
   # Clean up all intermediate tables (keep output for graph metrics)
   for (tbl in stable_tables) {
-    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
+    il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
   }
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {repr_tbl}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {repr_tbl}'))
+  il_db_execute(
     con,
     glue::glue(
       'DROP TABLE IF EXISTS {cc_tbl("neighbors", prefix)}'
@@ -289,8 +289,8 @@ solve_cc_sql <- function(
     return(output_tbl)
   }
 
-  result <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {output_tbl}'))
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
+  result <- il_db_get_query(con, glue::glue('SELECT * FROM {output_tbl}'))
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
   tibble::as_tibble(result)
 }
 
@@ -314,11 +314,11 @@ sql_best_link_filter <- function(
   prefix = NULL
 ) {
   filtered_tbl <- cc_tbl('best_link', prefix)
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {filtered_tbl}'))
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {filtered_tbl}'))
 
   if (ties_method == 'drop') {
     # Exclude all edges touching nodes whose max probability is tied.
-    DBI::dbExecute(
+    il_db_execute(
       con,
       glue::glue(
         'CREATE TABLE {filtered_tbl} AS ',
@@ -353,7 +353,7 @@ sql_best_link_filter <- function(
     )
   } else {
     # 'lowest_id': break ties by keeping the edge to the smaller partner id.
-    DBI::dbExecute(
+    il_db_execute(
       con,
       glue::glue(
         'CREATE TABLE {filtered_tbl} AS ',
@@ -427,7 +427,7 @@ solve_one_to_one_sql <- function(
   oto_merged <- cc_tbl('oto_merged', prefix)
 
   # Upload source dataset mapping
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_src}'))
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {oto_src}'))
   sd_df <- data.frame(
     node_id = names(source_dataset),
     source_dataset = unname(source_dataset),
@@ -436,8 +436,8 @@ solve_one_to_one_sql <- function(
   DBI::dbWriteTable(con, oto_src, sd_df)
 
   # Initialize: each node is its own representative
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_repr}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {oto_repr}'))
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {oto_repr} AS ',
@@ -452,8 +452,8 @@ solve_one_to_one_sql <- function(
 
   for (iter in seq_len(max_iterations)) {
     # Step 1: Build cluster->datasets mapping
-    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_cluster_ds}'))
-    DBI::dbExecute(
+    il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {oto_cluster_ds}'))
+    il_db_execute(
       con,
       glue::glue(
         'CREATE TABLE {oto_cluster_ds} AS ',
@@ -464,14 +464,14 @@ solve_one_to_one_sql <- function(
     )
 
     # Step 2: rank constraint-respecting candidate edges and keep mutual best
-    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_ranked}'))
+    il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {oto_ranked}'))
 
     tie_order <- ''
     if (ties_method == 'lowest_id') {
       tie_order <- ', CASE WHEN repr < partner_repr THEN partner_repr ELSE repr END'
     }
 
-    DBI::dbExecute(
+    il_db_execute(
       con,
       glue::glue(
         'CREATE TABLE {oto_ranked} AS ',
@@ -519,7 +519,7 @@ solve_one_to_one_sql <- function(
     )
 
     # Check if any merges happened
-    n_merges <- DBI::dbGetQuery(
+    n_merges <- il_db_get_query(
       con,
       glue::glue('SELECT COUNT(*) AS n FROM {oto_ranked}')
     )$n
@@ -529,8 +529,8 @@ solve_one_to_one_sql <- function(
     }
 
     # Step 3: merge mutual-best pairs into representative MIN(repr_l, repr_r)
-    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_merged}'))
-    DBI::dbExecute(
+    il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {oto_merged}'))
+    il_db_execute(
       con,
       glue::glue(
         'CREATE TABLE {oto_merged} AS ',
@@ -552,8 +552,8 @@ solve_one_to_one_sql <- function(
       )
     )
 
-    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_repr}'))
-    DBI::dbExecute(
+    il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {oto_repr}'))
+    il_db_execute(
       con,
       glue::glue(
         'ALTER TABLE {oto_merged} RENAME TO {oto_repr}'
@@ -562,8 +562,8 @@ solve_one_to_one_sql <- function(
   }
 
   output_tbl <- cc_tbl('output', prefix)
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {output_tbl}'))
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {output_tbl} AS ',
@@ -573,7 +573,7 @@ solve_one_to_one_sql <- function(
 
   result <- NULL
   if (collect) {
-    result <- DBI::dbGetQuery(con, glue::glue('SELECT * FROM {output_tbl}'))
+    result <- il_db_get_query(con, glue::glue('SELECT * FROM {output_tbl}'))
   }
 
   # Clean up
@@ -582,7 +582,7 @@ solve_one_to_one_sql <- function(
     tables_to_drop <- c(tables_to_drop, output_tbl)
   }
   for (tbl in tables_to_drop) {
-    DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
+    il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {tbl}'))
   }
 
   if (!collect) {
@@ -772,8 +772,8 @@ sql_node_metrics <- function(con, cc_output_tbl, edges_tbl, prefix = NULL) {
   node_metrics_tbl <- cc_tbl('node_metrics', prefix)
 
   # Build bidirectional edges for degree computation
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {bidir_tbl}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {bidir_tbl}'))
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {bidir_tbl} AS ',
@@ -784,8 +784,8 @@ sql_node_metrics <- function(con, cc_output_tbl, edges_tbl, prefix = NULL) {
   )
 
   # Node degree + cluster size
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {node_metrics_tbl}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {node_metrics_tbl}'))
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {node_metrics_tbl} AS ',
@@ -798,7 +798,7 @@ sql_node_metrics <- function(con, cc_output_tbl, edges_tbl, prefix = NULL) {
     )
   )
 
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {bidir_tbl}'))
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {bidir_tbl}'))
   node_metrics_tbl
 }
 
@@ -813,8 +813,8 @@ sql_node_metrics <- function(con, cc_output_tbl, edges_tbl, prefix = NULL) {
 #' @noRd
 sql_cluster_metrics <- function(con, node_metrics_tbl, prefix = NULL) {
   cluster_tbl <- cc_tbl('cluster_metrics', prefix)
-  DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {cluster_tbl}'))
-  DBI::dbExecute(
+  il_db_execute(con, glue::glue('DROP TABLE IF EXISTS {cluster_tbl}'))
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {cluster_tbl} AS ',

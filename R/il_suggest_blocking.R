@@ -138,13 +138,13 @@ evaluate_column_combos <- function(
       'SELECT DISTINCT {select_cols} FROM {qtbl} WHERE {null_filters}',
       ') AS __d'
     )
-    n_distinct <- as.integer(DBI::dbGetQuery(con, sql_distinct)$n[1])
+    n_distinct <- as.integer(il_db_get_query(con, sql_distinct)$n[1])
 
     # coverage: % of rows with non-NULL values in all columns
     sql_coverage <- glue::glue(
       'SELECT COUNT(*) AS n FROM {qtbl} WHERE {null_filters}'
     )
-    n_covered <- as.integer(DBI::dbGetQuery(con, sql_coverage)$n[1])
+    n_covered <- as.integer(il_db_get_query(con, sql_coverage)$n[1])
     coverage <- n_covered / n
 
     # pair count
@@ -280,7 +280,7 @@ block_from_labels <- function(.data, labels, columns = NULL, con = NULL) {
   sql_fetch <- glue::glue(
     'SELECT {col_select} FROM {qtbl} WHERE unique_id IN ({id_list})'
   )
-  src <- DBI::dbGetQuery(con, sql_fetch)
+  src <- il_db_get_query(con, sql_fetch)
   rownames(src) <- as.character(src$unique_id)
 
   results <- lapply(columns, function(col) {

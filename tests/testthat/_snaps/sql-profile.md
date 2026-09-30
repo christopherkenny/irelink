@@ -5,7 +5,6 @@
     Message
       -- query
       SELECT 1 AS x
-      
     Output
         x
       1 1

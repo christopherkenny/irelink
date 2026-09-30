@@ -78,7 +78,7 @@ il_sample_records <- function(con, tbl, threshold, modulus, salt = '') {
   threshold_sql <- sprintf('%.0f', threshold)
 
   if (identical(detect_dialect(con), 'duckdb')) {
-    DBI::dbExecute(
+    il_db_execute(
       con,
       glue::glue(
         'CREATE TABLE {qout} AS SELECT * FROM {qtbl} ',
@@ -89,7 +89,7 @@ il_sample_records <- function(con, tbl, threshold, modulus, salt = '') {
     return(out)
   }
 
-  ids <- DBI::dbGetQuery(
+  ids <- il_db_get_query(
     con,
     glue::glue('SELECT unique_id FROM {qtbl}')
   )$unique_id
@@ -97,7 +97,7 @@ il_sample_records <- function(con, tbl, threshold, modulus, salt = '') {
   id_tbl <- il_scratch_table_name('sample_ids')
   DBI::dbWriteTable(con, id_tbl, data.frame(unique_id = keep))
   on.exit(drop_registered(con, id_tbl), add = TRUE)
-  DBI::dbExecute(
+  il_db_execute(
     con,
     glue::glue(
       'CREATE TABLE {qout} AS SELECT * FROM {qtbl} ',
