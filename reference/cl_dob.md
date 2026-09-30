@@ -1,7 +1,7 @@
 # Date of Birth Comparison
 
 A pre-built domain comparison for dates of birth. Combines exact
-matching, a Damerau-Levenshtein string check for transposed digits, and
+matching, a Levenshtein string check for single-digit errors, and
 configurable date-difference levels to handle common errors.
 
 ## Usage

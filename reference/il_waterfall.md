@@ -74,7 +74,7 @@ df <- data.frame(
 )
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmpye6umx/duckdb
+#> ℹ /tmp/Rtmpqysoz5/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -98,9 +98,9 @@ il_waterfall(pairs, which = 1)
 #>   step       order contribution direction   start     end
 #>   <chr>      <int>        <dbl> <chr>       <dbl>   <dbl>
 #> 1 Prior          1      -0.0510 prior      0      -0.0510
-#> 2 first_name     2       1.63   positive  -0.0510  1.58  
-#> 3 surname        3       2.66   positive   1.58    4.25  
-#> 4 dob            4       3.19   positive   4.25    7.43  
-#> 5 Final          5       7.43   final      0       7.43  
+#> 2 first_name     2       2.91   positive  -0.0510  2.86  
+#> 3 surname        3       2.66   positive   2.86    5.52  
+#> 4 dob            4       3.19   positive   5.52    8.71  
+#> 5 Final          5       8.71   final      0       8.71  
 DBI::dbDisconnect(con, shutdown = TRUE)
 ```

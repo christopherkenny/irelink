@@ -26,6 +26,11 @@ Useful links:
 **Maintainer**: Christopher T. Kenny <ctkenny@proton.me>
 ([ORCID](https://orcid.org/0000-0002-9386-6860)) \[copyright holder\]
 
+Authors:
+
+- Christopher T. Kenny <ctkenny@proton.me>
+  ([ORCID](https://orcid.org/0000-0002-9386-6860)) \[copyright holder\]
+
 Other contributors:
 
 - Robin Linacre (Lead author of splink, the Python package this is

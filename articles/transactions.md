@@ -69,7 +69,7 @@ df_destination
 
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpZD5elR/duckdb
+#> ℹ /tmp/Rtmp1GHHG2/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -88,8 +88,8 @@ il_profile(df_origin, memo, transaction_date, amount, con = con, top_n = 8)
 #>  2 memo             J B donation BG    25
 #>  3 memo             J B money BGC      24
 #>  4 memo             J B  BGC           21
-#>  5 memo             J S money BGC      18
-#>  6 memo             J P  BGC           18
+#>  5 memo             J P  BGC           18
+#>  6 memo             J S money BGC      18
 #>  7 memo             A B money BGC      18
 #>  8 memo             J C money BGC      17
 #>  9 transaction_date 19122             696
@@ -323,16 +323,16 @@ predictions
 #> # A tibble: 594,672 × 8
 #>    unique_id_l unique_id_r gamma_amount gamma_memo gamma_transaction_date
 #>  *       <dbl>       <dbl>        <int>      <int>                  <int>
-#>  1        1252       44620            4          3                      0
-#>  2        1674        1667            0          3                      4
-#>  3         327         320            0          3                      4
-#>  4        1217       18292            0          3                      3
-#>  5         493         491            0          3                      4
-#>  6        1064         938            3          2                      0
-#>  7        1242        9987            2          3                      0
-#>  8        1634        5269            3          3                      0
-#>  9        2485        2491            2          3                      0
-#> 10        3723       14037            3          2                      0
+#>  1        2997        2997            2          0                      2
+#>  2        7226        7226            3          3                      1
+#>  3       14152       14152            4          1                      1
+#>  4       14182       14182            2          2                      1
+#>  5       15228       15228            3          1                      4
+#>  6       15516       15516            3          1                      1
+#>  7       18166       18166            4          3                      1
+#>  8       20267       20267            3          1                      1
+#>  9       31782       31782            3          1                      1
+#> 10           5           8            0          3                      4
 #> # ℹ 594,662 more rows
 #> # ℹ 3 more variables: match_weight <dbl>, total_match_weight <dbl>,
 #> #   match_probability <dbl>
@@ -392,16 +392,16 @@ errors[errors$error_type == 'false_positive', ]
 #> # A tibble: 43,970 × 6
 #>    unique_id_l unique_id_r match_weight match_probability true_label error_type 
 #>          <dbl>       <dbl>        <dbl>             <dbl> <lgl>      <chr>      
-#>  1        1922       29394        14.3              0.987 FALSE      false_posi…
-#>  2         132       26495        10.8              0.867 FALSE      false_posi…
-#>  3        1345       29568        14.0              0.984 FALSE      false_posi…
-#>  4        1766       18165        10.8              0.867 FALSE      false_posi…
-#>  5        2340       45290        11.2              0.896 FALSE      false_posi…
-#>  6        3333       41112        11.2              0.896 FALSE      false_posi…
-#>  7        2374       17578        11.5              0.915 FALSE      false_posi…
-#>  8        4023       39862         9.70             0.756 FALSE      false_posi…
-#>  9        3351        3640        11.2              0.896 FALSE      false_posi…
-#> 10        6011       32676        11.5              0.915 FALSE      false_posi…
+#>  1       35419       20991        10.6              0.851 FALSE      false_posi…
+#>  2       38462       25872        10.8              0.867 FALSE      false_posi…
+#>  3       39704       34349         8.24             0.531 FALSE      false_posi…
+#>  4       40837       36912        10.3              0.829 FALSE      false_posi…
+#>  5       41095       15770         9.70             0.756 FALSE      false_posi…
+#>  6       41335       33267        10.3              0.821 FALSE      false_posi…
+#>  7       42119       29700        10.6              0.851 FALSE      false_posi…
+#>  8        1922       29394        14.3              0.987 FALSE      false_posi…
+#>  9         132       26495        10.8              0.867 FALSE      false_posi…
+#> 10        1345       29568        14.0              0.984 FALSE      false_posi…
 #> # ℹ 43,960 more rows
 ```
 

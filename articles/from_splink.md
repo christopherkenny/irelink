@@ -26,6 +26,11 @@ the same role and can be passed directly to
 jobs where duplicates may exist within each input table and across the
 two tables.
 
+`irelink` scores in-memory inputs and DBI-backed tables, including lazy
+DuckDB results. Splink’s DuckDB source pruning and Parquet-backed
+intermediate tables are not available, so very large workflows should
+rely on explicit blocking and `predict(collect = FALSE)`.
+
 ## Comparison levels
 
 Comparison levels are the building blocks used to score how similar two
@@ -63,7 +68,7 @@ levels.
 |----|----|
 | `NameComparison` | [`cl_name()`](http://christophertkenny.com/irelink/reference/cl_name.md) |
 | `ForenameSurnameComparison` | [`cl_forename_surname()`](http://christophertkenny.com/irelink/reference/cl_forename_surname.md) |
-| `DateOfBirthComparison` | [`cl_dob()`](http://christophertkenny.com/irelink/reference/cl_dob.md) |
+| `DateOfBirthComparison` | [`cl_dob()`](http://christophertkenny.com/irelink/reference/cl_dob.md) (Levenshtein for one-character typos) |
 | `EmailComparison` | [`cl_email()`](http://christophertkenny.com/irelink/reference/cl_email.md) |
 | `PostcodeComparison` | [`cl_postcode()`](http://christophertkenny.com/irelink/reference/cl_postcode.md) |
 

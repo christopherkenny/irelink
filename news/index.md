@@ -194,7 +194,8 @@ probabilistic record linkage engine into idiomatic R.
 - `profile_sql = TRUE` on
   [`predict()`](https://rdrr.io/r/stats/predict.html) attaches
   lightweight SQL timing metadata to collected predictions or lazy
-  prediction objects.
+  prediction objects, and lazy objects keep it when collected. Profiling
+  adds no overhead when disabled.
 
 ### Diagnostics and evaluation
 

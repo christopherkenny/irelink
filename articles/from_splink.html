@@ -191,6 +191,11 @@ directly to <code><a href="../reference/il_compare.html">il_compare()</a></code>
 <code>link_type = "link_and_dedupe"</code> for two-table jobs where
 duplicates may exist within each input table and across the two
 tables.</p>
+<p><code>irelink</code> scores in-memory inputs and DBI-backed tables,
+including lazy DuckDB results. Splink’s DuckDB source pruning and
+Parquet-backed intermediate tables are not available, so very large
+workflows should rely on explicit blocking and
+<code>predict(collect = FALSE)</code>.</p>
 </div>
 <div class="section level2">
 <h2 id="comparison-levels">Comparison levels<a class="anchor" aria-label="anchor" href="#comparison-levels"></a>
@@ -286,6 +291,10 @@ corresponds to a Splink comparison level class.</p>
 In <code>irelink</code>, these are helper functions that return
 preconfigured sets of levels.</p>
 <table class="table">
+<colgroup>
+<col width="56%">
+<col width="43%">
+</colgroup>
 <thead><tr class="header">
 <th>splink (Python)</th>
 <th>irelink (R)</th>
@@ -301,7 +310,8 @@ preconfigured sets of levels.</p>
 </tr>
 <tr class="odd">
 <td><code>DateOfBirthComparison</code></td>
-<td><code><a href="../reference/cl_dob.html">cl_dob()</a></code></td>
+<td>
+<code><a href="../reference/cl_dob.html">cl_dob()</a></code> (Levenshtein for one-character typos)</td>
 </tr>
 <tr class="even">
 <td><code>EmailComparison</code></td>

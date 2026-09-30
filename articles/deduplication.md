@@ -49,7 +49,7 @@ and value distributions:
 
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp8XdAV0/duckdb
+#> ℹ /tmp/RtmpxClqC3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -225,7 +225,7 @@ summary(model)
 #>   Blocking rules: 3
 #> 
 #>   Parameters:
-#>     prior: 0.5161334
+#>     prior: 0.5161233
 #>     comparisons: # A tibble: 23 × 4
 #>      comparisons:    comparison gamma_level      m       u
 #>      comparisons:    <chr>            <int>  <dbl>   <dbl>
@@ -288,7 +288,7 @@ and attach it to the same data or to new data with
 
 con2 <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp8XdAV0/duckdb
+#> ℹ /tmp/RtmpxClqC3/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -301,12 +301,12 @@ head(predict(model2, threshold = 0.85))
 #> # A tibble: 6 × 11
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob gamma_city
 #>         <int>       <int>            <int>         <int>     <int>      <int>
-#> 1         509         512                4             2         3          1
-#> 2         100         104                4            -1         5          0
-#> 3         150         152                4             4         2          1
-#> 4         252         254                4             4         5          0
-#> 5         215         217                4             4         5          0
-#> 6         814         820                4             4         5          1
+#> 1         479         481                4             4         5          0
+#> 2         510         512                4             4         3          1
+#> 3          99         104                4             2         5          1
+#> 4         270         271                4             4         5          1
+#> 5         100         102                4            -1         5          0
+#> 6         214         217                4             3         3          1
 #> # ℹ 5 more variables: gamma_email <int>, match_weight <dbl>, tf_adj_city <dbl>,
 #> #   total_match_weight <dbl>, match_probability <dbl>
 DBI::dbDisconnect(con2, shutdown = TRUE)
@@ -353,12 +353,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 525       cluster_517
-#> 2 540       cluster_535
-#> 3 143       cluster_142
-#> 4 539       cluster_535
-#> 5 784       cluster_784
-#> 6 32        cluster_32
+#> 1 523       cluster_517
+#> 2 533       cluster_527
+#> 3 174       cluster_172
+#> 4 257       cluster_252
+#> 5 171       cluster_164
+#> 6 168       cluster_164
 ```
 
 ## Evaluate against ground truth
