@@ -22,6 +22,11 @@ Useful links:
 \author{
 \strong{Maintainer}: Christopher T. Kenny \email{ctkenny@proton.me} (\href{https://orcid.org/0000-0002-9386-6860}{ORCID}) [copyright holder]
 
+Authors:
+\itemize{
+  \item Christopher T. Kenny \email{ctkenny@proton.me} (\href{https://orcid.org/0000-0002-9386-6860}{ORCID}) [copyright holder]
+}
+
 Other contributors:
 \itemize{
   \item Robin Linacre (Lead author of splink, the Python package this is derived from) [copyright holder]

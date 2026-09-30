@@ -1,5 +1,4 @@
-# Sprint 10 — Evaluation: il_accuracy(), il_confusion_matrix(), il_errors()
-# Translated from: test_accuracy.py
+# Translated from splink: test_accuracy.py
 
 test_that('il_accuracy() returns correct TP/FP/TN/FN at known thresholds', {
   skip_if_not_installed('RSQLite')
@@ -7,8 +6,7 @@ test_that('il_accuracy() returns correct TP/FP/TN/FN at known thresholds', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  # From: test_truth_space_table_from_labels_column_dedupe_only
-  # 6 records: cluster 1 (IDs 1,2,3), cluster 2 (ID 4), cluster 3 (IDs 5,6)
+  # 6 records in clusters {1, 2, 3}, {4}, and {5, 6}
   df <- data.frame(
     unique_id = 1:6,
     first_name = c('John', 'John', 'John', 'Mary', 'Jane', 'Jane'),
@@ -151,8 +149,7 @@ test_that('il_accuracy() and il_confusion_matrix() agree for lazy inputs without
   expect_equal(cm$tn, best$tn)
 })
 
-# --- il_errors() ----------------------------------------------------------
-# From: test_prediction_errors_from_labels_table
+# il_errors(): from test_prediction_errors_from_labels_table
 
 test_that('il_errors() returns false positive and false negative pairs', {
   skip_if_not_installed('RSQLite')

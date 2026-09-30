@@ -63,9 +63,7 @@ il_tf_chart <- function(model, col, n_most_freq = 10L, n_least_freq = 5L) {
     cli::cli_abort('Term frequency table {.field {tf_tbl}} is empty.')
   }
 
-  # Compute the TF weight adjustment: log2(tf / median_tf)
-  # Values with TF above median get negative adjustment (penalised)
-  # Values with TF below median get positive adjustment (boosted)
+  # log2(median_tf / tf): common values are penalised, rare values boosted.
   median_tf <- stats::median(tf_data$tf, na.rm = TRUE)
   tf_data$weight_adj <- log2(median_tf / tf_data$tf)
 

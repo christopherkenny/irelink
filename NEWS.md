@@ -56,7 +56,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 - `il_score_patterns()` scores compatible comparison-pattern tables, including dependency-aware pattern tables larger than the table used for fitting.
 - `il_deterministic_link()` performs single-table exact-match deduplication without training.
 - `il_find_matches()` scores a set of probe records against existing data.
-- `profile_sql = TRUE` on `predict()` attaches lightweight SQL timing metadata to collected predictions or lazy prediction objects.
+- `profile_sql = TRUE` on `predict()` attaches lightweight SQL timing metadata to collected predictions or lazy prediction objects, and lazy objects keep it when collected. Profiling adds no overhead when disabled.
 
 ## Diagnostics and evaluation
 

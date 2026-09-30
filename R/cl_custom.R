@@ -65,8 +65,7 @@ cl_literal <- function(value, side = c('both', 'left', 'right')) {
     }
     op <- '='
   }
-  sql_expr <- switch(
-    side,
+  sql_expr <- switch(side,
     'both' = paste0(
       'l.{col} ',
       op,

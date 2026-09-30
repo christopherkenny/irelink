@@ -1,5 +1,4 @@
-# Sprint 10 — il_attach(): reattach saved models to fresh data
-# Tests the production workflow: train -> save -> load -> attach -> predict
+# Production workflow: train -> save -> load -> attach -> predict
 
 # Helper: small trained model for reuse tests
 make_attach_model <- function(con) {

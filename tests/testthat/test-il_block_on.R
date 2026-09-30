@@ -1,6 +1,4 @@
-# Sprint 3 — Blocking rules: il_block_on() and block_on()
-# Translated from: test_blocking.py (blocking rule basics),
-# test_blocking_rule_composition.py (AND/OR/NOT)
+# Translated from splink: test_blocking.py, test_blocking_rule_composition.py
 
 # --- il_block_on() --------------------------------------------------------
 
@@ -67,8 +65,7 @@ test_that('print.il_spec() shows blocking rules', {
   )
 })
 
-# --- block_on() (standalone) ----------------------------------------------
-# From: test_blocking.py — standalone rules for training
+# block_on() standalone rules: from test_blocking.py
 
 test_that('block_on() creates a standalone blocking rule without a spec', {
   rule <- block_on(first_name, surname)

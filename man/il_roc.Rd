@@ -21,7 +21,7 @@ A \code{\link[tibble:tibble]{tibble::tibble()}} with columns \code{threshold}, \
 \description{
 Returns a tidy tibble of false-positive rates and true-positive rates
 at each match-probability threshold, for plotting an ROC curve.
-Requires labeled pairs. Designed for use with \code{\link[ggplot2:geom_path]{ggplot2::geom_line()}}.
+Requires labeled pairs. Designed for use with \code{\link[ggplot2:geom_line]{ggplot2::geom_line()}}.
 }
 \examples{
 df <- data.frame(

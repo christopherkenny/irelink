@@ -102,8 +102,7 @@ il_compare <- function(
   spec
 }
 
-# Extract column names from a quosure. Handles bare names, c(), and
-# tidyselect helpers (which are stored as deferred expressions).
+# Extract column names from a quosure (bare names, c(), or deferred tidyselect).
 extract_col_names <- function(quo) {
   expr <- rlang::quo_get_expr(quo)
   if (rlang::is_symbol(expr)) {
@@ -129,8 +128,7 @@ extract_col_names <- function(quo) {
   )
 }
 
-# Resolve data-dependent tidyselect comparisons once model columns are known.
-# Bare-name comparisons are already concrete and pass through unchanged.
+# Resolve deferred tidyselect comparisons once model columns are known.
 resolve_spec_selectors <- function(spec, columns, column_classes = NULL) {
   if (
     !any(vapply(
@@ -188,8 +186,7 @@ make_tidyselect_proxy <- function(columns, column_classes = NULL) {
     if (is.na(cls)) {
       return(logical())
     }
-    switch(
-      cls,
+    switch(cls,
       character = character(),
       factor = factor(),
       integer = integer(),

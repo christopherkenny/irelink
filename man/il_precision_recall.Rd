@@ -21,7 +21,7 @@ A \code{\link[tibble:tibble]{tibble::tibble()}} with columns \code{threshold}, \
 \description{
 Returns a tidy tibble of precision and recall values at each
 match-probability threshold. Requires labeled pairs. Designed for use
-with \code{\link[ggplot2:geom_path]{ggplot2::geom_line()}}.
+with \code{\link[ggplot2:geom_line]{ggplot2::geom_line()}}.
 }
 \examples{
 df <- data.frame(

@@ -86,4 +86,3 @@ il_comparison_vectors <- function(model, blocking = NULL, limit = NULL) {
 
   add_class(tibble::as_tibble(agg), 'il_comparison_vectors')
 }
-

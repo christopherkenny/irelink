@@ -1,6 +1,4 @@
-# Sprint 9 — Clustering: il_cluster()
-# Translated from: test_clustering.py, test_cluster_using_single_best_links.py,
-# test_cc_random_graphs.py, test_cluster_at_multiple_thresholds.py
+# Translated from splink's clustering tests
 
 test_that('il_cluster() assigns connected pairs to the same cluster', {
   # Hand-crafted pairs: A-B and B-C should be one cluster of three
@@ -55,8 +53,7 @@ test_that('il_cluster() handles empty predictions gracefully', {
 })
 
 test_that("il_cluster(method = 'best_link') limits to one record per cluster from each source", {
-  # From: test_single_best_links_correctness_example_1
-  # 9 records from 3 datasets, 6 predictions
+  # 9 records from 3 datasets with 6 predictions
   pairs <- tibble::tibble(
     unique_id_l = c(0L, 1L, 3L, 4L, 6L, 6L),
     unique_id_r = c(1L, 2L, 5L, 5L, 5L, 7L),
@@ -85,15 +82,13 @@ test_that('il_cluster() handles ties in best_link', {
   pairs <- structure(pairs, class = c('il_compared', class(pairs)))
 
   clusters <- il_cluster(pairs, threshold = 0.5, method = 'best_link')
-  # With ties, records should still be assigned to clusters
-  # (exact behavior depends on tie-breaking strategy)
+  # Tied records should still be assigned to clusters
   expect_s3_class(clusters, 'tbl_df')
   expect_true(length(unique(clusters$cluster_id)) > 1)
 })
 
 test_that('il_cluster() with connected components matches igraph', {
-  # From: test_cc_random_graphs — small random graph
-  # Create a small graph with known components
+  # Small random graph with known components
   set.seed(42)
   n <- 20
   edges <- data.frame(
@@ -128,8 +123,7 @@ test_that('il_cluster() with connected components matches igraph', {
 # --- ties_method --------------------------------------------------------------
 
 test_that("ties_method = 'drop' removes tied best-link edges", {
-  # Three records: A-B and A-C tied at 0.9; B-C at 0.5
-  # A is tied so its edges should be dropped; B-C survives
+  # A-B and A-C tie at 0.9, so A's edges drop and only B-C survives
   pairs <- tibble::tibble(
     unique_id_l = c('A', 'A', 'B'),
     unique_id_r = c('B', 'C', 'C'),

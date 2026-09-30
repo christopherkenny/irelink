@@ -58,4 +58,24 @@ test_that('prediction can record SQL profile entries', {
   lazy <- predict(model, threshold = 0, collect = FALSE, profile_sql = TRUE)
   expect_s3_class(lazy$sql_profile, 'tbl_df')
   expect_true('predict_lazy.create' %in% lazy$sql_profile$step)
+
+  collected <- collect_il_compared_lazy(lazy)
+  collected_profile <- attr(collected, 'sql_profile')
+  expect_s3_class(collected_profile, 'tbl_df')
+  expect_identical(collected_profile, lazy$sql_profile)
+})
+
+test_that('SQL wrappers record rows and statements when profiling is enabled', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+  profile <- il_new_sql_profile(TRUE)
+
+  il_db_execute(con, 'CREATE TABLE timing_test (x INTEGER)', 'create', profile)
+  il_db_get_query(con, 'SELECT 1 AS x', 'query', profile)
+
+  entries <- il_sql_profile_entries(profile)
+  expect_equal(entries$step, c('create', 'query'))
+  expect_equal(entries$rows, c(0L, 1L))
+  expect_all_true(nzchar(entries$statement))
+  expect_all_true(is.finite(entries$elapsed))
 })

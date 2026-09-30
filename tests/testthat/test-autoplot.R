@@ -1,5 +1,4 @@
-# Sprint 10 — Visualization: autoplot.il_model(), autoplot.il_compared()
-# Translated from: test_charts.py
+# Translated from splink: test_charts.py
 
 test_that('autoplot(model) returns a ggplot object', {
   skip_if_not_installed('RSQLite')

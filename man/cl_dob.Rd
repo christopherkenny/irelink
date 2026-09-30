@@ -23,7 +23,7 @@ A comparison-level object for use in \code{\link[=il_compare]{il_compare()}}.
 }
 \description{
 A pre-built domain comparison for dates of birth. Combines exact
-matching, a Damerau-Levenshtein string check for transposed digits,
+matching, a Levenshtein string check for single-digit errors,
 and configurable date-difference levels to handle common errors.
 }
 \examples{

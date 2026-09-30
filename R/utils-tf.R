@@ -1,6 +1,4 @@
-# Term frequency computation and adjustment helpers.
-# Implements the TF weighting from Fellegi-Sunter: rare exact-match values
-# receive higher match weights than common ones.
+# Term-frequency helpers: rare exact-match values get higher match weights.
 
 #' Identify comparison columns that have term_frequency enabled
 #' @param comparisons List of comparison entries from the spec.

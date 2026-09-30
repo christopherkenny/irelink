@@ -1,5 +1,4 @@
-# Sprint 9 — Graph metrics: il_graph_metrics()
-# Translated from: test_graph_metrics.py
+# Translated from splink: test_graph_metrics.py
 
 test_that('il_graph_metrics() returns a list of three tibbles', {
   # From: test_size_density_dedupe — simple 3-record example
@@ -28,10 +27,7 @@ test_that('il_graph_metrics() returns a list of three tibbles', {
 })
 
 test_that('il_graph_metrics() computes correct cluster sizes', {
-  # From: test_metrics — known cluster structure
-  # Cluster A: 4 nodes, 4 edges
-  # Cluster B: 2 nodes, 1 edge
-  # Cluster C: 1 node (isolated)
+  # Clusters: A (4 nodes, 4 edges), B (2 nodes, 1 edge), C (1 isolated node)
   pairs <- tibble::tibble(
     unique_id_l = c('1', '1', '2', '3', '5'),
     unique_id_r = c('2', '3', '3', '4', '6'),

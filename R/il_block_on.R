@@ -161,10 +161,7 @@ block_on <- function(..., .where = NULL, .transform = NULL, .explode = NULL) {
   )
 }
 
-# Parse a list of quosures into column names and per-column transforms.
-# Bare symbols -> column name, no transform.
-# col ~ tf formulas -> column name from LHS, transform from evaluated RHS.
-# Returns list(columns = chr, per_col_tfs = list).
+# Split quosures into column names and per-column transforms from `col ~ tf` formulas.
 parse_blocking_cols <- function(col_exprs) {
   columns <- character(length(col_exprs))
   per_col_tfs <- list()
@@ -201,9 +198,7 @@ parse_blocking_cols <- function(col_exprs) {
   list(columns = columns, per_col_tfs = per_col_tfs)
 }
 
-# Combine formula-extracted per-column transforms with the .transform argument.
-# Formula transforms take precedence. Returns NULL, a single function, or a
-# named list depending on what was provided.
+# Merge formula transforms with .transform; formula transforms take precedence.
 merge_blocking_transforms <- function(per_col_tfs, dot_transform, columns) {
   if (length(per_col_tfs) == 0L) {
     validate_blocking_transform_names(dot_transform, columns)

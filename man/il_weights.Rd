@@ -16,7 +16,7 @@ A \code{\link[tibble:tibble]{tibble::tibble()}} with columns \code{comparison}, 
 \description{
 Returns a tidy tibble of comparison levels with their m probabilities,
 u probabilities, and log-2 Bayes factors (match weights). Designed for
-use with \code{\link[ggplot2:geom_bar]{ggplot2::geom_col()}} and \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}}.
+use with \code{\link[ggplot2:geom_col]{ggplot2::geom_col()}} and \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}}.
 }
 \examples{
 df <- data.frame(

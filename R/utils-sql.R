@@ -1,5 +1,4 @@
-# Internal SQL generation functions for comparison levels, blocking rules,
-# and join conditions. Not exported.
+# Internal SQL generation for comparison levels, blocking rules, and join conditions.
 
 #' Convert a time-diff threshold + unit to total seconds
 #' @param value Numeric threshold value.
@@ -7,8 +6,7 @@
 #' @return Numeric value in seconds.
 #' @noRd
 time_diff_to_seconds <- function(value, unit) {
-  mult <- switch(
-    unit,
+  mult <- switch(unit,
     'seconds' = 1,
     'minutes' = 60,
     'hours' = 3600,
@@ -49,9 +47,12 @@ sql_cast_double <- function(expression, dialect) {
 #' @noRd
 sql_similarity_expression <- function(method, lhs, rhs, dialect) {
   function_name <- switch(method,
-    'jaro_winkler' = 'jaro_winkler_similarity', 'jaro' = 'jaro_similarity',
-    'jaccard' = 'jaccard', 'cosine' = 'cosine_similarity',
-    'levenshtein' = 'levenshtein', 'damerau_levenshtein' = 'damerau_levenshtein',
+    'jaro_winkler' = 'jaro_winkler_similarity',
+    'jaro' = 'jaro_similarity',
+    'jaccard' = 'jaccard',
+    'cosine' = 'cosine_similarity',
+    'levenshtein' = 'levenshtein',
+    'damerau_levenshtein' = 'damerau_levenshtein',
     NULL
   )
   if (is.null(function_name)) cli::cli_abort('Unknown SQL string-comparison method {.val {method}}.')
@@ -149,8 +150,7 @@ sql_transform_col <- function(col_ref, transform, dialect = NULL) {
   if (is_column_transform(transform)) {
     return(column_transform_sql(transform, col_ref, dialect))
   }
-  # Phonetic transforms need special handling (dialect-dependent, some
-  # have multi-arg SQL signatures)
+  # Phonetic transforms are dialect-dependent and some take multiple SQL arguments.
   phonetic_sql <- phonetic_transform_sql(transform, col_ref, dialect)
   if (!is.null(phonetic_sql)) {
     return(phonetic_sql)
@@ -312,16 +312,14 @@ phonetic_transform_sql <- function(transform, col_ref, dialect = NULL) {
 #' Validate that a phonetic function is supported by a SQL dialect
 #' @noRd
 validate_phonetic_dialect <- function(fn_name, dialect) {
-  supported <- switch(
-    fn_name,
+  supported <- switch(fn_name,
     'il_soundex' = 'duckdb',
     'il_metaphone' = character(0),
     'il_dmetaphone' = character(0),
     character(0)
   )
   if (!dialect %in% supported) {
-    label <- switch(
-      fn_name,
+    label <- switch(fn_name,
       'il_soundex' = 'Soundex',
       'il_metaphone' = 'Metaphone',
       'il_dmetaphone' = 'Double Metaphone'
@@ -372,10 +370,7 @@ sql_gamma_case <- function(comp, dialect) {
     ))
   }
 
-  # Build multi-level CASE for similarity methods with thresholds.
-  # Thresholds are stored strictest-first (descending for similarity,
-  # ascending for distance). The SQL CASE evaluates top-to-bottom,
-  # returning the first match — so strictest threshold gets highest gamma.
+  # Thresholds are stored strictest-first, so the CASE gives the strictest match the highest gamma.
 
   if (method == 'jaro_winkler') {
     n <- length(thresholds)
@@ -505,8 +500,7 @@ sql_gamma_case <- function(comp, dialect) {
     whens <- vapply(
       seq_along(thresholds),
       function(i) {
-        mult <- switch(
-          level$units[i],
+        mult <- switch(level$units[i],
           'days' = 1,
           'months' = 30,
           'years' = 365,
@@ -744,7 +738,12 @@ sql_sublevel_condition <- function(
   }
   if (method == 'date_diff') {
     t <- sub$thresholds[1]
-    mult <- switch(sub$units[1], 'days' = 1, 'months' = 30, 'years' = 365, 1)
+    mult <- switch(sub$units[1],
+      'days' = 1,
+      'months' = 30,
+      'years' = 365,
+      1
+    )
     days_val <- t * mult
     diff_expr <- sql_date_diff_expr(lcol, rcol, dialect)
     return(glue::glue('{null_guard} AND {diff_expr} <= {days_val}'))
@@ -837,10 +836,7 @@ sql_sublevel_condition <- function(
   glue::glue('{null_guard} AND {lcol} = {rcol}')
 }
 
-# Build the inner scalar expression that yields the best pairwise score
-# for array_min_distance: MAX similarity (jaro_winkler) or MIN distance
-# (levenshtein) across all element pairs via UNNEST cross-join.
-# Returns a SQL fragment suitable for embedding in a scalar subquery.
+# Best pairwise element score for array_min_distance (MAX similarity or MIN distance).
 sql_array_min_distance_inner <- function(fn, col, dialect = 'duckdb') {
   agg <- 'MIN'
   dist_fn <- sql_similarity_expression('levenshtein', 'lv', 'rv', dialect)
@@ -863,9 +859,7 @@ sql_array_min_distance_inner <- function(fn, col, dialect = 'duckdb') {
   )
 }
 
-# Build the full multi-threshold CASE expression for array_min_distance.
-# Wraps sql_array_min_distance_inner in an outer CASE that maps the best
-# score to an integer gamma level (0 = else, K = strictest match).
+# Map the best array_min_distance score to a gamma level (0 = else, K = strictest).
 sql_array_min_distance_case <- function(level, col, null_guard, dialect = 'duckdb') {
   fn <- level$fn
   thresholds <- level$thresholds
@@ -1028,13 +1022,7 @@ build_gamma_query <- function(
 
   inner <- paste(all_parts, collapse = ' UNION ALL ')
 
-  # Optionally wrap in DISTINCT to deduplicate across blocking rules.
-  # With preceding-rule exclusion, duplicates are largely eliminated at
-  # source. For EM callers, GROUP BY handles aggregation. For predict
-  # callers, dedup is applied after scoring + threshold filtering.
-
-  # GROUP BY handles aggregation.  For predict callers, dedup is applied
-  # after scoring + threshold filtering where far fewer rows remain.
+  # DISTINCT is optional: EM callers aggregate with GROUP BY and predict dedups after filtering.
   if (deduplicate) {
     sql <- glue::glue('SELECT DISTINCT * FROM ({inner}) AS pairs')
   } else {
@@ -1289,8 +1277,7 @@ sql_for_comparison_level <- function(level, col, dialect = 'duckdb') {
     units <- level$units
     parts <- character(length(thresholds))
     for (i in seq_along(thresholds)) {
-      days_val <- switch(
-        units[i],
+      days_val <- switch(units[i],
         'days' = thresholds[i],
         'months' = thresholds[i] * 30,
         'years' = thresholds[i] * 365,
@@ -1658,9 +1645,7 @@ sql_tf_adj_expr <- function(
   gamma_col <- sql_quote_identifier(paste0('gamma_', col))
   tf_col_l <- sql_quote_identifier(paste0('tf_', col, '_l'))
   tf_col_r <- sql_quote_identifier(paste0('tf_', col, '_r'))
-  # Build TF divisor using COALESCE so that when only one side has a TF
-  # value the available value is used (matches splink's coalesce approach
-  # and the R-side pmax(na.rm=TRUE) path).
+  # COALESCE so one-sided TF values still apply, matching splink and the R-side pmax() path.
   tf_coalesce_lr <- glue::glue(
     'COALESCE({tf_col_l}, {tf_col_r})'
   )
@@ -1793,10 +1778,7 @@ build_scored_query <- function(
     )
   }
 
-  # Two-level nesting:
-  #   Inner: gamma query + match_weight + tf_adj columns
-  #   Outer: match_probability + threshold filter + DISTINCT (dedup here,
-  #          not in build_gamma_query, so we deduplicate fewer rows)
+  # Inner query scores gammas and weights; outer adds probability, threshold, and DISTINCT.
   glue::glue(
     'SELECT DISTINCT unique_id_l, unique_id_r, {gamma_select}, ',
     'match_weight{outer_tf_adj}, ',

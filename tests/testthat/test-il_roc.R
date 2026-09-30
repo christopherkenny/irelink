@@ -1,6 +1,4 @@
-# Sprint 10 — ROC and precision-recall: il_roc(), il_precision_recall(),
-# il_unlinkables()
-# Translated from: test_accuracy.py (roc tests)
+# Translated from splink: test_accuracy.py
 
 test_that('il_roc() returns a tibble with fpr and tpr in [0, 1]', {
   skip_if_not_installed('RSQLite')

@@ -1,5 +1,4 @@
-# Sprint 8 — Deterministic linking: il_deterministic_link()
-# Translated from: test_full_example_deterministic_link.py
+# Translated from splink: test_full_example_deterministic_link.py
 
 test_that('il_deterministic_link() returns a tibble of exact-match pairs', {
   skip_if_not_installed('RSQLite')

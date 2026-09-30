@@ -1,10 +1,8 @@
-# Term frequency adjustment tests
-# Verifies TF table computation, adjustment math, and end-to-end behavior.
+# Term frequency tables, adjustment math, and end-to-end behavior
 
 # Helper: build a model with known value frequencies
 make_tf_model <- function(con) {
-  # City distribution: London x40, Birmingham x8, Truro x2
-  # This gives tf_London = 0.80, tf_Birmingham = 0.16, tf_Truro = 0.04
+  # London x40, Birmingham x8, Truro x2 -> tf 0.80, 0.16, 0.04
   df <- data.frame(
     unique_id = 1:50,
     city = c(rep('London', 40), rep('Birmingham', 8), rep('Truro', 2)),
@@ -138,12 +136,10 @@ test_that('compute_tf_adjustment() produces correct adjustments', {
 
   adj <- compute_tf_adjustment(gamma_mat, tf_data, comparisons, mu)
 
-  # Pair 1: gamma=1, tf_max = max(0.80, 0.80) = 0.80
-  # adj = log2(0.10 / 0.80) = log2(0.125) = -3
+  # Pair 1: tf_max = 0.80, so adj = log2(0.10 / 0.80) = -3
   expect_equal(adj[1], log2(0.10 / 0.80), tolerance = 1e-10)
 
-  # Pair 2: gamma=1, tf_max = max(0.04, 0.04) = 0.04
-  # adj = log2(0.10 / 0.04) = log2(2.5) ≈ 1.322
+  # Pair 2: tf_max = 0.04, so adj = log2(0.10 / 0.04) ~= 1.322
   expect_equal(adj[2], log2(0.10 / 0.04), tolerance = 1e-10)
 
   # Pair 3: gamma=0, no adjustment
@@ -205,13 +201,11 @@ test_that('TF adjustments change match weights vs non-TF', {
 
   pairs_no_tf <- predict(model_no_tf, threshold = 0)
 
-  # Match weights should differ when gamma_city == 1
-  # (TF adjusts the weight based on value frequency)
+  # TF adjusts match weights by value frequency when gamma_city == 1
   tf_weights <- pairs_tf$match_weight[pairs_tf$gamma_city == 1]
   no_tf_weights <- pairs_no_tf$match_weight[pairs_no_tf$gamma_city == 1]
 
-  # The TF model should not have identical weights for all city-matching pairs
-  # (London vs Truro pairs get different adjustments)
+  # London and Truro pairs should get different adjustments
   if (length(tf_weights) > 1) {
     expect_true(
       sd(tf_weights) > sd(no_tf_weights),
@@ -231,13 +225,9 @@ test_that('TF gives rare values higher weights than common values', {
   pairs <- predict(model, threshold = 0)
 
   if (nrow(pairs) > 0) {
-    # Get a London pair and a Truro pair (if any)
-    # Due to blocking on city, all pairs share the same city
-    # Look at the tf_adj_city column
+    # Blocking on city means each pair shares a city; check tf_adj_city varies
     if ('tf_adj_city' %in% names(pairs)) {
       london_adj <- pairs$tf_adj_city[pairs$gamma_city == 1][1]
-      # We can't easily separate London vs Truro pairs without city values,
-      # but we can check that tf_adj_city varies
       tf_adjs <- pairs$tf_adj_city[pairs$gamma_city == 1]
       if (length(unique(tf_adjs)) > 1) {
         # Rare values (smaller TF) should have higher adjustments
@@ -263,8 +253,7 @@ test_that('waterfall includes TF adjustment in contributions', {
     wf <- il_waterfall(pairs, which = 1)
     expect_s3_class(wf, 'tbl_df')
     expect_true('city' %in% wf$step)
-    # The contribution for city should include TF adjustment
-    # (it will differ from the base w1/w0 when TF is active)
+    # City contribution should include the TF adjustment
     expect_true(is.numeric(wf$contribution))
   }
 })
@@ -335,10 +324,7 @@ test_that('TF adjustment handles one-sided NULL city in SQL path (DuckDB)', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  # Build a linking model where dataset B has missing city values.
-  # The TF lookup comes from the union; the missing city should still get a
-
-  # TF adjustment when the other side has a TF value.
+  # Missing city in B should still get a TF adjustment from the other side
   df_a <- data.frame(
     unique_id = 1:20,
     city = c(rep('London', 16), rep('Truro', 4)),
@@ -362,9 +348,7 @@ test_that('TF adjustment handles one-sided NULL city in SQL path (DuckDB)', {
   pairs_sql <- predict(model, threshold = 0, collect = TRUE)
 
   if (nrow(pairs_sql) > 0 && 'tf_adj_city' %in% names(pairs_sql)) {
-    # All pairs where gamma_city == 1 should have a non-zero TF adjustment
-    # even if one side had NULL city (and therefore NULL TF) — the COALESCE
-    # ensures the available TF value is used.
+    # COALESCE uses the available TF value when one side's city is NULL
     exact_matches <- pairs_sql[pairs_sql$gamma_city == 1, ]
     if (nrow(exact_matches) > 0) {
       expect_true(

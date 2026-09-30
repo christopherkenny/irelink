@@ -16,7 +16,7 @@ A \code{\link[tibble:tibble]{tibble::tibble()}} with columns \code{session}, \co
 \description{
 Returns a tidy tibble of parameter estimates at each EM iteration,
 useful for diagnosing convergence. Designed for use with
-\code{\link[ggplot2:geom_path]{ggplot2::geom_line()}} and \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}}.
+\code{\link[ggplot2:geom_line]{ggplot2::geom_line()}} and \code{\link[ggplot2:facet_wrap]{ggplot2::facet_wrap()}}.
 }
 \examples{
 df <- data.frame(

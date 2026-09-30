@@ -78,8 +78,7 @@ il_roc <- function(model, labels = NULL, labels_col = NULL) {
     tpr = acc$tp / pmax(acc$tp + acc$fn, 1L)
   )
 
-  # ROC curves conventionally start at no predicted positives. A threshold of
-  # 1 can still predict records when probabilities are exactly 1.
+  # Start the curve at (0, 0); a threshold of 1 can still predict pairs with probability 1.
   if (!any(roc$fpr == 0 & roc$tpr == 0)) {
     roc <- rbind(
       tibble::tibble(threshold = Inf, fpr = 0, tpr = 0),

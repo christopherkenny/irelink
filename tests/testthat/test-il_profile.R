@@ -1,5 +1,4 @@
-# Sprint 5 — Exploration: il_profile()
-# Translated from: test_profile_data.py
+# Translated from splink: test_profile_data.py
 
 test_that('il_profile() returns value counts for selected columns', {
   skip_if_not_installed('RSQLite')

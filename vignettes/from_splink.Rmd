@@ -46,6 +46,9 @@ In `irelink`, the `cl_*()` functions fill the same role and can be passed direct
 
 `irelink` also supports `link_type = "link_and_dedupe"` for two-table jobs where duplicates may exist within each input table and across the two tables.
 
+`irelink` scores in-memory inputs and DBI-backed tables, including lazy DuckDB results.
+Splink's DuckDB source pruning and Parquet-backed intermediate tables are not available, so very large workflows should rely on explicit blocking and `predict(collect = FALSE)`.
+
 ## Comparison levels
 
 Comparison levels are the building blocks used to score how similar two records are on a field.
@@ -81,7 +84,7 @@ In `irelink`, these are helper functions that return preconfigured sets of level
 |-----------------|-------------|
 | `NameComparison` | `cl_name()` |
 | `ForenameSurnameComparison` | `cl_forename_surname()` |
-| `DateOfBirthComparison` | `cl_dob()` |
+| `DateOfBirthComparison` | `cl_dob()` (Levenshtein for one-character typos) |
 | `EmailComparison` | `cl_email()` |
 | `PostcodeComparison` | `cl_postcode()` |
 

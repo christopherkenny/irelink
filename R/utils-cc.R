@@ -1,10 +1,4 @@
-# SQL-based connected components and graph metrics.
-# Implements splink's iterative representative-propagation algorithm
-# entirely in SQL (no graph library needed for the primary path).
-# Reference: https://arxiv.org/pdf/1802.09478.pdf
-#
-# The R-side driver loop is thin: fire SQL, check convergence, repeat.
-# Typical convergence: 3-7 iterations even for large graphs.
+# SQL connected components via splink's representative propagation (arXiv:1802.09478).
 
 # Table names used by the CC algorithm
 cc_tbl <- function(name, prefix = NULL) {
@@ -323,8 +317,7 @@ sql_best_link_filter <- function(
   DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {filtered_tbl}'))
 
   if (ties_method == 'drop') {
-    # Identify nodes with more than one edge tied at their maximum probability,
-    # then exclude all edges touching those tied nodes.
+    # Exclude all edges touching nodes whose max probability is tied.
     DBI::dbExecute(
       con,
       glue::glue(
@@ -470,8 +463,7 @@ solve_one_to_one_sql <- function(
       )
     )
 
-    # Step 2: Find candidate edges that don't violate constraints,
-    # rank by probability, and keep mutual best
+    # Step 2: rank constraint-respecting candidate edges and keep mutual best
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_ranked}'))
 
     tie_order <- ''
@@ -536,8 +528,7 @@ solve_one_to_one_sql <- function(
       break
     }
 
-    # Step 3: Merge clusters — update representatives
-    # For each mutual-best pair, the new representative is MIN(repr_l, repr_r)
+    # Step 3: merge mutual-best pairs into representative MIN(repr_l, repr_r)
     DBI::dbExecute(con, glue::glue('DROP TABLE IF EXISTS {oto_merged}'))
     DBI::dbExecute(
       con,
@@ -746,8 +737,7 @@ solve_one_to_one_r <- function(
       }
       partner_best <- best_partner[[partner]]
       if (!is.null(partner_best) && partner_best == cl) {
-        # Mutual best — merge: assign all nodes in larger-id cluster
-        # to smaller-id cluster
+        # Mutual best: merge the larger-id cluster into the smaller-id one
         new_rep <- min(cl, partner)
         old_rep <- max(cl, partner)
         repr[repr == old_rep] <- new_rep

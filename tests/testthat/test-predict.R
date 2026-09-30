@@ -1,6 +1,4 @@
-# Sprint 8 — Prediction: predict.il_model()
-# Translated from: test_full_example_duckdb.py, test_full_example_sqlite.py,
-# test_train_vs_predict.py, test_compare_splink2.py
+# Translated from splink's full example and train-vs-predict tests
 
 # Helper to build a trained model for prediction tests
 make_trained_model <- function(con) {
@@ -179,13 +177,8 @@ test_that('predict() finds known planted duplicates in demo data', {
   model <- make_trained_model(con)
   pairs <- predict(model, threshold = 0.5)
 
-  # Demo fake_1000 contains planted duplicate clusters.
-  # The trained model should find at least some of them.
+  # fake_1000 has planted duplicates; the model should find some
   expect_true(nrow(pairs) > 0)
-
-  # Records in the same cluster should share a cluster identifier
-  # (verified in Sprint 9), but at this stage we just confirm
-  # high-probability pairs exist among the known duplicates.
 })
 
 # --- Tidyverse integration (from 09-implementation-plan §6b) --------------

@@ -153,8 +153,7 @@ cluster_sql <- function(
 
   if (method == 'best_link') {
     if (!is.null(source_dataset)) {
-      # Iterative one-to-one: merge clusters step-by-step, re-evaluating
-      # dataset constraints after each merge (splink's approach).
+      # Iterative one-to-one: re-check dataset constraints after each merge, as splink does.
       result <- solve_one_to_one_sql(
         con,
         edges_tbl,
@@ -274,7 +273,6 @@ cluster_igraph <- function(
 }
 
 # Filter edges to keep only mutual best links
-# @noRd
 best_link_filter <- function(pairs, ties_method = 'lowest_id') {
   if (nrow(pairs) == 0L) {
     return(pairs)
@@ -294,8 +292,7 @@ best_link_filter <- function(pairs, ties_method = 'lowest_id') {
   }
 
   if (ties_method == 'drop') {
-    # A node is tied if more than one edge shares its best probability.
-    # Drop all edges where either endpoint is tied.
+    # Drop all edges touching a node whose best probability is tied.
     tied_nodes <- character(0)
     for (nd in all_nodes) {
       cnt <- sum(
@@ -330,8 +327,7 @@ best_link_filter <- function(pairs, ties_method = 'lowest_id') {
     return(pairs[keep, , drop = FALSE])
   }
 
-  # 'lowest_id': break ties by keeping the edge to the lower unique_id.
-  # For each node track the best edge index; on tie, prefer smaller partner id.
+  # 'lowest_id': on ties, keep the edge to the smaller partner id.
   best_idx <- stats::setNames(rep(NA_integer_, length(all_nodes)), all_nodes)
 
   for (i in seq_len(nrow(pairs))) {

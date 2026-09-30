@@ -1,8 +1,4 @@
-# Sprint 3 — Spec composition: il_compare()
-# Translated from: test_comparison_level_composition.py::test_composition_outputs,
-# test_new_comparison_levels.py (creator tests),
-# test_settings_validation.py (column validation),
-# test_columns_selected.py (tidyselect)
+# Translated from splink's comparison composition, validation, and column selection tests
 
 test_that('il_compare() takes an il_spec first and returns an il_spec', {
   spec <- il_spec() |> il_compare(first_name, cl_exact())

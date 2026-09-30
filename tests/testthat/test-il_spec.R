@@ -1,8 +1,3 @@
-# Sprint 1 — Foundation: il_spec, unit helpers, S3 classes
-# Translated from splink test patterns; no direct splink equivalent
-# for structural S3 tests, but follows the contract defined in
-# inst/refs/04-irelink-core-interface.md and 08-sprints.md.
-
 test_that('il_spec() creates an il_spec object', {
   spec <- il_spec()
   expect_s3_class(spec, 'il_spec')

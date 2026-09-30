@@ -1,11 +1,4 @@
-# Unit helpers -- tagged-value constructors for self-documenting thresholds.
-# Inspired by gt's px(), pct(), and md().
-#
-# NOTE: days(), months(), and years() share names with lubridate exports.
-# We accept the namespace collision because:
-#   1. irelink's versions are tagged-value constructors, not durations.
-#   2. Users will rarely load both irelink and lubridate simultaneously.
-#   3. Explicit namespacing (irelink::days()) resolves any ambiguity.
+# Tagged-value unit helpers; days(), months(), and years() intentionally mask lubridate.
 
 # Internal validator for unit helper inputs
 check_unit_input <- function(n, unit) {

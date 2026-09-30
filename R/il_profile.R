@@ -73,9 +73,7 @@ il_profile <- function(.data, ..., con = NULL, top_n = NULL, bottom_n = NULL) {
   con <- reg$con
   on.exit(drop_registered(con, tbl_name), add = TRUE)
 
-  # Build a list of (label, sql_expr) pairs.
-  # A character literal like "city || left(name,1)" is used as raw SQL;
-  # a bare name like `first_name` is quoted as an identifier.
+  # Character literals are raw SQL expressions; bare names are quoted identifiers.
   if (length(col_exprs) == 0L) {
     col_specs <- lapply(reg$columns, function(nm) {
       list(label = nm, sql_expr = as.character(DBI::dbQuoteIdentifier(con, nm)))

@@ -86,8 +86,7 @@ il_find_matches <- function(model, new_records, threshold = 0.85) {
     mu <- extract_mu_vectors(params, comp_names)
   }
 
-  # Upload new records to a temporary table for SQL-side blocking
-  # Pad missing comparison/blocking columns with NA before registering
+  # Pad missing comparison/blocking columns with NA, then upload for SQL-side blocking
   all_needed <- unique(c(
     comp_cols,
     unlist(lapply(blocking_rules, function(r) r$columns))

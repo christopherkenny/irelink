@@ -1,11 +1,4 @@
-# Sprint 5 — SQL generation: internal engine tests
-# Translated from: test_linker_variants.py (join SQL),
-# test_blocking.py (blocking SQL fragments),
-# test_blocking_rule_composition.py (AND/OR SQL),
-# test_sql_transform.py (SQL manipulation)
-
-# These test internal SQL-generation functions. The functions are not
-# exported; use  to access them.
+# Internal SQL generation, translated from splink's blocking and SQL transform tests
 
 test_that('cl_exact() generates correct equality SQL for a column', {
   # From: test_blocking.py — blocking_rule_sql == 'l."surname" = r."surname"'

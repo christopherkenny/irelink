@@ -1,5 +1,4 @@
-# Internal helper for normalizing data input to a database table reference.
-# Supports data.frames, tbl_lazy (dbplyr), and character table name strings.
+# Normalise data.frames, tbl_lazy, and table-name strings to a database table.
 
 .il_table_counter <- new.env(parent = emptyenv())
 .il_table_counter$n <- 0L
@@ -119,10 +118,7 @@ register_data <- function(
       )
     }
 
-    # Create a registered object, adding unique_id if needed.
-    # When we must synthesize row IDs, materialize them once in a table so
-    # they stay stable across later queries to the model.
-    # Drop any existing table/view first to avoid type conflicts.
+    # Drop any existing object, then materialise synthesized row IDs so they stay stable.
     drop_registered(con, tbl_name)
     qtbl_name <- sql_quote_identifier(tbl_name)
     has_uid <- 'unique_id' %in% cols
@@ -176,8 +172,7 @@ register_data <- function(
     }
 
     has_uid <- 'unique_id' %in% cols
-    # Drop any existing table/view first to avoid type conflicts.
-    # As above, materialize synthesized row IDs once so they stay stable.
+    # Drop any existing object, then materialise synthesized row IDs so they stay stable.
     drop_registered(con, tbl_name)
     qtbl_name <- sql_quote_identifier(tbl_name)
     if (has_uid) {

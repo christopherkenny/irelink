@@ -1,6 +1,4 @@
-# Sprint 4 — String similarity: il_string_similarity()
-# No direct splink equivalent test — this is an irelink utility.
-# Tests verify correctness against known string-pair scores.
+# No direct splink equivalent; checks known string-pair scores.
 
 test_that('il_string_similarity() returns a tibble', {
   result <- il_string_similarity('Robert', 'Robt')

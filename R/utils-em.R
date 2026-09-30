@@ -595,8 +595,7 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     return(ifelse(both_present & val_l == val_r, 1L, 0L))
   }
 
-  # Multi-threshold: loop from most lenient to strictest, overwriting
-  # with higher gamma levels. Thresholds are stored strictest-first.
+  # Thresholds are stored strictest-first, so loop lenient to strict and overwrite gamma.
   thresholds <- comp_level$thresholds
 
   if (method %in% c('levenshtein', 'damerau_levenshtein')) {
@@ -712,7 +711,12 @@ compute_gamma <- function(val_l, val_r, comp_level) {
     nt <- length(thresholds)
     for (i in rev(seq_along(thresholds))) {
       unit <- comp_level$units[i]
-      mult <- switch(unit, 'days' = 1, 'months' = 30, 'years' = 365, 1)
+      mult <- switch(unit,
+        'days' = 1,
+        'months' = 30,
+        'years' = 365,
+        1
+      )
       days_thresh <- thresholds[i] * mult
       level_code <- nt - i + 1L
       gamma[bp & !is.na(diff) & diff <= days_thresh] <- level_code
@@ -783,9 +787,7 @@ compute_gamma <- function(val_l, val_r, comp_level) {
       if (fn == 'jaro_winkler') {
         best <- max(1 - dists)
       }
-      # Iterate most-lenient to strictest; overwrite with higher gamma each time
-      # a stricter threshold is also satisfied. Matches the pattern in jaro_winkler
-      # and levenshtein handling above.
+      # Iterate lenient to strict, overwriting gamma as stricter thresholds are met.
       for (i in rev(seq_along(thresholds))) {
         level_code <- n - i + 1L
         passes <- best <= thresholds[i]

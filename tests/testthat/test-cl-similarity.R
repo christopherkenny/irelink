@@ -1,7 +1,4 @@
-# Sprint 2 — Similarity-based comparison level constructors
-# Translated from: test_comparison_level_lib.py, test_comparison_lib.py,
-# test_date_levels_and_comparisons.py, test_km_distance_level.py,
-# test_array_columns.py, test_comparison_level.py, test_regex_param.py
+# Translated from splink's comparison level library tests
 
 # --- cl_exact() -----------------------------------------------------------
 
@@ -47,9 +44,7 @@ test_that('cl_jaro() creates a jaro-only comparison level', {
   expect_equal(lev$method, 'jaro')
 })
 
-# --- cl_levenshtein() / cl_damerau_levenshtein() --------------------------
-# From: test_comparison_level_lib.py::test_levenshtein_level,
-# test_damerau_levenshtein_level
+# cl_levenshtein() / cl_damerau_levenshtein(): from test_comparison_level_lib.py
 
 test_that('cl_levenshtein() stores integer distance thresholds', {
   lev <- cl_levenshtein(1, 2, 3)
@@ -64,8 +59,7 @@ test_that('cl_damerau_levenshtein() creates a damerau-levenshtein level', {
   expect_equal(lev$method, 'damerau_levenshtein')
 })
 
-# --- cl_jaccard() / cl_cosine() -------------------------------------------
-# From: test_comparison_level_lib.py::test_cosine_similarity_level
+# cl_jaccard() / cl_cosine(): from test_comparison_level_lib.py
 
 test_that('cl_jaccard() creates a jaccard similarity level', {
   lev <- cl_jaccard(0.8, 0.5)
@@ -96,8 +90,7 @@ test_that('cl_cosine() creates a cosine similarity level', {
   expect_equal(lev$thresholds, c(0.9, 0.7, 0.5))
 })
 
-# --- cl_numeric_diff() / cl_pct_diff() ------------------------------------
-# From: test_comparison_level_lib.py::test_absolute_difference, test_perc_difference
+# cl_numeric_diff() / cl_pct_diff(): from test_comparison_level_lib.py
 
 test_that('cl_numeric_diff() stores absolute-difference thresholds', {
   lev <- cl_numeric_diff(0, 5, 10, 20, 50)
@@ -123,8 +116,7 @@ test_that('pct_diff uses strict < (not <=) matching splink', {
   expect_false(grepl('<= 0.1', sql))
 })
 
-# --- cl_date_diff() -------------------------------------------------------
-# From: test_date_levels_and_comparisons.py
+# cl_date_diff(): from test_date_levels_and_comparisons.py
 
 test_that('cl_date_diff() accepts unit-helper thresholds', {
   lev <- cl_date_diff(days(30), days(365))
@@ -152,8 +144,7 @@ test_that('cl_date_diff() rejects invalid metrics', {
   expect_error(cl_date_diff(km(30)))
 })
 
-# --- cl_geo_distance() -----------------------------------------------------
-# From: test_km_distance_level.py
+# cl_geo_distance(): from test_km_distance_level.py
 
 test_that('cl_geo_distance() creates a geographic distance level', {
   lev <- cl_geo_distance(km(0.1), km(1), km(10), km(300))
@@ -206,8 +197,7 @@ test_that('cl_geo_distance() has active SQL gamma support', {
   expect_match(sql, 'RADIANS', fixed = TRUE)
 })
 
-# --- cl_array_intersect() -------------------------------------------------
-# From: test_array_columns.py::test_array_comparison_1
+# cl_array_intersect(): from test_array_columns.py
 
 test_that('cl_array_intersect() creates an array intersection level', {
   lev <- cl_array_intersect(4, 3, 2, 1)

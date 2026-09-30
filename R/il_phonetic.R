@@ -54,10 +54,7 @@ il_dmetaphone <- function(x) {
   ))
 }
 
-# R-side Soundex implementation
-# Follows the standard algorithm: retain first letter, map consonants to
-# digits, collapse adjacent duplicates while treating H/W as transparent
-# separators, and pad/truncate to 4 characters.
+# R-side Soundex; H and W are transparent when collapsing adjacent duplicate digits.
 soundex_one <- function(s) {
   if (is.na(s) || nchar(s) == 0L) {
     return(NA_character_)
@@ -147,7 +144,7 @@ register_phonetic_macros <- function(con) {
   )
   coded_tail <- paste0(
     'translate(',
-    "replace(replace(substr(",
+    'replace(replace(substr(',
     letters_only,
     ", 2), 'H', ''), 'W', '')",
     ", 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', '01230120022455012623010202')"
@@ -172,7 +169,7 @@ register_phonetic_macros <- function(con) {
     ') = 0 THEN NULL ELSE ',
     'left(',
     first_letter,
-    " || replace((",
+    ' || replace((',
     trimmed,
     "), '0', '') || '000', 4) ",
     'END)'
@@ -181,8 +178,7 @@ register_phonetic_macros <- function(con) {
   invisible(NULL)
 }
 
-# Helper: wrap an expression in nested replace() calls that collapse
-# adjacent duplicate digits (0–6). Repeated passes handle longer runs.
+# Collapse adjacent duplicate digits (0-6) with nested replace() calls.
 dedup_adjacent <- function(expr, passes = 4L) {
   for (i in seq_len(passes)) {
     for (d in as.character(0:6)) {

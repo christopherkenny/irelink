@@ -1,9 +1,6 @@
-# Sprint 8 — Pair inspection: il_waterfall(), il_compare_records(),
-# il_find_matches()
-# Translated from: test_compare_two_records.py, test_find_new_matches.py
+# Translated from splink: test_compare_two_records.py, test_find_new_matches.py
 
-# --- il_compare_records() -------------------------------------------------
-# From: test_compare_two_records.py
+# il_compare_records(): from test_compare_two_records.py
 
 test_that('il_compare_records() scores a known pair', {
   skip_if_not_installed('RSQLite')
@@ -72,8 +69,7 @@ test_that('il_compare_records() validates row count and required columns', {
   )
 })
 
-# --- il_find_matches() ----------------------------------------------------
-# From: test_find_new_matches.py::test_matches_work
+# il_find_matches(): from test_find_new_matches.py
 
 test_that('il_find_matches() returns matches for a new record', {
   skip_if_not_installed('RSQLite')

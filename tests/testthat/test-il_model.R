@@ -1,8 +1,4 @@
-# Sprint 6 — Model creation: il_model(), print, summary, is_il_model,
-# il_cleanup()
-# Translated from: test_full_example_duckdb.py (linker creation),
-# test_settings_validation.py (column validation),
-# test_caching_tables.py (cleanup)
+# Translated from splink's linker creation, settings validation, and caching tests
 
 # Helper spec used across multiple tests in this file
 make_test_spec <- function() {
@@ -239,8 +235,7 @@ test_that('il_model() handles factor columns in data', {
   expect_s3_class(model, 'il_model')
 })
 
-# --- il_cleanup() ---------------------------------------------------------
-# From: test_caching_tables.py
+# il_cleanup(): from test_caching_tables.py
 
 test_that('il_cleanup() removes temporary tables', {
   skip_if_not_installed('RSQLite')

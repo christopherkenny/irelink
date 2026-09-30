@@ -83,7 +83,7 @@ cl_name <- function(term_frequency = FALSE, phonetic = FALSE) {
 #' Date of Birth Comparison
 #'
 #' A pre-built domain comparison for dates of birth. Combines exact
-#' matching, a Damerau-Levenshtein string check for transposed digits,
+#' matching, a Levenshtein string check for single-digit errors,
 #' and configurable date-difference levels to handle common errors.
 #'
 #' @param thresholds A list of unit-tagged threshold values created by
@@ -115,7 +115,7 @@ cl_dob <- function(
   }
   date_levels <- lapply(thresholds, function(t) cl_date_diff(t))
   base_levels <- c(
-    list(cl_null(), cl_exact(), cl_damerau_levenshtein(1)),
+    list(cl_null(), cl_exact(), cl_levenshtein(1)),
     date_levels,
     list(cl_else())
   )
@@ -346,9 +346,7 @@ cl_zip_code <- function(
   }
 }
 
-# Internal helper: build a list of cl_custom() levels for Haversine distance
-# thresholds between lat/lon columns. Each level checks whether the great-circle
-# distance between the two records is within `d` km.
+# Build one cl_custom() Haversine level per km threshold between lat/lon columns.
 geo_distance_levels <- function(lat_col, long_col, km_thresholds) {
   lapply(km_thresholds, function(d) {
     sql <- paste0(

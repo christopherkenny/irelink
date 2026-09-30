@@ -291,8 +291,7 @@ column_transform_sql <- function(transform, col_ref, dialect = NULL) {
   type <- attr(transform, 'transform_type')
   p <- attr(transform, 'params')
 
-  switch(
-    type,
+  switch(type,
     'il_substr' = paste0(
       'SUBSTRING(',
       col_ref,
@@ -376,8 +375,7 @@ sql_quote_literal <- function(x) {
 column_transform_to_name <- function(transform) {
   type <- attr(transform, 'transform_type')
   p <- attr(transform, 'params')
-  switch(
-    type,
+  switch(type,
     'il_substr' = paste0('il_substr(', p$start, ',', p$length, ')'),
     'il_regex_extract' = paste0(
       'il_regex_extract("',

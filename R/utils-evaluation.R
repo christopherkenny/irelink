@@ -48,8 +48,7 @@ labels_from_column <- function(model, labels_col, threshold = 0) {
   if (dialect_has_fuzzy_sql(dialect)) {
     lazy <- predict_lazy(model, threshold)
     on.exit(drop_registered(con, lazy$predicted_tbl), add = TRUE)
-    # Universe = all true match pairs (from data) UNION all candidate pairs.
-    # This ensures true matches missed by blocking are counted as FNs.
+    # Union true matches with candidates so matches missed by blocking count as FNs.
     sql <- glue::glue(
       'WITH true_matches AS (',
       'SELECT gl.unique_id AS unique_id_l, gr.unique_id AS unique_id_r ',

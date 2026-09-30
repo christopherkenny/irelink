@@ -1,5 +1,4 @@
-# Sprint 5 — Exploration: il_completeness()
-# Translated from: test_completeness.py
+# Translated from splink: test_completeness.py
 
 test_that('il_completeness() returns a tibble with one row per column', {
   skip_if_not_installed('RSQLite')

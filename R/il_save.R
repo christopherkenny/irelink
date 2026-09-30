@@ -243,8 +243,7 @@ model_json_dialect <- function(model) {
 }
 
 irelink_to_splink_link_type <- function(link_type) {
-  switch(
-    link_type,
+  switch(link_type,
     'dedupe' = 'dedupe_only',
     'link' = 'link_only',
     'link_and_dedupe' = 'link_and_dedupe',
@@ -253,8 +252,7 @@ irelink_to_splink_link_type <- function(link_type) {
 }
 
 splink_to_irelink_link_type <- function(link_type) {
-  switch(
-    link_type %||% 'dedupe_only',
+  switch(link_type %||% 'dedupe_only',
     'dedupe_only' = 'dedupe',
     'link_only' = 'link',
     'link_and_dedupe' = 'link_and_dedupe',
@@ -417,8 +415,7 @@ matching_param_row <- function(params, comparison, gamma_level) {
   }
   rows <- params[
     params$comparison == comparison &
-      params$gamma_level == gamma_level,
-    ,
+      params$gamma_level == gamma_level, ,
     drop = FALSE
   ]
   if (nrow(rows) == 0L) {
@@ -646,8 +643,7 @@ splink_json_to_params <- function(comparisons, prior = NULL) {
   if (length(rows) > 0L) {
     out$comparisons <- do.call(rbind, rows)
     out$comparisons <- out$comparisons[
-      order(out$comparisons$comparison, out$comparisons$gamma_level),
-      ,
+      order(out$comparisons$comparison, out$comparisons$gamma_level), ,
       drop = FALSE
     ]
   }

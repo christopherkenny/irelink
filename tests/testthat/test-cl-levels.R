@@ -1,7 +1,4 @@
-# Sprint 2 — Level composition: cl_levels(), cl_null(), cl_else(),
-# cl_and(), cl_or(), cl_not()
-# Translated from: test_comparison_level_composition.py,
-# test_compound_comparison_levels.py
+# Translated from splink: test_comparison_level_composition.py, test_compound_comparison_levels.py
 
 # --- cl_null() / cl_else() ------------------------------------------------
 
@@ -56,8 +53,7 @@ test_that('cl_levels() works without cl_null() and cl_else()', {
   expect_length(lvls$levels, 2)
 })
 
-# --- cl_and() / cl_or() / cl_not() ----------------------------------------
-# From: test_comparison_level_composition.py
+# cl_and() / cl_or() / cl_not(): from test_comparison_level_composition.py
 
 test_that('cl_and/cl_or/cl_not create boolean nodes', {
   and_node <- cl_and(cl_exact(), cl_jaro_winkler(0.9))

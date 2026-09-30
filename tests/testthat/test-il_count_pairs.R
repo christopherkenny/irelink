@@ -1,5 +1,4 @@
-# Sprint 5 — Exploration: il_count_pairs()
-# Translated from: test_analyse_blocking.py, test_total_comparison_count.py
+# Translated from splink: test_analyse_blocking.py, test_total_comparison_count.py
 
 test_that('il_count_pairs() returns accurate pair count for dedupe', {
   skip_if_not_installed('RSQLite')
@@ -26,8 +25,7 @@ test_that('il_count_pairs() with blocking reduces pair count', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  # From: test_analyse_blocking.py — 4 rows, block_on("first_name")
-  # Two Johns: only 1 pair blocked
+  # Two Johns among 4 rows: blocking on first_name yields 1 pair
   df <- data.frame(
     unique_id = 1:4,
     first_name = c('John', 'Mary', 'Jane', 'John'),
@@ -47,8 +45,7 @@ test_that('il_count_pairs() cartesian dedupe is n*(n-1)/2', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  # From: test_total_comparison_count.py
-  # 5 records -> 5*4/2 = 10 pairs
+  # 5 records -> 5 * 4 / 2 = 10 pairs
   df <- data.frame(
     unique_id = 1:5,
     name = paste0('person_', 1:5)
@@ -64,7 +61,6 @@ test_that("il_count_pairs() for link_type='link' computes cross-product", {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  # From: test_total_comparison_count.py::test_calculate_cartesian_link_only
   # 2 records * 3 records = 6 pairs
   df1 <- data.frame(unique_id = 1:2, name = c('A', 'B'))
   df2 <- data.frame(unique_id = 3:5, name = c('C', 'D', 'E'))

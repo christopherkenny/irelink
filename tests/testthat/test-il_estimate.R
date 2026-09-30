@@ -1,9 +1,4 @@
-# Sprint 7 — Training: il_estimate_u(), il_estimate_em(),
-# il_estimate_prior(), il_estimate_m_from_labels(),
-# il_estimate_m_from_column()
-# Translated from: test_u_train.py, test_expectation_maximisation.py,
-# test_correctness_of_convergence.py,
-# test_estimate_prob_two_rr_match.py, test_m_train.py
+# Translated from splink's u, EM, prior, and m training tests
 
 # Helper to create a trained-ready model
 make_test_model <- function(con) {
@@ -21,8 +16,7 @@ make_test_model <- function(con) {
   il_model(df, spec = spec, con = con)
 }
 
-# --- il_estimate_u() ------------------------------------------------------
-# From: test_u_train.py::test_u_train
+# il_estimate_u(): from test_u_train.py
 
 test_that('il_estimate_u() returns an il_model with u parameters set', {
   skip_if_not_installed('RSQLite')
@@ -45,8 +39,7 @@ test_that('il_estimate_u() produces reasonable u values', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  # From: test_u_train.py — 6 records, 15 pairs
-  # Exact match on first_name: Amanda-Amanda = 1 pair -> u ≈ 1/15
+  # 6 records, 15 pairs, one Amanda-Amanda exact match -> u ~= 1/15
   model <- make_test_model(con) |>
     il_estimate_u(max_pairs = 1e6)
 
@@ -141,8 +134,7 @@ test_that('il_estimate_u() keeps unobserved gamma levels with a u floor', {
   )
 })
 
-# --- il_estimate_em() -----------------------------------------------------
-# From: test_expectation_maximisation.py, test_correctness_of_convergence.py
+# il_estimate_em(): from test_expectation_maximisation.py
 
 test_that('il_estimate_em() returns an il_model with updated parameters', {
   skip_if_not_installed('RSQLite')
@@ -163,8 +155,7 @@ test_that('il_estimate_em() errors clearly on empty blocking results', {
   con <- test_con()
   withr::defer(test_discon(con))
 
-  # From: test_clear_error_when_empty_block
-  # block on surname where no two records share a surname
+  # No two records share a surname, so blocking on it yields no pairs
   model <- make_test_model(con) |>
     il_estimate_u(max_pairs = 1e6)
 
@@ -198,13 +189,11 @@ test_that('multiple il_estimate_em() calls refine, not reset, parameters', {
 
   params_after_second <- il_parameters(model)
 
-  # Parameters should not be reset to initial values
-  # (they may change, but should not be NA)
+  # Parameters may change but should not reset to NA
   expect_false(all(is.na(params_after_second$m)))
 })
 
-# --- il_estimate_prior() --------------------------------------------------
-# From: test_estimate_prob_two_rr_match.py
+# il_estimate_prior(): from test_estimate_prob_two_rr_match.py
 
 test_that('il_estimate_prior() returns a valid probability', {
   skip_if_not_installed('RSQLite')
@@ -229,8 +218,7 @@ test_that('il_estimate_prior() returns a valid probability', {
     il_estimate_prior(block_on(first_name), block_on(surname), recall = 1.0)
 
   expect_s3_class(model, 'il_model')
-  # The two rules produce the same four unique pairs; they should not be
-  # counted twice. Total dedupe pairs are 6 * 5 / 2 = 15.
+  # Both rules yield the same 4 of 6 * 5 / 2 = 15 pairs; don't double count
   expect_equal(model$params$prior, 4 / 15)
 })
 
@@ -285,13 +273,11 @@ test_that('il_estimate_prior() uses link_and_dedupe denominator', {
   ) |>
     il_estimate_prior(block_on(name), recall = 1.0)
 
-  # 2 cross-table pairs plus 1 within-left pair over
-  # 2*2 cross + 1 within-left + 1 within-right possible pairs.
+  # 3 matches over 2 * 2 cross + 1 within-left + 1 within-right = 6 pairs
   expect_equal(model$params$prior, 3 / 6)
 })
 
-# --- il_estimate_m_from_labels() ------------------------------------------
-# From: test_m_train.py
+# il_estimate_m_from_labels(): from test_m_train.py
 
 test_that('il_estimate_m_from_labels() computes m from pairwise labels', {
   skip_if_not_installed('RSQLite')
@@ -369,8 +355,7 @@ test_that('il_estimate_m_from_labels() validates label table shape', {
   )
 })
 
-# --- il_estimate_m_from_column() ------------------------------------------
-# From: test_m_train.py (method 1 — label column)
+# il_estimate_m_from_column(): from test_m_train.py
 
 test_that('il_estimate_m_from_column() computes m from a cluster column', {
   skip_if_not_installed('RSQLite')

@@ -57,7 +57,11 @@ cl_date_diff <- function(...) {
     vapply(
       units,
       function(unit) {
-        switch(unit, days = 1, months = 30, years = 365)
+        switch(unit,
+          days = 1,
+          months = 30,
+          years = 365
+        )
       },
       numeric(1)
     )

@@ -49,9 +49,11 @@ il_sql_profile_entries <- function(profile) {
 #' Execute a SQL statement with optional profiling
 #' @noRd
 il_db_execute <- function(con, sql, step = NULL, profile = NULL) {
-  timing <- system.time({
-    result <- DBI::dbExecute(con, sql)
-  })
+  # Skip system.time() when not profiling; it can add a GC pause per statement.
+  if (is.null(profile)) {
+    return(DBI::dbExecute(con, sql))
+  }
+  timing <- system.time(result <- DBI::dbExecute(con, sql), gcFirst = FALSE)
   il_profile_append(
     profile,
     step,
@@ -65,9 +67,10 @@ il_db_execute <- function(con, sql, step = NULL, profile = NULL) {
 #' Query SQL with optional profiling
 #' @noRd
 il_db_get_query <- function(con, sql, step = NULL, profile = NULL) {
-  timing <- system.time({
-    result <- DBI::dbGetQuery(con, sql)
-  })
+  if (is.null(profile)) {
+    return(DBI::dbGetQuery(con, sql))
+  }
+  timing <- system.time(result <- DBI::dbGetQuery(con, sql), gcFirst = FALSE)
   il_profile_append(
     profile,
     step,

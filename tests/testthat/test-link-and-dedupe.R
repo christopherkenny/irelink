@@ -1,6 +1,4 @@
-# Sprint 10 — link_and_dedupe mode and il_find_matches edge cases
-# Tests that link_and_dedupe produces pairs from all three pair sets
-# (A×B cross-table, A×A within-left, B×B within-right).
+# link_and_dedupe covers cross-table, within-left, and within-right pairs
 
 # Two small tables with known overlapping and within-table duplicates
 make_lad_data <- function() {

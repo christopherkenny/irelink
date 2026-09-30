@@ -83,6 +83,46 @@ test_that('cl_email() has at least 4 match levels', {
 test_that('cl_dob() has at least 4 match levels', {
   lev <- cl_dob()
   expect_true(length(lev$levels) >= 4)
+  expect_equal(lev$levels[[3]]$method, 'levenshtein')
+})
+
+test_that('cl_dob() uses Levenshtein semantics in R and DuckDB', {
+  level <- cl_dob()$levels[[3]]
+  # Transposition is Damerau distance 1 but Levenshtein distance 2.
+  expect_equal(
+    compute_gamma(
+      c('1990-01-12', '1990-01-12'),
+      c('1990-01-21', '1990-01-13'),
+      level
+    ),
+    c(0L, 1L)
+  )
+
+  con <- test_con()
+  withr::defer(test_discon(con))
+  sql <- sql_gamma_case(
+    list(columns = 'dob', method = level, transform = NULL),
+    dialect = 'duckdb'
+  )
+  expect_match(sql, 'levenshtein(', fixed = TRUE)
+  result <- DBI::dbGetQuery(
+    con,
+    glue::glue(
+      'SELECT {sql} AS gamma FROM ',
+      "(VALUES ('1990-01-12')) AS l(\"dob\") CROSS JOIN ",
+      "(VALUES ('1990-01-13')) AS r(\"dob\")"
+    )
+  )
+  expect_equal(result$gamma, 1L)
+  transposed <- DBI::dbGetQuery(
+    con,
+    glue::glue(
+      'SELECT {sql} AS gamma FROM ',
+      "(VALUES ('1990-01-12')) AS l(\"dob\") CROSS JOIN ",
+      "(VALUES ('1990-01-21')) AS r(\"dob\")"
+    )
+  )
+  expect_equal(transposed$gamma, 0L)
 })
 
 test_that('cl_dob() accepts custom thresholds', {

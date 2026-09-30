@@ -252,8 +252,7 @@ remainder_weights <- function(model, col, level_names) {
   if (!is.null(params)) {
     rows <- params[params$comparison == col, , drop = FALSE]
     rows <- rows[
-      match(as.integer(level_names), rows$gamma_level),
-      ,
+      match(as.integer(level_names), rows$gamma_level), ,
       drop = FALSE
     ]
     if (
@@ -335,8 +334,7 @@ em_prior_metadata <- function(
     prevalence_rows <- priors[
       priors$family == 'prevalence' &
         is.finite(priors$strength) &
-        priors$strength > 0,
-      ,
+        priors$strength > 0, ,
       drop = FALSE
     ]
     if (nrow(prevalence_rows) > 0L) {
@@ -407,8 +405,7 @@ model_prior_strength <- function(priors, comparison) {
     return(0)
   }
   rows <- priors[
-    priors$family == 'm' & priors$comparison == comparison,
-    ,
+    priors$family == 'm' & priors$comparison == comparison, ,
     drop = FALSE
   ]
   if (nrow(rows) == 0L) {

@@ -178,11 +178,7 @@ il_estimate_em <- function(
     }
   }
 
-  # Column deactivation: identify comparisons that overlap with the
-
-  # blocking rule's columns and exclude them from estimation (splink's
-  # approach — blocking on a column means it must match, so gamma is
-  # always the highest level and m/u cannot be estimated from the data).
+  # Deactivate comparisons on blocking columns: they always match, so m/u can't be estimated.
   br_cols <- blocking$columns
   deactivated <- vapply(
     comparisons,
@@ -309,9 +305,7 @@ il_estimate_em <- function(
     log_nonmatch <- rep(log(1 - prior), n_patterns)
 
     for (j in seq_len(n_comp)) {
-      # Skip deactivated comparisons in E-step — their contribution is
-      # already captured by the blocking-adjusted prior (splink removes
-      # them from the comparison list entirely).
+      # Skip deactivated comparisons; the blocking-adjusted prior already covers them.
       if (deactivated[j]) {
         next
       }
@@ -400,10 +394,10 @@ il_estimate_em <- function(
         if (!is.null(m_prior)) {
           prior_alpha[as.integer(names(m_prior)) + 1L] <-
             as.numeric(m_prior) *
-            model_prior_strength(
-              model$params$priors,
-              comp_names[j]
-            )
+              model_prior_strength(
+                model$params$priors,
+                comp_names[j]
+              )
         }
         for (k in seq(0L, nl - 1L)) {
           mask <- pattern_mat[, j] == k

@@ -20,7 +20,7 @@ one row per comparison contribution, and a final total.
 \description{
 Returns a tidy tibble showing how each comparison contributed to the
 total match weight for a specific record pair. Designed for use with
-\code{\link[ggplot2:geom_bar]{ggplot2::geom_col()}} and \code{\link[ggplot2:coord_flip]{ggplot2::coord_flip()}}.
+\code{\link[ggplot2:geom_col]{ggplot2::geom_col()}} and \code{\link[ggplot2:coord_flip]{ggplot2::coord_flip()}}.
 }
 \examples{
 df <- data.frame(

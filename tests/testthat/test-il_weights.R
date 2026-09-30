@@ -1,6 +1,3 @@
-# Sprint 7 — Model inspection: il_weights(), il_parameters(),
-# il_training_history()
-
 # --- il_weights() ---------------------------------------------------------
 
 test_that('il_weights() returns a tibble with expected columns', {

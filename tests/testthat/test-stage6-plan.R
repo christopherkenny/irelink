@@ -1,5 +1,4 @@
-# Snapshot tests, backend compatibility, tidyselect edge cases,
-# and clustering NA handling.
+# Snapshots, backend compatibility, tidyselect edge cases, and clustering NA handling
 
 # ── 6a. NA handling in clustering ─────────────────────────────
 
@@ -14,8 +13,7 @@ test_that('il_cluster() tolerates NA in match_probability by using threshold', {
     class = c('il_compared', 'tbl_df', 'tbl', 'data.frame')
   )
 
-  # threshold filters before clustering; NA probabilities should be
-  # dropped by the >= comparison (NA >= 0.5 is NA -> FALSE -> dropped)
+  # NA probabilities fail the >= threshold and are dropped before clustering
   clusters <- il_cluster(pairs, threshold = 0.5)
   expect_s3_class(clusters, 'tbl_df')
   # A-B linked, C isolated because B-C has NA probability
@@ -25,8 +23,7 @@ test_that('il_cluster() tolerates NA in match_probability by using threshold', {
 # ── tidyselect where() in il_compare ──────────────────────────────────────
 
 test_that('tidyselect: where(is.character) stores a deferred expression', {
-  # where() requires column metadata, so il_compare stores it as deferred
-  # (same pattern as everything() and matches() tests in test-il_compare.R)
+  # where() needs column metadata, so il_compare() stores it as deferred
   spec <- il_spec() |>
     il_compare(tidyselect::where(is.character), cl_exact())
 

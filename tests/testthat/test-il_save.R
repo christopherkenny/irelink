@@ -1,5 +1,4 @@
-# Sprint 10 — Serialisation: il_save(), il_load()
-# From: test_full_example_duckdb.py (save/load model)
+# Translated from splink: test_full_example_duckdb.py
 
 test_that('il_save() and il_load() round-trip preserves model parameters', {
   skip_if_no_jsonlite()

@@ -105,7 +105,9 @@ collect_il_compared_lazy <- function(x, ...) {
     glue::glue('SELECT * FROM {x$predicted_tbl}')
   )
   result <- tibble::as_tibble(result)
-  new_il_compared(result, model = x$model)
+  compared <- new_il_compared(result, model = x$model)
+  attr(compared, 'sql_profile') <- x$sql_profile %||% il_sql_profile_entries(NULL)
+  compared
 }
 
 #' Materialise lazy or collected pairs into an il_compared tibble
@@ -277,8 +279,7 @@ predict.il_model <- function(
     ))
   }
 
-  # SQL-first collect path for DuckDB:
-  # Score, filter, and deduplicate in SQL; only collect the final result.
+  # SQL-first collect path for DuckDB: score, filter, and deduplicate before collecting.
   dialect <- detect_dialect(object$con)
   if (dialect_has_fuzzy_sql(dialect)) {
     dependency_aware <- identical(
@@ -408,8 +409,7 @@ predict.il_model <- function(
 
   if (!is.null(threshold_match_weight)) {
     result <- result[
-      result$match_weight >= threshold_match_weight,
-      ,
+      result$match_weight >= threshold_match_weight, ,
       drop = FALSE
     ]
   } else {

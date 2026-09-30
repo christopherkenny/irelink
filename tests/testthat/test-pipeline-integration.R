@@ -1,6 +1,4 @@
-# Pipeline integration tests — full end-to-end workflows
-# From: 09-implementation-plan §6b (tidyverse integration)
-# These verify that irelink objects compose cleanly with the tidyverse.
+# End-to-end workflows composed with the tidyverse
 
 # --- Full pipe chain (Sprint 8 MVP) --------------------------------------
 

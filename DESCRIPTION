@@ -47,7 +47,6 @@ License: MIT + file LICENSE
 Depends: R (>= 4.1.0)
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Imports:
     cli,
     DBI,
@@ -75,3 +74,4 @@ BugReports: https://github.com/christopherkenny/irelink/issues
 VignetteBuilder: knitr
 LazyData: true
 Config/Needs/website: christopherkenny/ctktemplate, rmarkdown
+Config/roxygen2/version: 8.0.0

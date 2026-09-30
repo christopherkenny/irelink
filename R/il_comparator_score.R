@@ -63,14 +63,14 @@ comparator_score_sql <- function(.data, col_1, col_2, con) {
   qcol_1 <- sql_quote_identifier(col_1)
   qcol_2 <- sql_quote_identifier(col_2)
   sql <- glue::glue(
-      'SELECT {qcol_1}, {qcol_2}, ',
-      '  jaro_winkler_similarity({qcol_1}, {qcol_2}) AS jaro_winkler, ',
-      '  jaro_similarity({qcol_1}, {qcol_2}) AS jaro, ',
-      '  levenshtein({qcol_1}, {qcol_2}) AS levenshtein, ',
-      '  jaccard({qcol_1}, {qcol_2}) AS jaccard ',
-      'FROM {qtbl} ',
-      'WHERE {qcol_1} IS NOT NULL AND {qcol_2} IS NOT NULL'
-    )
+    'SELECT {qcol_1}, {qcol_2}, ',
+    '  jaro_winkler_similarity({qcol_1}, {qcol_2}) AS jaro_winkler, ',
+    '  jaro_similarity({qcol_1}, {qcol_2}) AS jaro, ',
+    '  levenshtein({qcol_1}, {qcol_2}) AS levenshtein, ',
+    '  jaccard({qcol_1}, {qcol_2}) AS jaccard ',
+    'FROM {qtbl} ',
+    'WHERE {qcol_1} IS NOT NULL AND {qcol_2} IS NOT NULL'
+  )
 
   result <- tibble::as_tibble(DBI::dbGetQuery(con, sql))
 

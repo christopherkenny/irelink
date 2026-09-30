@@ -63,9 +63,7 @@ test_that('SQL CC: best_link method filters correctly', {
   con <- test_con()
   on.exit(test_discon(con))
 
-  # Triangle: A-B(0.9), A-C(0.5), B-C(0.8)
-  # A's best = B; B's best = A; C's best = B
-  # Only A-B is mutual best -> clusters are {A,B} and {C}
+  # Triangle A-B 0.9, A-C 0.5, B-C 0.8: only A-B is mutual best
   pairs <- make_sql_pairs(
     con,
     id_l = c('A', 'A', 'B'),
