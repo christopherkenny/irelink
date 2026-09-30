@@ -58,14 +58,6 @@ because of the corruption process:
 ``` r
 
 con <- DBI::dbConnect(duckdb::duckdb())
-#> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpAaB64b/duckdb
-#> This is removed when the R session ends.
-#> • Extensions are re-downloaded each session.
-#> • Secrets are lost.
-#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
-#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
-#> ℹ See ?duckdb_storage for details and alternatives.
 comp <- il_completeness(febrl4a, febrl4b, con = con)
 comp
 #> # A tibble: 22 × 5
@@ -226,12 +218,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id  
 #>   <chr>     <chr>       
-#> 1 146       cluster_146 
-#> 2 965       cluster_1018
-#> 3 3173      cluster_1298
-#> 4 1018      cluster_1018
-#> 5 917       cluster_3026
-#> 6 3366      cluster_229
+#> 1 4210      cluster_3653
+#> 2 4435      cluster_1137
+#> 3 4295      cluster_1505
+#> 4 229       cluster_229 
+#> 5 3456      cluster_3415
+#> 6 953       cluster_329
 ```
 
 ## Evaluate against ground truth

@@ -88,14 +88,6 @@ database:
 
 df <- fake_20
 con <- DBI::dbConnect(duckdb::duckdb())
-#> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp878vCu/duckdb
-#> This is removed when the R session ends.
-#> • Extensions are re-downloaded each session.
-#> • Secrets are lost.
-#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
-#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
-#> ℹ See ?duckdb_storage for details and alternatives.
 
 model <- il_model(df, spec = spec, con = con)
 model
@@ -159,12 +151,12 @@ head(pairs)
 #> # A tibble: 6 × 8
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob match_weight
 #>         <int>       <int>            <int>         <int>     <int>        <dbl>
-#> 1           3          14                2             2         0         3.86
-#> 2           4          14                2             2         0         3.86
-#> 3           7          17                2             2         1         8.76
-#> 4          13          14                2             2         0         3.86
-#> 5           5          15                2             2         1         8.76
-#> 6           6          15                2             2         1         8.76
+#> 1           1          11                2             2         1         8.76
+#> 2           9          20                2             2         0         3.86
+#> 3           3          13                2             2         1         8.76
+#> 4           9          19                2             2         1         8.76
+#> 5           2          11                2             2         1         8.76
+#> 6          19          20                2             2         0         3.86
 #> # ℹ 2 more variables: total_match_weight <dbl>, match_probability <dbl>
 ```
 
@@ -186,9 +178,9 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 7         cluster_17
-#> 2 13        cluster_13
-#> 3 20        cluster_10
+#> 1 5         cluster_15
+#> 2 17        cluster_17
+#> 3 15        cluster_15
 #> 4 3         cluster_13
 #> 5 6         cluster_15
 #> 6 14        cluster_13

@@ -51,14 +51,6 @@ comparisons:
 ``` r
 
 con <- DBI::dbConnect(duckdb::duckdb())
-#> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpnDN4FZ/duckdb
-#> This is removed when the R session ends.
-#> • Extensions are re-downloaded each session.
-#> • Secrets are lost.
-#> ℹ Run duckdb(shared_home = TRUE) (or create ~/.duckdb) to keep them (suitable for most users).
-#> ℹ Run duckdb(shared_home = FALSE) to accept the temporary directory (and silence this message).
-#> ℹ See ?duckdb_storage for details and alternatives.
 ```
 
 ``` r
@@ -266,18 +258,18 @@ autoplot(il_unlinkables(model))
 predictions <- predict(model, threshold = 0.5)
 predictions
 #> # A tibble: 237,463 × 13
-#>    unique_id_l  unique_id_r  gamma_first_name gamma_surname gamma_dob
-#>  * <chr>        <chr>                   <int>         <int>     <int>
-#>  1 Q16066242-13 Q7527034-7                  4             4        -1
-#>  2 Q16066242-11 Q75867928-11                4             4        -1
-#>  3 Q16066242-13 Q75867928-11                4             4        -1
-#>  4 Q16066242-5  Q75867928-7                 4             4         0
-#>  5 Q16066242-6  Q75867928-5                 4             4        -1
-#>  6 Q16066242-4  Q75867928-3                 4             4         0
-#>  7 Q16066242-4  Q75867928-1                 4             4         0
-#>  8 Q16066242-3  Q2248538-12                 4             4        -1
-#>  9 Q44279-4     Q44279-7                    4             4         4
-#> 10 Q19335644-5  Q19335644-7                 3             4        -1
+#>    unique_id_l  unique_id_r gamma_first_name gamma_surname gamma_dob
+#>  * <chr>        <chr>                  <int>         <int>     <int>
+#>  1 Q19974910-14 Q19974910-2                4             2         5
+#>  2 Q19974910-16 Q19974910-2                4             2         5
+#>  3 Q25207068-8  Q25207068-9                4             3         5
+#>  4 Q4798690-2   Q4798690-6                 4            -1         5
+#>  5 Q4798690-3   Q4798690-6                 4            -1         5
+#>  6 Q7372936-12  Q7372936-2                 4             1         5
+#>  7 Q7372936-17  Q7372936-2                 4             0         5
+#>  8 Q16066505-10 Q16066505-3                4             2         5
+#>  9 Q16066505-18 Q16066505-3                4             0         5
+#> 10 Q25207068-8  Q5545144-5                 4             3         5
 #> # ℹ 237,453 more rows
 #> # ℹ 8 more variables: gamma_postcode_fake <int>, gamma_birth_place <int>,
 #> #   gamma_occupation <int>, match_weight <dbl>, tf_adj_birth_place <dbl>,
@@ -305,18 +297,18 @@ autoplot(predictions, which = 1)
 clusters <- il_cluster(predictions, threshold = 0.95)
 clusters
 #> # A tibble: 46,088 × 2
-#>    unique_id    cluster_id         
-#>    <chr>        <chr>              
-#>  1 Q21664937-21 cluster_Q21664937-1
-#>  2 Q6227471-12  cluster_Q6227471-1 
-#>  3 Q266468-11   cluster_Q266468-1  
-#>  4 Q494264-3    cluster_Q494264-1  
-#>  5 Q4885744-1   cluster_Q4885744-1 
-#>  6 Q442983-12   cluster_Q442983-1  
-#>  7 Q48689010-3  cluster_Q48689010-1
-#>  8 Q5538920-4   cluster_Q5538920-1 
-#>  9 Q97801414-1  cluster_Q97801414-1
-#> 10 Q699617-3    cluster_Q699617-1  
+#>    unique_id   cluster_id         
+#>    <chr>       <chr>              
+#>  1 Q466175-6   cluster_Q466175-1  
+#>  2 Q16225197-5 cluster_Q16225197-1
+#>  3 Q16198727-8 cluster_Q16198727-1
+#>  4 Q98561031-9 cluster_Q98561031-1
+#>  5 Q538999-8   cluster_Q538999-1  
+#>  6 Q7795287-2  cluster_Q7795287-1 
+#>  7 Q6253247-5  cluster_Q6253247-1 
+#>  8 Q8017699-7  cluster_Q8017699-1 
+#>  9 Q14945409-5 cluster_Q14945409-1
+#> 10 Q6130450-8  cluster_Q6130450-1 
 #> # ℹ 46,078 more rows
 ```
 
@@ -385,18 +377,18 @@ autoplot(il_precision_recall(model, labels_col = 'cluster'))
 errors <- il_errors(model, labels_col = 'cluster', threshold = 0.999)
 errors[errors$error_type == 'false_positive', ]
 #> # A tibble: 368 × 6
-#>    unique_id_l unique_id_r match_weight match_probability true_label error_type 
-#>    <chr>       <chr>              <dbl>             <dbl> <lgl>      <chr>      
-#>  1 Q7528045-4  Q7528085-7          26.2             1.000 FALSE      false_posi…
-#>  2 Q5583974-11 Q6130041-4          22.4             0.999 FALSE      false_posi…
-#>  3 Q3568485-2  Q3568487-1          43.5             1.000 FALSE      false_posi…
-#>  4 Q7528045-6  Q7528085-4          28.7             1.000 FALSE      false_posi…
-#>  5 Q4088004-3  Q545038-7           24.9             1.000 FALSE      false_posi…
-#>  6 Q3568485-9  Q3568487-1          43.5             1.000 FALSE      false_posi…
-#>  7 Q5583974-1  Q6130041-6          22.4             0.999 FALSE      false_posi…
-#>  8 Q4088004-3  Q545038-1           24.9             1.000 FALSE      false_posi…
-#>  9 Q28054162-5 Q6252444-7          23.0             0.999 FALSE      false_posi…
-#> 10 Q7528045-3  Q7528085-4          25.5             1.000 FALSE      false_posi…
+#>    unique_id_l  unique_id_r match_weight match_probability true_label error_type
+#>    <chr>        <chr>              <dbl>             <dbl> <lgl>      <chr>     
+#>  1 Q5583974-12  Q6130041-4          22.4             0.999 FALSE      false_pos…
+#>  2 Q2638280-20  Q6208797-7          22.8             0.999 FALSE      false_pos…
+#>  3 Q1173539-3   Q1512-7             24.3             1.000 FALSE      false_pos…
+#>  4 Q2248538-12  Q969969-3           22.6             0.999 FALSE      false_pos…
+#>  5 Q28054162-6  Q6252444-7          23.0             0.999 FALSE      false_pos…
+#>  6 Q5583974-5   Q6130041-4          22.4             0.999 FALSE      false_pos…
+#>  7 Q15990139-8  Q2248538-12         22.6             0.999 FALSE      false_pos…
+#>  8 Q17627000-2  Q24845632-1         23.9             1.000 FALSE      false_pos…
+#>  9 Q16931677-18 Q7527919-5          22.6             0.999 FALSE      false_pos…
+#> 10 Q4088004-5   Q545038-3           24.9             1.000 FALSE      false_pos…
 #> # ℹ 358 more rows
 ```
 
@@ -410,16 +402,16 @@ errors[errors$error_type == 'false_negative', ]
 #> # A tibble: 112,363 × 6
 #>    unique_id_l  unique_id_r match_weight match_probability true_label error_type
 #>    <chr>        <chr>              <dbl>             <dbl> <lgl>      <chr>     
-#>  1 Q903516-14   Q903516-8           8.52            0.0750 TRUE       false_neg…
-#>  2 Q16066489-12 Q16066489-…         9.50            0.138  TRUE       false_neg…
-#>  3 Q6526304-12  Q6526304-17        10.6             0.260  TRUE       false_neg…
-#>  4 Q1508011-10  Q1508011-3         11.2             0.343  TRUE       false_neg…
-#>  5 Q5722403-1   Q5722403-17        11.2             0.343  TRUE       false_neg…
-#>  6 Q105533881-… Q105533881…        10.2             0.208  TRUE       false_neg…
-#>  7 Q6286514-15  Q6286514-9          5.97            0.0137 TRUE       false_neg…
-#>  8 Q18527189-1  Q18527189-5        12.0             0.478  TRUE       false_neg…
-#>  9 Q16030023-16 Q16030023-…         9.69            0.155  TRUE       false_neg…
-#> 10 Q19560783-13 Q19560783-9         7.12            0.0299 TRUE       false_neg…
+#>  1 Q6536490-15  Q6536490-8         10.6             0.260  TRUE       false_neg…
+#>  2 Q12354525-10 Q12354525-9        11.0             0.317  TRUE       false_neg…
+#>  3 Q4799003-15  Q4799003-18         9.90            0.175  TRUE       false_neg…
+#>  4 Q24284561-14 Q24284561-7        10.6             0.260  TRUE       false_neg…
+#>  5 Q16023424-10 Q16023424-…         7.88            0.0495 TRUE       false_neg…
+#>  6 Q5081613-11  Q5081613-14        11.0             0.317  TRUE       false_neg…
+#>  7 Q16030315-1  Q16030315-4         7.88            0.0495 TRUE       false_neg…
+#>  8 Q14946876-21 Q14946876-7        12.0             0.478  TRUE       false_neg…
+#>  9 Q61640232-18 Q61640232-…        11.3             0.359  TRUE       false_neg…
+#> 10 Q61743797-10 Q61743797-…         7.16            0.0307 TRUE       false_neg…
 #> # ℹ 112,353 more rows
 ```
 

@@ -38,6 +38,9 @@ library(irelink)
 #> The following object is masked from 'package:base':
 #> 
 #>     months
+```
+
+``` r
 
 df <- fake_20
 con <- DBI::dbConnect(duckdb::duckdb())
@@ -85,22 +88,22 @@ clusters
 #>    <chr>     <chr>     
 #>  1 19        cluster_10
 #>  2 8         cluster_17
-#>  3 17        cluster_17
-#>  4 3         cluster_13
-#>  5 6         cluster_15
-#>  6 10        cluster_10
-#>  7 4         cluster_13
-#>  8 7         cluster_17
-#>  9 20        cluster_10
-#> 10 5         cluster_15
-#> 11 15        cluster_15
-#> 12 9         cluster_10
-#> 13 13        cluster_13
-#> 14 14        cluster_13
+#>  3 9         cluster_10
+#>  4 13        cluster_13
+#>  5 7         cluster_17
+#>  6 17        cluster_17
+#>  7 15        cluster_15
+#>  8 14        cluster_13
+#>  9 4         cluster_13
+#> 10 20        cluster_10
+#> 11 5         cluster_15
+#> 12 3         cluster_13
+#> 13 6         cluster_15
+#> 14 10        cluster_10
 #> 15 12        cluster_1 
-#> 16 2         cluster_1 
-#> 17 11        cluster_1 
-#> 18 1         cluster_1
+#> 16 11        cluster_1 
+#> 17 1         cluster_1 
+#> 18 2         cluster_1
 ```
 
 [`il_cleanup()`](http://christophertkenny.com/irelink/reference/il_cleanup.md)
@@ -168,8 +171,8 @@ pairs
 #>   unique_id_l unique_id_r gamma_given_name gamma_surname gamma_date_of_birth
 #> *       <int>       <int>            <int>         <int>               <int>
 #> 1         165          59                0             2                   1
-#> 2          29          77                0             2                   1
-#> 3          24         160                0             2                   1
+#> 2          24         160                0             2                   1
+#> 3          29          77                0             2                   1
 #> # ℹ 3 more variables: match_weight <dbl>, total_match_weight <dbl>,
 #> #   match_probability <dbl>
 ```
