@@ -181,10 +181,10 @@ print.il_seconds <- function(x, ...) {
   invisible(x)
 }
 
-#' Create a Distance in Kilometres
+#' Create a Distance in Kilometers
 #'
 #' A tagged-value constructor that marks a numeric threshold as a distance
-#' in kilometres. Use inside [cl_geo_distance()] for self-documenting
+#' in kilometers. Use inside [cl_geo_distance()] for self-documenting
 #' thresholds.
 #'
 #' @param n A non-negative numeric value.
@@ -203,7 +203,7 @@ km <- function(n) {
 #' Create a Distance in Miles
 #'
 #' A tagged-value constructor that marks a numeric threshold as a distance
-#' in miles. Converted to kilometres internally by [cl_geo_distance()].
+#' in miles. Converted to kilometers internally by [cl_geo_distance()].
 #'
 #' @param n A non-negative numeric value.
 #'

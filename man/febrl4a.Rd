@@ -42,7 +42,7 @@ Ground truth is encoded in \code{rec_id}: records sharing the same base ID
 }
 \references{
 Christen, P. and Churches, T. (2004).
-Febrl -- Freely Extensible Biomedical Record Linkage.
+FEBRL -- Freely Extensible Biomedical Record Linkage.
 Australian National University.
 }
 \seealso{

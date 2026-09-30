@@ -97,7 +97,7 @@
 #'
 #' @references
 #' Christen, P. and Churches, T. (2004).
-#' Febrl -- Freely Extensible Biomedical Record Linkage.
+#' FEBRL -- Freely Extensible Biomedical Record Linkage.
 #' Australian National University.
 #'
 #' @seealso [febrl4b] for the corresponding duplicate records.
@@ -143,7 +143,7 @@
 #'
 #' @references
 #' Christen, P. and Churches, T. (2004).
-#' Febrl -- Freely Extensible Biomedical Record Linkage.
+#' FEBRL -- Freely Extensible Biomedical Record Linkage.
 #' Australian National University.
 #'
 #' @seealso [febrl4a] for the corresponding original records.

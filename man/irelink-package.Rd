@@ -23,7 +23,7 @@ Defaults to \code{FALSE}.
 \seealso{
 Useful links:
 \itemize{
-  \item \url{http://christophertkenny.com/irelink/}
+  \item \url{https://christophertkenny.com/irelink/}
   \item \url{https://github.com/christopherkenny/irelink}
   \item Report bugs at \url{https://github.com/christopherkenny/irelink/issues}
 }

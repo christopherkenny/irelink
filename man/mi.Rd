@@ -14,7 +14,7 @@ A tagged numeric with class \code{il_mi}.
 }
 \description{
 A tagged-value constructor that marks a numeric threshold as a distance
-in miles. Converted to kilometres internally by \code{\link[=cl_geo_distance]{cl_geo_distance()}}.
+in miles. Converted to kilometers internally by \code{\link[=cl_geo_distance]{cl_geo_distance()}}.
 }
 \examples{
 il_spec() |>

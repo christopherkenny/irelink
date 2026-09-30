@@ -84,30 +84,30 @@ clusters
 #> # A tibble: 18 × 2
 #>    unique_id cluster_id
 #>    <chr>     <chr>     
-#>  1 10        cluster_10
-#>  2 6         cluster_15
-#>  3 3         cluster_13
-#>  4 13        cluster_13
-#>  5 7         cluster_17
-#>  6 15        cluster_15
-#>  7 8         cluster_17
-#>  8 19        cluster_10
-#>  9 5         cluster_15
-#> 10 4         cluster_13
-#> 11 17        cluster_17
-#> 12 14        cluster_13
-#> 13 20        cluster_10
-#> 14 9         cluster_10
-#> 15 2         cluster_1 
-#> 16 11        cluster_1 
-#> 17 1         cluster_1 
-#> 18 12        cluster_1
+#>  1 19        cluster_10
+#>  2 8         cluster_17
+#>  3 17        cluster_17
+#>  4 3         cluster_13
+#>  5 6         cluster_15
+#>  6 10        cluster_10
+#>  7 4         cluster_13
+#>  8 7         cluster_17
+#>  9 20        cluster_10
+#> 10 5         cluster_15
+#> 11 15        cluster_15
+#> 12 9         cluster_10
+#> 13 13        cluster_13
+#> 14 14        cluster_13
+#> 15 12        cluster_1 
+#> 16 2         cluster_1 
+#> 17 11        cluster_1 
+#> 18 1         cluster_1
 ```
 
 `il_cleanup()` drops the temporary tables owned by this model. Use
 `il_cleanup_all(con)` as an interactive escape hatch when a failed or
-exploratory session may have left several `irelink` models’ tables
-behind.
+exploratory session may have left tables behind from several `irelink`
+models.
 
 ``` r
 il_cleanup(model)

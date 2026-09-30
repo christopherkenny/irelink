@@ -224,7 +224,7 @@ cl_first_last_name <- function(
 #'   columns. Both must be supplied together. When provided, geographic
 #'   distance levels are appended before `cl_else()`.
 #' @param km_thresholds Numeric vector of distance thresholds in
-#'   kilometres, ordered from strictest to most lenient. Only used when
+#'   kilometers, ordered from strictest to most lenient. Only used when
 #'   `lat_col` and `long_col` are supplied. Defaults to `c(1, 10, 100)`.
 #'
 #' @return A comparison-level object for use in [il_compare()].
@@ -300,7 +300,7 @@ cl_postcode <- function(
 #'   columns. Both must be supplied together. When provided, geographic
 #'   distance levels are appended before `cl_else()`.
 #' @param km_thresholds Numeric vector of distance thresholds in
-#'   kilometres, ordered from strictest to most lenient. Only used when
+#'   kilometers, ordered from strictest to most lenient. Only used when
 #'   `lat_col` and `long_col` are supplied. Defaults to `c(1, 10, 100)`.
 #'
 #' @return A comparison-level object for use in [il_compare()].

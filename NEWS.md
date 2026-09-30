@@ -74,7 +74,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 ## Data exploration
 
 - `il_compare_records()` computes comparison levels for one explicit record pair against a spec without fitting a model, and `il_string_similarity()` computes 5 string similarity metrics for a single pair.
-- `il_comparator_score()` computes batch string similarity across a DataFrame with SQL-side scoring on DuckDB.
+- `il_comparator_score()` computes batch string similarity across a data frame with SQL-side scoring on DuckDB.
 - `il_comparator_threshold_chart()` visualizes match rates at multiple similarity thresholds.
 - `il_phonetic_chart()` produces a Soundex agreement heatmap.
 - `il_tf_chart()` visualizes model-specific term frequency distributions with labeled most/least common values.

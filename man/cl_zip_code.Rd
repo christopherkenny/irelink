@@ -21,7 +21,7 @@ columns. Both must be supplied together. When provided, geographic
 distance levels are appended before \code{cl_else()}.}
 
 \item{km_thresholds}{Numeric vector of distance thresholds in
-kilometres, ordered from strictest to most lenient. Only used when
+kilometers, ordered from strictest to most lenient. Only used when
 \code{lat_col} and \code{long_col} are supplied. Defaults to \code{c(1, 10, 100)}.}
 }
 \value{

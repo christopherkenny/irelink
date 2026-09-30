@@ -2,7 +2,7 @@
 % Please edit documentation in R/unit-helpers.R
 \name{km}
 \alias{km}
-\title{Create a Distance in Kilometres}
+\title{Create a Distance in Kilometers}
 \usage{
 km(n)
 }
@@ -14,7 +14,7 @@ A tagged numeric with class \code{il_km}.
 }
 \description{
 A tagged-value constructor that marks a numeric threshold as a distance
-in kilometres. Use inside \code{\link[=cl_geo_distance]{cl_geo_distance()}} for self-documenting
+in kilometers. Use inside \code{\link[=cl_geo_distance]{cl_geo_distance()}} for self-documenting
 thresholds.
 }
 \examples{

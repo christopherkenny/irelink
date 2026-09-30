@@ -46,7 +46,7 @@ corresponding original (e.g., \code{rec-1070-dup-0} matches
 }
 \references{
 Christen, P. and Churches, T. (2004).
-Febrl -- Freely Extensible Biomedical Record Linkage.
+FEBRL -- Freely Extensible Biomedical Record Linkage.
 Australian National University.
 }
 \seealso{
