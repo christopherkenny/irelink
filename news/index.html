@@ -122,6 +122,8 @@
 <li>
 <code><a href="../reference/il_score_missing_edges.html">il_score_missing_edges()</a></code> enumerates and scores unscored within-cluster pairs.</li>
 <li>
+<code><a href="../reference/il_score_pairs.html">il_score_pairs()</a></code> scores every pair between two sets of records with a trained model, without blocking, using the model’s own term-frequency tables.</li>
+<li>
 <code><a href="../reference/il_score_patterns.html">il_score_patterns()</a></code> scores compatible comparison-pattern tables, including dependency-aware pattern tables larger than the table used for fitting.</li>
 <li>
 <code><a href="../reference/il_deterministic_link.html">il_deterministic_link()</a></code> performs single-table exact-match deduplication without training.</li>
@@ -154,7 +156,7 @@
 <div class="section level3">
 <h3 id="data-exploration-0-0-1">Data exploration<a class="anchor" aria-label="anchor" href="#data-exploration-0-0-1"></a></h3>
 <ul><li>
-<code><a href="../reference/il_compare_records.html">il_compare_records()</a></code> scores one explicit record pair against a spec without fitting a full model, and <code><a href="../reference/il_string_similarity.html">il_string_similarity()</a></code> computes 5 string similarity metrics for a single pair.</li>
+<code><a href="../reference/il_compare_records.html">il_compare_records()</a></code> computes comparison levels for one explicit record pair against a spec without fitting a model, and <code><a href="../reference/il_string_similarity.html">il_string_similarity()</a></code> computes 5 string similarity metrics for a single pair.</li>
 <li>
 <code><a href="../reference/il_comparator_score.html">il_comparator_score()</a></code> computes batch string similarity across a DataFrame with SQL-side scoring on DuckDB.</li>
 <li>

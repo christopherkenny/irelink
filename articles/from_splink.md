@@ -226,6 +226,12 @@ results <- il_find_matches(model, new_df, threshold = 0.5)
 
 [`il_find_matches()`](http://christophertkenny.com/irelink/reference/il_find_matches.md)
 corresponds to `predict_between()`: it scores new records against the
-model’s existing data, but not new records against each other. Splink
-5’s `predict_within()`, which scores pairs within the new records, has
-no `irelink` equivalent yet.
+model’s existing data, but not new records against each other. For
+Splink 5’s `predict_within()`, attach the new records to the trained
+model with
+[`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md)
+and call [`predict()`](https://rdrr.io/r/stats/predict.html). Note that
+[`il_attach()`](http://christophertkenny.com/irelink/reference/il_attach.md)
+computes term frequencies from the attached records. When those are too
+few to be representative, replace them with term frequencies from the
+full data using `il_register_tf(..., overwrite = TRUE)`.

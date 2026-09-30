@@ -11,6 +11,16 @@ Python 'splink' library by Linacre et al. (2022)
 [doi:10.23889/ijpds.v7i3.1794](https://doi.org/10.23889/ijpds.v7i3.1794)
 into idiomatic R.
 
+## Package options
+
+- `irelink.show_sql`: If `TRUE`, print the SQL that
+  [`predict()`](https://rdrr.io/r/stats/predict.html),
+  [`il_estimate_u()`](http://christophertkenny.com/irelink/reference/il_estimate_u.md),
+  and
+  [`il_estimate_prior()`](http://christophertkenny.com/irelink/reference/il_estimate_prior.md)
+  send to the database, as messages. This covers the same queries that
+  `profile_sql = TRUE` times. Defaults to `FALSE`.
+
 ## See also
 
 Useful links:

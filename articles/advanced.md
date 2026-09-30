@@ -22,7 +22,7 @@ library(ggplot2)
 df <- fake_1000
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp0FMDGV/duckdb
+#> ℹ /tmp/RtmpqK2e0Q/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -122,7 +122,7 @@ in SQL.
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,534 pairs in table __il_9311_1_predicted_5 (threshold = 0.5)
+#> <il_compared_lazy> 2,534 pairs in table __il_9156_1_predicted_5 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -197,16 +197,16 @@ metrics$clusters
 #> # A tibble: 143 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralization
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_133       9      32   0.903                  0.446
-#>  2 cluster_44        5      10   1.05                   0.333
-#>  3 cluster_476       2       1   1                     NA    
-#>  4 cluster_736       2       1   1                     NA    
-#>  5 cluster_879       5      14   1.4                    0.167
-#>  6 cluster_911       7      21   1                      0    
-#>  7 cluster_428       3       2   0.667                  1    
-#>  8 cluster_960       7      17   0.810                  0.267
-#>  9 cluster_332       6      15   1                      0.3  
-#> 10 cluster_599       2       1   1                     NA    
+#>  1 cluster_289       7      17   0.810                  0.267
+#>  2 cluster_79        9      21   0.583                  0.214
+#>  3 cluster_332       6      15   1                      0.3  
+#>  4 cluster_599       2       1   1                     NA    
+#>  5 cluster_311       3       4   1.17                   4    
+#>  6 cluster_618      10      31   0.689                  0.25 
+#>  7 cluster_694       8      24   0.857                  0.190
+#>  8 cluster_149      16      46   0.388                  0.319
+#>  9 cluster_301      10      41   0.911                  0.111
+#> 10 cluster_27        5       9   0.9                    0.167
 #> # ℹ 133 more rows
 ```
 
@@ -224,12 +224,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 134       cluster_133      8           1    
-#> 2 138       cluster_133      7           0.875
-#> 3 133       cluster_133      8           1    
-#> 4 137       cluster_133     10           1.25 
-#> 5 139       cluster_133      8           1    
-#> 6 140       cluster_133      7           0.875
+#> 1 125       cluster_122      3             0.6
+#> 2 124       cluster_122      4             0.8
+#> 3 122       cluster_122      5             1  
+#> 4 127       cluster_122      5             1  
+#> 5 123       cluster_122      4             0.8
+#> 6 126       cluster_122      3             0.6
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -327,13 +327,13 @@ matches
 #> # A tibble: 7 × 5
 #>   unique_id_l unique_id_r match_weight total_match_weight match_probability
 #>         <int>       <int>        <dbl>              <dbl>             <dbl>
-#> 1           1         237         2.34              1.26              0.705
-#> 2           1         789         2.38              1.30              0.711
-#> 3           1         362         2.34              1.26              0.705
-#> 4           2         858         1.49              0.402             0.569
-#> 5           2         859         2.94              1.86              0.783
-#> 6           2         864         1.49              0.402             0.569
-#> 7           1         238         2.38              1.30              0.711
+#> 1           2         858         1.49              0.402             0.569
+#> 2           2         859         2.94              1.86              0.783
+#> 3           2         864         1.49              0.402             0.569
+#> 4           1         362         2.34              1.26              0.705
+#> 5           1         238         2.38              1.30              0.711
+#> 6           1         237         2.34              1.26              0.705
+#> 7           1         789         2.38              1.30              0.711
 ```
 
 Each row is a (new record, existing record) pair. `unique_id_l`

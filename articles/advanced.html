@@ -100,7 +100,7 @@ across sections.</p>
 <span><span class="va">df</span> <span class="op">&lt;-</span> <span class="va">fake_1000</span></span>
 <span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp0FMDGV/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpqK2e0Q/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -186,7 +186,7 @@ connected-components analysis in SQL.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">pairs_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">model</span>, threshold <span class="op">=</span> <span class="fl">0.5</span>, collect <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span>
 <span><span class="va">pairs_lazy</span></span>
-<span><span class="co">#&gt; &lt;il_compared_lazy&gt; 2,534 pairs in table __il_9311_1_predicted_5 (threshold = 0.5)</span></span></code></pre></div>
+<span><span class="co">#&gt; &lt;il_compared_lazy&gt; 2,534 pairs in table __il_9156_1_predicted_5 (threshold = 0.5)</span></span></code></pre></div>
 <p>Pass the lazy reference directly to <code><a href="../reference/il_cluster.html">il_cluster()</a></code>:</p>
 <div class="sourceCode" id="cb6"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">clusters_lazy</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_cluster.html">il_cluster</a></span><span class="op">(</span><span class="va">pairs_lazy</span>, threshold <span class="op">=</span> <span class="fl">0.85</span><span class="op">)</span></span>
@@ -238,16 +238,16 @@ of that size:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 143 × 5</span></span></span>
 <span><span class="co">#&gt;    cluster_id  n_nodes n_edges density cluster_centralization</span></span>
 <span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>                  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> cluster_133       9      32   0.903                  0.446</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> cluster_44        5      10   1.05                   0.333</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> cluster_476       2       1   1                     <span style="color: #BB0000;">NA</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> cluster_736       2       1   1                     <span style="color: #BB0000;">NA</span>    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> cluster_879       5      14   1.4                    0.167</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> cluster_911       7      21   1                      0    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_428       3       2   0.667                  1    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_960       7      17   0.810                  0.267</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_332       6      15   1                      0.3  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_599       2       1   1                     <span style="color: #BB0000;">NA</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> cluster_289       7      17   0.810                  0.267</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> cluster_79        9      21   0.583                  0.214</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> cluster_332       6      15   1                      0.3  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> cluster_599       2       1   1                     <span style="color: #BB0000;">NA</span>    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> cluster_311       3       4   1.17                   4    </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> cluster_618      10      31   0.689                  0.25 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> cluster_694       8      24   0.857                  0.190</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> cluster_149      16      46   0.388                  0.319</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> cluster_301      10      41   0.911                  0.111</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> cluster_27        5       9   0.9                    0.167</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 133 more rows</span></span></span></code></pre></div>
 <p>A large maximum cluster size with low density often means a
 transitive link is pulling unrelated entities together. Consider raising
@@ -259,12 +259,12 @@ then checking the metrics again.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 4</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id  degree node_centrality</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>           <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 134       cluster_133      8           1    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 138       cluster_133      7           0.875</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 133       cluster_133      8           1    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 137       cluster_133     10           1.25 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 139       cluster_133      8           1    </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 140       cluster_133      7           0.875</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 125       cluster_122      3             0.6</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 124       cluster_122      4             0.8</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 122       cluster_122      5             1  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 127       cluster_122      5             1  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 123       cluster_122      4             0.8</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 126       cluster_122      3             0.6</span></span></code></pre></div>
 <p>Records with unusually high degree relative to their cluster size may
 be acting as hubs that inflate the cluster beyond its true
 membership.</p>
@@ -346,13 +346,13 @@ and comparison spec.</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 7 × 5</span></span></span>
 <span><span class="co">#&gt;   unique_id_l unique_id_r match_weight total_match_weight match_probability</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>              <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>             <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           1         237         2.34              1.26              0.705</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           1         789         2.38              1.30              0.711</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           1         362         2.34              1.26              0.705</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           2         858         1.49              0.402             0.569</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           2         859         2.94              1.86              0.783</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           2         864         1.49              0.402             0.569</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span>           1         238         2.38              1.30              0.711</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           2         858         1.49              0.402             0.569</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           2         859         2.94              1.86              0.783</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           2         864         1.49              0.402             0.569</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           1         362         2.34              1.26              0.705</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           1         238         2.38              1.30              0.711</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           1         237         2.34              1.26              0.705</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">7</span>           1         789         2.38              1.30              0.711</span></span></code></pre></div>
 <p>Each row is a (new record, existing record) pair.
 <code>unique_id_l</code> identifies the new record (auto-assigned
 starting from 1) and <code>unique_id_r</code> identifies the matched

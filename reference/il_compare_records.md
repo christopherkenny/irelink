@@ -35,6 +35,11 @@ il_compare_records(record_a, record_b, spec, con = NULL)
 
 A single-row tibble of per-comparison gamma values.
 
+## See also
+
+[`il_score_pairs()`](http://christophertkenny.com/irelink/reference/il_score_pairs.md)
+to score pairs with a trained model.
+
 ## Examples
 
 ``` r
@@ -77,7 +82,7 @@ df <- data.frame(
 )
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpZE4yUn/duckdb
+#> ℹ /tmp/RtmpEldr8p/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.

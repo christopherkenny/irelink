@@ -190,6 +190,9 @@ probabilistic record linkage engine into idiomatic R.
   model-scoped in-database table.
 - [`il_score_missing_edges()`](http://christophertkenny.com/irelink/reference/il_score_missing_edges.md)
   enumerates and scores unscored within-cluster pairs.
+- [`il_score_pairs()`](http://christophertkenny.com/irelink/reference/il_score_pairs.md)
+  scores every pair between two sets of records with a trained model,
+  without blocking, using the model’s own term-frequency tables.
 - [`il_score_patterns()`](http://christophertkenny.com/irelink/reference/il_score_patterns.md)
   scores compatible comparison-pattern tables, including
   dependency-aware pattern tables larger than the table used for
@@ -239,8 +242,8 @@ probabilistic record linkage engine into idiomatic R.
 ### Data exploration
 
 - [`il_compare_records()`](http://christophertkenny.com/irelink/reference/il_compare_records.md)
-  scores one explicit record pair against a spec without fitting a full
-  model, and
+  computes comparison levels for one explicit record pair against a spec
+  without fitting a model, and
   [`il_string_similarity()`](http://christophertkenny.com/irelink/reference/il_string_similarity.md)
   computes 5 string similarity metrics for a single pair.
 - [`il_comparator_score()`](http://christophertkenny.com/irelink/reference/il_comparator_score.md)

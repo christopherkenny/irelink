@@ -132,7 +132,7 @@ directly to <code><a href="../reference/il_compare.html">il_compare()</a></code>
 <td>Define settings</td>
 <td><code>SettingsCreator(...)</code></td>
 <td>
-<code>il_spec() &amp;#124;&gt;</code><br><code>il_compare(...) &amp;#124;&gt;</code><br><code>il_block_on(...)</code>
+<code>il_spec() |&gt;</code><br><code>il_compare(...) |&gt;</code><br><code>il_block_on(...)</code>
 </td>
 </tr>
 <tr class="odd">
@@ -191,6 +191,23 @@ directly to <code><a href="../reference/il_compare.html">il_compare()</a></code>
 <code>linker.inference.</code><br><code>predict_between(df_sdf, new_sdf, ...)</code>
 </td>
 <td><code>il_find_matches(model, new_records, ...)</code></td>
+</tr>
+<tr class="even">
+<td>Pairs within new records</td>
+<td>
+<code>linker.inference.</code><br><code>predict_within(new_sdf, ...)</code>
+</td>
+<td>
+<code>il_attach(model, new_records) |&gt;</code><br><code>predict(...)</code>
+</td>
+</tr>
+<tr class="odd">
+<td>Score chosen pairs</td>
+<td>
+<code>linker.inference.</code><br><code>score_pair(...)</code>,
+<code>score_pairs(...)</code>
+</td>
+<td><code>il_score_pairs(model, records_l, records_r)</code></td>
 </tr>
 </tbody>
 </table>
@@ -364,10 +381,8 @@ preconfigured sets of levels.</p>
 <td><code>il_waterfall(pairs, ...)</code></td>
 </tr>
 <tr class="even">
-<td><code>linker.inference.score_pair(...)</code></td>
-<td>
-<code>il_compare_records(record_a, record_b, spec)</code>
-(comparison levels only)</td>
+<td><em>comparison levels for a pair, without a model</em></td>
+<td><code>il_compare_records(record_a, record_b, spec)</code></td>
 </tr>
 <tr class="odd">
 <td>
@@ -595,9 +610,13 @@ the two packages.</p>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_find_matches.html">il_find_matches</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">new_df</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
 <p><code><a href="../reference/il_find_matches.html">il_find_matches()</a></code> corresponds to
 <code>predict_between()</code>: it scores new records against the
-model’s existing data, but not new records against each other. Splink
-5’s <code>predict_within()</code>, which scores pairs within the new
-records, has no <code>irelink</code> equivalent yet.</p>
+model’s existing data, but not new records against each other. For
+Splink 5’s <code>predict_within()</code>, attach the new records to the
+trained model with <code><a href="../reference/il_attach.html">il_attach()</a></code> and call
+<code><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict()</a></code>. Note that <code><a href="../reference/il_attach.html">il_attach()</a></code> computes term
+frequencies from the attached records. When those are too few to be
+representative, replace them with term frequencies from the full data
+using <code>il_register_tf(..., overwrite = TRUE)</code>.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

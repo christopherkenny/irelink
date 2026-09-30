@@ -49,7 +49,7 @@ and value distributions:
 
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpQ7V1Aw/duckdb
+#> ℹ /tmp/Rtmpti77rz/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -288,7 +288,7 @@ and attach it to the same data or to new data with
 
 con2 <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpQ7V1Aw/duckdb
+#> ℹ /tmp/Rtmpti77rz/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -301,12 +301,12 @@ head(predict(model2, threshold = 0.85))
 #> # A tibble: 6 × 11
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob gamma_city
 #>         <int>       <int>            <int>         <int>     <int>      <int>
-#> 1         102         104                4             2         5          1
-#> 2         252         254                4             4         5          0
-#> 3         316         318                4             1         2          0
-#> 4         816         820                4             4         5          1
-#> 5         819         820                4             4         5          0
-#> 6          99         100                4            -1         5          0
+#> 1         509         512                4             2         3          1
+#> 2         510         512                4             4         3          1
+#> 3          69          71                4             2         5          0
+#> 4         143         144                4             4         5          1
+#> 5         150         152                4             4         2          1
+#> 6         270         271                4             4         5          1
 #> # ℹ 5 more variables: gamma_email <int>, match_weight <dbl>, tf_adj_city <dbl>,
 #> #   total_match_weight <dbl>, match_probability <dbl>
 DBI::dbDisconnect(con2, shutdown = TRUE)
@@ -353,12 +353,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 230       cluster_229
-#> 2 1         cluster_0  
-#> 3 560       cluster_558
-#> 4 655       cluster_654
-#> 5 773       cluster_772
-#> 6 537       cluster_535
+#> 1 820       cluster_814
+#> 2 631       cluster_626
+#> 3 932       cluster_924
+#> 4 595       cluster_592
+#> 5 961       cluster_960
+#> 6 264       cluster_261
 ```
 
 ## Evaluate against ground truth
