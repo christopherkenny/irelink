@@ -13,13 +13,8 @@ into idiomatic R.
 
 ## Package options
 
-- `irelink.show_sql`: If `TRUE`, print the SQL that
-  [`predict()`](https://rdrr.io/r/stats/predict.html),
-  [`il_estimate_u()`](http://christophertkenny.com/irelink/reference/il_estimate_u.md),
-  and
-  [`il_estimate_prior()`](http://christophertkenny.com/irelink/reference/il_estimate_prior.md)
-  send to the database, as messages. This covers the same queries that
-  `profile_sql = TRUE` times. Defaults to `FALSE`.
+- `irelink.show_sql`: If `TRUE`, print every SQL statement irelink sends
+  to the database as a message. Defaults to `FALSE`.
 
 ## See also
 

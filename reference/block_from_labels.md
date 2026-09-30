@@ -42,7 +42,7 @@ with columns `column`, `recall` (fraction of true matches caught), and
 ``` r
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpwUsBnF/duckdb
+#> ℹ /tmp/RtmpCyxgpv/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.

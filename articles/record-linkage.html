@@ -134,7 +134,7 @@ values because of the corruption process:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpeDd9r5/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpAaB64b/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -271,12 +271,12 @@ then run EM:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id  </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 1078      cluster_1078</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 664       cluster_664 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 4656      cluster_4656</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 3699      cluster_3348</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 2517      cluster_2517</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 4523      cluster_2332</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 146       cluster_146 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 965       cluster_1018</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 3173      cluster_1298</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 1018      cluster_1018</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 917       cluster_3026</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 3366      cluster_229</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>

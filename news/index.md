@@ -314,6 +314,8 @@ probabilistic record linkage engine into idiomatic R.
   [`il_estimate_prior()`](http://christophertkenny.com/irelink/reference/il_estimate_prior.md),
   and [`predict()`](https://rdrr.io/r/stats/predict.html) records
   lightweight SQL timing metadata for performance investigation.
+- `options(irelink.show_sql = TRUE)` prints every SQL statement irelink
+  sends to the database, formatted for reading.
 - End-to-end benchmarks against an R-side SQLite baseline: 1,000 records
   in 1.4 s (2.1× faster), 5,000 records in 19.5 s (1.6×), 10,000 records
   in 61.4 s (2.6×). Speedup grows with dataset size.
