@@ -70,7 +70,7 @@ df_destination
 
 ## Profile the data
 
-```{r setup-con}
+```{r setup-con, message = FALSE}
 con <- DBI::dbConnect(duckdb::duckdb())
 ```
 

@@ -38,7 +38,7 @@ Missing values appear as `NA`, which reflects a common real-world problem.
 
 Before building a model, profile the data to understand its completeness and value distributions:
 
-```{r completeness}
+```{r completeness, message = FALSE}
 con <- DBI::dbConnect(duckdb::duckdb())
 comp <- il_completeness(df, con = con)
 comp
@@ -151,7 +151,7 @@ il_save(model, path)
 
 Load the saved model with `il_load()` and attach it to the same data or to new data with `il_attach()`:
 
-```{r attach}
+```{r attach, message = FALSE}
 con2 <- DBI::dbConnect(duckdb::duckdb())
 loaded <- il_load(path)
 model2 <- il_attach(loaded, fake_1000, con = con2)

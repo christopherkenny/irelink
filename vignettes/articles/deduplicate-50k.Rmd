@@ -48,7 +48,7 @@ df
 
 Use completeness and value distributions to choose blocking rules and comparisons:
 
-```{r setup-con}
+```{r setup-con, message = FALSE}
 con <- DBI::dbConnect(duckdb::duckdb())
 ```
 

@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 )
 ```
 
-# irelink <a href="http://christophertkenny.com/irelink/"><img src="man/figures/logo.png" align="right" height="130" alt="irelink website" /></a>
+# irelink <a href="https://christophertkenny.com/irelink/"><img src="man/figures/logo.png" align="right" height="130" alt="irelink website" /></a>
 
 <!-- badges: start -->
 [![R-CMD-check](https://github.com/christopherkenny/irelink/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/christopherkenny/irelink/actions/workflows/R-CMD-check.yaml)
@@ -42,9 +42,11 @@ The bundled `fake_20` dataset provides a small example for experimentation.
 `irelink` pushes data into a SQL database for efficient pair generation, so you need a DBI connection.
 Here we use an in-memory DuckDB instance.
 
-```{r dedup-load}
+```{r dedup-library}
 library(irelink)
+```
 
+```{r dedup-load, message = FALSE}
 df <- fake_20
 con <- DBI::dbConnect(duckdb::duckdb())
 ```
@@ -90,7 +92,7 @@ DBI::dbDisconnect(con, shutdown = TRUE)
 Link records across two separate datasets, finding which rows in one table correspond to rows in the other.
 The FEBRL benchmark datasets provide a classic record-linkage scenario: `febrl4a` contains 5,000 original records and `febrl4b` contains one duplicate per original with realistic data-quality errors.
 
-```{r link-load}
+```{r link-load, message = FALSE}
 # Use a small slice for this quick demo; see vignette("record-linkage") for the full workflow
 df_a <- head(febrl4a, 200)
 df_b <- head(febrl4b, 200)

@@ -66,7 +66,7 @@ Multiple blocking rules use OR logic, so a pair is compared if it satisfies any 
 Any DBI-compatible connection works.
 Here we use an in-memory DuckDB database:
 
-```{r model}
+```{r model, message = FALSE}
 df <- fake_20
 con <- DBI::dbConnect(duckdb::duckdb())
 

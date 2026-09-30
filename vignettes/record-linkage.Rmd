@@ -38,7 +38,7 @@ head(febrl4b)
 Check completeness across both tables.
 Table B has more missing values because of the corruption process:
 
-```{r completeness}
+```{r completeness, message = FALSE}
 con <- DBI::dbConnect(duckdb::duckdb())
 comp <- il_completeness(febrl4a, febrl4b, con = con)
 comp

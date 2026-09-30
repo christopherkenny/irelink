@@ -18,3 +18,4 @@
 ^inst/notes/.*$
 ^inst/benchmarks/.*$
 ^inst/refs/.*$
+^cran-comments\.md$
