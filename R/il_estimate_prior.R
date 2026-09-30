@@ -10,6 +10,10 @@
 #'   deterministic matching criteria.
 #' @param recall A numeric value between 0 and 1 representing the assumed
 #'   recall of the deterministic rules. Defaults to `0.7`.
+#' @param record_sample_proportion Proportion of records, chosen by a
+#'   deterministic hash of `unique_id`, used to count deterministic matches.
+#'   Values below 1 estimate the count from the sample, which is faster on
+#'   large data. Defaults to `1` (exact counts).
 #' @param profile_sql Logical. If `TRUE`, store lightweight SQL timing metadata
 #'   in `model$params$sql_profile`.
 #'
@@ -65,7 +69,13 @@
 #'
 #' model <- il_estimate_prior(model, block_on(first_name, surname, dob))
 #' DBI::dbDisconnect(con, shutdown = TRUE)
-il_estimate_prior <- function(model, ..., recall = 0.7, profile_sql = FALSE) {
+il_estimate_prior <- function(
+  model,
+  ...,
+  recall = 0.7,
+  record_sample_proportion = 1,
+  profile_sql = FALSE
+) {
   validate_il_model(model)
   profile <- il_new_sql_profile(profile_sql)
   rules <- list(...)
@@ -93,6 +103,10 @@ il_estimate_prior <- function(model, ..., recall = 0.7, profile_sql = FALSE) {
     )
   }
 
+  record_sample_proportion <- validate_record_sample_proportion(
+    record_sample_proportion
+  )
+
   con <- model$con
   tbl <- model$data$tbl_l
   tbl_r <- model$data$tbl_r %||% tbl
@@ -110,6 +124,25 @@ il_estimate_prior <- function(model, ..., recall = 0.7, profile_sql = FALSE) {
     total_pairs <- n_total * n_r
   }
 
+  scale <- 1
+  if (record_sample_proportion < 1) {
+    threshold <- sample_threshold(
+      record_sample_proportion,
+      il_probe_sample_modulus
+    )
+    scale <- (il_probe_sample_modulus / threshold)^2
+    sampled <- il_sample_table_pair(
+      con,
+      tbl,
+      tbl_r,
+      threshold,
+      il_probe_sample_modulus
+    )
+    on.exit(drop_sampled_tables(con, sampled$tables), add = TRUE)
+    tbl <- sampled$tbl_l
+    tbl_r <- sampled$tbl_r
+  }
+
   n_blocked <- count_unique_blocked_pairs(
     con = con,
     tbl_l = tbl,
@@ -119,6 +152,10 @@ il_estimate_prior <- function(model, ..., recall = 0.7, profile_sql = FALSE) {
     dialect = detect_dialect(con),
     profile = profile
   )
+  if (scale > 1) {
+    warn_small_pair_sample(n_blocked, 'deterministic rules')
+    n_blocked <- n_blocked * scale
+  }
 
   estimated_matches <- n_blocked / recall
   prior <- min(max(estimated_matches / total_pairs, 1e-6), 1 - 1e-6)

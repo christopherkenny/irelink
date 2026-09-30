@@ -15,16 +15,20 @@ il_estimate_u(
 \arguments{
 \item{model}{An \code{il_model} object (piped in).}
 
-\item{max_pairs}{Maximum number of random pairs to sample. Defaults to
-\code{1e6}.}
+\item{max_pairs}{Approximate number of random pairs to score. Defaults to
+\code{1e6}. When the data has at most \code{max_pairs} candidate pairs, all of them
+are used. Otherwise, a random sample of records is drawn so that every pair
+has the same chance of inclusion and about \code{max_pairs} pairs are scored.
+Use \code{\link[=set.seed]{set.seed()}} to make the sample reproducible.}
 
 \item{min_count_per_level}{Optional integer. When set, chunked estimation
 stops once every comparison level has been observed at least this many
-times, or once \code{max_pairs} has been sampled.}
+times. Chunks are random subsets of the sampled pairs, so stopping early
+still leaves a random sample.}
 
 \item{chunk_size}{Optional integer number of pairs to score per chunk. When
-set, u estimation accumulates gamma counts across chunks instead of using
-one aggregate query.}
+set, u estimation accumulates gamma counts across random chunks instead of
+using one aggregate query.}
 
 \item{profile_sql}{Logical. If \code{TRUE}, store lightweight SQL timing metadata
 in \code{model$params$sql_profile}.}

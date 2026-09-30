@@ -171,67 +171,69 @@ get_pairs_with_gammas <- function(model, blocking_rules, limit = NULL) {
   list(ids = ids, gamma_mat = gamma_mat, tf_data = tf_data)
 }
 
-#' Get random pairs with gammas (for u estimation)
-#'
-#' Returns gamma-level counts aggregated across a random sample of pairs,
-#' rather than the full pair matrix, to keep data transfer small.
+#' Build SQL selecting gamma columns for every candidate pair
 #'
 #' @param model An il_model object.
-#' @param max_pairs Maximum pairs to sample.
-#' @return A list with `counts` (data frame of gamma columns + `n`) and
-#'   `n_pairs` (total sampled pairs).
+#' @param extra_where Optional extra SQL condition on the `l` and `r` aliases.
+#' @return SQL for the union of pairs across table combinations.
 #' @noRd
-get_random_pairs_with_gammas <- function(
-  model,
-  max_pairs = 1e6,
-  profile = NULL
-) {
+all_pair_gamma_sql <- function(model, extra_where = NULL) {
   con <- model$con
   dialect <- detect_dialect(con)
   comparisons <- model$spec$comparisons
-  comp_names <- comparison_names(comparisons)
-  gamma_cols <- paste0('gamma_', comp_names)
+  tbl_l <- model$data$tbl_l
+  tbl_r <- model$data$tbl_r %||% tbl_l
+  link_type <- model$link_type %||% 'dedupe'
+  has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
 
-  if (dialect_has_fuzzy_sql(dialect)) {
-    tbl_l <- model$data$tbl_l
-    tbl_r <- tbl_l
-    if (!is.null(model$data$tbl_r)) {
-      tbl_r <- model$data$tbl_r
-    }
-    link_type <- model$link_type %||% 'dedupe'
-    has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
-    max_pairs <- as.integer(max_pairs)
+  gamma_exprs <- vapply(
+    comparisons,
+    function(comp) {
+      expr <- sql_gamma_case(comp, dialect)
+      glue::glue(
+        '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
+      )
+    },
+    character(1)
+  )
+  gamma_select <- paste(gamma_exprs, collapse = ', ')
 
-    gamma_exprs <- vapply(
-      comparisons,
-      function(comp) {
-        expr <- sql_gamma_case(comp, dialect)
-        glue::glue(
-          '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
-        )
-      },
-      character(1)
-    )
-    gamma_select <- paste(gamma_exprs, collapse = ', ')
+  table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
+  parts <- vapply(
+    table_pairs,
+    function(tp) {
+      where <- paste(c(tp$join_cond, extra_where), collapse = ' AND ')
+      glue::glue(
+        'SELECT {gamma_select} ',
+        'FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
+        'WHERE {where}'
+      )
+    },
+    character(1)
+  )
+  paste(parts, collapse = ' UNION ALL ')
+}
+
+#' Get gamma-pattern counts for u estimation
+#'
+#' Scores every candidate pair of `model`, aggregating gamma-pattern counts in
+#' the database to keep data transfer small. Random sampling happens before
+#' this, by sampling records in `u_pair_model()`.
+#'
+#' @param model An il_model object, usually with sampled tables.
+#' @return A list with `counts` (data frame of gamma columns + `n`) and
+#'   `n_pairs` (total pairs scored).
+#' @noRd
+get_random_pairs_with_gammas <- function(model, profile = NULL) {
+  con <- model$con
+  comparisons <- model$spec$comparisons
+  gamma_cols <- paste0('gamma_', comparison_names(comparisons))
+
+  if (dialect_has_fuzzy_sql(detect_dialect(con))) {
     group_by_clause <- sql_identifier_csv(gamma_cols)
-
-    table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
-    parts <- vapply(
-      table_pairs,
-      function(tp) {
-        glue::glue(
-          'SELECT {gamma_select} ',
-          'FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
-          'WHERE {tp$join_cond}'
-        )
-      },
-      character(1)
-    )
-    inner <- paste(parts, collapse = ' UNION ALL ')
-
     sql <- glue::glue(
       'SELECT {group_by_clause}, COUNT(*) AS n FROM (',
-      'SELECT * FROM ({inner}) AS pairs LIMIT {max_pairs}',
+      '{all_pair_gamma_sql(model)}',
       ') AS sampled GROUP BY {group_by_clause}'
     )
     result <- il_db_get_query(
@@ -247,102 +249,59 @@ get_random_pairs_with_gammas <- function(
   }
 
   # Fallback: R-side — pull pairs, compute gammas, aggregate counts in R
-  pairs <- get_all_pairs(model, max_pairs = max_pairs)
+  pairs <- get_all_pairs(model, max_pairs = NULL)
   if (nrow(pairs) == 0L) {
-    empty <- as.data.frame(matrix(
-      integer(0),
-      nrow = 0,
-      ncol = length(gamma_cols) + 1L,
-      dimnames = list(NULL, c(gamma_cols, 'n'))
-    ))
-    return(list(counts = empty, n_pairs = 0L))
+    return(list(counts = empty_gamma_counts(gamma_cols), n_pairs = 0L))
   }
   gamma_mat <- compute_gamma_matrix(pairs, comparisons)
-  n_pairs <- nrow(gamma_mat)
-  counts_df <- as.data.frame(gamma_mat)
-  names(counts_df) <- gamma_cols
-  counts <- stats::aggregate(
-    list(n = rep(1L, n_pairs)),
-    by = counts_df,
-    FUN = sum
+  list(
+    counts = gamma_matrix_counts(gamma_mat, gamma_cols),
+    n_pairs = nrow(gamma_mat)
   )
-  list(counts = counts, n_pairs = n_pairs)
 }
 
-#' Get random-pair gamma counts in chunks
+#' Get gamma-pattern counts for u estimation in random chunks
 #'
-#' Accumulates the same gamma-pattern counts as
-#' `get_random_pairs_with_gammas()`, but queries or processes at most
-#' `chunk_size` candidate pairs at a time and can stop early once every
-#' comparison level has enough support.
+#' Splits the candidate pairs of `model` into `n_chunks` random partitions by a
+#' salted hash of the pair ids, scoring one partition at a time. Each partition
+#' is a random subset of pairs, so stopping early once every comparison level
+#' has enough support still leaves a random sample.
 #'
-#' @param model An il_model object.
-#' @param max_pairs Maximum pairs to sample.
-#' @param chunk_size Number of pairs per chunk.
+#' @param model An il_model object, usually with sampled tables.
+#' @param expected_pairs Expected number of candidate pairs in `model`.
+#' @param chunk_size Target number of pairs per chunk.
 #' @param min_count_per_level Optional early-stop support target.
+#' @param salt String from R's RNG used to randomize chunk membership.
 #' @return A list with `counts`, `n_pairs`, `stopped_early`, and `n_chunks`.
 #' @noRd
 get_random_pair_gamma_counts_chunked <- function(
   model,
-  max_pairs,
+  expected_pairs,
   chunk_size,
   min_count_per_level = NULL,
+  salt = '',
   profile = NULL
 ) {
   con <- model$con
-  dialect <- detect_dialect(con)
   comparisons <- model$spec$comparisons
   comp_names <- comparison_names(comparisons)
   gamma_cols <- paste0('gamma_', comp_names)
+  n_parts <- max(1L, as.integer(ceiling(expected_pairs / chunk_size)))
 
   counts <- empty_gamma_counts(gamma_cols)
   n_pairs <- 0L
   n_chunks <- 0L
   stopped_early <- FALSE
 
-  if (dialect_has_fuzzy_sql(dialect)) {
-    tbl_l <- model$data$tbl_l
-    tbl_r <- tbl_l
-    if (!is.null(model$data$tbl_r)) {
-      tbl_r <- model$data$tbl_r
-    }
-    link_type <- model$link_type %||% 'dedupe'
-    has_two_tables <- !is.null(model$data$tbl_r) && model$data$tbl_r != tbl_l
-
-    gamma_exprs <- vapply(
-      comparisons,
-      function(comp) {
-        expr <- sql_gamma_case(comp, dialect)
-        glue::glue(
-          '{expr} AS {sql_quote_identifier(paste0("gamma_", comparison_name(comp)))}'
-        )
-      },
-      character(1)
-    )
-    gamma_select <- paste(gamma_exprs, collapse = ', ')
+  if (dialect_has_fuzzy_sql(detect_dialect(con))) {
     group_by_clause <- sql_identifier_csv(gamma_cols)
-
-    table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
-    parts <- vapply(
-      table_pairs,
-      function(tp) {
-        glue::glue(
-          'SELECT {gamma_select} ',
-          'FROM {sql_quote_identifier(tp$from_l)} l, {sql_quote_identifier(tp$from_r)} r ',
-          'WHERE {tp$join_cond}'
-        )
-      },
-      character(1)
-    )
-    inner <- paste(parts, collapse = ' UNION ALL ')
-
-    offset <- 0L
-    while (n_pairs < max_pairs) {
-      this_limit <- min(chunk_size, max_pairs - n_pairs)
+    for (k in seq_len(n_parts) - 1L) {
+      chunk_where <- glue::glue(
+        "hash(l.unique_id, r.unique_id, '{salt}') % {n_parts} = {k}"
+      )
       sql <- glue::glue(
         'SELECT {group_by_clause}, COUNT(*) AS n FROM (',
-        'SELECT * FROM ({inner}) AS pairs ',
-        'LIMIT {this_limit} OFFSET {offset}',
+        '{all_pair_gamma_sql(model, chunk_where)}',
         ') AS sampled GROUP BY {group_by_clause}'
       )
       chunk_counts <- il_db_get_query(
@@ -351,26 +310,16 @@ get_random_pair_gamma_counts_chunked <- function(
         step = 'estimate_u.random_pair_gamma_counts_chunk',
         profile = profile
       )
-      chunk_n <- sum(chunk_counts$n)
+      n_chunks <- n_chunks + 1L
       if (nrow(chunk_counts) == 0L) {
-        chunk_n <- 0L
-      }
-      if (chunk_n == 0L) {
-        break
+        next
       }
       counts <- combine_gamma_counts(counts, chunk_counts, gamma_cols)
-      n_pairs <- n_pairs + chunk_n
-      n_chunks <- n_chunks + 1L
-      offset <- offset + chunk_n
+      n_pairs <- n_pairs + sum(chunk_counts$n)
       if (
-        gamma_support_met(
-          counts,
-          comparisons,
-          comp_names,
-          min_count_per_level
-        )
+        gamma_support_met(counts, comparisons, comp_names, min_count_per_level)
       ) {
-        stopped_early <- TRUE
+        stopped_early <- k < n_parts - 1L
         break
       }
     }
@@ -382,34 +331,23 @@ get_random_pair_gamma_counts_chunked <- function(
     ))
   }
 
-  pairs <- get_all_pairs(model, max_pairs = max_pairs)
-  if (nrow(pairs) == 0L) {
-    return(list(
-      counts = counts,
-      n_pairs = 0L,
-      stopped_early = FALSE,
-      n_chunks = 0L
-    ))
+  pairs <- get_all_pairs(model, max_pairs = NULL)
+  if (nrow(pairs) > 1L) {
+    pairs <- pairs[sample.int(nrow(pairs)), , drop = FALSE]
   }
   start <- 1L
-  while (start <= nrow(pairs) && n_pairs < max_pairs) {
-    end <- min(start + chunk_size - 1L, nrow(pairs), max_pairs)
+  while (start <= nrow(pairs)) {
+    end <- min(start + chunk_size - 1L, nrow(pairs))
     chunk_pairs <- pairs[start:end, , drop = FALSE]
     gamma_mat <- compute_gamma_matrix(chunk_pairs, comparisons)
     chunk_counts <- gamma_matrix_counts(gamma_mat, gamma_cols)
     counts <- combine_gamma_counts(counts, chunk_counts, gamma_cols)
-    chunk_n <- nrow(gamma_mat)
-    n_pairs <- n_pairs + chunk_n
+    n_pairs <- n_pairs + nrow(gamma_mat)
     n_chunks <- n_chunks + 1L
     if (
-      gamma_support_met(
-        counts,
-        comparisons,
-        comp_names,
-        min_count_per_level
-      )
+      gamma_support_met(counts, comparisons, comp_names, min_count_per_level)
     ) {
-      stopped_early <- TRUE
+      stopped_early <- end < nrow(pairs)
       break
     }
     start <- end + 1L
@@ -975,7 +913,6 @@ get_all_pairs <- function(model, max_pairs = 1e6) {
   cols <- model$data$columns
   sel <- build_select_aliases(cols)
 
-  max_pairs <- as.integer(max_pairs)
   table_pairs <- build_table_pairs(tbl_l, tbl_r, link_type, has_two_tables)
   parts <- vapply(
     table_pairs,
@@ -988,7 +925,9 @@ get_all_pairs <- function(model, max_pairs = 1e6) {
     character(1)
   )
   sql <- paste(parts, collapse = ' UNION ALL ')
-  sql <- glue::glue('{sql} LIMIT {max_pairs}')
+  if (!is.null(max_pairs)) {
+    sql <- glue::glue('{sql} LIMIT {as.integer(max_pairs)}')
+  }
 
   DBI::dbGetQuery(con, sql)
 }

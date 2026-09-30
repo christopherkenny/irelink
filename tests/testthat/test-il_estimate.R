@@ -54,20 +54,55 @@ test_that('il_estimate_u() can stop chunked sampling after every level is observ
   con <- test_con()
   withr::defer(test_discon(con))
 
-  df <- data.frame(unique_id = 1:3, key = c('a', 'a', 'b'))
+  df <- data.frame(unique_id = 1:100, key = rep(c('a', 'b'), 50))
   spec <- il_spec() |>
     il_compare(key, cl_exact())
 
   model <- il_model(df, spec = spec, con = con) |>
     il_estimate_u(
-      max_pairs = 10,
-      chunk_size = 1,
+      max_pairs = 1e4,
+      chunk_size = 500,
       min_count_per_level = 1
     )
 
   expect_true(model$params$u_estimation$stopped_early)
-  expect_lt(model$params$u_estimation$n_pairs_sampled, 10)
-  expect_equal(model$params$u_estimation$n_pairs_sampled, 2)
+  expect_lt(model$params$u_estimation$n_pairs_sampled, choose(100, 2))
+})
+
+test_that('il_estimate_u() samples pairs at random from ordered data', {
+  withr::local_seed(1)
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- data.frame(unique_id = 1:2000, key = rep(c('a', 'b', 'c', 'd'), each = 500))
+  spec <- il_spec() |>
+    il_compare(key, cl_exact())
+
+  model <- il_model(df, spec = spec, con = con)
+  tables_before <- DBI::dbListTables(con)
+  model <- il_estimate_u(model, max_pairs = 2e4)
+  params <- il_parameters(model)
+  u_match <- params$u[params$gamma_level == max(params$gamma_level)]
+
+  expect_equal(u_match, 4 * choose(500, 2) / choose(2000, 2), tolerance = 0.1)
+  expect_equal(model$params$u_estimation$n_pairs_sampled, 2e4, tolerance = 0.2)
+  expect_setequal(DBI::dbListTables(con), tables_before)
+})
+
+test_that('il_estimate_u() sampling is reproducible with set.seed()', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- data.frame(unique_id = 1:500, key = sample(letters, 500, replace = TRUE))
+  spec <- il_spec() |>
+    il_compare(key, cl_exact())
+  model <- il_model(df, spec = spec, con = con)
+
+  fit <- function(seed) {
+    withr::with_seed(seed, il_estimate_u(model, max_pairs = 5000))$params
+  }
+
+  expect_identical(fit(1), fit(1))
 })
 
 test_that('chunked il_estimate_u() matches unchunked output for one full chunk', {
@@ -161,6 +196,52 @@ test_that('il_estimate_em() errors clearly on empty blocking results', {
 
   expect_error(
     il_estimate_em(model, block_on(surname))
+  )
+})
+
+test_that('il_estimate_em() max_pairs trains on a record sample', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_compare(surname, cl_exact()) |>
+    il_compare(city, cl_exact())
+  model <- il_model(fake_1000, spec = spec, con = con) |>
+    il_estimate_u()
+  tables_before <- DBI::dbListTables(con)
+
+  sampled <- em_pair_model(model, block_on(city), 2000, 1)
+  n_sampled <- count_unique_blocked_pairs(
+    con,
+    sampled$model$data$tbl_l,
+    NULL,
+    list(block_on(city)),
+    'dedupe',
+    detect_dialect(con)
+  )
+  drop_sampled_tables(con, sampled$tables)
+  expect_equal(n_sampled, 2000, tolerance = 0.5)
+
+  trained <- suppressMessages(il_estimate_em(
+    model,
+    block_on(city),
+    max_pairs = 2000
+  ))
+  expect_s3_class(trained, 'il_model')
+  expect_identical(trained$data$tbl_l, model$data$tbl_l)
+  expect_setequal(DBI::dbListTables(con), tables_before)
+})
+
+test_that('il_estimate_em() validates max_pairs', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  model <- make_test_model(con)
+
+  expect_snapshot(
+    il_estimate_em(model, block_on(first_name), max_pairs = -1),
+    error = TRUE
   )
 })
 
@@ -275,6 +356,26 @@ test_that('il_estimate_prior() uses link_and_dedupe denominator', {
 
   # 3 matches over 2 * 2 cross + 1 within-left + 1 within-right = 6 pairs
   expect_equal(model$params$prior, 3 / 6)
+})
+
+test_that('il_estimate_prior() estimates from a record sample', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  spec <- il_spec() |>
+    il_compare(first_name, cl_exact()) |>
+    il_block_on(city)
+  model <- il_model(fake_1000, spec = spec, con = con)
+
+  exact <- il_estimate_prior(model, block_on(city), recall = 1)
+  est <- il_estimate_prior(
+    model,
+    block_on(city),
+    recall = 1,
+    record_sample_proportion = 0.5
+  )
+
+  expect_equal(est$params$prior, exact$params$prior, tolerance = 0.25)
 })
 
 # il_estimate_m_from_labels(): from test_m_train.py

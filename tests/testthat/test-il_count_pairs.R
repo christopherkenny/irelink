@@ -91,3 +91,83 @@ test_that('il_count_pairs() with multiple blocking rules reports each', {
   # Should report pair counts for each blocking rule
   expect_true(nrow(result) >= 2)
 })
+
+test_that('il_count_pairs() estimates counts from a record sample', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  exact <- il_count_pairs(
+    fake_1000,
+    block_on(city),
+    con = con,
+    record_sample_proportion = 1
+  )
+  est <- il_count_pairs(
+    fake_1000,
+    block_on(city),
+    con = con,
+    record_sample_proportion = 0.5
+  )
+
+  expect_equal(est$n_pairs, exact$n_pairs, tolerance = 0.25)
+  expect_equal(est$cumulative_pairs, est$n_pairs)
+})
+
+test_that('il_count_pairs() samples records on SQLite', {
+  skip_if_not_installed('RSQLite')
+
+  con <- DBI::dbConnect(RSQLite::SQLite(), ':memory:')
+  withr::defer(DBI::dbDisconnect(con))
+
+  exact <- il_count_pairs(
+    fake_1000,
+    block_on(city),
+    con = con,
+    record_sample_proportion = 1
+  )
+  est <- il_count_pairs(
+    fake_1000,
+    block_on(city),
+    con = con,
+    record_sample_proportion = 0.5
+  )
+
+  expect_equal(est$n_pairs, exact$n_pairs, tolerance = 0.25)
+  expect_equal(DBI::dbListTables(con), character(0))
+})
+
+test_that('il_count_pairs() warns when sampled estimates are unstable', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- data.frame(
+    unique_id = 1:4,
+    first_name = c('John', 'Mary', 'Jane', 'John')
+  )
+
+  expect_snapshot(
+    result <- il_count_pairs(
+      df,
+      block_on(first_name),
+      con = con,
+      record_sample_proportion = 0.5
+    )
+  )
+})
+
+test_that('il_count_pairs() validates record_sample_proportion', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  df <- data.frame(unique_id = 1:2, first_name = c('a', 'a'))
+
+  expect_snapshot(
+    il_count_pairs(
+      df,
+      block_on(first_name),
+      con = con,
+      record_sample_proportion = 0
+    ),
+    error = TRUE
+  )
+})

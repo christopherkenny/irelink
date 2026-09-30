@@ -228,3 +228,42 @@ test_that('il_load() accepts a valid Splink JSON model and predict() works after
   expect_gt(nrow(pairs), 0)
   expect_true(all(c('match_weight', 'match_probability') %in% names(pairs)))
 })
+
+test_that('il_load() accepts Splink JSON blocking rules written as strings', {
+  skip_if_no_jsonlite()
+
+  model_json <- list(
+    link_type = 'dedupe_only',
+    probability_two_random_records_match = 0.05,
+    comparisons = list(
+      list(
+        output_column_name = 'first_name',
+        comparison_levels = list(
+          list(
+            sql_condition = 'first_name_l = first_name_r',
+            m_probability = 0.9,
+            u_probability = 0.2
+          ),
+          list(
+            sql_condition = 'ELSE',
+            m_probability = 0.1,
+            u_probability = 0.8
+          )
+        )
+      )
+    ),
+    blocking_rules_to_generate_predictions = list(
+      'l.surname = r.surname',
+      'l.first_name = r.first_name'
+    )
+  )
+
+  path <- withr::local_tempfile(fileext = '.json')
+  jsonlite::write_json(model_json, path, auto_unbox = TRUE, digits = NA)
+
+  loaded <- il_load(path)
+  expect_equal(
+    vapply(loaded$spec$blocking_rules, \(br) br$columns, character(1)),
+    c('surname', 'first_name')
+  )
+})

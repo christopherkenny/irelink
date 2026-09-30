@@ -15,6 +15,8 @@ il_estimate_em(
   estimate_without_tf = TRUE,
   derive_prior = FALSE,
   estimator_mode = c("independent", "dependency-aware"),
+  max_pairs = NULL,
+  record_sample_proportion = 1,
   ...
 )
 }
@@ -58,6 +60,16 @@ model. Defaults to \code{FALSE}. Only supported with
 \item{estimator_mode}{Estimator to use. \code{"independent"} keeps the
 conditionally independent Fellegi-Sunter EM estimator. \code{"dependency-aware"}
 fits log-linear matched and unmatched comparison-pattern distributions.}
+
+\item{max_pairs}{Optional cap on the approximate number of blocked pairs used
+for training. When the blocking rule would generate more pairs, EM trains
+on a deterministic sample of records, chosen so the expected number of
+blocked pairs is about \code{max_pairs}. Defaults to \code{NULL} (no cap).}
+
+\item{record_sample_proportion}{Proportion of records used to count
+blocked pairs when \code{max_pairs} is set. Defaults to \code{1}, which counts
+exactly. Values below 1 estimate the count from a deterministic record
+sample, which is faster on very large data.}
 
 \item{...}{Reserved for future options.}
 }

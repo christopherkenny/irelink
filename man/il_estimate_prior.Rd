@@ -4,7 +4,13 @@
 \alias{il_estimate_prior}
 \title{Estimate the Prior Match Probability}
 \usage{
-il_estimate_prior(model, ..., recall = 0.7, profile_sql = FALSE)
+il_estimate_prior(
+  model,
+  ...,
+  recall = 0.7,
+  record_sample_proportion = 1,
+  profile_sql = FALSE
+)
 }
 \arguments{
 \item{model}{An \code{il_model} object (piped in).}
@@ -14,6 +20,11 @@ deterministic matching criteria.}
 
 \item{recall}{A numeric value between 0 and 1 representing the assumed
 recall of the deterministic rules. Defaults to \code{0.7}.}
+
+\item{record_sample_proportion}{Proportion of records, chosen by a
+deterministic hash of \code{unique_id}, used to count deterministic matches.
+Values below 1 estimate the count from the sample, which is faster on
+large data. Defaults to \code{1} (exact counts).}
 
 \item{profile_sql}{Logical. If \code{TRUE}, store lightweight SQL timing metadata
 in \code{model$params$sql_profile}.}

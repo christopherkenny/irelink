@@ -6,14 +6,18 @@
 #' observed level frequencies approximate the u distribution.
 #'
 #' @param model An `il_model` object (piped in).
-#' @param max_pairs Maximum number of random pairs to sample. Defaults to
-#'   `1e6`.
+#' @param max_pairs Approximate number of random pairs to score. Defaults to
+#'   `1e6`. When the data has at most `max_pairs` candidate pairs, all of them
+#'   are used. Otherwise, a random sample of records is drawn so that every pair
+#'   has the same chance of inclusion and about `max_pairs` pairs are scored.
+#'   Use [set.seed()] to make the sample reproducible.
 #' @param min_count_per_level Optional integer. When set, chunked estimation
 #'   stops once every comparison level has been observed at least this many
-#'   times, or once `max_pairs` has been sampled.
+#'   times. Chunks are random subsets of the sampled pairs, so stopping early
+#'   still leaves a random sample.
 #' @param chunk_size Optional integer number of pairs to score per chunk. When
-#'   set, u estimation accumulates gamma counts across chunks instead of using
-#'   one aggregate query.
+#'   set, u estimation accumulates gamma counts across random chunks instead of
+#'   using one aggregate query.
 #' @param profile_sql Logical. If `TRUE`, store lightweight SQL timing metadata
 #'   in `model$params$sql_profile`.
 #'
@@ -88,22 +92,26 @@ il_estimate_u <- function(
   if (!is.null(chunk_size)) {
     chunk_size <- validate_positive_count(chunk_size, 'chunk_size')
   }
+  salt <- as.character(sample.int(.Machine$integer.max, 1L))
+  sampled <- u_pair_model(model, max_pairs, salt)
+  on.exit(drop_sampled_tables(model$con, sampled$tables), add = TRUE)
+
   use_chunked <- !is.null(min_count_per_level) || !is.null(chunk_size)
   if (use_chunked) {
     if (is.null(chunk_size)) {
       chunk_size <- min(max_pairs, 100000L)
     }
     result <- get_random_pair_gamma_counts_chunked(
-      model,
-      max_pairs = max_pairs,
+      sampled$model,
+      expected_pairs = sampled$expected_pairs,
       chunk_size = chunk_size,
       min_count_per_level = min_count_per_level,
+      salt = salt,
       profile = profile
     )
   } else {
     result <- get_random_pairs_with_gammas(
-      model,
-      max_pairs = max_pairs,
+      sampled$model,
       profile = profile
     )
     result$stopped_early <- FALSE

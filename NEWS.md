@@ -30,7 +30,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 
 - `il_block_on()` and `block_on()` for equality-based and custom SQL blocking rules, with per-column transform support via formula syntax (`col ~ transform`, e.g. `first_name ~ il_substr(1, 3)`) or a named-list `.transform` for programmatic construction.
 - `.explode` parameter for array-valued blocking columns (generates `UNNEST` subqueries for DuckDB).
-- `il_count_pairs()` estimates candidate-pair counts, including cumulative totals and percent-of-cartesian summaries across rule combinations.
+- `il_count_pairs()` counts candidate pairs, including cumulative totals and percent-of-cartesian summaries across rule combinations, and can estimate counts from a deterministic record sample on large data through `record_sample_proportion`.
 - `il_suggest_blocking()` ranks candidate blocking rules by pair-reduction, coverage, and balanced score.
 - `il_find_blocking_below()` finds blocking rule combinations below a pair count ceiling.
 - `block_from_labels()` measures per-column recall from labeled pairs.
@@ -38,10 +38,10 @@ Initial development release, translating Python's [splink](https://github.com/mo
 
 ## Training
 
-- `il_estimate_u()` estimates non-match probabilities by sampling random pairs, with optional chunked estimation through `chunk_size` and early stopping through `min_count_per_level`.
-- `il_estimate_em()` runs the Fellegi-Sunter EM algorithm with configurable `max_iterations`, `convergence`, `fix_u`, `fix_m`, `fix_prior`, `derive_prior`, `estimate_without_tf`, and `estimator_mode` parameters.
+- `il_estimate_u()` estimates non-match probabilities from all candidate pairs when there are at most `max_pairs`, and otherwise from a uniform random sample of records (reproducible with `set.seed()`), with optional chunked estimation over random chunks through `chunk_size` and early stopping through `min_count_per_level`.
+- `il_estimate_em()` runs the Fellegi-Sunter EM algorithm with configurable `max_iterations`, `convergence`, `fix_u`, `fix_m`, `fix_prior`, `derive_prior`, `estimate_without_tf`, and `estimator_mode` parameters. An optional `max_pairs` cap trains on a deterministic record sample sized to produce about that many blocked pairs.
 - `estimator_mode = "dependency-aware"` fits log-linear matched and unmatched comparison-pattern distributions over aggregated gamma counts, preserving missing comparison states as explicit pattern levels.
-- `il_estimate_prior()` sets the prior match probability from deterministic matching rules, counting unique blocked pairs across overlapping rules.
+- `il_estimate_prior()` sets the prior match probability from deterministic matching rules, counting unique blocked pairs across overlapping rules, optionally from a deterministic record sample through `record_sample_proportion`.
 - `il_prior_prevalence()` and `il_prior_m()` add regularizing custom priors for EM, `il_constrain_m()` adds explicit fixed matched-class constraints, and `il_priors()` / `il_constraints()` expose the stored metadata.
 - `il_estimate_m_from_labels()` and `il_estimate_m_from_column()` initialize parameters from ground-truth labels.
 

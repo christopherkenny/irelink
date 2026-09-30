@@ -4,7 +4,13 @@
 \alias{il_count_pairs}
 \title{Count Candidate Pairs Under Blocking Rules}
 \usage{
-il_count_pairs(.data, ..., con = NULL, link_type = c("dedupe", "link"))
+il_count_pairs(
+  .data,
+  ...,
+  con = NULL,
+  link_type = c("dedupe", "link"),
+  record_sample_proportion = 1
+)
 }
 \arguments{
 \item{.data}{A data frame, \link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}, or character table name
@@ -17,11 +23,18 @@ additional datasets for linkage.}
 \link[dbplyr:tbl_lazy]{dbplyr::tbl_lazy}.}
 
 \item{link_type}{One of \code{"dedupe"} (default) or \code{"link"}.}
+
+\item{record_sample_proportion}{Proportion of records on each side of the
+blocking join, chosen by a deterministic hash of \code{unique_id}, used to
+estimate pair counts. Counts from the sample are scaled up by
+\code{1 / record_sample_proportion^2}. Defaults to \code{1} (exact counts). Values
+below 1 trade accuracy for speed on large data.}
 }
 \value{
 A \code{\link[tibble:tibble]{tibble::tibble()}} with columns \code{rule} and \code{n_pairs}. When blocking rules
 are supplied, it also includes \code{cumulative_pairs} and
-\code{pct_of_cartesian}.
+\code{pct_of_cartesian}. Counts are estimates when \code{record_sample_proportion}
+is below 1.
 }
 \description{
 Estimates how many record pairs each blocking rule generates without

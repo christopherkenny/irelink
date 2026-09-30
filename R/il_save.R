@@ -544,9 +544,10 @@ highest_tf_level <- function(levels) {
 }
 
 splink_json_to_blocking_rule <- function(br_data) {
-  sql <- br_data$blocking_rule
   if (is.character(br_data)) {
     sql <- br_data
+  } else {
+    sql <- br_data$blocking_rule
   }
   sql <- trimws(splink_sql_to_table_alias_sql(sql))
   structure(

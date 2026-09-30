@@ -11,10 +11,16 @@
 #' @param con A DBI connection object from [DBI::dbConnect()]. Optional when `.data` is a
 #'   [dbplyr::tbl_lazy].
 #' @param link_type One of `"dedupe"` (default) or `"link"`.
+#' @param record_sample_proportion Proportion of records on each side of the
+#'   blocking join, chosen by a deterministic hash of `unique_id`, used to
+#'   estimate pair counts. Counts from the sample are scaled up by
+#'   `1 / record_sample_proportion^2`. Defaults to `1` (exact counts). Values
+#'   below 1 trade accuracy for speed on large data.
 #'
 #' @return A [tibble::tibble()] with columns `rule` and `n_pairs`. When blocking rules
 #'   are supplied, it also includes `cumulative_pairs` and
-#'   `pct_of_cartesian`.
+#'   `pct_of_cartesian`. Counts are estimates when `record_sample_proportion`
+#'   is below 1.
 #' @export
 #'
 #' @examples
@@ -67,9 +73,13 @@ il_count_pairs <- function(
   .data,
   ...,
   con = NULL,
-  link_type = c('dedupe', 'link')
+  link_type = c('dedupe', 'link'),
+  record_sample_proportion = 1
 ) {
   link_type <- match.arg(link_type)
+  record_sample_proportion <- validate_record_sample_proportion(
+    record_sample_proportion
+  )
   dots <- list(...)
 
   # Separate blocking rules from extra datasets
@@ -138,6 +148,27 @@ il_count_pairs <- function(
   }
 
   dialect <- detect_dialect(con)
+  count_l <- tbl_l
+  count_r <- tbl_r
+
+  scale <- 1
+  if (record_sample_proportion < 1) {
+    threshold <- sample_threshold(
+      record_sample_proportion,
+      il_probe_sample_modulus
+    )
+    scale <- (il_probe_sample_modulus / threshold)^2
+    sampled <- il_sample_table_pair(
+      con,
+      tbl_l,
+      tbl_r,
+      threshold,
+      il_probe_sample_modulus
+    )
+    on.exit(drop_sampled_tables(con, sampled$tables), add = TRUE)
+    count_l <- sampled$tbl_l
+    count_r <- sampled$tbl_r
+  }
 
   results <- lapply(blocking_rules, function(rule) {
     where <- build_blocking_condition(
@@ -148,8 +179,8 @@ il_count_pairs <- function(
     )
     n <- count_blocked_pairs(
       con,
-      tbl_l,
-      tbl_r,
+      count_l,
+      count_r,
       where,
       dedupe = (link_type == 'dedupe')
     )
@@ -188,13 +219,19 @@ il_count_pairs <- function(
       cum_parts,
       glue::glue(
         'SELECT l.unique_id AS lid, r.unique_id AS rid ',
-        'FROM {tbl_l} l, {tbl_r} r ',
+        'FROM {count_l} l, {count_r} r ',
         'WHERE {dedup_cond}{where}'
       )
     )
     union_sql <- paste(cum_parts, collapse = ' UNION ')
     count_sql <- glue::glue('SELECT COUNT(*) AS n FROM ({union_sql}) AS __cum')
     cum_pairs[i] <- as.numeric(DBI::dbGetQuery(con, count_sql)$n[1])
+  }
+
+  if (scale > 1) {
+    warn_small_pair_sample(out$n_pairs, out$rule)
+    out$n_pairs <- round(out$n_pairs * scale)
+    cum_pairs <- round(cum_pairs * scale)
   }
 
   out$cumulative_pairs <- cum_pairs
