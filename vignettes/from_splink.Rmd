@@ -34,7 +34,7 @@ In `irelink`, the `cl_*()` functions fill the same role and can be passed direct
 | Load data | `splink_datasets.fake_1000` | `fake_1000` |
 | Choose backend | `DuckDBAPI()` | `DBI::dbConnect(duckdb::duckdb())` |
 | Register data | `db_api.register(df, ...)` | *handled by* `il_model()` |
-| Define settings | `SettingsCreator(...)` | `il_spec() &#124;>`<br>`il_compare(...) &#124;>`<br>`il_block_on(...)` |
+| Define settings | `SettingsCreator(...)` | `il_spec() |>`<br>`il_compare(...) |>`<br>`il_block_on(...)` |
 | Create model | `Linker(df_sdf, settings)` | `il_model(df, spec = spec, con = con)` |
 | Estimate prior | `linker.training.`<br>`estimate_probability_two_random_records_match(...)` | `il_estimate_prior(model, ...)` |
 | Estimate u | `linker.training.`<br>`estimate_u_using_random_sampling(...)` | `il_estimate_u(model)` |
@@ -44,6 +44,8 @@ In `irelink`, the `cl_*()` functions fill the same role and can be passed direct
 | Cluster | `linker.clustering.`<br>`cluster_pairwise_predictions_at_threshold(...)` | `il_cluster(pairs)` |
 | Deterministic link | `linker.deterministic_link()` | `il_deterministic_link(df, ...)` |
 | Match new records | `linker.inference.`<br>`predict_between(df_sdf, new_sdf, ...)` | `il_find_matches(model, new_records, ...)` |
+| Pairs within new records | `linker.inference.`<br>`predict_within(new_sdf, ...)` | `il_attach(model, new_records) |>`<br>`predict(...)` |
+| Score chosen pairs | `linker.inference.`<br>`score_pair(...)`, `score_pairs(...)` | `il_score_pairs(model, records_l, records_r)` |
 
 Splink 5 requires registering each input with `db_api.register()` before building a `Linker`, and the `Linker` no longer takes `db_api`.
 In `irelink`, `il_model()` registers data frames, lazy tables, or table names on the supplied connection itself.
@@ -99,7 +101,7 @@ In `irelink`, these are helper functions that return preconfigured sets of level
 | `linker.visualisations.match_weights_chart()` | `il_weights(model)` |
 | `linker.visualisations.`<br>`parameter_estimate_comparisons_chart()` | `il_parameters(model)` |
 | `linker.visualisations.waterfall_chart(...)` | `il_waterfall(pairs, ...)` |
-| `linker.inference.score_pair(...)` | `il_compare_records(record_a, record_b, spec)` (comparison levels only) |
+| *comparison levels for a pair, without a model* | `il_compare_records(record_a, record_b, spec)` |
 | `linker.evaluation.`<br>`prediction_errors_from_labels_column(...)` | `il_errors(model, ...)` |
 | `linker.evaluation.unlinkables_chart()` | `il_unlinkables(model)` |
 
@@ -244,4 +246,6 @@ results <- il_find_matches(model, new_df, threshold = 0.5)
 ```
 
 `il_find_matches()` corresponds to `predict_between()`: it scores new records against the model's existing data, but not new records against each other.
-Splink 5's `predict_within()`, which scores pairs within the new records, has no `irelink` equivalent yet.
+For Splink 5's `predict_within()`, attach the new records to the trained model with `il_attach()` and call `predict()`.
+Note that `il_attach()` computes term frequencies from the attached records.
+When those are too few to be representative, replace them with term frequencies from the full data using `il_register_tf(..., overwrite = TRUE)`.

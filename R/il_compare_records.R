@@ -13,6 +13,7 @@
 #'   DuckDB connection is created and closed on exit.
 #'
 #' @return A single-row tibble of per-comparison gamma values.
+#' @seealso [il_score_pairs()] to score pairs with a trained model.
 #' @export
 #'
 #' @examples

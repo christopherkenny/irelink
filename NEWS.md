@@ -53,6 +53,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 - `include_fields = TRUE` joins all source columns into the scored output.
 - `collect = FALSE` returns an `il_compared_lazy` object backed by a model-scoped in-database table.
 - `il_score_missing_edges()` enumerates and scores unscored within-cluster pairs.
+- `il_score_pairs()` scores every pair between two sets of records with a trained model, without blocking, using the model's own term-frequency tables.
 - `il_score_patterns()` scores compatible comparison-pattern tables, including dependency-aware pattern tables larger than the table used for fitting.
 - `il_deterministic_link()` performs single-table exact-match deduplication without training.
 - `il_find_matches()` scores a set of probe records against existing data.
@@ -72,7 +73,7 @@ Initial development release, translating Python's [splink](https://github.com/mo
 
 ## Data exploration
 
-- `il_compare_records()` scores one explicit record pair against a spec without fitting a full model, and `il_string_similarity()` computes 5 string similarity metrics for a single pair.
+- `il_compare_records()` computes comparison levels for one explicit record pair against a spec without fitting a model, and `il_string_similarity()` computes 5 string similarity metrics for a single pair.
 - `il_comparator_score()` computes batch string similarity across a DataFrame with SQL-side scoring on DuckDB.
 - `il_comparator_threshold_chart()` visualizes match rates at multiple similarity thresholds.
 - `il_phonetic_chart()` produces a Soundex agreement heatmap.

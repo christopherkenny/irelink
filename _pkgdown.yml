@@ -104,6 +104,7 @@ reference:
       - il_cluster
       - il_deterministic_link
       - il_find_matches
+      - il_score_pairs
       - il_score_patterns
       - il_score_missing_edges
 

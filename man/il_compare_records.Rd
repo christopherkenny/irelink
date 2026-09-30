@@ -77,3 +77,6 @@ record_b <- df[2, ]
 il_compare_records(record_a, record_b, spec = spec, con = con)
 DBI::dbDisconnect(con, shutdown = TRUE)
 }
+\seealso{
+\code{\link[=il_score_pairs]{il_score_pairs()}} to score pairs with a trained model.
+}

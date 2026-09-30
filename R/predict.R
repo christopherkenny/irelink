@@ -158,7 +158,8 @@ ensure_collected <- function(pairs) {
 #'   candidate pairs. Greedy matching sorts pairs by descending posterior
 #'   match probability, then by left and right row order.
 #' @param profile_sql Logical. If `TRUE`, attach lightweight SQL timing
-#'   metadata to collected predictions or include it on lazy predictions.
+#'   metadata to collected predictions or include it on lazy predictions. To
+#'   see the SQL itself, set `options(irelink.show_sql = TRUE)`.
 #' @param ... Additional arguments passed to the generic.
 #'
 #' @return When `collect = TRUE`: an `il_compared` tibble with one row

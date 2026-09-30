@@ -79,3 +79,38 @@ test_that('SQL wrappers record rows and statements when profiling is enabled', {
   expect_all_true(nzchar(entries$statement))
   expect_all_true(is.finite(entries$elapsed))
 })
+
+test_that('SQL wrappers print statements when irelink.show_sql is TRUE', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+  withr::local_options(irelink.show_sql = TRUE)
+
+  expect_snapshot(il_db_get_query(con, 'SELECT 1 AS x', 'query'))
+})
+
+test_that('SQL wrappers stay quiet by default', {
+  con <- test_con()
+  withr::defer(test_discon(con))
+
+  expect_no_message(il_db_get_query(con, 'SELECT 1 AS x', 'query'))
+})
+
+test_that('format_sql() lays out clauses, conditions, and CASE branches', {
+  sql <- paste(
+    'SELECT COUNT(*) AS n, CASE WHEN l.x = r.x THEN 1 ELSE 0 END AS g',
+    'FROM (SELECT l.unique_id FROM "t" l, "t" r',
+    'WHERE l.unique_id < r.unique_id AND l.x = r.x) AS pairs',
+    'LEFT JOIN "tf" ON pairs.x = tf.x GROUP BY g'
+  )
+
+  expect_snapshot(cat(format_sql(sql)))
+})
+
+test_that('format_sql() only changes whitespace and leaves literals alone', {
+  sql <- "SELECT 'a FROM b WHERE c' AS s, \"select\" FROM t WHERE x = 'AND'"
+  formatted <- format_sql(sql)
+
+  expect_equal(gsub('\\s+', '', formatted), gsub('\\s+', '', sql))
+  expect_match(formatted, "'a FROM b WHERE c'", fixed = TRUE)
+  expect_match(formatted, "x = 'AND'", fixed = TRUE)
+})

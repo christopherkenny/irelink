@@ -50,7 +50,8 @@ candidate pairs. Greedy matching sorts pairs by descending posterior
 match probability, then by left and right row order.}
 
 \item{profile_sql}{Logical. If \code{TRUE}, attach lightweight SQL timing
-metadata to collected predictions or include it on lazy predictions.}
+metadata to collected predictions or include it on lazy predictions. To
+see the SQL itself, set \code{options(irelink.show_sql = TRUE)}.}
 
 \item{...}{Additional arguments passed to the generic.}
 }
