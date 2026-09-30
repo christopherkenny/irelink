@@ -19,6 +19,8 @@ il_estimate_em(
   estimate_without_tf = TRUE,
   derive_prior = FALSE,
   estimator_mode = c("independent", "dependency-aware"),
+  max_pairs = NULL,
+  record_sample_proportion = 1,
   ...
 )
 ```
@@ -84,6 +86,20 @@ il_estimate_em(
   Fellegi-Sunter EM estimator. `"dependency-aware"` fits log-linear
   matched and unmatched comparison-pattern distributions.
 
+- max_pairs:
+
+  Optional cap on the approximate number of blocked pairs used for
+  training. When the blocking rule would generate more pairs, EM trains
+  on a deterministic sample of records, chosen so the expected number of
+  blocked pairs is about `max_pairs`. Defaults to `NULL` (no cap).
+
+- record_sample_proportion:
+
+  Proportion of records used to count blocked pairs when `max_pairs` is
+  set. Defaults to `1`, which counts exactly. Values below 1 estimate
+  the count from a deterministic record sample, which is faster on very
+  large data.
+
 - ...:
 
   Reserved for future options.
@@ -134,7 +150,7 @@ df <- data.frame(
 )
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmpqysoz5/duckdb
+#> ℹ /tmp/RtmpZE4yUn/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.

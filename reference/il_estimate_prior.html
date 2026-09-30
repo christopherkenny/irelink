@@ -60,7 +60,13 @@ parameter estimation.</p>
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">il_estimate_prior</span><span class="op">(</span><span class="va">model</span>, <span class="va">...</span>, recall <span class="op">=</span> <span class="fl">0.7</span>, profile_sql <span class="op">=</span> <span class="cn">FALSE</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">il_estimate_prior</span><span class="op">(</span></span>
+<span>  <span class="va">model</span>,</span>
+<span>  <span class="va">...</span>,</span>
+<span>  recall <span class="op">=</span> <span class="fl">0.7</span>,</span>
+<span>  record_sample_proportion <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  profile_sql <span class="op">=</span> <span class="cn">FALSE</span></span>
+<span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
@@ -79,6 +85,13 @@ deterministic matching criteria.</p></dd>
 <dt id="arg-recall">recall<a class="anchor" aria-label="anchor" href="#arg-recall"></a></dt>
 <dd><p>A numeric value between 0 and 1 representing the assumed
 recall of the deterministic rules. Defaults to <code>0.7</code>.</p></dd>
+
+
+<dt id="arg-record-sample-proportion">record_sample_proportion<a class="anchor" aria-label="anchor" href="#arg-record-sample-proportion"></a></dt>
+<dd><p>Proportion of records, chosen by a
+deterministic hash of <code>unique_id</code>, used to count deterministic matches.
+Values below 1 estimate the count from the sample, which is faster on
+large data. Defaults to <code>1</code> (exact counts).</p></dd>
 
 
 <dt id="arg-profile-sql">profile_sql<a class="anchor" aria-label="anchor" href="#arg-profile-sql"></a></dt>
@@ -132,7 +145,7 @@ in <code>model$params$sql_profile</code>.</p></dd>
 <span class="r-in"><span><span class="op">)</span></span></span>
 <span class="r-in"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span></span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> duckdb keeps downloaded extensions and secrets in a temporary directory:</span>
-<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">ℹ</span> /tmp/Rtmpqysoz5/duckdb</span>
+<span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #0000BB;">ℹ</span> /tmp/RtmpZE4yUn/duckdb</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> This is removed when the R session ends.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span>
 <span class="r-msg co"><span class="r-pr">#&gt;</span> <span style="color: #00BBBB;">•</span> Secrets are lost.</span>

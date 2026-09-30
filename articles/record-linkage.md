@@ -59,7 +59,7 @@ because of the corruption process:
 
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp1mwW47/duckdb
+#> ℹ /tmp/RtmpQvweFk/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -183,22 +183,22 @@ autoplot(model, type = 'parameters')
 
 il_weights(model)
 #> # A tibble: 14 × 5
-#>    comparison    gamma_level  m_prob  u_prob weight
-#>    <chr>               <int>   <dbl>   <dbl>  <dbl>
-#>  1 given_name              0 0.157   0.969   -2.63 
-#>  2 given_name              1 0.0136  0.0247  -0.865
-#>  3 given_name              2 0.0135  0.00127  3.41 
-#>  4 given_name              3 0.127   0.00127  6.64 
-#>  5 given_name              4 0.690   0.00396  7.44 
-#>  6 surname                 0 0.125   0.980   -2.97 
-#>  7 surname                 1 0.00700 0.0124  -0.826
-#>  8 surname                 2 0.0163  0.00127  3.68 
-#>  9 surname                 3 0.182   0.00145  6.97 
-#> 10 surname                 4 0.670   0.00440  7.25 
-#> 11 date_of_birth           0 0.103   1.000   -3.28 
-#> 12 date_of_birth           1 0.897   0.0002  12.1  
-#> 13 postcode                0 0.165   0.999   -2.60 
-#> 14 postcode                1 0.835   0.00124  9.40
+#>    comparison    gamma_level  m_prob   u_prob weight
+#>    <chr>               <int>   <dbl>    <dbl>  <dbl>
+#>  1 given_name              0 0.158   0.970    -2.62 
+#>  2 given_name              1 0.0136  0.0245   -0.853
+#>  3 given_name              2 0.0137  0.000891  3.94 
+#>  4 given_name              3 0.126   0.00131   6.60 
+#>  5 given_name              4 0.688   0.00327   7.72 
+#>  6 surname                 0 0.127   0.980    -2.95 
+#>  7 surname                 1 0.00698 0.0144   -1.05 
+#>  8 surname                 2 0.0165  0.000448  5.20 
+#>  9 surname                 3 0.182   0.000758  7.90 
+#> 10 surname                 4 0.668   0.00396   7.40 
+#> 11 date_of_birth           0 0.104   1.000    -3.26 
+#> 12 date_of_birth           1 0.896   0.000127 12.8  
+#> 13 postcode                0 0.167   0.999    -2.58 
+#> 14 postcode                1 0.833   0.00107   9.60
 ```
 
 ## Predict and cluster
@@ -226,12 +226,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id  
 #>   <chr>     <chr>       
-#> 1 3235      cluster_2834
-#> 2 870       cluster_3026
-#> 3 4715      cluster_2640
-#> 4 1611      cluster_146 
-#> 5 1111      cluster_1111
-#> 6 4469      cluster_2834
+#> 1 446       cluster_3459
+#> 2 3653      cluster_3653
+#> 3 256       cluster_256 
+#> 4 4858      cluster_4174
+#> 5 1940      cluster_1940
+#> 6 1773      cluster_1271
 ```
 
 ## Evaluate against ground truth

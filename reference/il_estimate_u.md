@@ -25,19 +25,25 @@ il_estimate_u(
 
 - max_pairs:
 
-  Maximum number of random pairs to sample. Defaults to `1e6`.
+  Approximate number of random pairs to score. Defaults to `1e6`. When
+  the data has at most `max_pairs` candidate pairs, all of them are
+  used. Otherwise, a random sample of records is drawn so that every
+  pair has the same chance of inclusion and about `max_pairs` pairs are
+  scored. Use [`set.seed()`](https://rdrr.io/r/base/Random.html) to make
+  the sample reproducible.
 
 - min_count_per_level:
 
   Optional integer. When set, chunked estimation stops once every
-  comparison level has been observed at least this many times, or once
-  `max_pairs` has been sampled.
+  comparison level has been observed at least this many times. Chunks
+  are random subsets of the sampled pairs, so stopping early still
+  leaves a random sample.
 
 - chunk_size:
 
   Optional integer number of pairs to score per chunk. When set, u
-  estimation accumulates gamma counts across chunks instead of using one
-  aggregate query.
+  estimation accumulates gamma counts across random chunks instead of
+  using one aggregate query.
 
 - profile_sql:
 
@@ -90,7 +96,7 @@ df <- data.frame(
 )
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmpqysoz5/duckdb
+#> ℹ /tmp/RtmpZE4yUn/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.

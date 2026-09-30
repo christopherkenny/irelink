@@ -80,7 +80,7 @@
     
     
 <p><code>irelink</code> translates the Python <a href="https://github.com/moj-analytical-services/splink" class="external-link">splink</a>
-library into idiomatic R. This vignette maps common Splink patterns to
+library into idiomatic R. This vignette maps common Splink 5 patterns to
 <code>irelink</code> so you can get started quickly.</p>
 <div class="section level2">
 <h2 id="design-differences">Design differences<a class="anchor" aria-label="anchor" href="#design-differences"></a>
@@ -122,79 +122,91 @@ directly to <code><a href="../reference/il_compare.html">il_compare()</a></code>
 <td><code>DBI::dbConnect(duckdb::duckdb())</code></td>
 </tr>
 <tr class="odd">
+<td>Register data</td>
+<td><code>db_api.register(df, ...)</code></td>
+<td>
+<em>handled by</em> <code><a href="../reference/il_model.html">il_model()</a></code>
+</td>
+</tr>
+<tr class="even">
 <td>Define settings</td>
 <td><code>SettingsCreator(...)</code></td>
 <td>
 <code>il_spec() &amp;#124;&gt;</code><br><code>il_compare(...) &amp;#124;&gt;</code><br><code>il_block_on(...)</code>
 </td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Create model</td>
-<td><code>Linker(df, settings, db_api)</code></td>
+<td><code>Linker(df_sdf, settings)</code></td>
 <td><code>il_model(df, spec = spec, con = con)</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Estimate prior</td>
 <td>
 <code>linker.training.</code><br><code>estimate_probability_two_random_records_match(...)</code>
 </td>
 <td><code>il_estimate_prior(model, ...)</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Estimate u</td>
 <td>
 <code>linker.training.</code><br><code>estimate_u_using_random_sampling(...)</code>
 </td>
 <td><code>il_estimate_u(model)</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Estimate m (EM)</td>
 <td>
 <code>linker.training.</code><br><code>estimate_parameters_using_expectation_maximisation(...)</code>
 </td>
 <td><code>il_estimate_em(model, ...)</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Estimate m (labels)</td>
 <td>
 <code>linker.training.</code><br><code>estimate_m_from_pairwise_labels(...)</code>
 </td>
 <td><code>il_estimate_m_from_labels(model, ...)</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Predict</td>
 <td><code>linker.inference.predict(...)</code></td>
 <td><code>predict(model, ...)</code></td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Cluster</td>
 <td>
 <code>linker.clustering.</code><br><code>cluster_pairwise_predictions_at_threshold(...)</code>
 </td>
 <td><code>il_cluster(pairs)</code></td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Deterministic link</td>
 <td><code>linker.deterministic_link()</code></td>
 <td><code>il_deterministic_link(df, ...)</code></td>
 </tr>
-<tr class="even">
-<td>Find matches</td>
+<tr class="odd">
+<td>Match new records</td>
 <td>
-<code>linker.inference.</code><br><code>find_matches_to_new_records(...)</code>
+<code>linker.inference.</code><br><code>predict_between(df_sdf, new_sdf, ...)</code>
 </td>
 <td><code>il_find_matches(model, new_records, ...)</code></td>
 </tr>
 </tbody>
 </table>
+<p>Splink 5 requires registering each input with
+<code>db_api.register()</code> before building a <code>Linker</code>,
+and the <code>Linker</code> no longer takes <code>db_api</code>. In
+<code>irelink</code>, <code><a href="../reference/il_model.html">il_model()</a></code> registers data frames,
+lazy tables, or table names on the supplied connection itself.</p>
 <p><code>irelink</code> also supports
 <code>link_type = "link_and_dedupe"</code> for two-table jobs where
 duplicates may exist within each input table and across the two
 tables.</p>
 <p><code>irelink</code> scores in-memory inputs and DBI-backed tables,
-including lazy DuckDB results. Splink’s DuckDB source pruning and
-Parquet-backed intermediate tables are not available, so very large
-workflows should rely on explicit blocking and
+including lazy DuckDB results. Splink 5’s chunked prediction, DuckDB
+source pruning, and Parquet-backed intermediate tables are not
+available, so very large workflows should rely on explicit blocking and
 <code>predict(collect = FALSE)</code>.</p>
 </div>
 <div class="section level2">
@@ -352,12 +364,14 @@ preconfigured sets of levels.</p>
 <td><code>il_waterfall(pairs, ...)</code></td>
 </tr>
 <tr class="even">
-<td><code>linker.misc.query_comparison_details(...)</code></td>
-<td><code>il_compare_records(record_a, record_b, ...)</code></td>
+<td><code>linker.inference.score_pair(...)</code></td>
+<td>
+<code>il_compare_records(record_a, record_b, spec)</code>
+(comparison levels only)</td>
 </tr>
 <tr class="odd">
 <td>
-<code>linker.training.</code><br><code>prediction_errors_from_labels_column(...)</code>
+<code>linker.evaluation.</code><br><code>prediction_errors_from_labels_column(...)</code>
 </td>
 <td><code>il_errors(model, ...)</code></td>
 </tr>
@@ -371,6 +385,9 @@ preconfigured sets of levels.</p>
 <div class="section level2">
 <h2 id="evaluation">Evaluation<a class="anchor" aria-label="anchor" href="#evaluation"></a>
 </h2>
+<p>Splink 5 combines these analyses in
+<code>linker.evaluation.accuracy_analysis_from_labels_column()</code>,
+selected with <code>output_type</code>.</p>
 <table class="table">
 <colgroup>
 <col width="56%">
@@ -383,19 +400,19 @@ preconfigured sets of levels.</p>
 <tbody>
 <tr class="odd">
 <td>
-<code>linker.evaluation.</code><br><code>accuracy_chart_from_labels_column(...)</code>
+<code>accuracy_analysis_from_labels_column(</code><br><code>..., output_type="accuracy")</code>
 </td>
 <td><code>il_accuracy(model, ...)</code></td>
 </tr>
 <tr class="even">
 <td>
-<code>linker.evaluation.</code><br><code>precision_recall_chart_from_labels_column(...)</code>
+<code>accuracy_analysis_from_labels_column(</code><br><code>..., output_type="precision_recall")</code>
 </td>
 <td><code>il_precision_recall(model, ...)</code></td>
 </tr>
 <tr class="odd">
 <td>
-<code>linker.evaluation.</code><br><code>roc_chart_from_labels_column(...)</code>
+<code>accuracy_analysis_from_labels_column(</code><br><code>..., output_type="roc")</code>
 </td>
 <td><code>il_roc(model, ...)</code></td>
 </tr>
@@ -416,19 +433,28 @@ preconfigured sets of levels.</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td><code>linker.profile_columns(...)</code></td>
+<td><code>splink.exploratory.profile_columns(...)</code></td>
 <td><code>il_profile(df, ...)</code></td>
 </tr>
 <tr class="even">
-<td><code>linker.count_num_comparisons_from_blocking_rule(...)</code></td>
-<td><code>il_count_pairs(df, ...)</code></td>
+<td><code>splink.exploratory.completeness_chart(...)</code></td>
+<td><code>il_completeness(df, ...)</code></td>
 </tr>
 <tr class="odd">
-<td><em>completeness profiling</em></td>
-<td><code>il_completeness(df, ...)</code></td>
+<td>
+<code>splink.blocking_analysis.</code><br><code>count_comparisons_from_blocking_rules(...)</code>
+</td>
+<td><code>il_count_pairs(df, ...)</code></td>
+</tr>
+<tr class="even">
+<td><code>splink.blocking_analysis.n_largest_blocks(...)</code></td>
+<td><code>il_largest_blocks(df, ...)</code></td>
 </tr>
 </tbody>
 </table>
+<p>Splink 5 estimates blocking comparison counts from a 5% record sample
+by default. <code><a href="../reference/il_count_pairs.html">il_count_pairs()</a></code> computes exact counts unless
+you set <code>record_sample_proportion</code> below 1.</p>
 </div>
 <div class="section level2">
 <h2 id="persistence">Persistence<a class="anchor" aria-label="anchor" href="#persistence"></a>
@@ -448,11 +474,13 @@ preconfigured sets of levels.</p>
 <td><code>il_save(model, path)</code></td>
 </tr>
 <tr class="even">
-<td><code>load_model_from_json(...)</code></td>
+<td><code>Linker(df_sdf, "model.json")</code></td>
 <td><code>il_load(path)</code></td>
 </tr>
 <tr class="odd">
-<td><code>delete_tables_created_by_splink_from_db(...)</code></td>
+<td>
+<code>linker.table_management.</code><br><code>delete_tables_created_by_splink_from_db()</code>
+</td>
 <td><code>il_cleanup_all(con)</code></td>
 </tr>
 <tr class="even">
@@ -489,8 +517,8 @@ functions.</p>
 <div class="sourceCode" id="cb2"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb2-1"><a href="#cb2-1" tabindex="-1"></a><span class="im">from</span> splink <span class="im">import</span> Linker, SettingsCreator, DuckDBAPI, block_on, splink_datasets</span>
 <span id="cb2-2"><a href="#cb2-2" tabindex="-1"></a><span class="im">import</span> splink.comparison_library <span class="im">as</span> cl</span>
 <span id="cb2-3"><a href="#cb2-3" tabindex="-1"></a></span>
-<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>df <span class="op">=</span> splink_datasets.fake_1000</span>
-<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>db_api <span class="op">=</span> DuckDBAPI()</span>
+<span id="cb2-4"><a href="#cb2-4" tabindex="-1"></a>db_api <span class="op">=</span> DuckDBAPI()</span>
+<span id="cb2-5"><a href="#cb2-5" tabindex="-1"></a>df_sdf <span class="op">=</span> db_api.register(splink_datasets.fake_1000, dataset_display_name<span class="op">=</span><span class="st">"fake_1000"</span>)</span>
 <span id="cb2-6"><a href="#cb2-6" tabindex="-1"></a></span>
 <span id="cb2-7"><a href="#cb2-7" tabindex="-1"></a>settings <span class="op">=</span> SettingsCreator(</span>
 <span id="cb2-8"><a href="#cb2-8" tabindex="-1"></a>    link_type<span class="op">=</span><span class="st">"dedupe_only"</span>,</span>
@@ -505,7 +533,7 @@ functions.</p>
 <span id="cb2-17"><a href="#cb2-17" tabindex="-1"></a>    ],</span>
 <span id="cb2-18"><a href="#cb2-18" tabindex="-1"></a>)</span>
 <span id="cb2-19"><a href="#cb2-19" tabindex="-1"></a></span>
-<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>linker <span class="op">=</span> Linker(df, settings, db_api)</span>
+<span id="cb2-20"><a href="#cb2-20" tabindex="-1"></a>linker <span class="op">=</span> Linker(df_sdf, settings)</span>
 <span id="cb2-21"><a href="#cb2-21" tabindex="-1"></a>linker.training.estimate_u_using_random_sampling(max_pairs<span class="op">=</span><span class="fl">1e6</span>)</span>
 <span id="cb2-22"><a href="#cb2-22" tabindex="-1"></a>linker.training.estimate_parameters_using_expectation_maximisation(</span>
 <span id="cb2-23"><a href="#cb2-23" tabindex="-1"></a>    block_on(<span class="st">"surname"</span>)</span>
@@ -550,12 +578,13 @@ the two packages.</p>
 <h2 id="example-finding-matches-against-new-records">Example: finding matches against new records<a class="anchor" aria-label="anchor" href="#example-finding-matches-against-new-records"></a>
 </h2>
 <p><strong>splink (Python):</strong></p>
-<div class="sourceCode" id="cb4"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>new_records <span class="op">=</span> pd.DataFrame([{</span>
-<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>    <span class="st">"first_name"</span>: <span class="st">"Jhon"</span>, <span class="st">"surname"</span>: <span class="st">"Smith"</span>, <span class="st">"dob"</span>: <span class="st">"1990-01-15"</span></span>
-<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>}])</span>
-<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>results <span class="op">=</span> linker.inference.find_matches_to_new_records(</span>
-<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>    new_records, blocking_rules<span class="op">=</span>[], match_weight_threshold<span class="op">=-</span><span class="dv">10</span></span>
-<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>)</span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre class="sourceCode python"><code class="sourceCode python"><span id="cb4-1"><a href="#cb4-1" tabindex="-1"></a>new_sdf <span class="op">=</span> db_api.register(</span>
+<span id="cb4-2"><a href="#cb4-2" tabindex="-1"></a>    [{<span class="st">"unique_id"</span>: <span class="dv">1001</span>, <span class="st">"first_name"</span>: <span class="st">"Jhon"</span>, <span class="st">"surname"</span>: <span class="st">"Smith"</span>, <span class="st">"dob"</span>: <span class="st">"1990-01-15"</span>}],</span>
+<span id="cb4-3"><a href="#cb4-3" tabindex="-1"></a>    dataset_display_name<span class="op">=</span><span class="st">"new_records"</span>,</span>
+<span id="cb4-4"><a href="#cb4-4" tabindex="-1"></a>)</span>
+<span id="cb4-5"><a href="#cb4-5" tabindex="-1"></a>results <span class="op">=</span> linker.inference.predict_between(</span>
+<span id="cb4-6"><a href="#cb4-6" tabindex="-1"></a>    df_sdf, new_sdf, threshold_match_probability<span class="op">=</span><span class="fl">0.5</span></span>
+<span id="cb4-7"><a href="#cb4-7" tabindex="-1"></a>)</span></code></pre></div>
 <p><strong>irelink (R):</strong></p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">new_df</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span></span>
@@ -564,10 +593,11 @@ the two packages.</p>
 <span>  dob <span class="op">=</span> <span class="st">"1990-01-15"</span></span>
 <span><span class="op">)</span></span>
 <span><span class="va">results</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/il_find_matches.html">il_find_matches</a></span><span class="op">(</span><span class="va">model</span>, <span class="va">new_df</span>, threshold <span class="op">=</span> <span class="fl">0.5</span><span class="op">)</span></span></code></pre></div>
-<p>Splink uses a match-weight threshold for this workflow.
-<code><a href="../reference/il_find_matches.html">il_find_matches()</a></code> filters on posterior match probability.
-Translate those thresholds with the same caution as in the prediction
-example above.</p>
+<p><code><a href="../reference/il_find_matches.html">il_find_matches()</a></code> corresponds to
+<code>predict_between()</code>: it scores new records against the
+model’s existing data, but not new records against each other. Splink
+5’s <code>predict_within()</code>, which scores pairs within the new
+records, has no <code>irelink</code> equivalent yet.</p>
 </div>
   </main><aside class="col-md-3"><nav id="toc" aria-label="Table of contents"><h2>On this page</h2>
     </nav></aside>

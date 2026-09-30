@@ -57,7 +57,7 @@ tibble if no rules qualify.
 ``` r
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmpqysoz5/duckdb
+#> ℹ /tmp/RtmpZE4yUn/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.

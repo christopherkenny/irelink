@@ -2,7 +2,7 @@
 
 `irelink` translates the Python
 [splink](https://github.com/moj-analytical-services/splink) library into
-idiomatic R. This vignette maps common Splink patterns to `irelink` so
+idiomatic R. This vignette maps common Splink 5 patterns to `irelink` so
 you can get started quickly.
 
 ## Design differences
@@ -22,14 +22,22 @@ the same role and can be passed directly to
 
 [TABLE]
 
+Splink 5 requires registering each input with `db_api.register()` before
+building a `Linker`, and the `Linker` no longer takes `db_api`. In
+`irelink`,
+[`il_model()`](http://christophertkenny.com/irelink/reference/il_model.md)
+registers data frames, lazy tables, or table names on the supplied
+connection itself.
+
 `irelink` also supports `link_type = "link_and_dedupe"` for two-table
 jobs where duplicates may exist within each input table and across the
 two tables.
 
 `irelink` scores in-memory inputs and DBI-backed tables, including lazy
-DuckDB results. Splink’s DuckDB source pruning and Parquet-backed
-intermediate tables are not available, so very large workflows should
-rely on explicit blocking and `predict(collect = FALSE)`.
+DuckDB results. Splink 5’s chunked prediction, DuckDB source pruning,
+and Parquet-backed intermediate tables are not available, so very large
+workflows should rely on explicit blocking and
+`predict(collect = FALSE)`.
 
 ## Comparison levels
 
@@ -78,24 +86,24 @@ levels.
 
 ## Evaluation
 
+Splink 5 combines these analyses in
+`linker.evaluation.accuracy_analysis_from_labels_column()`, selected
+with `output_type`.
+
 [TABLE]
 
 ## Data profiling
 
-| splink (Python) | irelink (R) |
-|----|----|
-| `linker.profile_columns(...)` | `il_profile(df, ...)` |
-| `linker.count_num_comparisons_from_blocking_rule(...)` | `il_count_pairs(df, ...)` |
-| *completeness profiling* | `il_completeness(df, ...)` |
+[TABLE]
+
+Splink 5 estimates blocking comparison counts from a 5% record sample by
+default.
+[`il_count_pairs()`](http://christophertkenny.com/irelink/reference/il_count_pairs.md)
+computes exact counts unless you set `record_sample_proportion` below 1.
 
 ## Persistence
 
-| splink (Python)                                | irelink (R)            |
-|------------------------------------------------|------------------------|
-| `linker.misc.save_model_to_json(...)`          | `il_save(model, path)` |
-| `load_model_from_json(...)`                    | `il_load(path)`        |
-| `delete_tables_created_by_splink_from_db(...)` | `il_cleanup_all(con)`  |
-| *model-scoped cleanup*                         | `il_cleanup(model)`    |
+[TABLE]
 
 ## Blocking rules
 
@@ -128,8 +136,8 @@ Below is a minimal deduplication example in both Splink and `irelink`.
 from splink import Linker, SettingsCreator, DuckDBAPI, block_on, splink_datasets
 import splink.comparison_library as cl
 
-df = splink_datasets.fake_1000
 db_api = DuckDBAPI()
+df_sdf = db_api.register(splink_datasets.fake_1000, dataset_display_name="fake_1000")
 
 settings = SettingsCreator(
     link_type="dedupe_only",
@@ -144,7 +152,7 @@ settings = SettingsCreator(
     ],
 )
 
-linker = Linker(df, settings, db_api)
+linker = Linker(df_sdf, settings)
 linker.training.estimate_u_using_random_sampling(max_pairs=1e6)
 linker.training.estimate_parameters_using_expectation_maximisation(
     block_on("surname")
@@ -195,11 +203,12 @@ thresholds between the two packages.
 **splink (Python):**
 
 ``` python
-new_records = pd.DataFrame([{
-    "first_name": "Jhon", "surname": "Smith", "dob": "1990-01-15"
-}])
-results = linker.inference.find_matches_to_new_records(
-    new_records, blocking_rules=[], match_weight_threshold=-10
+new_sdf = db_api.register(
+    [{"unique_id": 1001, "first_name": "Jhon", "surname": "Smith", "dob": "1990-01-15"}],
+    dataset_display_name="new_records",
+)
+results = linker.inference.predict_between(
+    df_sdf, new_sdf, threshold_match_probability=0.5
 )
 ```
 
@@ -215,7 +224,8 @@ new_df <- data.frame(
 results <- il_find_matches(model, new_df, threshold = 0.5)
 ```
 
-Splink uses a match-weight threshold for this workflow.
 [`il_find_matches()`](http://christophertkenny.com/irelink/reference/il_find_matches.md)
-filters on posterior match probability. Translate those thresholds with
-the same caution as in the prediction example above.
+corresponds to `predict_between()`: it scores new records against the
+model’s existing data, but not new records against each other. Splink
+5’s `predict_within()`, which scores pairs within the new records, has
+no `irelink` equivalent yet.

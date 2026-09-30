@@ -89,7 +89,7 @@ database:
 df <- fake_20
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmplmkztq/duckdb
+#> ℹ /tmp/RtmpPexFk1/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -159,12 +159,12 @@ head(pairs)
 #> # A tibble: 6 × 8
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob match_weight
 #>         <int>       <int>            <int>         <int>     <int>        <dbl>
-#> 1           3          14                2             2         0         3.86
-#> 2           4          14                2             2         0         3.86
-#> 3           7          17                2             2         1         8.76
-#> 4          13          14                2             2         0         3.86
-#> 5           5          15                2             2         1         8.76
-#> 6           6          15                2             2         1         8.76
+#> 1           8          17                1             2         1         7.49
+#> 2          10          20                2             2         0         3.86
+#> 3           1           2                2             2         1         8.76
+#> 4           4          13                2             2         1         8.76
+#> 5          10          19                1             2         1         7.49
+#> 6           5           6                2             2         1         8.76
 #> # ℹ 2 more variables: total_match_weight <dbl>, match_probability <dbl>
 ```
 
@@ -186,12 +186,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 17        cluster_17
-#> 2 15        cluster_15
-#> 3 5         cluster_15
-#> 4 4         cluster_13
-#> 5 19        cluster_10
-#> 6 8         cluster_17
+#> 1 7         cluster_17
+#> 2 13        cluster_13
+#> 3 20        cluster_10
+#> 4 5         cluster_15
+#> 5 17        cluster_17
+#> 6 15        cluster_15
 ```
 
 Each record is assigned a `cluster_id`. Records in the same cluster are

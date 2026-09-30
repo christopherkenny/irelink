@@ -134,7 +134,7 @@ values because of the corruption process:</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/Rtmp1mwW47/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpQvweFk/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -237,22 +237,22 @@ then run EM:</p>
 <div class="sourceCode" id="cb10"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="../reference/il_weights.html">il_weights</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 14 × 5</span></span></span>
-<span><span class="co">#&gt;    comparison    gamma_level  m_prob  u_prob weight</span></span>
-<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> given_name              0 0.157   0.969   -<span style="color: #BB0000;">2.63</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> given_name              1 0.013<span style="text-decoration: underline;">6</span>  0.024<span style="text-decoration: underline;">7</span>  -<span style="color: #BB0000;">0.865</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> given_name              2 0.013<span style="text-decoration: underline;">5</span>  0.001<span style="text-decoration: underline;">27</span>  3.41 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> given_name              3 0.127   0.001<span style="text-decoration: underline;">27</span>  6.64 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> given_name              4 0.690   0.003<span style="text-decoration: underline;">96</span>  7.44 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> surname                 0 0.125   0.980   -<span style="color: #BB0000;">2.97</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> surname                 1 0.007<span style="text-decoration: underline;">00</span> 0.012<span style="text-decoration: underline;">4</span>  -<span style="color: #BB0000;">0.826</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> surname                 2 0.016<span style="text-decoration: underline;">3</span>  0.001<span style="text-decoration: underline;">27</span>  3.68 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> surname                 3 0.182   0.001<span style="text-decoration: underline;">45</span>  6.97 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> surname                 4 0.670   0.004<span style="text-decoration: underline;">40</span>  7.25 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> date_of_birth           0 0.103   1.000   -<span style="color: #BB0000;">3.28</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> date_of_birth           1 0.897   0.000<span style="text-decoration: underline;">2</span>  12.1  </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span> postcode                0 0.165   0.999   -<span style="color: #BB0000;">2.60</span> </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span> postcode                1 0.835   0.001<span style="text-decoration: underline;">24</span>  9.40</span></span></code></pre></div>
+<span><span class="co">#&gt;    comparison    gamma_level  m_prob   u_prob weight</span></span>
+<span><span class="co">#&gt;    <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>               <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>   <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>    <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span>  <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 1</span> given_name              0 0.158   0.970    -<span style="color: #BB0000;">2.62</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 2</span> given_name              1 0.013<span style="text-decoration: underline;">6</span>  0.024<span style="text-decoration: underline;">5</span>   -<span style="color: #BB0000;">0.853</span></span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 3</span> given_name              2 0.013<span style="text-decoration: underline;">7</span>  0.000<span style="text-decoration: underline;">891</span>  3.94 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 4</span> given_name              3 0.126   0.001<span style="text-decoration: underline;">31</span>   6.60 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 5</span> given_name              4 0.688   0.003<span style="text-decoration: underline;">27</span>   7.72 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 6</span> surname                 0 0.127   0.980    -<span style="color: #BB0000;">2.95</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 7</span> surname                 1 0.006<span style="text-decoration: underline;">98</span> 0.014<span style="text-decoration: underline;">4</span>   -<span style="color: #BB0000;">1.05</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 8</span> surname                 2 0.016<span style="text-decoration: underline;">5</span>  0.000<span style="text-decoration: underline;">448</span>  5.20 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;"> 9</span> surname                 3 0.182   0.000<span style="text-decoration: underline;">758</span>  7.90 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">10</span> surname                 4 0.668   0.003<span style="text-decoration: underline;">96</span>   7.40 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">11</span> date_of_birth           0 0.104   1.000    -<span style="color: #BB0000;">3.26</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">12</span> date_of_birth           1 0.896   0.000<span style="text-decoration: underline;">127</span> 12.8  </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">13</span> postcode                0 0.167   0.999    -<span style="color: #BB0000;">2.58</span> </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">14</span> postcode                1 0.833   0.001<span style="text-decoration: underline;">07</span>   9.60</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="predict-and-cluster">Predict and cluster<a class="anchor" aria-label="anchor" href="#predict-and-cluster"></a>
@@ -271,12 +271,12 @@ then run EM:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id  </span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>       </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 3235      cluster_2834</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 870       cluster_3026</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 4715      cluster_2640</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 1611      cluster_146 </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 1111      cluster_1111</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 4469      cluster_2834</span></span></code></pre></div>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 446       cluster_3459</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 3653      cluster_3653</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 256       cluster_256 </span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 4858      cluster_4174</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 1940      cluster_1940</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 1773      cluster_1271</span></span></code></pre></div>
 </div>
 <div class="section level2">
 <h2 id="evaluate-against-ground-truth">Evaluate against ground truth<a class="anchor" aria-label="anchor" href="#evaluate-against-ground-truth"></a>

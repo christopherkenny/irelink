@@ -49,7 +49,7 @@ and value distributions:
 
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpxClqC3/duckdb
+#> ℹ /tmp/RtmpQ7V1Aw/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -225,22 +225,22 @@ summary(model)
 #>   Blocking rules: 3
 #> 
 #>   Parameters:
-#>     prior: 0.5161233
+#>     prior: 0.3619547
 #>     comparisons: # A tibble: 23 × 4
 #>      comparisons:    comparison gamma_level      m       u
 #>      comparisons:    <chr>            <int>  <dbl>   <dbl>
-#>      comparisons:  1 first_name           0 0.355  0.967  
-#>      comparisons:  2 first_name           1 0.110  0.0187 
-#>      comparisons:  3 first_name           2 0.0278 0.00213
-#>      comparisons:  4 first_name           3 0.0894 0.00370
-#>      comparisons:  5 first_name           4 0.417  0.00852
-#>      comparisons:  6 surname              0 0.346  0.966  
-#>      comparisons:  7 surname              1 0.0941 0.0173 
-#>      comparisons:  8 surname              2 0.0274 0.00189
-#>      comparisons:  9 surname              3 0.0696 0.00295
-#>      comparisons: 10 surname              4 0.463  0.0114 
+#>      comparisons:  1 first_name           0 0.356  0.974  
+#>      comparisons:  2 first_name           1 0.110  0.0169 
+#>      comparisons:  3 first_name           2 0.0278 0.00142
+#>      comparisons:  4 first_name           3 0.0893 0.00172
+#>      comparisons:  5 first_name           4 0.417  0.00575
+#>      comparisons:  6 surname              0 0.346  0.976  
+#>      comparisons:  7 surname              1 0.0942 0.0157 
+#>      comparisons:  8 surname              2 0.0274 0.00127
+#>      comparisons:  9 surname              3 0.0696 0.00118
+#>      comparisons: 10 surname              4 0.463  0.00584
 #>      comparisons: # ℹ 13 more rows
-#>     u_estimation: 1e+05
+#>     u_estimation: 106953
 #>      u_estimation: FALSE
 #>      u_estimation: NULL
 #>      u_estimation: NULL
@@ -288,7 +288,7 @@ and attach it to the same data or to new data with
 
 con2 <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpxClqC3/duckdb
+#> ℹ /tmp/RtmpQ7V1Aw/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -301,12 +301,12 @@ head(predict(model2, threshold = 0.85))
 #> # A tibble: 6 × 11
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob gamma_city
 #>         <int>       <int>            <int>         <int>     <int>      <int>
-#> 1         479         481                4             4         5          0
-#> 2         510         512                4             4         3          1
-#> 3          99         104                4             2         5          1
-#> 4         270         271                4             4         5          1
-#> 5         100         102                4            -1         5          0
-#> 6         214         217                4             3         3          1
+#> 1         102         104                4             2         5          1
+#> 2         252         254                4             4         5          0
+#> 3         316         318                4             1         2          0
+#> 4         816         820                4             4         5          1
+#> 5         819         820                4             4         5          0
+#> 6          99         100                4            -1         5          0
 #> # ℹ 5 more variables: gamma_email <int>, match_weight <dbl>, tf_adj_city <dbl>,
 #> #   total_match_weight <dbl>, match_probability <dbl>
 DBI::dbDisconnect(con2, shutdown = TRUE)
@@ -323,7 +323,7 @@ Score all candidate pairs and apply a probability threshold:
 
 predictions <- predict(model, threshold = 0.5)
 nrow(predictions)
-#> [1] 2783
+#> [1] 2713
 ```
 
 View the match-weight distribution:
@@ -353,12 +353,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id 
 #>   <chr>     <chr>      
-#> 1 523       cluster_517
-#> 2 533       cluster_527
-#> 3 174       cluster_172
-#> 4 257       cluster_252
-#> 5 171       cluster_164
-#> 6 168       cluster_164
+#> 1 230       cluster_229
+#> 2 1         cluster_0  
+#> 3 560       cluster_558
+#> 4 655       cluster_654
+#> 5 773       cluster_772
+#> 6 537       cluster_535
 ```
 
 ## Evaluate against ground truth
@@ -391,18 +391,18 @@ sum(labels$is_match)
 acc <- il_accuracy(model, labels = labels)
 acc
 #> # A tibble: 419 × 16
-#>     threshold    tp    fp    fn    tn fn_blocking_miss precision recall    f1
-#>         <dbl> <int> <int> <int> <int>            <int>     <dbl>  <dbl> <dbl>
-#>  1 0           1135   229   896   916              896     0.832  0.559 0.669
-#>  2 0.00000183  1135   229   896   916              896     0.832  0.559 0.669
-#>  3 0.00000353  1135   229   896   916              896     0.832  0.559 0.669
-#>  4 0.00000498  1135   229   896   916              896     0.832  0.559 0.669
-#>  5 0.00000512  1135   229   896   916              896     0.832  0.559 0.669
-#>  6 0.00000960  1135   229   896   916              896     0.832  0.559 0.669
-#>  7 0.00000986  1135   229   896   916              896     0.832  0.559 0.669
-#>  8 0.0000139   1135   229   896   916              896     0.832  0.559 0.669
-#>  9 0.0000255   1135   229   896   916              896     0.832  0.559 0.669
-#> 10 0.0000268   1115   152   916   993              896     0.880  0.549 0.676
+#>      threshold    tp    fp    fn    tn fn_blocking_miss precision recall    f1
+#>          <dbl> <int> <int> <int> <int>            <int>     <dbl>  <dbl> <dbl>
+#>  1 0            1135   229   896   916              896     0.832  0.559 0.669
+#>  2 0.000000946  1135   229   896   916              896     0.832  0.559 0.669
+#>  3 0.00000190   1135   229   896   916              896     0.832  0.559 0.669
+#>  4 0.00000259   1135   229   896   916              896     0.832  0.559 0.669
+#>  5 0.00000267   1135   229   896   916              896     0.832  0.559 0.669
+#>  6 0.00000519   1135   229   896   916              896     0.832  0.559 0.669
+#>  7 0.00000534   1135   229   896   916              896     0.832  0.559 0.669
+#>  8 0.00000731   1135   229   896   916              896     0.832  0.559 0.669
+#>  9 0.0000146    1135   229   896   916              896     0.832  0.559 0.669
+#> 10 0.0000151    1135   229   896   916              896     0.832  0.559 0.669
 #> # ℹ 409 more rows
 #> # ℹ 7 more variables: f2 <dbl>, f0_5 <dbl>, specificity <dbl>, npv <dbl>,
 #> #   accuracy <dbl>, p4 <dbl>, phi <dbl>
@@ -446,12 +446,12 @@ head(errors)
 #> # A tibble: 6 × 6
 #>   unique_id_l unique_id_r match_weight match_probability true_label error_type  
 #>         <int>       <int>        <dbl>             <dbl> <lgl>      <chr>       
-#> 1           4           7        17.1              1.000 FALSE      false_posit…
-#> 2           4           8         8.89             0.998 FALSE      false_posit…
-#> 3           4           9        14.7              1.000 FALSE      false_posit…
-#> 4           4          10        12.2              1.000 FALSE      false_posit…
-#> 5           5           7        19.0              1.000 FALSE      false_posit…
-#> 6           5           8         8.89             0.998 FALSE      false_posit…
+#> 1           4           7         19.8             1.000 FALSE      false_posit…
+#> 2           4           8         10.2             0.999 FALSE      false_posit…
+#> 3           4           9         16.5             1.000 FALSE      false_posit…
+#> 4           4          10         14.4             1.000 FALSE      false_posit…
+#> 5           5           7         21.7             1.000 FALSE      false_posit…
+#> 6           5           8         10.2             0.999 FALSE      false_posit…
 ```
 
 ### Unlinkables

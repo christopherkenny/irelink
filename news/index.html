@@ -83,7 +83,7 @@
 <li>
 <code>.explode</code> parameter for array-valued blocking columns (generates <code>UNNEST</code> subqueries for DuckDB).</li>
 <li>
-<code><a href="../reference/il_count_pairs.html">il_count_pairs()</a></code> estimates candidate-pair counts, including cumulative totals and percent-of-cartesian summaries across rule combinations.</li>
+<code><a href="../reference/il_count_pairs.html">il_count_pairs()</a></code> counts candidate pairs, including cumulative totals and percent-of-cartesian summaries across rule combinations, and can estimate counts from a deterministic record sample on large data through <code>record_sample_proportion</code>.</li>
 <li>
 <code><a href="../reference/il_suggest_blocking.html">il_suggest_blocking()</a></code> ranks candidate blocking rules by pair-reduction, coverage, and balanced score.</li>
 <li>
@@ -96,13 +96,13 @@
 <div class="section level3">
 <h3 id="training-0-0-1">Training<a class="anchor" aria-label="anchor" href="#training-0-0-1"></a></h3>
 <ul><li>
-<code><a href="../reference/il_estimate_u.html">il_estimate_u()</a></code> estimates non-match probabilities by sampling random pairs, with optional chunked estimation through <code>chunk_size</code> and early stopping through <code>min_count_per_level</code>.</li>
+<code><a href="../reference/il_estimate_u.html">il_estimate_u()</a></code> estimates non-match probabilities from all candidate pairs when there are at most <code>max_pairs</code>, and otherwise from a uniform random sample of records (reproducible with <code><a href="https://rdrr.io/r/base/Random.html" class="external-link">set.seed()</a></code>), with optional chunked estimation over random chunks through <code>chunk_size</code> and early stopping through <code>min_count_per_level</code>.</li>
 <li>
-<code><a href="../reference/il_estimate_em.html">il_estimate_em()</a></code> runs the Fellegi-Sunter EM algorithm with configurable <code>max_iterations</code>, <code>convergence</code>, <code>fix_u</code>, <code>fix_m</code>, <code>fix_prior</code>, <code>derive_prior</code>, <code>estimate_without_tf</code>, and <code>estimator_mode</code> parameters.</li>
+<code><a href="../reference/il_estimate_em.html">il_estimate_em()</a></code> runs the Fellegi-Sunter EM algorithm with configurable <code>max_iterations</code>, <code>convergence</code>, <code>fix_u</code>, <code>fix_m</code>, <code>fix_prior</code>, <code>derive_prior</code>, <code>estimate_without_tf</code>, and <code>estimator_mode</code> parameters. An optional <code>max_pairs</code> cap trains on a deterministic record sample sized to produce about that many blocked pairs.</li>
 <li>
 <code>estimator_mode = "dependency-aware"</code> fits log-linear matched and unmatched comparison-pattern distributions over aggregated gamma counts, preserving missing comparison states as explicit pattern levels.</li>
 <li>
-<code><a href="../reference/il_estimate_prior.html">il_estimate_prior()</a></code> sets the prior match probability from deterministic matching rules, counting unique blocked pairs across overlapping rules.</li>
+<code><a href="../reference/il_estimate_prior.html">il_estimate_prior()</a></code> sets the prior match probability from deterministic matching rules, counting unique blocked pairs across overlapping rules, optionally from a deterministic record sample through <code>record_sample_proportion</code>.</li>
 <li>
 <code><a href="../reference/il_prior_prevalence.html">il_prior_prevalence()</a></code> and <code><a href="../reference/il_prior_m.html">il_prior_m()</a></code> add regularizing custom priors for EM, <code><a href="../reference/il_constrain_m.html">il_constrain_m()</a></code> adds explicit fixed matched-class constraints, and <code><a href="../reference/il_priors.html">il_priors()</a></code> / <code><a href="../reference/il_constraints.html">il_constraints()</a></code> expose the stored metadata.</li>
 <li>

@@ -120,8 +120,10 @@ probabilistic record linkage engine into idiomatic R.
 - `.explode` parameter for array-valued blocking columns (generates
   `UNNEST` subqueries for DuckDB).
 - [`il_count_pairs()`](http://christophertkenny.com/irelink/reference/il_count_pairs.md)
-  estimates candidate-pair counts, including cumulative totals and
-  percent-of-cartesian summaries across rule combinations.
+  counts candidate pairs, including cumulative totals and
+  percent-of-cartesian summaries across rule combinations, and can
+  estimate counts from a deterministic record sample on large data
+  through `record_sample_proportion`.
 - [`il_suggest_blocking()`](http://christophertkenny.com/irelink/reference/il_suggest_blocking.md)
   ranks candidate blocking rules by pair-reduction, coverage, and
   balanced score.
@@ -136,21 +138,26 @@ probabilistic record linkage engine into idiomatic R.
 ### Training
 
 - [`il_estimate_u()`](http://christophertkenny.com/irelink/reference/il_estimate_u.md)
-  estimates non-match probabilities by sampling random pairs, with
-  optional chunked estimation through `chunk_size` and early stopping
-  through `min_count_per_level`.
+  estimates non-match probabilities from all candidate pairs when there
+  are at most `max_pairs`, and otherwise from a uniform random sample of
+  records (reproducible with
+  [`set.seed()`](https://rdrr.io/r/base/Random.html)), with optional
+  chunked estimation over random chunks through `chunk_size` and early
+  stopping through `min_count_per_level`.
 - [`il_estimate_em()`](http://christophertkenny.com/irelink/reference/il_estimate_em.md)
   runs the Fellegi-Sunter EM algorithm with configurable
   `max_iterations`, `convergence`, `fix_u`, `fix_m`, `fix_prior`,
   `derive_prior`, `estimate_without_tf`, and `estimator_mode`
-  parameters.
+  parameters. An optional `max_pairs` cap trains on a deterministic
+  record sample sized to produce about that many blocked pairs.
 - `estimator_mode = "dependency-aware"` fits log-linear matched and
   unmatched comparison-pattern distributions over aggregated gamma
   counts, preserving missing comparison states as explicit pattern
   levels.
 - [`il_estimate_prior()`](http://christophertkenny.com/irelink/reference/il_estimate_prior.md)
   sets the prior match probability from deterministic matching rules,
-  counting unique blocked pairs across overlapping rules.
+  counting unique blocked pairs across overlapping rules, optionally
+  from a deterministic record sample through `record_sample_proportion`.
 - [`il_prior_prevalence()`](http://christophertkenny.com/irelink/reference/il_prior_prevalence.md)
   and
   [`il_prior_m()`](http://christophertkenny.com/irelink/reference/il_prior_m.md)

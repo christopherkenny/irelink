@@ -7,7 +7,13 @@ before training. Too many pairs is slow, while too few misses matches.
 ## Usage
 
 ``` r
-il_count_pairs(.data, ..., con = NULL, link_type = c("dedupe", "link"))
+il_count_pairs(
+  .data,
+  ...,
+  con = NULL,
+  link_type = c("dedupe", "link"),
+  record_sample_proportion = 1
+)
 ```
 
 ## Arguments
@@ -35,12 +41,21 @@ il_count_pairs(.data, ..., con = NULL, link_type = c("dedupe", "link"))
 
   One of `"dedupe"` (default) or `"link"`.
 
+- record_sample_proportion:
+
+  Proportion of records on each side of the blocking join, chosen by a
+  deterministic hash of `unique_id`, used to estimate pair counts.
+  Counts from the sample are scaled up by
+  `1 / record_sample_proportion^2`. Defaults to `1` (exact counts).
+  Values below 1 trade accuracy for speed on large data.
+
 ## Value
 
 A
 [`tibble::tibble()`](https://tibble.tidyverse.org/reference/tibble.html)
 with columns `rule` and `n_pairs`. When blocking rules are supplied, it
-also includes `cumulative_pairs` and `pct_of_cartesian`.
+also includes `cumulative_pairs` and `pct_of_cartesian`. Counts are
+estimates when `record_sample_proportion` is below 1.
 
 ## Examples
 
@@ -84,7 +99,7 @@ df <- data.frame(
 )
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmpqysoz5/duckdb
+#> ℹ /tmp/RtmpZE4yUn/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.

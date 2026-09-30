@@ -22,7 +22,7 @@ library(ggplot2)
 df <- fake_1000
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmppAD3pz/duckdb
+#> ℹ /tmp/Rtmp0FMDGV/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -122,7 +122,7 @@ in SQL.
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,783 pairs in table __il_9231_1_predicted_4 (threshold = 0.5)
+#> <il_compared_lazy> 2,534 pairs in table __il_9311_1_predicted_5 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -132,7 +132,7 @@ Pass the lazy reference directly to
 
 clusters_lazy <- il_cluster(pairs_lazy, threshold = 0.85)
 nrow(clusters_lazy)
-#> [1] 952
+#> [1] 950
 ```
 
 [`autoplot()`](https://ggplot2.tidyverse.org/reference/autoplot.html)
@@ -194,20 +194,20 @@ that size:
 ``` r
 
 metrics$clusters
-#> # A tibble: 142 × 5
+#> # A tibble: 143 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralization
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_243       1       2   0                    NA     
-#>  2 cluster_905       2       1   1                    NA     
-#>  3 cluster_372       9      20   0.556                 0.25  
-#>  4 cluster_716       3      14   4.67                 19     
-#>  5 cluster_654      10      44   0.978                 0.0278
-#>  6 cluster_851       7      12   0.595                 0.8   
-#>  7 cluster_194      10      35   0.778                 0.139 
-#>  8 cluster_20        3       2   0.667                 1     
-#>  9 cluster_276       3       4   1.5                   4.5   
-#> 10 cluster_686       7      18   0.857                 0.2   
-#> # ℹ 132 more rows
+#>  1 cluster_133       9      32   0.903                  0.446
+#>  2 cluster_44        5      10   1.05                   0.333
+#>  3 cluster_476       2       1   1                     NA    
+#>  4 cluster_736       2       1   1                     NA    
+#>  5 cluster_879       5      14   1.4                    0.167
+#>  6 cluster_911       7      21   1                      0    
+#>  7 cluster_428       3       2   0.667                  1    
+#>  8 cluster_960       7      17   0.810                  0.267
+#>  9 cluster_332       6      15   1                      0.3  
+#> 10 cluster_599       2       1   1                     NA    
+#> # ℹ 133 more rows
 ```
 
 A large maximum cluster size with low density often means a transitive
@@ -224,12 +224,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 137       cluster_133     10           1.25 
-#> 2 135       cluster_133      3           0.375
-#> 3 139       cluster_133     10           1.25 
-#> 4 138       cluster_133      9           1.12 
-#> 5 141       cluster_133      9           1.12 
-#> 6 136       cluster_133      9           1.12
+#> 1 134       cluster_133      8           1    
+#> 2 138       cluster_133      7           0.875
+#> 3 133       cluster_133      8           1    
+#> 4 137       cluster_133     10           1.25 
+#> 5 139       cluster_133      8           1    
+#> 6 140       cluster_133      7           0.875
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -324,26 +324,16 @@ new_df <- data.frame(
 
 matches <- il_find_matches(model, new_df, threshold = 0.5)
 matches
-#> # A tibble: 17 × 5
-#>    unique_id_l unique_id_r match_weight total_match_weight match_probability
-#>          <int>       <int>        <dbl>              <dbl>             <dbl>
-#>  1           1         238        2.31               2.41              0.841
-#>  2           1         791        0.832              0.925             0.655
-#>  3           2         858        0.871              0.964             0.661
-#>  4           2         859        2.31               2.41              0.841
-#>  5           2         864        0.871              0.964             0.661
-#>  6           1         240        0.832              0.925             0.655
-#>  7           1         363        0.832              0.925             0.655
-#>  8           1         239        0.832              0.925             0.655
-#>  9           1         241        0.832              0.925             0.655
-#> 10           1         362        2.28               2.37              0.838
-#> 11           1         364        0.832              0.925             0.655
-#> 12           1         367        0.832              0.925             0.655
-#> 13           1         237        2.28               2.37              0.838
-#> 14           1         242        0.832              0.925             0.655
-#> 15           1         365        0.832              0.925             0.655
-#> 16           1         366        0.832              0.925             0.655
-#> 17           1         789        2.31               2.41              0.841
+#> # A tibble: 7 × 5
+#>   unique_id_l unique_id_r match_weight total_match_weight match_probability
+#>         <int>       <int>        <dbl>              <dbl>             <dbl>
+#> 1           1         237         2.34              1.26              0.705
+#> 2           1         789         2.38              1.30              0.711
+#> 3           1         362         2.34              1.26              0.705
+#> 4           2         858         1.49              0.402             0.569
+#> 5           2         859         2.94              1.86              0.783
+#> 6           2         864         1.49              0.402             0.569
+#> 7           1         238         2.38              1.30              0.711
 ```
 
 Each row is a (new record, existing record) pair. `unique_id_l`

@@ -8,7 +8,13 @@ parameter estimation.
 ## Usage
 
 ``` r
-il_estimate_prior(model, ..., recall = 0.7, profile_sql = FALSE)
+il_estimate_prior(
+  model,
+  ...,
+  recall = 0.7,
+  record_sample_proportion = 1,
+  profile_sql = FALSE
+)
 ```
 
 ## Arguments
@@ -27,6 +33,13 @@ il_estimate_prior(model, ..., recall = 0.7, profile_sql = FALSE)
 
   A numeric value between 0 and 1 representing the assumed recall of the
   deterministic rules. Defaults to `0.7`.
+
+- record_sample_proportion:
+
+  Proportion of records, chosen by a deterministic hash of `unique_id`,
+  used to count deterministic matches. Values below 1 estimate the count
+  from the sample, which is faster on large data. Defaults to `1` (exact
+  counts).
 
 - profile_sql:
 
@@ -79,7 +92,7 @@ df <- data.frame(
 )
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmpqysoz5/duckdb
+#> ℹ /tmp/RtmpZE4yUn/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
