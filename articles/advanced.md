@@ -22,7 +22,7 @@ library(ggplot2)
 df <- fake_1000
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpqK2e0Q/duckdb
+#> ℹ /tmp/RtmpMVqrQ5/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -122,7 +122,7 @@ in SQL.
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,534 pairs in table __il_9156_1_predicted_5 (threshold = 0.5)
+#> <il_compared_lazy> 2,534 pairs in table __il_8896_1_predicted_5 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -197,16 +197,16 @@ metrics$clusters
 #> # A tibble: 143 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralization
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_289       7      17   0.810                  0.267
-#>  2 cluster_79        9      21   0.583                  0.214
+#>  1 cluster_149      16      46   0.388                  0.319
+#>  2 cluster_301      10      41   0.911                  0.111
 #>  3 cluster_332       6      15   1                      0.3  
 #>  4 cluster_599       2       1   1                     NA    
-#>  5 cluster_311       3       4   1.17                   4    
-#>  6 cluster_618      10      31   0.689                  0.25 
-#>  7 cluster_694       8      24   0.857                  0.190
-#>  8 cluster_149      16      46   0.388                  0.319
-#>  9 cluster_301      10      41   0.911                  0.111
-#> 10 cluster_27        5       9   0.9                    0.167
+#>  5 cluster_10       13      27   0.346                  0.379
+#>  6 cluster_517      10      46   1.01                   0.125
+#>  7 cluster_772       5       9   0.9                    0.167
+#>  8 cluster_888       9      32   0.889                  0.143
+#>  9 cluster_296       5       9   0.9                    0.167
+#> 10 cluster_907       4       4   0.667                  0.667
 #> # ℹ 133 more rows
 ```
 
@@ -224,12 +224,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 125       cluster_122      3             0.6
-#> 2 124       cluster_122      4             0.8
-#> 3 122       cluster_122      5             1  
-#> 4 127       cluster_122      5             1  
-#> 5 123       cluster_122      4             0.8
-#> 6 126       cluster_122      3             0.6
+#> 1 152       cluster_149      7           0.467
+#> 2 153       cluster_149      4           0.267
+#> 3 267       cluster_149      7           0.467
+#> 4 266       cluster_149      4           0.267
+#> 5 151       cluster_149      6           0.4  
+#> 6 270       cluster_149      6           0.4
 ```
 
 Records with unusually high degree relative to their cluster size may be
@@ -330,8 +330,8 @@ matches
 #> 1           2         858         1.49              0.402             0.569
 #> 2           2         859         2.94              1.86              0.783
 #> 3           2         864         1.49              0.402             0.569
-#> 4           1         362         2.34              1.26              0.705
-#> 5           1         238         2.38              1.30              0.711
+#> 4           1         238         2.38              1.30              0.711
+#> 5           1         362         2.34              1.26              0.705
 #> 6           1         237         2.34              1.26              0.705
 #> 7           1         789         2.38              1.30              0.711
 ```

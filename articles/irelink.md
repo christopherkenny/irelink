@@ -89,7 +89,7 @@ database:
 df <- fake_20
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpHUpM28/duckdb
+#> ℹ /tmp/RtmplgXY6n/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -159,10 +159,10 @@ head(pairs)
 #> # A tibble: 6 × 8
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob match_weight
 #>         <int>       <int>            <int>         <int>     <int>        <dbl>
-#> 1           1          11                2             2         1         8.76
-#> 2           9          20                2             2         0         3.86
-#> 3           3          13                2             2         1         8.76
-#> 4           9          19                2             2         1         8.76
+#> 1           2          12                2             1         0         1.64
+#> 2           2          11                2             2         1         8.76
+#> 3          19          20                2             2         0         3.86
+#> 4           3           4                2             2         1         8.76
 #> 5           3          14                2             2         0         3.86
 #> 6           4          14                2             2         0         3.86
 #> # ℹ 2 more variables: total_match_weight <dbl>, match_probability <dbl>
@@ -186,11 +186,11 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id
 #>   <chr>     <chr>     
-#> 1 9         cluster_10
-#> 2 8         cluster_17
-#> 3 10        cluster_10
-#> 4 4         cluster_13
-#> 5 19        cluster_10
+#> 1 19        cluster_10
+#> 2 4         cluster_13
+#> 3 9         cluster_10
+#> 4 8         cluster_17
+#> 5 10        cluster_10
 #> 6 7         cluster_17
 ```
 

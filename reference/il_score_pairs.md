@@ -33,9 +33,10 @@ il_score_pairs(model, records_l, records_r, con = NULL)
 
 ## Value
 
-An `il_compared` tibble with one row per pair, containing `unique_id_l`,
-`unique_id_r`, `match_weight`, `total_match_weight`,
-`match_probability`, the comparison levels, and the compared fields.
+An `il_compared` tibble with one row per pair, containing `unique_id_l`
+and `unique_id_r` (ids within `records_l` and `records_r`),
+`match_weight`, `total_match_weight`, `match_probability`, the
+comparison levels, and the compared fields.
 
 ## Details
 
@@ -54,7 +55,7 @@ or its tables registered with
 ``` r
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpEldr8p/duckdb
+#> ℹ /tmp/Rtmp7NRmac/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.

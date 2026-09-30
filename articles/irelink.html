@@ -169,7 +169,7 @@ use an in-memory DuckDB database:</p>
 <code class="sourceCode R"><span><span class="va">df</span> <span class="op">&lt;-</span> <span class="va">fake_20</span></span>
 <span><span class="va">con</span> <span class="op">&lt;-</span> <span class="fu">DBI</span><span class="fu">::</span><span class="fu"><a href="https://dbi.r-dbi.org/reference/dbConnect.html" class="external-link">dbConnect</a></span><span class="op">(</span><span class="fu">duckdb</span><span class="fu">::</span><span class="fu"><a href="https://r.duckdb.org/reference/duckdb.html" class="external-link">duckdb</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span></span>
 <span><span class="co">#&gt; duckdb keeps downloaded extensions and secrets in a temporary directory:</span></span>
-<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmpHUpM28/duckdb</span></span>
+<span><span class="co">#&gt; <span style="color: #0000BB;">ℹ</span> /tmp/RtmplgXY6n/duckdb</span></span>
 <span><span class="co">#&gt; This is removed when the R session ends.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Extensions are re-downloaded each session.</span></span>
 <span><span class="co">#&gt; <span style="color: #00BBBB;">•</span> Secrets are lost.</span></span>
@@ -227,10 +227,10 @@ a match-probability threshold:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 8</span></span></span>
 <span><span class="co">#&gt;   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob match_weight</span></span>
 <span><span class="co">#&gt;         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>       <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>            <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>         <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;int&gt;</span>        <span style="color: #949494; font-style: italic;">&lt;dbl&gt;</span></span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           1          11                2             2         1         8.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           9          20                2             2         0         3.86</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>           3          13                2             2         1         8.76</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           9          19                2             2         1         8.76</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span>           2          12                2             1         0         1.64</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span>           2          11                2             2         1         8.76</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span>          19          20                2             2         0         3.86</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span>           3           4                2             2         1         8.76</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span>           3          14                2             2         0         3.86</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span>           4          14                2             2         0         3.86</span></span>
 <span><span class="co">#&gt; <span style="color: #949494;"># ℹ 2 more variables: total_match_weight &lt;dbl&gt;, match_probability &lt;dbl&gt;</span></span></span></code></pre></div>
@@ -251,11 +251,11 @@ clusters with connected-components analysis:</p>
 <span><span class="co">#&gt; <span style="color: #949494;"># A tibble: 6 × 2</span></span></span>
 <span><span class="co">#&gt;   unique_id cluster_id</span></span>
 <span><span class="co">#&gt;   <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     <span style="color: #949494; font-style: italic;">&lt;chr&gt;</span>     </span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 9         cluster_10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 8         cluster_17</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 10        cluster_10</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 4         cluster_13</span></span>
-<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 19        cluster_10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">1</span> 19        cluster_10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">2</span> 4         cluster_13</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">3</span> 9         cluster_10</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">4</span> 8         cluster_17</span></span>
+<span><span class="co">#&gt; <span style="color: #BCBCBC;">5</span> 10        cluster_10</span></span>
 <span><span class="co">#&gt; <span style="color: #BCBCBC;">6</span> 7         cluster_17</span></span></code></pre></div>
 <p>Each record is assigned a <code>cluster_id</code>. Records in the
 same cluster are treated as the same entity.</p>
