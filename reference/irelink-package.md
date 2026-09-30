@@ -25,7 +25,7 @@ into idiomatic R.
 
 Useful links:
 
-- <http://christophertkenny.com/irelink/>
+- <https://christophertkenny.com/irelink/>
 
 - <https://github.com/christopherkenny/irelink>
 

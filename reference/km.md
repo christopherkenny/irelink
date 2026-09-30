@@ -1,7 +1,7 @@
-# Create a Distance in Kilometres
+# Create a Distance in Kilometers
 
 A tagged-value constructor that marks a numeric threshold as a distance
-in kilometres. Use inside
+in kilometers. Use inside
 [`cl_geo_distance()`](http://christophertkenny.com/irelink/reference/cl_geo_distance.md)
 for self-documenting thresholds.
 

@@ -321,6 +321,6 @@ Lightweight constructors for physical and temporal units.
 - [`seconds()`](http://christophertkenny.com/irelink/reference/seconds.md)
   : Create a Duration in Seconds
 - [`km()`](http://christophertkenny.com/irelink/reference/km.md) :
-  Create a Distance in Kilometres
+  Create a Distance in Kilometers
 - [`mi()`](http://christophertkenny.com/irelink/reference/mi.md) :
   Create a Distance in Miles

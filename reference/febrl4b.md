@@ -72,7 +72,7 @@ MIT license. The FEBRL datasets originate from Christen and Churches
 
 ## References
 
-Christen, P. and Churches, T. (2004). Febrl – Freely Extensible
+Christen, P. and Churches, T. (2004). FEBRL – Freely Extensible
 Biomedical Record Linkage. Australian National University.
 
 ## See also

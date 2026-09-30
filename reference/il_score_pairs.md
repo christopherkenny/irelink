@@ -55,7 +55,7 @@ or its tables registered with
 ``` r
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/Rtmp7NRmac/duckdb
+#> ℹ /tmp/RtmpwUsBnF/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -84,8 +84,8 @@ il_score_pairs(
 #> # A tibble: 2 × 14
 #>   unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob match_weight
 #> *       <int>       <int>            <int>         <int>     <int>        <dbl>
-#> 1           1           1                2             2         1        20.8 
-#> 2           1           2                1             1         0         3.13
+#> 1           1           2                1             1         0         3.13
+#> 2           1           1                2             2         1        20.8 
 #> # ℹ 8 more variables: total_match_weight <dbl>, match_probability <dbl>,
 #> #   first_name_l <chr>, surname_l <chr>, dob_l <chr>, first_name_r <chr>,
 #> #   surname_r <chr>, dob_r <chr>

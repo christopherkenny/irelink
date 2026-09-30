@@ -1,7 +1,7 @@
 # Create a Distance in Miles
 
 A tagged-value constructor that marks a numeric threshold as a distance
-in miles. Converted to kilometres internally by
+in miles. Converted to kilometers internally by
 [`cl_geo_distance()`](http://christophertkenny.com/irelink/reference/cl_geo_distance.md).
 
 ## Usage

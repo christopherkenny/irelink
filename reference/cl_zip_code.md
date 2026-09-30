@@ -34,7 +34,7 @@ cl_zip_code(
 
 - km_thresholds:
 
-  Numeric vector of distance thresholds in kilometres, ordered from
+  Numeric vector of distance thresholds in kilometers, ordered from
   strictest to most lenient. Only used when `lat_col` and `long_col` are
   supplied. Defaults to `c(1, 10, 100)`.
 

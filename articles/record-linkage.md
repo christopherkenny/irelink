@@ -59,7 +59,7 @@ because of the corruption process:
 
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpFOt3DP/duckdb
+#> ℹ /tmp/RtmpeDd9r5/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.
@@ -226,12 +226,12 @@ head(clusters)
 #> # A tibble: 6 × 2
 #>   unique_id cluster_id  
 #>   <chr>     <chr>       
-#> 1 3235      cluster_2834
-#> 2 1611      cluster_146 
-#> 3 870       cluster_3026
-#> 4 4469      cluster_2834
-#> 5 1111      cluster_1111
-#> 6 2834      cluster_2834
+#> 1 1078      cluster_1078
+#> 2 664       cluster_664 
+#> 3 4656      cluster_4656
+#> 4 3699      cluster_3348
+#> 5 2517      cluster_2517
+#> 6 4523      cluster_2332
 ```
 
 ## Evaluate against ground truth

@@ -247,7 +247,7 @@ probabilistic record linkage engine into idiomatic R.
   [`il_string_similarity()`](http://christophertkenny.com/irelink/reference/il_string_similarity.md)
   computes 5 string similarity metrics for a single pair.
 - [`il_comparator_score()`](http://christophertkenny.com/irelink/reference/il_comparator_score.md)
-  computes batch string similarity across a DataFrame with SQL-side
+  computes batch string similarity across a data frame with SQL-side
   scoring on DuckDB.
 - [`il_comparator_threshold_chart()`](http://christophertkenny.com/irelink/reference/il_comparator_threshold_chart.md)
   visualizes match rates at multiple similarity thresholds.
