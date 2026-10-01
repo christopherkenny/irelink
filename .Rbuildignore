@@ -19,3 +19,4 @@
 ^inst/benchmarks/.*$
 ^inst/refs/.*$
 ^cran-comments\.md$
+^CRAN-SUBMISSION$
