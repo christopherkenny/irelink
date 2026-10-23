@@ -468,7 +468,7 @@ solve_one_to_one_sql <- function(
 
     tie_order <- ''
     if (ties_method == 'lowest_id') {
-      tie_order <- ', CASE WHEN repr < partner_repr THEN partner_repr ELSE repr END'
+      tie_order <- ', partner_repr'
     }
 
     il_db_execute(

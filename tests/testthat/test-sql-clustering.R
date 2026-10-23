@@ -280,41 +280,45 @@ test_that('SQL best_link with source_dataset matches R tie handling', {
   con <- test_con()
   on.exit(test_discon(con))
 
-  pairs_data <- tibble::tibble(
-    unique_id_l = c('B', 'A'),
-    unique_id_r = c('C', 'C'),
-    match_weight = c(4, 4),
-    match_probability = c(0.9, 0.9)
-  )
-  sql_pairs <- structure(
-    pairs_data,
-    class = c('il_compared', class(pairs_data))
-  )
-  attr(sql_pairs, 'model') <- list(con = con)
+  ids <- c('A', 'B', 'C')
+  for (hub in ids) {
+    partners <- setdiff(ids, hub)
+    source_dataset <- stats::setNames(rep('left', length(ids)), ids)
+    source_dataset[hub] <- 'right'
 
-  r_pairs <- structure(pairs_data, class = c('il_compared', class(pairs_data)))
-  source_dataset <- c(A = 'left', B = 'left', C = 'right')
+    for (row_order in list(1:2, 2:1)) {
+      for (reverse_edges in c(FALSE, TRUE)) {
+        id_l <- rev(partners)[row_order]
+        id_r <- rep(hub, 2)
+        if (reverse_edges) {
+          id_r <- id_l
+          id_l <- rep(hub, 2)
+        }
+        sql_pairs <- make_sql_pairs(con, id_l, id_r, prob = c(0.9, 0.9))
+        r_pairs <- sql_pairs
+        attr(r_pairs, 'model') <- NULL
 
-  sql_clusters <- il_cluster(
-    sql_pairs,
-    method = 'best_link',
-    ties_method = 'lowest_id',
-    source_dataset = source_dataset
-  )
-  r_clusters <- il_cluster(
-    r_pairs,
-    method = 'best_link',
-    ties_method = 'lowest_id',
-    source_dataset = source_dataset
-  )
+        sql_clusters <- il_cluster(
+          sql_pairs,
+          method = 'best_link',
+          ties_method = 'lowest_id',
+          source_dataset = source_dataset
+        )
+        r_clusters <- il_cluster(
+          r_pairs,
+          method = 'best_link',
+          ties_method = 'lowest_id',
+          source_dataset = source_dataset
+        )
 
-  sql_map <- stats::setNames(sql_clusters$cluster_id, sql_clusters$unique_id)
-  r_map <- stats::setNames(r_clusters$cluster_id, r_clusters$unique_id)
+        sql_map <- stats::setNames(sql_clusters$cluster_id, sql_clusters$unique_id)
+        r_map <- stats::setNames(r_clusters$cluster_id, r_clusters$unique_id)
+        expected <- stats::setNames(paste0('cluster_', ids), ids)
+        expected[c(hub, partners[1])] <- paste0('cluster_', min(hub, partners[1]))
 
-  expect_equal(unname(sql_map['A']), unname(sql_map['C']))
-  expect_false(unname(sql_map['A']) == unname(sql_map['B']))
-  expect_equal(
-    sql_map[c('A', 'B', 'C')] == sql_map['A'],
-    r_map[c('A', 'B', 'C')] == r_map['A']
-  )
+        expect_equal(sql_map[ids], expected)
+        expect_equal(sql_map[ids], r_map[ids])
+      }
+    }
+  }
 })
