@@ -32,7 +32,7 @@ An updated `il_model` with estimated m parameters.
 ``` r
 con <- DBI::dbConnect(duckdb::duckdb())
 #> duckdb keeps downloaded extensions and secrets in a temporary directory:
-#> ℹ /tmp/RtmpAun1I8/duckdb
+#> ℹ /tmp/RtmpJTFgSI/duckdb
 #> This is removed when the R session ends.
 #> • Extensions are re-downloaded each session.
 #> • Secrets are lost.

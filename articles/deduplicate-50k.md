@@ -258,18 +258,18 @@ autoplot(il_unlinkables(model))
 predictions <- predict(model, threshold = 0.5)
 predictions
 #> # A tibble: 237,463 × 13
-#>    unique_id_l unique_id_r gamma_first_name gamma_surname gamma_dob
-#>  * <chr>       <chr>                  <int>         <int>     <int>
-#>  1 Q7525972-2  Q7526839-14                4             4         1
-#>  2 Q7526084-2  Q7527398-16                4             4        -1
-#>  3 Q7526084-4  Q7527398-11                4             4         1
-#>  4 Q7526084-7  Q7527398-11                4             4        -1
-#>  5 Q7526084-12 Q7527398-11                4             4        -1
-#>  6 Q7525972-1  Q7527398-7                 4             4         2
-#>  7 Q7525972-2  Q7527398-2                 4             4         2
-#>  8 Q7526084-7  Q7528085-12                4             4        -1
-#>  9 Q7526300-5  Q7528085-6                 4             4        -1
-#> 10 Q7525972-2  Q7528085-6                 4             4         1
+#>    unique_id_l  unique_id_r gamma_first_name gamma_surname gamma_dob
+#>  * <chr>        <chr>                  <int>         <int>     <int>
+#>  1 Q16066385-12 Q16066385-6                4             4         5
+#>  2 Q5487220-1   Q5487220-7                 4             4         5
+#>  3 Q5364481-10  Q5364481-4                 1             4        -1
+#>  4 Q15130142-1  Q15130142-6                4             4         5
+#>  5 Q7026405-12  Q7026405-6                 4             4         5
+#>  6 Q15451699-11 Q15451699-2                4             4         4
+#>  7 Q3182385-10  Q3182385-12                2             4         5
+#>  8 Q21459192-18 Q21459192-2                4             4        -1
+#>  9 Q15996065-2  Q15996065-6                4             4         5
+#> 10 Q15996065-4  Q15996065-6                4             4         5
 #> # ℹ 237,453 more rows
 #> # ℹ 8 more variables: gamma_postcode_fake <int>, gamma_birth_place <int>,
 #> #   gamma_occupation <int>, match_weight <dbl>, tf_adj_birth_place <dbl>,
@@ -297,18 +297,18 @@ autoplot(predictions, which = 1)
 clusters <- il_cluster(predictions, threshold = 0.95)
 clusters
 #> # A tibble: 46,088 × 2
-#>    unique_id   cluster_id         
-#>    <chr>       <chr>              
-#>  1 Q538191-4   cluster_Q538191-1  
-#>  2 Q98759353-3 cluster_Q98759353-1
-#>  3 Q5485995-5  cluster_Q5485995-1 
-#>  4 Q21453621-3 cluster_Q21453621-1
-#>  5 Q7534311-2  cluster_Q7534311-1 
-#>  6 Q799510-9   cluster_Q799510-1  
-#>  7 Q426590-6   cluster_Q426590-1  
-#>  8 Q7659916-5  cluster_Q7659916-1 
-#>  9 Q18730184-7 cluster_Q18730184-1
-#> 10 Q212085-3   cluster_Q212085-1  
+#>    unique_id    cluster_id         
+#>    <chr>        <chr>              
+#>  1 Q16029902-19 cluster_Q16029902-1
+#>  2 Q5546247-4   cluster_Q5546247-1 
+#>  3 Q3435047-10  cluster_Q3435047-1 
+#>  4 Q2757905-2   cluster_Q2757905-1 
+#>  5 Q4722429-1   cluster_Q4722429-1 
+#>  6 Q75958296-2  cluster_Q75958296-1
+#>  7 Q336421-11   cluster_Q336421-1  
+#>  8 Q7526494-15  cluster_Q7526494-1 
+#>  9 Q7343952-10  cluster_Q7343952-1 
+#> 10 Q952574-1    cluster_Q952574-1  
 #> # ℹ 46,078 more rows
 ```
 
@@ -379,9 +379,9 @@ errors[errors$error_type == 'false_positive', ]
 #> # A tibble: 368 × 6
 #>    unique_id_l  unique_id_r match_weight match_probability true_label error_type
 #>    <chr>        <chr>              <dbl>             <dbl> <lgl>      <chr>     
-#>  1 Q3568485-2   Q3568487-2          43.5             1.000 FALSE      false_pos…
-#>  2 Q15176618-8  Q8005070-4          25.2             1.000 FALSE      false_pos…
-#>  3 Q15176618-6  Q8005070-2          25.3             1.000 FALSE      false_pos…
+#>  1 Q15176618-6  Q8005070-2          25.3             1.000 FALSE      false_pos…
+#>  2 Q3568485-2   Q3568487-2          43.5             1.000 FALSE      false_pos…
+#>  3 Q15176618-8  Q8005070-4          25.2             1.000 FALSE      false_pos…
 #>  4 Q7528045-2   Q7528085-8          22.2             0.999 FALSE      false_pos…
 #>  5 Q7528045-2   Q7528085-6          22.2             0.999 FALSE      false_pos…
 #>  6 Q4088004-5   Q545038-3           24.9             1.000 FALSE      false_pos…
@@ -402,16 +402,16 @@ errors[errors$error_type == 'false_negative', ]
 #> # A tibble: 112,363 × 6
 #>    unique_id_l  unique_id_r match_weight match_probability true_label error_type
 #>    <chr>        <chr>              <dbl>             <dbl> <lgl>      <chr>     
-#>  1 Q6227471-13  Q6227471-19        11.0          0.317     TRUE       false_neg…
-#>  2 Q56562415-1  Q56562415-3        10.6          0.260     TRUE       false_neg…
-#>  3 Q386694-12   Q386694-18          5.58         0.0105    TRUE       false_neg…
-#>  4 Q19660947-12 Q19660947-9        10.6          0.260     TRUE       false_neg…
-#>  5 Q5311987-13  Q5311987-3          7.29         0.0335    TRUE       false_neg…
-#>  6 Q47486968-10 Q47486968-5         8.81         0.0904    TRUE       false_neg…
-#>  7 Q16030077-16 Q16030077-9        10.2          0.208     TRUE       false_neg…
-#>  8 Q5722403-13  Q5722403-8         -3.12         0.0000254 TRUE       false_neg…
-#>  9 Q60519923-4  Q60519923-5        11.9          0.452     TRUE       false_neg…
-#> 10 Q76042843-15 Q76042843-8        10.4          0.230     TRUE       false_neg…
+#>  1 Q16066489-12 Q16066489-…         9.50            0.138  TRUE       false_neg…
+#>  2 Q6526304-12  Q6526304-17        10.6             0.260  TRUE       false_neg…
+#>  3 Q903516-14   Q903516-8           8.52            0.0750 TRUE       false_neg…
+#>  4 Q1356587-12  Q1356587-8         10.4             0.230  TRUE       false_neg…
+#>  5 Q1508011-10  Q1508011-3         11.2             0.343  TRUE       false_neg…
+#>  6 Q5722403-1   Q5722403-17        11.2             0.343  TRUE       false_neg…
+#>  7 Q105533881-… Q105533881…        10.2             0.208  TRUE       false_neg…
+#>  8 Q6286514-15  Q6286514-9          5.97            0.0137 TRUE       false_neg…
+#>  9 Q16030023-16 Q16030023-…         9.69            0.155  TRUE       false_neg…
+#> 10 Q18527189-1  Q18527189-5        12.0             0.478  TRUE       false_neg…
 #> # ℹ 112,353 more rows
 ```
 
