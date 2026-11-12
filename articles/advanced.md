@@ -121,7 +121,7 @@ in SQL.
 
 pairs_lazy <- predict(model, threshold = 0.5, collect = FALSE)
 pairs_lazy
-#> <il_compared_lazy> 2,534 pairs in table __il_9700_1_predicted_5 (threshold = 0.5)
+#> <il_compared_lazy> 2,534 pairs in table __il_9816_1_predicted_5 (threshold = 0.5)
 ```
 
 Pass the lazy reference directly to
@@ -196,16 +196,16 @@ metrics$clusters
 #> # A tibble: 143 × 5
 #>    cluster_id  n_nodes n_edges density cluster_centralization
 #>    <chr>         <int>   <int>   <dbl>                  <dbl>
-#>  1 cluster_149      16      46   0.388                  0.319
-#>  2 cluster_301      10      41   0.911                  0.111
-#>  3 cluster_394       9      32   0.889                  0.143
-#>  4 cluster_10       13      27   0.346                  0.379
-#>  5 cluster_517      10      46   1.01                   0.125
-#>  6 cluster_772       5       9   0.9                    0.167
-#>  7 cluster_888       9      32   0.889                  0.143
-#>  8 cluster_296       5       9   0.9                    0.167
-#>  9 cluster_907       4       4   0.667                  0.667
-#> 10 cluster_428       3       2   0.667                  1    
+#>  1 cluster_905       2       1   1                    NA     
+#>  2 cluster_220       9      28   0.778                 0.125 
+#>  3 cluster_261       4       6   1                     0     
+#>  4 cluster_194      10      35   0.778                 0.139 
+#>  5 cluster_20        3       2   0.667                 1     
+#>  6 cluster_276       3       2   0.667                 1     
+#>  7 cluster_686       7      18   0.857                 0.2   
+#>  8 cluster_404       4       4   0.667                 0.667 
+#>  9 cluster_971       5       6   0.6                   0.25  
+#> 10 cluster_654      10      44   0.978                 0.0278
 #> # ℹ 133 more rows
 ```
 
@@ -223,12 +223,12 @@ head(metrics$nodes)
 #> # A tibble: 6 × 4
 #>   unique_id cluster_id  degree node_centrality
 #>   <chr>     <chr>        <int>           <dbl>
-#> 1 273       cluster_149      3           0.2  
-#> 2 269       cluster_149      7           0.467
-#> 3 274       cluster_149      7           0.467
-#> 4 267       cluster_149      7           0.467
-#> 5 151       cluster_149      6           0.4  
-#> 6 266       cluster_149      4           0.267
+#> 1 138       cluster_133      7           0.875
+#> 2 139       cluster_133      8           1    
+#> 3 136       cluster_133      7           0.875
+#> 4 135       cluster_133      3           0.375
+#> 5 134       cluster_133      8           1    
+#> 6 141       cluster_133      7           0.875
 ```
 
 Records with unusually high degree relative to their cluster size may be
