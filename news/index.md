@@ -2,6 +2,8 @@
 
 ## irelink 0.0.2
 
+CRAN release: 2026-11-12
+
 - Fixed SQL `best_link` clustering with `source_dataset` to choose the
   lowest partner ID for tied scores consistently with R, including on
   DuckDB 2.0.0
